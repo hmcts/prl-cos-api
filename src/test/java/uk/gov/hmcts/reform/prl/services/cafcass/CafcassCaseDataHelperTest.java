@@ -937,6 +937,80 @@ class CafcassCaseDataHelperTest {
     }
 
     @Test
+    void shouldReturnFalseWhenAmendOtherPeopleHasOnlyGeneratedPartySourceFieldsChanged() {
+        Map<String, Object> otherPerson = new HashMap<>();
+        otherPerson.put("firstName", "Sam");
+        otherPerson.put("lastName", "Taylor");
+        otherPerson.put("gender", "male");
+
+        Map<String, Object> otherPersonWithGeneratedFields = new HashMap<>(otherPerson);
+        otherPersonWithGeneratedFields.put("partyId", "99999999-9999-9999-9999-999999999999");
+        otherPersonWithGeneratedFields.put("solicitorPartyId", "88888888-8888-8888-8888-888888888888");
+        otherPersonWithGeneratedFields.put("partyLevelFlag", Map.of("details", "generated"));
+        otherPersonWithGeneratedFields.put("liveInRefuge", "No");
+
+        Map<String, Object> relation = Map.of(
+            "otherPeopleId", "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+            "otherPeopleFullName", "Sam Taylor",
+            "childId", "cccccccc-cccc-cccc-cccc-cccccccccccc",
+            "childFullName", "Case Child",
+            "childAndOtherPeopleRelation", "guardian",
+            "childLivesWith", "No"
+        );
+
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("caseManagementLocation", caseManagementLocation());
+        caseData.put("otherPartyInTheCaseRevised", List.of(element(
+            "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+            otherPersonWithGeneratedFields
+        )));
+        caseData.put("childAndOtherPeopleRelations", List.of(element(
+            "11111111-1111-1111-1111-111111111111",
+            relation
+        )));
+
+        Map<String, Object> caseDataBefore = new HashMap<>();
+        caseDataBefore.put("caseManagementLocation", caseManagementLocation());
+        caseDataBefore.put("otherPartyInTheCaseRevised", List.of(element(
+            "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+            otherPerson
+        )));
+        caseDataBefore.put("childAndOtherPeopleRelations", List.of(element(
+            "22222222-2222-2222-2222-222222222222",
+            relation
+        )));
+
+        assertFalse(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
+            caseDetails(caseData),
+            caseDetails(caseDataBefore),
+            "amendOtherPeopleInTheCaseRevised"
+        ));
+    }
+
+    @Test
+    void shouldReturnTrueWhenAmendOtherPeopleHasRealPartySourceFieldChanged() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("caseManagementLocation", caseManagementLocation());
+        caseData.put("otherPartyInTheCaseRevised", List.of(element(
+            "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+            Map.of("firstName", "Sam", "lastName", "Taylor", "gender", "male")
+        )));
+
+        Map<String, Object> caseDataBefore = new HashMap<>();
+        caseDataBefore.put("caseManagementLocation", caseManagementLocation());
+        caseDataBefore.put("otherPartyInTheCaseRevised", List.of(element(
+            "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+            Map.of("firstName", "Samuel", "lastName", "Taylor", "gender", "male")
+        )));
+
+        assertTrue(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
+            caseDetails(caseData),
+            caseDetails(caseDataBefore),
+            "amendOtherPeopleInTheCaseRevised"
+        ));
+    }
+
+    @Test
     void shouldReturnTrueWhenReviewDocumentIsAddedFromCaseFileView() {
         String documentUrl = "http://dm-store/documents/22222222-2222-2222-2222-222222222222";
         Map<String, Object> caseData = new HashMap<>();

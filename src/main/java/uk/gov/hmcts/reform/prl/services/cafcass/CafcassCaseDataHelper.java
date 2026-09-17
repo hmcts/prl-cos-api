@@ -78,6 +78,43 @@ public class CafcassCaseDataHelper {
         AMEND_CHILDREN_AND_APPLICANTS,
         List.of("childAndApplicantRelations")
     );
+    private static final Map<String, List<String>> EVENT_SPECIFIC_SOURCE_FIELDS = Map.of(
+        AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED,
+        List.of("otherPartyInTheCaseRevised", "childAndOtherPeopleRelations"),
+        AMEND_CHILDREN_AND_APPLICANTS,
+        List.of("childAndApplicantRelations")
+    );
+    private static final List<String> OTHER_PARTY_COMPARISON_FIELDS = List.of(
+        "firstName",
+        "lastName",
+        "previousName",
+        "isDateOfBirthKnown",
+        "dateOfBirth",
+        "gender",
+        "otherGender",
+        "isPlaceOfBirthKnown",
+        "placeOfBirth",
+        "isCurrentAddressKnown",
+        "address",
+        "canYouProvideEmailAddress",
+        "email",
+        "canYouProvidePhoneNumber",
+        "phoneNumber",
+        "isAddressConfidential",
+        "isEmailAddressConfidential",
+        "isPhoneNumberConfidential"
+    );
+    private static final List<String> CHILD_AND_APPLICANT_RELATION_COMPARISON_FIELDS = List.of(
+        "childAndApplicantRelation",
+        "childAndApplicantRelationOtherDetails",
+        "childLivesWith"
+    );
+    private static final List<String> CHILD_AND_OTHER_PEOPLE_RELATION_COMPARISON_FIELDS = List.of(
+        "childAndOtherPeopleRelation",
+        "childAndOtherPeopleRelationOtherDetails",
+        "childLivesWith",
+        "isChildLivesWithPersonConfidential"
+    );
 
     private final CafCassFilter cafCassFilter;
     private final HearingService hearingService;
@@ -95,12 +132,203 @@ public class CafcassCaseDataHelper {
     }
 
     public boolean hasCafcassCaseDataChanged(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String eventId) {
+        if (eventId != null && EVENT_SPECIFIC_SOURCE_FIELDS.containsKey(eventId)) {
+            return !Objects.equals(
+                normaliseEventSpecificSourceFields(caseDetails, eventId),
+                normaliseEventSpecificSourceFields(caseDetailsBefore, eventId)
+            );
+        }
+
         String authorisation = systemUserService.getSysUserToken();
 
         return !Objects.equals(
             normaliseForComparison(prepareForComparison(caseDetails, authorisation), eventId),
             normaliseForComparison(prepareForComparison(caseDetailsBefore, authorisation), eventId)
         );
+    }
+
+    private Map<String, Object> normaliseEventSpecificSourceFields(CaseDetails caseDetails, String eventId) {
+        if (caseDetails == null || !hasCafcassEnglandLocation(caseDetails)) {
+            return null;
+        }
+        Map<String, Object> caseData = caseDetails.getData();
+        if (caseData == null) {
+            return null;
+        }
+
+        Map<String, Object> eventData = new HashMap<>();
+        EVENT_SPECIFIC_SOURCE_FIELDS.get(eventId).stream()
+            .filter(caseData::containsKey)
+            .forEach(fieldName -> eventData.put(fieldName, normaliseSourceField(fieldName, caseData.get(fieldName))));
+        removeEmptyValues(eventData);
+        return eventData;
+    }
+
+    private boolean hasCafcassEnglandLocation(CaseDetails caseDetails) {
+        Object caseManagementLocation = caseDetails.getData() == null ? null : caseDetails.getData().get("caseManagementLocation");
+        if (caseManagementLocation == null) {
+            return false;
+        }
+        Map<String, Object> location = objMapper.convertValue(caseManagementLocation, new TypeReference<>() {
+        });
+        String region = stringValue(location.get("regionId"));
+        if (region == null) {
+            region = stringValue(location.get("region"));
+        }
+        try {
+            return isCafcassEnglandRegion(region);
+        } catch (NumberFormatException e) {
+            log.warn("Unable to parse Cafcass region while comparing amend event data: {}", region);
+            return false;
+        }
+    }
+
+    private Object normaliseSourceField(String fieldName, Object fieldValue) {
+        Object convertedValue = objMapper.convertValue(fieldValue, new TypeReference<>() {
+        });
+        if (convertedValue instanceof List<?> elements) {
+            List<Object> normalisedElements = elements.stream()
+                .map(element -> normaliseSourceElement(fieldName, element))
+                .filter(Objects::nonNull)
+                .sorted((first, second) -> String.valueOf(first).compareTo(String.valueOf(second)))
+                .toList();
+            return normalisedElements.isEmpty() ? null : normalisedElements;
+        }
+        return convertedValue;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Object normaliseSourceElement(String fieldName, Object element) {
+        if (!(element instanceof Map<?, ?> elementMap)) {
+            return element;
+        }
+        Object value = elementMap.get("value");
+        if (!(value instanceof Map<?, ?> valueMap)) {
+            return value;
+        }
+
+        Map<String, Object> normalisedValue = new HashMap<>((Map<String, Object>) valueMap);
+        if ("otherPartyInTheCaseRevised".equals(fieldName)) {
+            normaliseOtherPartySourceValue(normalisedValue);
+        } else {
+            normaliseRelationshipSourceValue(fieldName, normalisedValue);
+        }
+        removeEmptyValues(normalisedValue);
+        return normalisedValue.isEmpty() ? null : normalisedValue;
+    }
+
+    private void normaliseOtherPartySourceValue(Map<String, Object> party) {
+        party.keySet().removeIf(fieldName -> !OTHER_PARTY_COMPARISON_FIELDS.contains(fieldName));
+        normaliseValues(party,
+                        "gender",
+                        "isDateOfBirthKnown",
+                        "isPlaceOfBirthKnown",
+                        "isCurrentAddressKnown",
+                        "canYouProvideEmailAddress",
+                        "canYouProvidePhoneNumber",
+                        "isAddressConfidential",
+                        "isEmailAddressConfidential",
+                        "isPhoneNumberConfidential");
+        if (!"other".equalsIgnoreCase(stringValue(party.get("gender")))) {
+            party.remove("otherGender");
+        }
+        if (!isYes(party.get("isDateOfBirthKnown"))) {
+            party.remove("dateOfBirth");
+        }
+        if (!isYes(party.get("isPlaceOfBirthKnown"))) {
+            party.remove("placeOfBirth");
+        }
+        if (!isYes(party.get("isCurrentAddressKnown"))) {
+            party.remove("address");
+            party.remove("isAddressConfidential");
+        }
+        if (isNo(party.get("canYouProvideEmailAddress"))) {
+            party.remove("email");
+            party.remove("isEmailAddressConfidential");
+        }
+        if (isNo(party.get("canYouProvidePhoneNumber"))) {
+            party.remove("phoneNumber");
+            party.remove("isPhoneNumberConfidential");
+        }
+    }
+
+    private void normaliseRelationshipSourceValue(String fieldName, Map<String, Object> relationship) {
+        if ("childAndApplicantRelations".equals(fieldName)) {
+            relationship.keySet().removeIf(field -> !CHILD_AND_APPLICANT_RELATION_COMPARISON_FIELDS.contains(field));
+            normaliseValues(relationship, "childAndApplicantRelation", "childLivesWith");
+            removeOtherDetailsWhenNotOther(relationship, "childAndApplicantRelation", "childAndApplicantRelationOtherDetails");
+        } else if ("childAndOtherPeopleRelations".equals(fieldName)) {
+            relationship.keySet().removeIf(field -> !CHILD_AND_OTHER_PEOPLE_RELATION_COMPARISON_FIELDS.contains(field));
+            normaliseValues(
+                relationship,
+                "childAndOtherPeopleRelation",
+                "childLivesWith",
+                "isChildLivesWithPersonConfidential"
+            );
+            removeOtherDetailsWhenNotOther(relationship, "childAndOtherPeopleRelation", "childAndOtherPeopleRelationOtherDetails");
+        }
+        if (!isYes(relationship.get("childLivesWith"))) {
+            relationship.remove("isChildLivesWithPersonConfidential");
+        }
+    }
+
+    private void normaliseValues(Map<String, Object> map, String... fieldNames) {
+        Arrays.stream(fieldNames)
+            .filter(map::containsKey)
+            .forEach(fieldName -> map.put(fieldName, stringValue(map.get(fieldName))));
+    }
+
+    private void removeOtherDetailsWhenNotOther(Map<String, Object> relationship,
+                                                String relationshipField,
+                                                String otherDetailsField) {
+        if (!"other".equalsIgnoreCase(stringValue(relationship.get(relationshipField)))) {
+            relationship.remove(otherDetailsField);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void removeEmptyValues(Map<String, Object> map) {
+        map.entrySet().removeIf(entry -> {
+            Object value = entry.getValue();
+            if (value instanceof Map<?, ?> nestedMap) {
+                removeEmptyValues((Map<String, Object>) nestedMap);
+                return nestedMap.isEmpty();
+            }
+            if (value instanceof List<?> nestedList) {
+                nestedList.stream()
+                    .filter(Map.class::isInstance)
+                    .map(nestedElement -> (Map<String, Object>) nestedElement)
+                    .forEach(this::removeEmptyValues);
+                return nestedList.isEmpty();
+            }
+            return value == null || "".equals(value);
+        });
+    }
+
+    private boolean isYes(Object value) {
+        return "Yes".equalsIgnoreCase(stringValue(value)) || "yes".equalsIgnoreCase(stringValue(value));
+    }
+
+    private boolean isNo(Object value) {
+        return "No".equalsIgnoreCase(stringValue(value)) || "no".equalsIgnoreCase(stringValue(value));
+    }
+
+    private String stringValue(Object value) {
+        if (value instanceof Map<?, ?> mapValue) {
+            Object id = mapValue.get("id");
+            if (id != null) {
+                return String.valueOf(id);
+            }
+            Object code = mapValue.get("code");
+            if (code != null) {
+                return String.valueOf(code);
+            }
+            Object valueField = mapValue.get("value");
+            if (valueField != null) {
+                return String.valueOf(valueField);
+            }
+        }
+        return value == null ? null : String.valueOf(value);
     }
 
     private Map<String, Object> normaliseForComparison(CafCassCaseDetail cafCassCaseDetail, String eventId) {
