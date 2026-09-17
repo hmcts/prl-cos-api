@@ -36,7 +36,7 @@ record ChaseDecision(boolean shouldFire, String description) {
     }
 
     static ChaseDecision skipHearingDateIsLessThanReleaseDate(LocalDate hearingEndDate, String hearingId, LocalDate releaseDate) {
-        return skip("hearing date " + hearingEndDate + " is less than release date " + releaseDate + " for hearingId " + hearingId);
+        return skip("hearing date " + hearingEndDate + " is before release date " + releaseDate + " for hearingId " + hearingId);
     }
 
     private static ChaseDecision skip(String reason) {

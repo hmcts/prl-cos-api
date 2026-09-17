@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.requestorder;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -16,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.services.workingdays.WorkingDayIndicator;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.HearingLabelUtils;
 
 import java.time.LocalDate;
@@ -36,7 +36,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 class HearingChasePolicy {
 
     private static final String C100 = "C100";
@@ -52,11 +51,21 @@ class HearingChasePolicy {
     @Value("#{'${hearing_component.hearingStatusesToFilter}'.split(',')}")
     private List<String> hearingStatusesToFilter;
 
+    @Value("${request-order-task.release-date}")
+    private String releaseDateStr;
+
+    private final LocalDate releaseDate;
+
+    public HearingChasePolicy(WorkingDayIndicator workingDayIndicator) {
+        this.workingDayIndicator = workingDayIndicator;
+        releaseDate = CommonUtils.parseDate(releaseDateStr).orElse(LocalDate.now());
+    }
+
     static String hearingIdOf(CaseHearing hearing) {
         return hearing.getHearingID() == null ? null : String.valueOf(hearing.getHearingID());
     }
 
-    ChaseDecision decide(CaseHearing hearing, CaseData caseData, HearingTrackingLedger ledger, LocalDate cronDate, LocalDate releaseDate) {
+    ChaseDecision decide(CaseHearing hearing, CaseData caseData, HearingTrackingLedger ledger, LocalDate cronDate) {
         String hearingId = hearingIdOf(hearing);
         if (hearingId == null) {
             return ChaseDecision.skipUnknownHearingId(hearing.getHmcStatus());
@@ -75,7 +84,7 @@ class HearingChasePolicy {
         int cadence = cadenceFor(caseData.getCaseTypeOfApplication());
 
         int workingDaysSinceHearingEndDate = workingDayIndicator.workingDaysBetween(hearingEndDate, cronDate);
-        if (workingDaysSinceHearingEndDate == 0 || hearingEndDate != null && (cadence > 0 && workingDaysSinceHearingEndDate % cadence != 0)) {
+        if ((workingDaysSinceHearingEndDate == 0) || (hearingEndDate != null && (cadence > 0 && workingDaysSinceHearingEndDate % cadence != 0))) {
             return ChaseDecision.skipHearingNotAtCadence(hearingEndDate, cadence);
         }
 

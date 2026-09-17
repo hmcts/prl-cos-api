@@ -64,6 +64,7 @@ class RequestOrderTaskServiceTest {
     private static final String CASE_ID = "123";
     private static final String HEARING_ID = "1";
     private static final LocalDate TODAY = LocalDate.of(2026, 4, 14);
+    private static final LocalDate RO_TASK_RELEASE_DATE = LocalDate.of(2026, 1, 1);
 
     @Mock ObjectMapper objectMapper;
     @Mock SystemUserService systemUserService;
@@ -93,12 +94,12 @@ class RequestOrderTaskServiceTest {
         ReflectionTestUtils.setField(chasePolicy, "fl401CadenceWorkingDays", 1);
         ReflectionTestUtils.setField(chasePolicy, "hearingStatusesToFilter",
             List.of("COMPLETED", "AWAITING_ACTUALS"));
+        ReflectionTestUtils.setField(chasePolicy, "releaseDate", RO_TASK_RELEASE_DATE);
 
         service = new RequestOrderTaskService(
             systemUserService, authTokenGenerator, coreCaseDataApi,
             hearingService, allTabService, chasePolicy, objectMapper, workingDayIndicator);
         ReflectionTestUtils.setField(service, "concurrentRequest", 5);
-        ReflectionTestUtils.setField(service, "releaseDateStr", "2026-01-01");
     }
 
     @ParameterizedTest

@@ -34,7 +34,6 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.workingdays.WorkingDayIndicator;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
-import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -83,8 +82,6 @@ public class RequestOrderTaskService {
     private int searchMulitplier;
     @Value("${request-order-task.cadence-working-days.c100}")
     private int largestCadenceWorkingDays;
-    @Value("${request-order-task.release-date}")
-    private String releaseDateStr;
 
     public void processRequestOrderTasks() {
         log.info("Running Request Order task cron job...");
@@ -108,7 +105,6 @@ public class RequestOrderTaskService {
                 ""
             ));
 
-        LocalDate releaseDate = CommonUtils.parseDate(releaseDateStr).orElse(LocalDate.now());
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
             searchResult.ifPresent(result -> {
                 log.info("Processing total record count of {}",
@@ -117,7 +113,7 @@ public class RequestOrderTaskService {
                         log.info("Processing initial record count of {}",
                                  result.getCases().size());
                         List<CaseDetails> cases = result.getCases();
-                        process(executor, semaphore, cases, releaseDate);
+                        process(executor, semaphore, cases);
 
                         String searchAfterValue = cases.getLast().getId().toString();
                         log.info("search after value {}", searchAfterValue);
@@ -143,7 +139,7 @@ public class RequestOrderTaskService {
                                 subsequentSearchResult
                                     .map(SearchResult::getCases)
                                     .ifPresent(subSequentCases ->
-                                                   process(executor, semaphore, subSequentCases, releaseDate));
+                                                   process(executor, semaphore, subSequentCases));
 
                                 searchAfterValue = subsequentSearchResult
                                     .map(SearchResult::getCases)
@@ -199,15 +195,14 @@ public class RequestOrderTaskService {
 
     private void process(ExecutorService executor,
                          Semaphore semaphore,
-                         List<CaseDetails> cases,
-                         LocalDate releaseDate) {
+                         List<CaseDetails> cases) {
         cases.forEach(caseDetails -> {
             try {
                 log.info("semaphore permit count {}", semaphore.availablePermits());
                 semaphore.acquire();
                 executor.submit(() -> {
                     try {
-                        processCase(caseDetails, releaseDate);
+                        processCase(caseDetails);
                     } catch (Exception e) {
                         log.error("Error while processing Request Order task for case {}", caseDetails.getId(), e);
                     } finally {
@@ -221,7 +216,7 @@ public class RequestOrderTaskService {
         });
     }
 
-    private void processCase(CaseDetails caseDetails, LocalDate releaseDate) {
+    private void processCase(CaseDetails caseDetails) {
         String caseId = String.valueOf(caseDetails.getId());
 
         Hearings hearings = fetchHearings(caseId);
@@ -234,19 +229,19 @@ public class RequestOrderTaskService {
         Iterator<CaseHearing> caseHearingIterator = hearings.getCaseHearings().iterator();
 
         if (caseHearingIterator.hasNext()) {
-            evaluateHearing(caseData, caseHearingIterator.next(), releaseDate);
-            evaluateMultipleHearing(caseHearingIterator, caseId, releaseDate);
+            evaluateHearing(caseData, caseHearingIterator.next());
+            evaluateMultipleHearing(caseHearingIterator, caseId);
         }
     }
 
-    private void evaluateMultipleHearing(Iterator<CaseHearing> caseHearingIterator, String caseId, LocalDate releaseDate) {
+    private void evaluateMultipleHearing(Iterator<CaseHearing> caseHearingIterator, String caseId) {
         while (caseHearingIterator.hasNext()) {
             CaseHearing hearing = caseHearingIterator.next();
             StartAllTabsUpdateDataContent start = allTabService.getStartUpdateForSpecificEvent(
                 caseId,
                 CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue());
 
-            evaluateDecision(start.caseData(), hearing, releaseDate)
+            evaluateDecision(start.caseData(), hearing)
                 .ifPresent(ledger -> {
 
                     String hearingId = hearingIdOf(hearing);
@@ -267,11 +262,10 @@ public class RequestOrderTaskService {
     }
 
     private Optional<HearingTrackingLedger> evaluateDecision(CaseData caseData,
-                                                             CaseHearing hearing,
-                                                             LocalDate releaseDate) {
+                                                             CaseHearing hearing) {
         String hearingId = hearingIdOf(hearing);
         HearingTrackingLedger ledger = HearingTrackingLedger.from(caseData);
-        ChaseDecision decision = chasePolicy.decide(hearing, caseData, ledger, LocalDate.now(UK_ZONE), releaseDate);
+        ChaseDecision decision = chasePolicy.decide(hearing, caseData, ledger, LocalDate.now(UK_ZONE));
         log.info("Request Order: caseId={} hearingId={} decision={}",
                  caseData.getId(), hearingId, decision.description());
         if (decision.shouldFire()) {
@@ -281,9 +275,8 @@ public class RequestOrderTaskService {
     }
 
     private void evaluateHearing(CaseData caseData,
-                                 CaseHearing hearing,
-                                 LocalDate releaseDate) {
-        evaluateDecision(caseData, hearing, releaseDate)
+                                 CaseHearing hearing) {
+        evaluateDecision(caseData, hearing)
             .ifPresent(ledger -> {
                 String hearingId = hearingIdOf(hearing);
                 ledger.recordFired(hearingId, LocalDate.now(UK_ZONE));
