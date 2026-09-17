@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.TierOfJudiciaryEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.staff.StaffUser;
 
 @Data
 @Builder
@@ -29,6 +30,15 @@ public class AllocatedJudge {
 
     @JsonProperty("legalAdviserList")
     private final DynamicList legalAdviserList;
+
+    @JsonProperty("legalAdviser")
+    private final StaffUser legalAdviser;
+
+    @JsonProperty("legalAdviserName")
+    private final String legalAdviserName;
+
+    @JsonProperty("legalAdviserEmail")
+    private final String legalAdviserEmail;
 
     @JsonProperty("tierOfJudiciary")
     private final TierOfJudiciaryEnum tierOfJudiciary;

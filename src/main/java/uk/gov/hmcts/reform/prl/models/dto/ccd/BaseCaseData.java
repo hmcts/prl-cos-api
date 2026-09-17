@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.enums.reopenclosedcases.ValidReopenClosedCasesSta
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.staff.StaffUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.RemovableDocument;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
@@ -166,6 +167,8 @@ public class BaseCaseData {
     private String optionSendOrReply;
 
     private String messageIdentifier;
+
+    private StaffUser legalAdviser;
 
     @JsonProperty("TTL")
     private TTL retainAndDisposeTimeToLive;

@@ -124,6 +124,7 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.localauthority.RemoveLocalAuthoritySolicitorService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.services.validators.LegalAdviserChecker;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingTransactionRequestMapper;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.TaskUtils;
@@ -210,6 +211,9 @@ class ManageOrderServiceTest {
 
     @Mock
     private DgsService dgsService;
+
+    @Mock
+    private LegalAdviserChecker legalAdviserChecker;
 
     @Mock
     private WelshCourtEmail welshCourtEmail;
@@ -7927,6 +7931,8 @@ class ManageOrderServiceTest {
         assertFalse(draftOrders.isEmpty());
         assertEquals(Yes, draftOrders.getFirst().getValue().getIsAutoHearingReqPending());
     }
+
+
 
     @Test
     void testSetDraftOrderCollection_createAnOrder_courtAdmin_eligibleForAhr_setsAutoHearingPending() {
