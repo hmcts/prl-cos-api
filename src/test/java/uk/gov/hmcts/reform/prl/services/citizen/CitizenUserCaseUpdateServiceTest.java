@@ -23,7 +23,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class CitizenUserCaseUpdateServiceTest {
+class CitizenUserCaseUpdateServiceTest {
 
     private static final String AUTHORISATION = "Bearer test";
     private static final String CASE_ID = "123";
@@ -35,7 +35,7 @@ public class CitizenUserCaseUpdateServiceTest {
     private AllTabServiceImpl allTabService;
 
     @Test
-    public void shouldValidateCitizenCaseAccessByStartingCitizenEvent() {
+    void shouldValidateCitizenCaseAccessByStartingCitizenEvent() {
         citizenUserCaseUpdateService.validateCitizenCaseAccess(
             AUTHORISATION,
             CASE_ID,
@@ -50,7 +50,7 @@ public class CitizenUserCaseUpdateServiceTest {
     }
 
     @Test
-    public void shouldStartAndSubmitCaseUpdateUsingCitizenUserAuth() {
+    void shouldStartAndSubmitCaseUpdateUsingCitizenUserAuth() {
         Map<String, Object> caseDataMap = new HashMap<>();
         CaseData caseData = CaseData.builder().build();
         EventRequestData eventRequestData = EventRequestData.builder().build();
@@ -105,7 +105,7 @@ public class CitizenUserCaseUpdateServiceTest {
     }
 
     @Test
-    public void shouldStartSubmitAndReturnValueFromCitizenUserAuthUpdate() {
+    void shouldStartSubmitAndReturnValueFromCitizenUserAuthUpdate() {
         Map<String, Object> caseDataMap = new HashMap<>();
         CaseData caseData = CaseData.builder().build();
         EventRequestData eventRequestData = EventRequestData.builder().build();
