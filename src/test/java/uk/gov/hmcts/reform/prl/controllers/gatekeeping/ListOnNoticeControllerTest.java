@@ -283,47 +283,6 @@ public class ListOnNoticeControllerTest {
     }
 
     @Test
-    public void testListOnNoticePrePopulateListOnNotice() throws Exception {
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
-        AboutToStartOrSubmitCallbackResponse response = listOnNoticeController.prePopulateListOnNotice(authToken,s2sToken,callbackRequest);
-        assertNotNull(response);
-    }
-
-    @Test
-    public void testExceptionForPrePopulateListOnNotice() throws Exception {
-
-        AllocatedJudge allocatedJudge = AllocatedJudge.builder()
-            .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
-            .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .courtName("testcourt")
-            .welshLanguageRequirement(Yes)
-            .welshLanguageRequirementApplication(english)
-            .languageRequirementApplicationNeedWelsh(Yes)
-            .allocatedJudge(allocatedJudge)
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            listOnNoticeController.prePopulateListOnNotice(authToken,s2sToken,callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
-
-    }
-
-    @Test
     public void testExceptionForListOnNoticeMidEvent() throws Exception {
 
         AllocatedJudge allocatedJudge = AllocatedJudge.builder()

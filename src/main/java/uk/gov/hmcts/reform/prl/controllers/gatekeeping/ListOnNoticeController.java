@@ -21,8 +21,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
@@ -77,28 +75,6 @@ public class ListOnNoticeController {
             if (!StringUtils.isEmpty(reasonsSelectedForListOnNotice)) {
                 caseDataUpdated.put(SELECTED_AND_ADDITIONAL_REASONS, reasonsSelectedForListOnNotice);
             }
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-    }
-
-    @PostMapping(path = "/pre-populate-list-on-notice", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to populate list on notice")
-    public AboutToStartOrSubmitCallbackResponse prePopulateListOnNotice(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            //populate legal advisor list
-            log.info("List on notice Before calling ref data for LA users list {}", System.currentTimeMillis());
-            caseDataUpdated.put(
-                "legalAdviserList",
-                DynamicList.builder().value(DynamicListElement.EMPTY).listItems(refDataUserService.getLegalAdvisorList())
-                    .build()
-            );
-            log.info("List on notice After calling ref data for LA users list {}", System.currentTimeMillis());
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
