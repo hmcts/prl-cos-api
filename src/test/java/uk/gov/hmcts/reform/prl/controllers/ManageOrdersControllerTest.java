@@ -3509,7 +3509,6 @@ public class ManageOrdersControllerTest {
             ENCRYPTED_CLIENT_CONTEXT,
             callbackRequest
         );
-        assertThat(responseResponseEntity.getBody().getData().get("nameOfLaToReviewOrder")).isNotNull();
         assertThat(responseResponseEntity.getHeaders())
             .containsKey(CLIENT_CONTEXT_HEADER_PARAMETER);
 
@@ -3519,7 +3518,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testPrePopulateJudgeOrLegalAdviserWithDateReservedWithListAssit() throws JsonProcessingException {
+    public void testPrePopulateJudgeOrLegalAdviserWithDateReservedWithListAssist() throws JsonProcessingException {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -3564,7 +3563,6 @@ public class ManageOrdersControllerTest {
             ENCRYPTED_CLIENT_CONTEXT,
             callbackRequest
         );
-        assertThat(responseResponseEntity.getBody().getData().get("nameOfLaToReviewOrder")).isNotNull();
         assertThat(responseResponseEntity.getHeaders())
             .doesNotContainKey(CLIENT_CONTEXT_HEADER_PARAMETER);
     }

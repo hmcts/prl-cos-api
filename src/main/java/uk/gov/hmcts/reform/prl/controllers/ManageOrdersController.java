@@ -897,18 +897,11 @@ public class ManageOrdersController {
         @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
-            caseDataUpdated.put(
-                "nameOfLaToReviewOrder",
-                DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
-                    .build()
-            );
 
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             ResponseEntity.BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.OK);
             if (objectMapper.convertValue(
-                    caseDataUpdated.get(IS_INVOKED_FROM_TASK),
+                callbackRequest.getCaseDetails().getData().get(IS_INVOKED_FROM_TASK),
                     new TypeReference<YesOrNo>() {
                     }
                 )
@@ -931,7 +924,7 @@ public class ManageOrdersController {
                     .orElseGet(ResponseEntity::ok);
             }
             return responseBuilder.body(AboutToStartOrSubmitCallbackResponse.builder()
-                                            .data(caseDataUpdated)
+                                            .data(callbackRequest.getCaseDetails().getData())
                                             .build());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
