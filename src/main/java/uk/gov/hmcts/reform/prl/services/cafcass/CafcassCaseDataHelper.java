@@ -122,6 +122,21 @@ public class CafcassCaseDataHelper {
         "childLivesWith",
         "isChildLivesWithPersonConfidential"
     );
+    private static final Map<String, String> RELATIONSHIP_VALUE_ALIASES = Map.ofEntries(
+        Map.entry("father", "father"),
+        Map.entry("mother", "mother"),
+        Map.entry("stepfather", "stepFather"),
+        Map.entry("step-father", "stepFather"),
+        Map.entry("step father", "stepFather"),
+        Map.entry("stepmother", "stepMother"),
+        Map.entry("step-mother", "stepMother"),
+        Map.entry("step mother", "stepMother"),
+        Map.entry("grandparent", "grandParent"),
+        Map.entry("specialguardian", "specialGuardian"),
+        Map.entry("special guardian", "specialGuardian"),
+        Map.entry("guardian", "guardian"),
+        Map.entry("other", "other")
+    );
 
     private final CafCassFilter cafCassFilter;
     private final HearingService hearingService;
@@ -297,7 +312,28 @@ public class CafcassCaseDataHelper {
     private void normaliseValues(Map<String, Object> map, String... fieldNames) {
         Arrays.stream(fieldNames)
             .filter(map::containsKey)
-            .forEach(fieldName -> map.put(fieldName, stringValue(map.get(fieldName))));
+            .forEach(fieldName -> map.put(fieldName, canonicalValue(fieldName, map.get(fieldName))));
+    }
+
+    private String canonicalValue(String fieldName, Object value) {
+        String stringValue = stringValue(value);
+        if (stringValue == null) {
+            return null;
+        }
+        if (fieldName.toLowerCase().contains("relation")) {
+            return RELATIONSHIP_VALUE_ALIASES.getOrDefault(stringValue.toLowerCase(), stringValue);
+        }
+        if ("childLivesWith".equals(fieldName)
+            || fieldName.startsWith("is")
+            || fieldName.startsWith("can")) {
+            if ("yes".equalsIgnoreCase(stringValue)) {
+                return "Yes";
+            }
+            if ("no".equalsIgnoreCase(stringValue)) {
+                return "No";
+            }
+        }
+        return stringValue;
     }
 
     private void removeOtherDetailsWhenNotOther(Map<String, Object> relationship,

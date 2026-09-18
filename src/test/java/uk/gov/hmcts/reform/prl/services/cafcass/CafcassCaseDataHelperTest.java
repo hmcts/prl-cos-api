@@ -930,6 +930,39 @@ class CafcassCaseDataHelperTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"amendChildrenAndApplicants", "childrenAndApplicants"})
+    void shouldReturnFalseWhenChildrenAndApplicantsUsesEquivalentDisplayValues(String eventId) {
+        Map<String, Object> submittedRelation = Map.of(
+            "childAndApplicantRelation", "Step-father",
+            "childLivesWith", "yes"
+        );
+        Map<String, Object> savedRelation = Map.of(
+            "childAndApplicantRelation", "stepFather",
+            "childLivesWith", "Yes"
+        );
+
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("caseManagementLocation", caseManagementLocation());
+        caseData.put("buffChildAndApplicantRelations", List.of(element(
+            "11111111-1111-1111-1111-111111111111",
+            submittedRelation
+        )));
+
+        Map<String, Object> caseDataBefore = new HashMap<>();
+        caseDataBefore.put("caseManagementLocation", caseManagementLocation());
+        caseDataBefore.put("childAndApplicantRelations", List.of(element(
+            "22222222-2222-2222-2222-222222222222",
+            savedRelation
+        )));
+
+        assertFalse(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
+            caseDetails(caseData),
+            caseDetails(caseDataBefore),
+            eventId
+        ));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"amendChildrenAndApplicants", "childrenAndApplicants"})
     void shouldReturnTrueWhenChildrenAndApplicantsSubmittedBufferHasRealChange(String eventId) {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put("caseManagementLocation", caseManagementLocation());
