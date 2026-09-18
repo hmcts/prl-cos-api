@@ -69,6 +69,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTIO
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOS_COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOS_PENDING;
@@ -363,7 +364,7 @@ public class StmtOfServImplService {
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         List<Element<Document>> docs = new ArrayList<>(unServedRespondentPack.getPackDocument()
                                                            .stream()
-                                                           .filter(d -> !SOA_FL415_FILENAME.equalsIgnoreCase(d.getValue().getDocumentFileName()))
+                                                           .filter(d -> !isFL415Document(d.getValue()))
                                                            .filter(d -> !isC9Document(d.getValue()))
                                                            .toList());
         docs = wrapElements(serviceOfApplicationService.removeCoverLettersFromThePacks(unwrapElements(docs)));
@@ -455,6 +456,12 @@ public class StmtOfServImplService {
         return document != null
             && (SOA_C9_PERSONAL_SERVICE_FILENAME.equalsIgnoreCase(document.getDocumentFileName())
             || SOA_C9_PERSONAL_SERVICE_FILENAME_WELSH.equalsIgnoreCase(document.getDocumentFileName()));
+    }
+
+    private boolean isFL415Document(Document document) {
+        return document != null
+            && (SOA_FL415_FILENAME.equalsIgnoreCase(document.getDocumentFileName())
+            || SOA_FL415_FILENAME_WELSH.equalsIgnoreCase(document.getDocumentFileName()));
     }
 
     public void saveCitizenSos(String caseId, String eventId,String authorisation, CitizenSos sosObject) {
