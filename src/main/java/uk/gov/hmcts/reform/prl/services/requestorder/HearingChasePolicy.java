@@ -42,23 +42,24 @@ class HearingChasePolicy {
 
     private final WorkingDayIndicator workingDayIndicator;
 
-    @Value("${request-order-task.cadence-working-days.c100}")
-    private int c100CadenceWorkingDays;
+    private final int c100CadenceWorkingDays;
 
-    @Value("${request-order-task.cadence-working-days.fl401}")
-    private int fl401CadenceWorkingDays;
+    private final int fl401CadenceWorkingDays;
 
-    @Value("#{'${hearing_component.hearingStatusesToFilter}'.split(',')}")
-    private List<String> hearingStatusesToFilter;
-
-    @Value("${request-order-task.release-date}")
-    private String releaseDateStr;
+    private final List<String> hearingStatusesToFilter;
 
     private final LocalDate releaseDate;
 
-    public HearingChasePolicy(WorkingDayIndicator workingDayIndicator) {
+    public HearingChasePolicy(WorkingDayIndicator workingDayIndicator,
+                              @Value("${request-order-task.cadence-working-days.c100}") int c100CadenceWorkingDays,
+                              @Value("${request-order-task.cadence-working-days.fl401}") int fl401CadenceWorkingDays,
+                              @Value("#{'${hearing_component.hearingStatusesToFilter}'.split(',')}") List<String> hearingStatusesToFilter,
+                              @Value("${request-order-task.release-date}") String releaseDateStr) {
         this.workingDayIndicator = workingDayIndicator;
-        releaseDate = CommonUtils.parseDate(releaseDateStr).orElse(LocalDate.now());
+        this.c100CadenceWorkingDays = c100CadenceWorkingDays;
+        this.fl401CadenceWorkingDays = fl401CadenceWorkingDays;
+        this.hearingStatusesToFilter = hearingStatusesToFilter;
+        this.releaseDate = CommonUtils.parseDate(releaseDateStr).orElse(LocalDate.now());
     }
 
     static String hearingIdOf(CaseHearing hearing) {

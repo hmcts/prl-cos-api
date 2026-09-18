@@ -44,12 +44,11 @@ class HearingChasePolicyTest {
 
     @BeforeEach
     void setUp() {
-        policy = new HearingChasePolicy(workingDayIndicator);
-        ReflectionTestUtils.setField(policy, "c100CadenceWorkingDays", 3);
-        ReflectionTestUtils.setField(policy, "fl401CadenceWorkingDays", 1);
-        ReflectionTestUtils.setField(policy, "hearingStatusesToFilter",
-            List.of("COMPLETED", "AWAITING_ACTUALS"));
-        ReflectionTestUtils.setField(policy, "releaseDate", RELEASE_DATE);
+        policy = new HearingChasePolicy(workingDayIndicator,
+                                        3,
+                                        1,
+                                        List.of("COMPLETED", "AWAITING_ACTUALS"),
+                                        "2026-01-01");
     }
 
     @Test

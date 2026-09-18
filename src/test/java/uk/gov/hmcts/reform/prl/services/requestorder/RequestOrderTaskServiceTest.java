@@ -89,12 +89,11 @@ class RequestOrderTaskServiceTest {
                 StartEventResponse.builder().build(),
                 null, null, null));
 
-        HearingChasePolicy chasePolicy = new HearingChasePolicy(workingDayIndicator);
-        ReflectionTestUtils.setField(chasePolicy, "c100CadenceWorkingDays", 3);
-        ReflectionTestUtils.setField(chasePolicy, "fl401CadenceWorkingDays", 1);
-        ReflectionTestUtils.setField(chasePolicy, "hearingStatusesToFilter",
-            List.of("COMPLETED", "AWAITING_ACTUALS"));
-        ReflectionTestUtils.setField(chasePolicy, "releaseDate", RO_TASK_RELEASE_DATE);
+        HearingChasePolicy chasePolicy = new HearingChasePolicy(workingDayIndicator,
+                                                                3,
+                                                                1,
+                                                                List.of("COMPLETED", "AWAITING_ACTUALS"),
+                                                                "2026-01-01");
 
         service = new RequestOrderTaskService(
             systemUserService, authTokenGenerator, coreCaseDataApi,
