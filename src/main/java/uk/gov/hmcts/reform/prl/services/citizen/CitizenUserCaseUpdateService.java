@@ -1,7 +1,9 @@
 package uk.gov.hmcts.reform.prl.services.citizen;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
@@ -15,11 +17,13 @@ import java.util.function.Function;
 public class CitizenUserCaseUpdateService {
 
     private final AllTabServiceImpl allTabService;
+    private final CitizenCoreCaseDataService citizenCoreCaseDataService;
 
     public void validateCitizenCaseAccess(String authorisation,
-                                          String caseId,
-                                          CaseEvent caseEvent) {
-        startCitizenUserEvent(authorisation, caseId, caseEvent);
+                                          String caseId) {
+        if (!citizenCoreCaseDataService.hasCitizenAccess(authorisation, caseId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
     }
 
     public CaseDetails updateCaseUsingCitizenUserAuth(String authorisation,

@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
-import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
@@ -457,8 +456,7 @@ public class StmtOfServImplService {
     public void saveCitizenSos(String caseId, String eventId,String authorisation, CitizenSos sosObject) {
         citizenUserCaseUpdateService.validateCitizenCaseAccess(
             authorisation,
-            caseId,
-            CaseEvent.fromValue(eventId)
+            caseId
         );
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent

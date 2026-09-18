@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
+import uk.gov.hmcts.reform.prl.services.citizen.CitizenCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenUserCaseUpdateService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -89,6 +90,9 @@ public class StmtOfServImplServiceTest {
     @Mock
     private ManageDocumentsService manageDocumentsService;
 
+    @Mock
+    private CitizenCoreCaseDataService citizenCoreCaseDataService;
+
     private DynamicList dynamicList1;
     private PartyDetails respondent;
     private Element<PartyDetails> wrappedRespondents;
@@ -102,7 +106,11 @@ public class StmtOfServImplServiceTest {
 
     @Before
     public void setup() {
-        CitizenUserCaseUpdateService citizenUserCaseUpdateService = new CitizenUserCaseUpdateService(allTabService);
+        when(citizenCoreCaseDataService.hasCitizenAccess(anyString(), anyString())).thenReturn(true);
+        CitizenUserCaseUpdateService citizenUserCaseUpdateService = new CitizenUserCaseUpdateService(
+            allTabService,
+            citizenCoreCaseDataService
+        );
         stmtOfServImplService = new StmtOfServImplService(
             objectMapper,
             userService,

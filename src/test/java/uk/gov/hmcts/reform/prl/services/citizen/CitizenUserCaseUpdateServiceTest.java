@@ -5,6 +5,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -19,6 +21,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,19 +37,31 @@ class CitizenUserCaseUpdateServiceTest {
     @Mock
     private AllTabServiceImpl allTabService;
 
+    @Mock
+    private CitizenCoreCaseDataService citizenCoreCaseDataService;
+
     @Test
-    void shouldValidateCitizenCaseAccessByStartingCitizenEvent() {
+    void shouldValidateCitizenCaseAccessByReadingCaseAsCitizen() {
+        when(citizenCoreCaseDataService.hasCitizenAccess(AUTHORISATION, CASE_ID)).thenReturn(true);
+
         citizenUserCaseUpdateService.validateCitizenCaseAccess(
             AUTHORISATION,
-            CASE_ID,
-            CaseEvent.CITIZEN_STATEMENT_OF_SERVICE
+            CASE_ID
         );
 
-        verify(allTabService).getStartUpdateForSpecificUserEvent(
-            CASE_ID,
-            CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue(),
-            AUTHORISATION
+        verify(citizenCoreCaseDataService).hasCitizenAccess(AUTHORISATION, CASE_ID);
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenCitizenDoesNotHaveCaseAccess() {
+        when(citizenCoreCaseDataService.hasCitizenAccess(AUTHORISATION, CASE_ID)).thenReturn(false);
+
+        ResponseStatusException exception = assertThrows(
+            ResponseStatusException.class,
+            () -> citizenUserCaseUpdateService.validateCitizenCaseAccess(AUTHORISATION, CASE_ID)
         );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
     }
 
     @Test
