@@ -190,15 +190,21 @@ public class CafcassCaseDataHelper {
     private EventSourceField normaliseEventSourceField(Map<String, Object> caseData, String fieldName) {
         if (CHILD_AND_APPLICANT_RELATIONS.equals(fieldName)) {
             Object relationValue = caseData.get(CHILD_AND_APPLICANT_RELATIONS);
-            if (relationValue == null) {
+            if (isEmptyRelationCollection(relationValue)) {
                 relationValue = caseData.get(BUFF_CHILD_AND_APPLICANT_RELATIONS);
             }
-            return relationValue == null ? null : new EventSourceField(CHILD_AND_APPLICANT_RELATIONS, relationValue);
+            return isEmptyRelationCollection(relationValue)
+                ? null : new EventSourceField(CHILD_AND_APPLICANT_RELATIONS, relationValue);
         }
         return caseData.containsKey(fieldName) ? new EventSourceField(fieldName, caseData.get(fieldName)) : null;
     }
 
     private record EventSourceField(String name, Object value) {
+    }
+
+    private boolean isEmptyRelationCollection(Object relationValue) {
+        return relationValue == null
+            || relationValue instanceof List<?> relationValues && relationValues.isEmpty();
     }
 
     private boolean hasCafcassEnglandLocation(CaseDetails caseDetails) {
