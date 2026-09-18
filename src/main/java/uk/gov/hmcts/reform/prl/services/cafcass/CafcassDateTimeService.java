@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services.cafcass;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -34,12 +35,16 @@ public class CafcassDateTimeService {
     private List<String> excludedEventList;
 
     public Map<String, Object> updateCafcassDateTime(CallbackRequest callbackRequest) {
+        return updateCafcassDateTime(callbackRequest, callbackRequest.getEventId());
+    }
+
+    public Map<String, Object> updateCafcassDateTime(CallbackRequest callbackRequest, String fallbackEventId) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
 
         return updateCafcassDateTime(caseDetails,
                                      caseDetailsBefore,
-                                     callbackRequest.getEventId());
+                                     StringUtils.defaultIfBlank(callbackRequest.getEventId(), fallbackEventId));
     }
 
     private Map<String, Object> updateCafcassDateTime(CaseDetails caseDetails,

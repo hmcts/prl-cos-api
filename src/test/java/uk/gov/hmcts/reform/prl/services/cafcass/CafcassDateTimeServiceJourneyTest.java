@@ -111,6 +111,23 @@ class CafcassDateTimeServiceJourneyTest {
         assertEquals(EXISTING_CAFCASS_DATE_TIME, updatedCaseData.get(CAFCASS_DATE_TIME));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"amendChildrenAndApplicants", "childrenAndApplicants"})
+    void shouldNotUpdateCafcassDateTimeWhenChildrenAndApplicantsSubmittedPayloadHasEmptySavedRelations(String eventId) {
+        CaseDetails caseDetails = journeyCaseDetails(caseDataAfterNoOpApplicantAmendWithEmptySavedRelations());
+        CaseDetails caseDetailsBefore = journeyCaseDetails(caseDataBeforeNoOpAmend(eventId));
+
+        assertFalse(cafcassCaseDataHelper.hasCafcassCaseDataChanged(caseDetails, caseDetailsBefore, eventId));
+
+        Map<String, Object> updatedCaseData = cafcassDateTimeService.updateCafcassDateTime(CallbackRequest.builder()
+            .eventId(eventId)
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetailsBefore)
+            .build());
+
+        assertEquals(EXISTING_CAFCASS_DATE_TIME, updatedCaseData.get(CAFCASS_DATE_TIME));
+    }
+
     private CaseDetails journeyCaseDetails(Map<String, Object> caseData) {
         return CaseDetails.builder()
             .id(1234567890123456L)
@@ -132,6 +149,16 @@ class CafcassDateTimeServiceJourneyTest {
                 applicantRelationship("Case Child", "Alex Green")
             )));
         }
+        return caseData;
+    }
+
+    private Map<String, Object> caseDataAfterNoOpApplicantAmendWithEmptySavedRelations() {
+        Map<String, Object> caseData = baseC100JourneyCaseData();
+        caseData.put("childAndApplicantRelations", Collections.emptyList());
+        caseData.put("buffChildAndApplicantRelations", List.of(element(
+            "22222222-2222-2222-2222-222222222222",
+            applicantRelationship("Case Child", "Alex Green")
+        )));
         return caseData;
     }
 

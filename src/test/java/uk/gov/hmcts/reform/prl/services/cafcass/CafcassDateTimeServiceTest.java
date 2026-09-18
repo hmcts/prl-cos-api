@@ -21,6 +21,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -84,6 +85,32 @@ class CafcassDateTimeServiceTest {
 
         Map<String, Object> actual = cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
         assertNull(actual.get(PrlAppsConstants.CAFCASS_DATE_TIME));
+    }
+
+    @Test
+    void shouldUseFallbackEventIdWhenCallbackEventIdIsBlank() {
+        CaseDetails caseDetails = CaseDetails.builder().data(new HashMap<>()).state("DECISION_OUTCOME").build();
+        CaseDetails caseDetailsBefore = CaseDetails.builder().data(new HashMap<>()).state("DECISION_OUTCOME").build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .eventId("")
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetailsBefore)
+            .build();
+
+        when(featureToggleService.isCafcassDateTimeFeatureEnabled()).thenReturn(true);
+        when(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
+            caseDetails,
+            caseDetailsBefore,
+            "childrenAndApplicants"
+        )).thenReturn(false);
+
+        Map<String, Object> actual = cafcassDateTimeService.updateCafcassDateTime(
+            callbackRequest,
+            "childrenAndApplicants"
+        );
+
+        assertNull(actual.get(PrlAppsConstants.CAFCASS_DATE_TIME));
+        verify(cafcassCaseDataHelper).hasCafcassCaseDataChanged(caseDetails, caseDetailsBefore, "childrenAndApplicants");
     }
 
     @Test
