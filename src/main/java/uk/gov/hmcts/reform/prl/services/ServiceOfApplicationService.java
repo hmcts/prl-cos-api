@@ -791,7 +791,7 @@ public class ServiceOfApplicationService {
                 SERVED_PARTY_APPLICANT
             );
         }
-        packFdocs = packFdocs.stream().filter(d -> !SOA_FL415_FILENAME.equalsIgnoreCase(d.getDocumentFileName()))
+        packFdocs = packFdocs.stream().filter(d -> !isFL415Document(d))
             .toList();
         caseDataMap.put(UNSERVED_APPLICANT_LIP_RESPONDENT_PACK, SoaPack.builder()
             .packDocument(wrapElements(packFdocs))
@@ -3739,7 +3739,7 @@ public class ServiceOfApplicationService {
             fl401StaticDocs,
             coverLetterMap
         );
-        packdDocs = packdDocs.stream().filter(d -> !SOA_FL415_FILENAME.equalsIgnoreCase(d.getDocumentFileName()))
+        packdDocs = packdDocs.stream().filter(d -> !isFL415Document(d))
             .toList();
         final SoaPack unservedRespondentPack = SoaPack.builder().packDocument(wrapElements(packdDocs))
             .partyIds(wrapElements(caseData.getRespondentsFL401().getPartyId().toString()))
