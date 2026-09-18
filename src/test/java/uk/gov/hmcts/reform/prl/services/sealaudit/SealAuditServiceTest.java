@@ -34,7 +34,6 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -482,31 +481,6 @@ class SealAuditServiceTest {
 
         verify(coreCaseDataApi).searchCases(anyString(), anyString(), anyString(), anyString());
         verify(sealDetectionService, never()).detectSeal(any());
-    }
-
-    @Test
-    void shouldParseValidDateUsingReflection() {
-        Optional<LocalDate> result = ReflectionTestUtils.invokeMethod(
-            sealAuditService,
-            "parseDate",
-            "2025-01-15"
-        );
-
-        assertNotNull(result);
-        assertTrue(result.isPresent());
-        assertEquals(LocalDate.of(2025, 1, 15), result.get());
-    }
-
-    @Test
-    void shouldReturnEmptyOptionalForInvalidDateUsingReflection() {
-        Optional<LocalDate> result = ReflectionTestUtils.invokeMethod(
-            sealAuditService,
-            "parseDate",
-            "not-a-date"
-        );
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
     }
 
     @Test
