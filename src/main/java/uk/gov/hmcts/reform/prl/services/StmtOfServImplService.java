@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotif
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
+import uk.gov.hmcts.reform.prl.services.citizen.CitizenUserCaseUpdateService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -99,6 +100,7 @@ public class StmtOfServImplService {
     private final ServiceOfApplicationPostService serviceOfApplicationPostService;
     private final LaunchDarklyClient launchDarklyClient;
     private final ManageDocumentsService manageDocumentsService;
+    private final CitizenUserCaseUpdateService citizenUserCaseUpdateService;
 
     public Map<String, Object> retrieveRespondentsList(CaseDetails caseDetails) {
         CaseData caseData = objectMapper.convertValue(
@@ -452,8 +454,26 @@ public class StmtOfServImplService {
     }
 
     public void saveCitizenSos(String caseId, String eventId,String authorisation, CitizenSos sosObject) {
+        citizenUserCaseUpdateService.validateCitizenCaseAccess(
+            authorisation,
+            caseId
+        );
+
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
             = allTabService.getStartUpdateForSpecificEvent(caseId, eventId);
+        updateCitizenSosCaseData(authorisation, sosObject, startAllTabsUpdateDataContent);
+        allTabService.submitAllTabsUpdate(
+            startAllTabsUpdateDataContent.authorisation(),
+            caseId,
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            startAllTabsUpdateDataContent.caseDataMap()
+        );
+    }
+
+    private void updateCitizenSosCaseData(String authorisation,
+                                          CitizenSos sosObject,
+                                          StartAllTabsUpdateDataContent startAllTabsUpdateDataContent) {
         Map<String, Object> updatedCaseDataMap = startAllTabsUpdateDataContent.caseDataMap();
         CaseData updatedCaseData = startAllTabsUpdateDataContent.caseData();
         if (YesOrNo.No.equals(sosObject.getIsOrder())) {
@@ -481,13 +501,6 @@ public class StmtOfServImplService {
         } else if (YesOrNo.Yes.equals(sosObject.getIsOrder())) {
             updateSosAndOrderCollectionForCitizenSos(sosObject, updatedCaseDataMap, updatedCaseData, authorisation);
         }
-        allTabService.submitAllTabsUpdate(
-            startAllTabsUpdateDataContent.authorisation(),
-            caseId,
-            startAllTabsUpdateDataContent.startEventResponse(),
-            startAllTabsUpdateDataContent.eventRequestData(),
-            updatedCaseDataMap
-        );
     }
 
     private void updateSosAndOrderCollectionForCitizenSos(CitizenSos sosObject, Map<String, Object> updatedCaseDataMap,
