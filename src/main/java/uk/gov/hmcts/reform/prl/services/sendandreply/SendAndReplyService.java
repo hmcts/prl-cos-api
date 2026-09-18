@@ -2224,7 +2224,6 @@ public class SendAndReplyService {
 
     public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmitted(CallbackRequest callbackRequest, String authorisation) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("sendOrReplyChoiceData={} for case={}", callbackRequest.getCaseDetails().getData().get(CHOOSE_SEND_OR_REPLY), caseData.getId());
         SendOrReply chooseAndReply = caseData.getChooseSendOrReply();
         return sendAndReplySubmittedForChoice(caseData, chooseAndReply, authorisation);
 
