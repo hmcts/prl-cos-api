@@ -21,6 +21,9 @@ import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -178,6 +181,74 @@ public class SendAndReplyControllerIntegrationTest {
                     .content(jsonRequest))
             .andExpect(status().isOk())
             .andReturn();
+    }
+
+    @Test
+    public void testSendOrReplyToMessagesMidEventTask() throws Exception {
+        String url = "/send-and-reply-to-messages/send-or-reply-to-messages/mid-event-task";
+        String jsonRequest = ResourceLoader.loadJson("requests/send-and-reply-case-data.json");
+
+        mockMvc.perform(
+                post(url)
+                    .header("Authorization", "testAuthToken")
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
+    @Test
+    public void testSendOrReplyToMessagesMidEventTaskWithClientContextHeader() throws Exception {
+        String url = "/send-and-reply-to-messages/send-or-reply-to-messages/mid-event-task";
+        String jsonRequest = ResourceLoader.loadJson("requests/send-and-reply-case-data.json");
+
+        mockMvc.perform(
+                post(url)
+                    .header("Authorization", "testAuthToken")
+                    .header("client-context", clientContextWithHearingId("999"))
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
+    @Test
+    public void testSendOrReplyToMessagesAboutToSubmitTask() throws Exception {
+        String url = "/send-and-reply-to-messages/send-or-reply-to-messages/about-to-submit-task";
+        String jsonRequest = ResourceLoader.loadJson("requests/send-and-reply-case-data.json");
+
+        mockMvc.perform(
+                post(url)
+                    .header("Authorization", "testAuthToken")
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
+    @Test
+    public void testSendOrReplyToMessagesAboutToSubmitTaskWithClientContextHeader() throws Exception {
+        String url = "/send-and-reply-to-messages/send-or-reply-to-messages/about-to-submit-task";
+        String jsonRequest = ResourceLoader.loadJson("requests/send-and-reply-case-data.json");
+
+        mockMvc.perform(
+                post(url)
+                    .header("Authorization", "testAuthToken")
+                    .header("client-context", clientContextWithHearingId("999"))
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
+    private static String clientContextWithHearingId(String hearingId) {
+        String json = "{\"client_context\":{\"user_task\":{\"task_data\":{\"additional_properties\":{\"hearingId\":\""
+            + hearingId + "\"}}}}}";
+        return Base64.getEncoder().encodeToString(json.getBytes(StandardCharsets.UTF_8));
     }
 
     @Test
