@@ -117,51 +117,6 @@ public class PaymentRequestService {
         );
     }
 
-    private PaymentResponse createPaymentAndUpdateCase(String authorization,
-                                                       CreatePaymentRequest createPaymentRequest,
-                                                       FeeResponse feeResponse,
-                                                       StartAllTabsUpdateDataContent startAllTabsUpdateDataContent) {
-        CaseData caseData = startAllTabsUpdateDataContent.caseData();
-        Map<String, Object> caseDataMap = new HashMap<>();
-        if (null == caseData) {
-            log.info(
-                "Retrieved caseData is null for caseId {}, please provide a valid caseId",
-                createPaymentRequest.getCaseId()
-            );
-            return null;
-        }
-
-        createPaymentRequest = createPaymentRequest.toBuilder()
-            .applicantCaseName(caseData.getApplicantCaseName()).build();
-
-        PaymentResponse paymentResponse;
-        if (isApplicationNotAwp(createPaymentRequest)) {
-            log.info("*** Citizen C100 and other applications case payment ***");
-            paymentResponse = createPayment(
-                authorization,
-                createPaymentRequest,
-                caseData.getPaymentServiceRequestReferenceNumber(),
-                caseData.getPaymentReferenceNumber(),
-                feeResponse
-            );
-            //update service request & payment request reference
-            caseDataMap.put("paymentServiceRequestReferenceNumber", paymentResponse.getServiceRequestReference());
-            caseDataMap.put("paymentReferenceNumber", paymentResponse.getPaymentReference());
-            caseDataMap.put("feeAmount", String.valueOf(feeResponse.getAmount()));
-        } else {
-            log.info("*** Citizen awp payment ***");
-            paymentResponse = handleCitizenAwpPayment(authorization,
-                                                      caseData,
-                                                      caseDataMap,
-                                                      createPaymentRequest,
-                                                      feeResponse);
-        }
-
-        startAllTabsUpdateDataContent.caseDataMap().putAll(caseDataMap);
-
-        return paymentResponse;
-    }
-
     public PaymentResponse createPayment(String authorization,
                                          CreatePaymentRequest createPaymentRequest,
                                          String paymentServiceReferenceNumber,
@@ -219,6 +174,52 @@ public class PaymentRequestService {
                                       paymentReferenceNumber, feeResponse);
         }
     }
+
+    private PaymentResponse createPaymentAndUpdateCase(String authorization,
+                                                       CreatePaymentRequest createPaymentRequest,
+                                                       FeeResponse feeResponse,
+                                                       StartAllTabsUpdateDataContent startAllTabsUpdateDataContent) {
+        CaseData caseData = startAllTabsUpdateDataContent.caseData();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        if (null == caseData) {
+            log.info(
+                "Retrieved caseData is null for caseId {}, please provide a valid caseId",
+                createPaymentRequest.getCaseId()
+            );
+            return null;
+        }
+
+        createPaymentRequest = createPaymentRequest.toBuilder()
+            .applicantCaseName(caseData.getApplicantCaseName()).build();
+
+        PaymentResponse paymentResponse;
+        if (isApplicationNotAwp(createPaymentRequest)) {
+            log.info("*** Citizen C100 and other applications case payment ***");
+            paymentResponse = createPayment(
+                authorization,
+                createPaymentRequest,
+                caseData.getPaymentServiceRequestReferenceNumber(),
+                caseData.getPaymentReferenceNumber(),
+                feeResponse
+            );
+            //update service request & payment request reference
+            caseDataMap.put("paymentServiceRequestReferenceNumber", paymentResponse.getServiceRequestReference());
+            caseDataMap.put("paymentReferenceNumber", paymentResponse.getPaymentReference());
+            caseDataMap.put("feeAmount", String.valueOf(feeResponse.getAmount()));
+        } else {
+            log.info("*** Citizen awp payment ***");
+            paymentResponse = handleCitizenAwpPayment(authorization,
+                                                      caseData,
+                                                      caseDataMap,
+                                                      createPaymentRequest,
+                                                      feeResponse);
+        }
+
+        startAllTabsUpdateDataContent.caseDataMap().putAll(caseDataMap);
+
+        return paymentResponse;
+    }
+
 
     private PaymentResponse getPaymentResponse(String authorization,
                                                CreatePaymentRequest createPaymentRequest,
