@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.caseaccess.RemoveUserRolesRequest;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 
@@ -63,12 +64,25 @@ public class CcdDataStoreService {
     public FindUserCaseRolesResponse findUserCaseRoles(String caseId, String authorisation) {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         String userId = userDetails.getId();
+        FindUserCaseRolesRequest request = buildFindUserCaseRolesRequest(caseId, userId);
 
-        return caseRoleClient.findUserCaseRoles(
+        // TEMP DEBUG: local-dev diagnostics for role lookup behaviour.
+        log.info("TEMP-DEBUG findUserCaseRoles request: caseId={}, userId={}", caseId, userId);
+
+        FindUserCaseRolesResponse response = caseRoleClient.findUserCaseRoles(
             authorisation,
             authTokenGenerator.generate(),
-            buildFindUserCaseRolesRequest(caseId, userId)
+            request
         );
+
+        int roleCount = response != null && response.getCaseUsers() != null ? response.getCaseUsers().size() : 0;
+        String returnedRoles = response != null && response.getCaseUsers() != null
+            ? response.getCaseUsers().stream().map(CaseUser::getCaseRole).collect(Collectors.joining(", "))
+            : "";
+        log.info("TEMP-DEBUG findUserCaseRoles response: caseId={}, userId={}, roleCount={}, roles=[{}]",
+                 caseId, userId, roleCount, returnedRoles);
+
+        return response;
     }
 
     private FindUserCaseRolesRequest buildFindUserCaseRolesRequest(String caseId, String userId) {

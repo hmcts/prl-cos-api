@@ -732,7 +732,7 @@ public class NoticeOfChangePartiesService {
         Map<String, Object> caseDataUpdated = caseDetails.getData();
 
         for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
-            SolicitorRole.fromCaseRoleLabel(caseUser.getCaseRole()).ifPresent(
+            resolveSolicitorRoleForCase(caseData, caseUser.getCaseRole()).ifPresent(
                 x -> {
                     switch (x.getRepresenting()) {
                         case CAAPPLICANT:
@@ -1129,7 +1129,7 @@ public class NoticeOfChangePartiesService {
     private List<Element<PartyDetails>> getSolicitorRepresentedParties(CaseData caseData, FindUserCaseRolesResponse findUserCaseRolesResponse) {
         List<Element<PartyDetails>> solicitorRepresentedParties = new ArrayList<>();
         for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
-            SolicitorRole.fromCaseRoleLabel(caseUser.getCaseRole()).ifPresent(
+            resolveSolicitorRoleForCase(caseData, caseUser.getCaseRole()).ifPresent(
                 x -> {
                     switch (x.getRepresenting()) {
                         case CAAPPLICANT:
@@ -1164,6 +1164,16 @@ public class NoticeOfChangePartiesService {
             caseId,
             authorisation
         );
+    }
+
+    private Optional<SolicitorRole> resolveSolicitorRoleForCase(CaseData caseData, String caseRoleLabel) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            && SolicitorRole.FL401APPLICANTSOLICITOR.getCaseRoleLabel().equalsIgnoreCase(caseRoleLabel)) {
+            log.info("Legacy role {} remapped to {} for C100 case {}",
+                     caseRoleLabel, SolicitorRole.C100APPLICANTSOLICITOR1.getCaseRoleLabel(), caseData.getId());
+            return Optional.of(SolicitorRole.C100APPLICANTSOLICITOR1);
+        }
+        return SolicitorRole.fromCaseRoleLabel(caseRoleLabel);
     }
 
     public Map<String, Object> populateAboutToStartAdminRemoveLegalRepresentative(CallbackRequest callbackRequest,
