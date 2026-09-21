@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterables;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
@@ -134,6 +136,26 @@ public class CitizenCoreCaseDataService {
     public CaseDetails getCase(String authorisation, String caseId) {
         String cosApis2sToken = authTokenGenerator.generate();
         return coreCaseDataApi.getCase(authorisation, cosApis2sToken, caseId);
+    }
+
+    public boolean hasCitizenAccess(String authorisation, String caseId) {
+        String cosApis2sToken = authTokenGenerator.generate();
+        UserInfo userInfo = idamClient.getUserInfo(authorisation);
+
+        try {
+            coreCaseDataApi.readForCitizen(
+                authorisation,
+                cosApis2sToken,
+                userInfo.getUid(),
+                JURISDICTION,
+                CASE_TYPE,
+                caseId
+            );
+            return true;
+        } catch (FeignException.NotFound | FeignException.Forbidden exception) {
+            log.warn("Citizen {} does not have access to case {}", userInfo.getUid(), caseId);
+            return false;
+        }
     }
 
     public boolean hasAccess(String authorisation, String caseId) {
