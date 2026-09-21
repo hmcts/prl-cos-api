@@ -843,7 +843,7 @@ public class CallbackController {
                 } else {
                     applicantOrganisationPolicy = applicantOrganisationPolicy.toBuilder()
                         .orgPolicyReference(StringUtils.EMPTY)
-                        .orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]")
+                        .orgPolicyCaseAssignedRole("[C100APPLICANTSOLICITOR1]")
                         .build();
                 }
                 log.info("putting applicantOrganisationPolicy: {}", applicantOrganisationPolicy);
