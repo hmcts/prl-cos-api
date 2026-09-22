@@ -140,7 +140,13 @@ public class CitizenCoreCaseDataService {
 
     public boolean hasCitizenAccess(String authorisation, String caseId) {
         String cosApis2sToken = authTokenGenerator.generate();
-        UserInfo userInfo = idamClient.getUserInfo(authorisation);
+        UserInfo userInfo;
+        try {
+            userInfo = idamClient.getUserInfo(authorisation);
+        } catch (FeignException exception) {
+            log.error("Unable to retrieve citizen information while checking access to case {}", caseId, exception);
+            throw exception;
+        }
 
         try {
             coreCaseDataApi.readForCitizen(
