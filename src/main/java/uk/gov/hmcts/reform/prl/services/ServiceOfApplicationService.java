@@ -1058,7 +1058,7 @@ public class ServiceOfApplicationService {
                                                         List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                         List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                         List<Document> staticDocs) {
-        staticDocs = staticDocs.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME)).toList();
+        staticDocs = staticDocs.stream().filter(d -> !isFL415Document(d)).toList();
         List<Element<PartyDetails>> applicantFl401 = Collections.singletonList(element(
             caseData.getApplicantsFL401().getPartyId(),
             caseData.getApplicantsFL401()
