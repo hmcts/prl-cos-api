@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.clients.CommonDataRefApi;
 import uk.gov.hmcts.reform.prl.clients.JudicialUserDetailsApi;
 import uk.gov.hmcts.reform.prl.clients.StaffResponseDetailsApi;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.exception.NoStaffResponseException;
 import uk.gov.hmcts.reform.prl.mapper.staffresponse.StaffResponseToDynamicListElementFilter;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -124,8 +125,27 @@ public class RefDataUserServiceTest {
 
     @Test
     public void testGetStaffDetailsWithException() {
+        staffRefDataService = mock(StaffRefDataService.class);
+        refDataUserService = new RefDataUserService(
+            authTokenGenerator, staffRefDataService, judicialUserDetailsApi,
+            idamClient, commonDataRefApi, launchDarklyClient
+        );
+        when(staffRefDataService.getAllStaffDetails()).thenThrow(new NoStaffResponseException("failed"));
         List<DynamicListElement> legalAdvisor = refDataUserService.getLegalAdvisorList();
         assertNull(legalAdvisor.getFirst().getCode());
+    }
+
+    @Test
+    public void testGetLegalAdvisorListReturnsEmptyOnUnexpectedException() {
+        staffRefDataService = mock(StaffRefDataService.class);
+        refDataUserService = new RefDataUserService(
+            authTokenGenerator, staffRefDataService, judicialUserDetailsApi,
+            idamClient, commonDataRefApi, launchDarklyClient
+        );
+        when(staffRefDataService.getAllStaffDetails()).thenThrow(new RuntimeException("Unexpected error"));
+        List<DynamicListElement> legalAdvisorList = refDataUserService.getLegalAdvisorList();
+        assertNotNull(legalAdvisorList);
+        assertNull(legalAdvisorList.getFirst().getCode());
     }
 
     @Test

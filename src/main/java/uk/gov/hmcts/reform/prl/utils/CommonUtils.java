@@ -278,7 +278,7 @@ public class CommonUtils {
         LocalDateTime ldt = CaseUtils.convertUtcToBst(bundleDateTime);
 
         return newBundleDateTime
-            .append(bundleDateTime.format(DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH)))
+            .append(ldt.format(DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH)))
             .append(EMPTY_SPACE_STRING)
             .append(CaseUtils.convertLocalDateTimeToAmOrPmTime(ldt))
             .toString();
