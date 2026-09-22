@@ -74,6 +74,7 @@ import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
 import static uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService.HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS;
 import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService.IS_CONFIDENTIAL_DATA_PRESENT;
@@ -1581,6 +1582,23 @@ class UpdatePartyDetailsServiceTest {
     }
 
     @Test
+    void checkThatIfFL401RespondentIsBrandNewThenDetailsMarkedAsChanged() {
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .respondentsFL401(null)
+            .build();
+        PartyDetails respondent = PartyDetails.builder()
+            .email("test1")
+            .build();
+        Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
+        boolean bool = updatePartyDetailsService.checkIfConfidentialityDetailsChangedRespondent(
+            caseDataBefore,
+            wrappedRespondent
+        );
+        assertTrue(bool);
+    }
+
+    @Test
     void checkIfDetailsChangedFl401AddressOnly() {
         PartyDetails respondentBefore = PartyDetails.builder()
             .address(Address.builder()
@@ -2496,6 +2514,47 @@ class UpdatePartyDetailsServiceTest {
                                                                             Mockito.anyBoolean(), anyMap());
     }
 
+    @Test
+    void shouldNotAttemptToGenerateRespondentC8WhenFl401RespondentNotYetAdded() throws Exception {
+        PartyDetails applicant = PartyDetails.builder().firstName("App").lastName("One").build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(applicant)
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .eventId("applicantDetails")
+            .caseDetailsBefore(CaseDetails.builder()
+                                   .id(12345L)
+                                   .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.name())
+                                   .data(caseDataMap)
+                                   .build())
+            .caseDetails(CaseDetails.builder()
+                             .id(12345L)
+                             .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.name())
+                             .data(caseDataMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+        when(confidentialDetailsMapper.mapConfidentialData(any(CaseData.class), Mockito.anyBoolean())).thenReturn(caseData);
+        when(confidentialityTabService.updateConfidentialityDetails(caseData)).thenReturn(Map.of());
+        when(caseSummaryTabService.updateTab(caseData)).thenReturn(Map.of());
+        when(noticeOfChangePartiesService.generate(any(CaseData.class), any(), anyMap())).thenReturn(Map.of());
+        when(documentGenService.createUpdatedCaseDataWithDocuments(anyString(), any(CaseData.class))).thenReturn(Map.of());
+
+        Map<String, Object> updatedCaseData = updatePartyDetailsService.updateApplicantRespondentAndChildData(
+            callbackRequest,
+            BEARER_TOKEN
+        );
+
+        assertNotNull(updatedCaseData);
+        verify(documentGenService, Mockito.times(1)).createUpdatedCaseDataWithDocuments(anyString(), any(CaseData.class));
+        verify(c100RespondentSolicitorService, Mockito.never()).populateDataMap(any(), any(), anyString());
+    }
+
     @ParameterizedTest
     @CsvSource({"PREPARE_FOR_HEARING_CONDUCT_HEARING, 1", "DECISION_OUTCOME, 1", "SUBMITTED_PAID, 0", "CASE_ISSUED, 0", "JUDICIAL_REVIEW, 0" })
     void shouldInvokeGenerateC8DocumentsForApplicantOnlyInHearingStates(State state, int times) throws Exception {
@@ -2867,6 +2926,60 @@ class UpdatePartyDetailsServiceTest {
         List<String> validationErrorList = updatePartyDetailsService.validateUpdatePartyDetails(callbackRequest);
 
         assertTrue(validationErrorList.isEmpty());
+    }
+
+    @Test
+    void shouldNotReturnEmptyRespondentsWhenUpdatingC100ApplicantDetailsBeforeRespondentsEntered() {
+        Element<PartyDetails> applicant = element(PartyDetails.builder()
+                                                      .firstName("Applicant")
+                                                      .lastName("One")
+                                                      .build());
+        List<Element<PartyDetails>> applicants = List.of(applicant);
+        OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
+            .orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]")
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(applicants)
+            .applicantOrganisationPolicy(applicantOrganisationPolicy)
+            .build();
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(applicants)
+            .applicantOrganisationPolicy(applicantOrganisationPolicy)
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        Map<String, Object> caseDataBeforeMap = new HashMap<>();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .eventId("applicantsDetails")
+            .caseDetailsBefore(CaseDetails.builder()
+                                   .id(12345L)
+                                   .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+                                   .data(caseDataBeforeMap)
+                                   .build())
+            .caseDetails(CaseDetails.builder()
+                             .id(12345L)
+                             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+                             .data(caseDataMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenAnswer(invocation ->
+            invocation.getArgument(0) == caseDataBeforeMap ? caseDataBefore : caseData);
+        when(confidentialDetailsMapper.mapConfidentialData(caseData, false)).thenReturn(caseData);
+        when(confidentialityTabService.updateConfidentialityDetails(caseData)).thenReturn(Map.of());
+        when(caseSummaryTabService.updateTab(caseData)).thenReturn(Map.of());
+        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CARESPONDENT)).thenReturn(Map.of());
+        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CAAPPLICANT)).thenReturn(Map.of());
+
+        Map<String, Object> updatedCaseData = updatePartyDetailsService.updateApplicantRespondentAndChildData(
+            callbackRequest,
+            BEARER_TOKEN
+        );
+
+        assertThat(updatedCaseData).containsKey("applicants");
+        assertThat(updatedCaseData).doesNotContainKey("respondents");
     }
 
     private Element<ResponseDocuments> existingResponseDocument() {

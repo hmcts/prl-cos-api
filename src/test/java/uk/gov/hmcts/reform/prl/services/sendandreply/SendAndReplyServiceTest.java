@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.controllers.testingsupport.TestLogAppender;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
@@ -794,7 +795,7 @@ public class SendAndReplyServiceTest {
             Mockito.any(),
             Mockito.any()
         )).thenReturn(categoriesAndDocuments);
-        when(hearingService.getFutureHearings(anyString(), anyString())).thenReturn(futureHearings);
+        when(hearingService.getHearings(anyString(), anyString())).thenReturn(futureHearings);
 
         Map<String, String> refDataCategoryValueMap = new HashMap<>();
 
@@ -806,6 +807,12 @@ public class SendAndReplyServiceTest {
             sendAndReplyService, "serviceCode", "serviceCode");
         ReflectionTestUtils.setField(
             sendAndReplyService, "hearingTypeCategoryId", "hearingTypeCategoryId");
+        ReflectionTestUtils.setField(
+            sendAndReplyService, "sendAndReplyFutureHearingStatuses",
+            List.of("LISTED", "AWAITING_ACTUALS"));
+        ReflectionTestUtils.setField(
+            sendAndReplyService, "sendAndReplyPastHearingStatuses",
+            List.of("COMPLETED", "AWAITING_ACTUALS"));
 
 
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
@@ -825,7 +832,7 @@ public class SendAndReplyServiceTest {
         DynamicList legalAdviserList = mock(DynamicList.class);
         when(refDataUserService.getStaffDynamicList(legalAdviserDynamicListElementConverter)).thenReturn(legalAdviserList);
 
-        CaseData updatedCaseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, auth);
+        CaseData updatedCaseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, auth, false, null);
 
         assertNotNull(updatedCaseData);
         assertEquals("123 - hearingType1", updatedCaseData.getSendOrReplyMessage().getSendMessageObject()
@@ -868,7 +875,7 @@ public class SendAndReplyServiceTest {
             .build();
         when(userService.getUserDetails(auth)).thenReturn(userDetails);
 
-        CaseData updatedCaseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, auth);
+        CaseData updatedCaseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, auth, false, null);
 
         assertNotNull(updatedCaseData);
         assertEquals("categoryId->documentURL", updatedCaseData.getSendOrReplyMessage()
@@ -997,6 +1004,83 @@ public class SendAndReplyServiceTest {
             data.getSendOrReplyMessage().getSendMessageObject(), auth);
 
         assertEquals("some message while sending",message.getMessageContent());
+    }
+
+    @Test
+    public void testBuildSendMessageAttachesSelectedSubmittedDocumentToExternalMessage() {
+        UUID selectedDocumentId = UUID.randomUUID();
+        DynamicList selectedDocumentList = dynamicDocumentList(selectedDocumentId, "Selected Document.pdf");
+
+        CaseData data = CaseData.builder()
+            .messageContent("some message while sending")
+            .chooseSendOrReply(SEND)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .messageAbout(MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS)
+                            .submittedDocumentsList(selectedDocumentList)
+                            .build()
+                    ).build())
+            .build();
+
+        when(caseDocumentClient.getMetadataForDocument(eq(auth), eq(serviceAuthToken), eq(selectedDocumentId)))
+            .thenReturn(testDocument());
+
+        Message message = sendAndReplyService.buildSendReplyMessage(
+            data,
+            data.getSendOrReplyMessage().getSendMessageObject(),
+            auth
+        );
+
+        List<Element<uk.gov.hmcts.reform.prl.models.documents.Document>> attachedDocs = message.getExternalMessageAttachDocs();
+        assertEquals(1, attachedDocs.size());
+        assertEquals("Selected Document.pdf", attachedDocs.getFirst().getValue().getDocumentFileName());
+    }
+
+    @Test
+    public void testBuildSendMessageCombinesSelectedSubmittedDocumentAndExternalAttachments() {
+        UUID selectedDocumentId = UUID.randomUUID();
+        UUID externalAttachmentId = UUID.randomUUID();
+        DynamicList selectedDocumentList = dynamicDocumentList(selectedDocumentId, "Selected Document.pdf");
+        DynamicList externalAttachmentList = dynamicDocumentList(externalAttachmentId, "Extra Attachment.pdf");
+
+        CaseData data = CaseData.builder()
+            .messageContent("some message while sending")
+            .chooseSendOrReply(SEND)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .messageAbout(MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS)
+                            .submittedDocumentsList(selectedDocumentList)
+                            .build()
+                    )
+                    .externalMessageAttachDocsList(List.of(element(SendAndReplyDynamicDoc.builder()
+                        .submittedDocsRefList(externalAttachmentList)
+                        .build())))
+                    .build())
+            .build();
+
+        when(caseDocumentClient.getMetadataForDocument(eq(auth), eq(serviceAuthToken), eq(selectedDocumentId)))
+            .thenReturn(testDocument());
+        when(caseDocumentClient.getMetadataForDocument(eq(auth), eq(serviceAuthToken), eq(externalAttachmentId)))
+            .thenReturn(testDocument());
+
+        Message message = sendAndReplyService.buildSendReplyMessage(
+            data,
+            data.getSendOrReplyMessage().getSendMessageObject(),
+            auth
+        );
+
+        List<Element<uk.gov.hmcts.reform.prl.models.documents.Document>> attachedDocs = message.getExternalMessageAttachDocs();
+        assertEquals(2, attachedDocs.size());
+        assertEquals("Selected Document.pdf", attachedDocs.getFirst().getValue().getDocumentFileName());
+        assertEquals("Extra Attachment.pdf", attachedDocs.get(1).getValue().getDocumentFileName());
     }
 
     @Test
@@ -1596,6 +1680,9 @@ public class SendAndReplyServiceTest {
 
         assertEquals(2,updatedMessageList.size());
         assertEquals(TEST_UUID, caseDataMap.get(TASK_ASSIGNEE_IDAM_ID));
+        Message submittedSendMessageObject = (Message) caseDataMap.get("sendMessageObject");
+        assertEquals(updatedMessageList.getFirst().getValue().getMessageIdentifier(),
+                     submittedSendMessageObject.getMessageIdentifier());
     }
 
     @Test
@@ -2554,6 +2641,406 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
+    public void testSendEmailNotificationToExternalPartiesC100CaseIncludesSelectedApplicationDocument() {
+        PartyDetails applicant = PartyDetails.builder()
+            .partyId(UUID.randomUUID())
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .firstName("Applicant firstname")
+            .lastName("Applicant lastName")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .solicitorEmail("testSolicitor@xyz.com")
+            .phoneNumber("1234567890")
+            .contactPreferences(ContactPreferences.email)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(applicant.getPartyId()).value(
+            applicant).build();
+
+        DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder()
+                               .code(wrappedApplicant.getId().toString())
+                               .label(applicant.getFirstName() + " " + applicant.getLastName())
+                               .build()))
+            .build();
+        DynamicList applicationsList = DynamicList.builder()
+            .value(DynamicListElement.builder()
+                       .code(awpOtherCode)
+                       .label("test-document")
+                       .build())
+            .build();
+
+        CaseData caseDataC100Message = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .caseTypeOfApplication("C100")
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .applicants(List.of(wrappedApplicant))
+            .respondents(emptyList())
+            .messageContent("some msg content")
+            .additionalApplicationsBundle(List.of(element(AdditionalApplicationsBundle.builder()
+                .otherApplicationsBundle(OtherApplicationsBundle.builder()
+                                             .applicationStatus(AWP_STATUS_SUBMITTED)
+                                             .applicationType(OtherApplicationType.FC600_COMMITTAL_APPLICATION)
+                                             .uploadedDateTime(dateSent)
+                                             .finalDocument(List.of(element(internalMessageDoc)))
+                                             .build())
+                .build())))
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(Message.builder()
+                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                                           .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
+                                           .messageAbout(MessageAboutEnum.APPLICATION)
+                                           .applicationsList(applicationsList)
+                                           .messageContent("some msg content")
+                                           .messageSubject("message subject")
+                                           .build()
+                    )
+                    .respondToMessage(YesOrNo.No)
+                    .messages(messages)
+                    .build())
+            .build();
+
+        sendAndReplyService.sendNotificationToExternalParties(caseDataC100Message, "authorisation");
+
+        ArgumentCaptor<SendgridEmailConfig> sendgridEmailConfigCaptor = ArgumentCaptor.forClass(SendgridEmailConfig.class);
+        verify(sendgridService).sendEmailUsingTemplateWithAttachments(
+            eq(SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY),
+            eq("authorisation"),
+            sendgridEmailConfigCaptor.capture()
+        );
+        SendgridEmailConfig sendgridEmailConfig = sendgridEmailConfigCaptor.getValue();
+        assertEquals(1, sendgridEmailConfig.getListOfAttachments().size());
+        assertEquals(internalMessageDoc.getDocumentFileName(),
+                     sendgridEmailConfig.getListOfAttachments().getFirst().getDocumentFileName());
+        assertEquals(1, sendgridEmailConfig.getDynamicTemplateData().get("documentSize"));
+    }
+
+    @Test
+    public void testSendEmailNotificationUsesSavedExternalMessageAttachmentsWhenTemporaryAttachListRemoved() {
+        PartyDetails applicant = PartyDetails.builder()
+            .partyId(UUID.randomUUID())
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .firstName("Applicant firstname")
+            .lastName("Applicant lastName")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .solicitorEmail("testSolicitor@xyz.com")
+            .phoneNumber("1234567890")
+            .contactPreferences(ContactPreferences.email)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(applicant.getPartyId()).value(
+            applicant).build();
+        DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder()
+                               .code(wrappedApplicant.getId().toString())
+                               .label(applicant.getFirstName() + " " + applicant.getLastName())
+                               .build()))
+            .build();
+        uk.gov.hmcts.reform.prl.models.documents.Document manuallyAddedDoc = internalMessageDoc.toBuilder()
+            .documentFileName("manually-added-doc.pdf")
+            .build();
+
+        Message sendMessageObject = Message.builder()
+            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+            .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
+            .messageAbout(MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS)
+            .messageContent("some msg content")
+            .messageSubject("message subject")
+            .messageIdentifier("target-message-id")
+            .build();
+        Message savedMessage = sendMessageObject.toBuilder()
+            .updatedTime(dateTime)
+            .externalMessageAttachDocs(List.of(element(internalMessageDoc), element(manuallyAddedDoc)))
+            .build();
+
+        CaseData caseDataC100Message = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .caseTypeOfApplication("C100")
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .applicants(List.of(wrappedApplicant))
+            .respondents(emptyList())
+            .messageContent("some msg content")
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(sendMessageObject)
+                    .respondToMessage(YesOrNo.No)
+                    .messages(List.of(element(savedMessage)))
+                    .build())
+            .build();
+
+        sendAndReplyService.sendNotificationToExternalParties(caseDataC100Message, "authorisation");
+
+        ArgumentCaptor<SendgridEmailConfig> sendgridEmailConfigCaptor = ArgumentCaptor.forClass(SendgridEmailConfig.class);
+        verify(sendgridService).sendEmailUsingTemplateWithAttachments(
+            eq(SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY),
+            eq("authorisation"),
+            sendgridEmailConfigCaptor.capture()
+        );
+        SendgridEmailConfig sendgridEmailConfig = sendgridEmailConfigCaptor.getValue();
+        assertEquals(2, sendgridEmailConfig.getListOfAttachments().size());
+        assertEquals(internalMessageDoc.getDocumentFileName(),
+                     sendgridEmailConfig.getListOfAttachments().getFirst().getDocumentFileName());
+        assertEquals("manually-added-doc.pdf",
+                     sendgridEmailConfig.getListOfAttachments().get(1).getDocumentFileName());
+        assertEquals(2, sendgridEmailConfig.getDynamicTemplateData().get("documentSize"));
+    }
+
+    @Test
+    public void testSendEmailNotificationMatchesSavedExternalMessageAttachmentsByIdentifier() {
+        PartyDetails applicant = PartyDetails.builder()
+            .partyId(UUID.randomUUID())
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .firstName("Applicant firstname")
+            .lastName("Applicant lastName")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .solicitorEmail("testSolicitor@xyz.com")
+            .phoneNumber("1234567890")
+            .contactPreferences(ContactPreferences.email)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(applicant.getPartyId()).value(
+            applicant).build();
+        DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder()
+                               .code(wrappedApplicant.getId().toString())
+                               .label(applicant.getFirstName() + " " + applicant.getLastName())
+                               .build()))
+            .build();
+        uk.gov.hmcts.reform.prl.models.documents.Document matchingDoc = internalMessageDoc.toBuilder()
+            .documentFileName("matching-doc.pdf")
+            .build();
+        uk.gov.hmcts.reform.prl.models.documents.Document newerNonMatchingDoc = internalMessageDoc.toBuilder()
+            .documentFileName("newer-non-matching-doc.pdf")
+            .build();
+
+        Message sendMessageObject = Message.builder()
+            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+            .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
+            .messageAbout(MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS)
+            .messageContent("same msg content")
+            .messageSubject("same message subject")
+            .messageIdentifier("target-message-id")
+            .build();
+        Message matchingSavedMessage = sendMessageObject.toBuilder()
+            .updatedTime(dateTime)
+            .externalMessageAttachDocs(List.of(element(matchingDoc)))
+            .build();
+        Message newerNonMatchingSavedMessage = sendMessageObject.toBuilder()
+            .messageIdentifier("other-message-id")
+            .updatedTime(dateTime.plusMinutes(1))
+            .externalMessageAttachDocs(List.of(element(newerNonMatchingDoc)))
+            .build();
+
+        CaseData caseDataC100Message = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .caseTypeOfApplication("C100")
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .applicants(List.of(wrappedApplicant))
+            .respondents(emptyList())
+            .messageContent("same msg content")
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(sendMessageObject)
+                    .respondToMessage(YesOrNo.No)
+                    .messages(List.of(element(newerNonMatchingSavedMessage), element(matchingSavedMessage)))
+                    .build())
+            .build();
+
+        sendAndReplyService.sendNotificationToExternalParties(caseDataC100Message, "authorisation");
+
+        ArgumentCaptor<SendgridEmailConfig> sendgridEmailConfigCaptor = ArgumentCaptor.forClass(SendgridEmailConfig.class);
+        verify(sendgridService).sendEmailUsingTemplateWithAttachments(
+            eq(SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY),
+            eq("authorisation"),
+            sendgridEmailConfigCaptor.capture()
+        );
+        SendgridEmailConfig sendgridEmailConfig = sendgridEmailConfigCaptor.getValue();
+        assertEquals(1, sendgridEmailConfig.getListOfAttachments().size());
+        assertEquals("matching-doc.pdf",
+                     sendgridEmailConfig.getListOfAttachments().getFirst().getDocumentFileName());
+    }
+
+    @Test
+    public void testSendEmailNotificationDoesNotUseSavedExternalMessageAttachmentsWhenNoIdentifierCanBeResolved() {
+        PartyDetails applicant = getApplicant().toBuilder()
+            .firstName("Applicant firstname")
+            .lastName("Applicant lastName")
+            .solicitorEmail("testSolicitor@xyz.com")
+            .contactPreferences(ContactPreferences.email)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder()
+            .id(applicant.getPartyId())
+            .value(applicant)
+            .build();
+        DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder()
+                               .code(wrappedApplicant.getId().toString())
+                               .label(applicant.getFirstName() + " " + applicant.getLastName())
+                               .build()))
+            .build();
+
+        Message sendMessageObject = Message.builder()
+            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+            .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
+            .messageAbout(MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS)
+            .messageContent("some msg content")
+            .messageSubject("message subject")
+            .build();
+        Message savedMessage = sendMessageObject.toBuilder()
+            .updatedTime(dateTime)
+            .externalMessageAttachDocs(List.of(element(internalMessageDoc)))
+            .build();
+
+        CaseData caseDataC100Message = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .caseTypeOfApplication("C100")
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .applicants(List.of(wrappedApplicant))
+            .respondents(emptyList())
+            .messageContent("some msg content")
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(sendMessageObject)
+                    .respondToMessage(YesOrNo.No)
+                    .messages(List.of(element(savedMessage)))
+                    .build())
+            .build();
+
+        ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger(
+            SendAndReplyService.class);
+        TestLogAppender appender = new TestLogAppender();
+        appender.start();
+        logger.addAppender(appender);
+
+        try {
+            sendAndReplyService.sendNotificationToExternalParties(caseDataC100Message, "authorisation");
+
+            ArgumentCaptor<SendgridEmailConfig> sendgridEmailConfigCaptor = ArgumentCaptor.forClass(SendgridEmailConfig.class);
+            verify(sendgridService).sendEmailUsingTemplateWithAttachments(
+                eq(SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY),
+                eq("authorisation"),
+                sendgridEmailConfigCaptor.capture()
+            );
+            SendgridEmailConfig sendgridEmailConfig = sendgridEmailConfigCaptor.getValue();
+            assertTrue(sendgridEmailConfig.getListOfAttachments().isEmpty());
+            assertEquals(0, sendgridEmailConfig.getDynamicTemplateData().get("documentSize"));
+            assertTrue(appender.getEvents().stream().anyMatch(
+                e -> e.getFormattedMessage().contains(
+                    "Cannot resolve saved external message attachments because messageIdentifier is missing for caseReference=12345")
+            ));
+        } finally {
+            logger.detachAppender(appender);
+        }
+    }
+
+    @Test
+    public void testSendEmailNotificationPrefersDatedSavedExternalMessageAttachmentsOverNullUpdatedTime() {
+        PartyDetails applicant = PartyDetails.builder()
+            .partyId(UUID.randomUUID())
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .firstName("Applicant firstname")
+            .lastName("Applicant lastName")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .solicitorEmail("testSolicitor@xyz.com")
+            .phoneNumber("1234567890")
+            .contactPreferences(ContactPreferences.email)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(applicant.getPartyId()).value(
+            applicant).build();
+        DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder()
+                               .code(wrappedApplicant.getId().toString())
+                               .label(applicant.getFirstName() + " " + applicant.getLastName())
+                               .build()))
+            .build();
+        uk.gov.hmcts.reform.prl.models.documents.Document nullUpdatedTimeDoc = internalMessageDoc.toBuilder()
+            .documentFileName("null-updated-time-doc.pdf")
+            .build();
+        uk.gov.hmcts.reform.prl.models.documents.Document datedDoc = internalMessageDoc.toBuilder()
+            .documentFileName("dated-doc.pdf")
+            .build();
+
+        Message sendMessageObject = Message.builder()
+            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+            .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
+            .messageAbout(MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS)
+            .messageContent("same msg content")
+            .messageSubject("same message subject")
+            .messageIdentifier("target-message-id")
+            .build();
+        Message nullUpdatedTimeSavedMessage = sendMessageObject.toBuilder()
+            .updatedTime(null)
+            .externalMessageAttachDocs(List.of(element(nullUpdatedTimeDoc)))
+            .build();
+        Message datedSavedMessage = sendMessageObject.toBuilder()
+            .updatedTime(dateTime)
+            .externalMessageAttachDocs(List.of(element(datedDoc)))
+            .build();
+
+        CaseData caseDataC100Message = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .caseTypeOfApplication("C100")
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .applicants(List.of(wrappedApplicant))
+            .respondents(emptyList())
+            .messageContent("same msg content")
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(sendMessageObject)
+                    .respondToMessage(YesOrNo.No)
+                    .messages(List.of(element(nullUpdatedTimeSavedMessage), element(datedSavedMessage)))
+                    .build())
+            .build();
+
+        sendAndReplyService.sendNotificationToExternalParties(caseDataC100Message, "authorisation");
+
+        ArgumentCaptor<SendgridEmailConfig> sendgridEmailConfigCaptor = ArgumentCaptor.forClass(SendgridEmailConfig.class);
+        verify(sendgridService).sendEmailUsingTemplateWithAttachments(
+            eq(SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY),
+            eq("authorisation"),
+            sendgridEmailConfigCaptor.capture()
+        );
+        SendgridEmailConfig sendgridEmailConfig = sendgridEmailConfigCaptor.getValue();
+        assertEquals(1, sendgridEmailConfig.getListOfAttachments().size());
+        assertEquals("dated-doc.pdf",
+                     sendgridEmailConfig.getListOfAttachments().getFirst().getDocumentFileName());
+    }
+
+    @Test
     public void testSendEmailNotificationToCafcassAndOthersC100Case() {
 
         PartyDetails applicant = PartyDetails.builder()
@@ -3105,8 +3592,177 @@ public class SendAndReplyServiceTest {
                         .build()))
                     .build()))
                 .build();
-        when(hearingService.getFutureHearings(auth, "1234")).thenReturn(futureHearings);
+        when(hearingService.getHearings(auth, "1234")).thenReturn(futureHearings);
         Assert.assertNotNull(sendAndReplyService.getFutureHearingDynamicList(auth,serviceAuthToken,"1234"));
+    }
+
+    @Test
+    public void getFutureHearingDynamicListExcludesPastStatuses() {
+        ReflectionTestUtils.setField(sendAndReplyService, "serviceCode", "serviceCode");
+        ReflectionTestUtils.setField(sendAndReplyService, "hearingTypeCategoryId", "hearingTypeCategoryId");
+        ReflectionTestUtils.setField(sendAndReplyService, "sendAndReplyFutureHearingStatuses", List.of("LISTED"));
+        ReflectionTestUtils.setField(sendAndReplyService, "sendAndReplyPastHearingStatuses",
+            List.of("COMPLETED", "AWAITING_ACTUALS"));
+
+        HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
+            .hearingStartDateTime(LocalDateTime.now().plusDays(5))
+            .build();
+        Hearings hearings = Hearings.hearingsWith().caseRef("1234").hmctsServiceCode("ABA5")
+            .caseHearings(List.of(
+                CaseHearing.caseHearingWith().hearingID(111L).hmcStatus("LISTED")
+                    .hearingType("hearingType1").hearingDaySchedule(List.of(schedule)).build(),
+                CaseHearing.caseHearingWith().hearingID(222L).hmcStatus("COMPLETED")
+                    .hearingType("hearingType2").hearingDaySchedule(List.of(schedule)).build(),
+                CaseHearing.caseHearingWith().hearingID(333L).hmcStatus("AWAITING_ACTUALS")
+                    .hearingType("hearingType3").hearingDaySchedule(List.of(schedule)).build()))
+            .build();
+        when(hearingService.getHearings(auth, "1234")).thenReturn(hearings);
+        when(refDataService.getRefDataCategoryValueMap(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(Map.of("hearingType1", "val1", "hearingType2", "val2", "hearingType3", "val3"));
+
+        DynamicList result = sendAndReplyService.getFutureHearingDynamicList(auth, serviceAuthToken, "1234");
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(1, result.getListItems().size());
+        Assert.assertEquals("111 - hearingType1", result.getListItems().getFirst().getCode());
+    }
+
+    @Test
+    public void getFutureHearingDynamicListReturnsEmptyDynamicListWhenNoHearingsMatchAllowedStatuses() {
+        ReflectionTestUtils.setField(sendAndReplyService, "serviceCode", "serviceCode");
+        ReflectionTestUtils.setField(sendAndReplyService, "hearingTypeCategoryId", "hearingTypeCategoryId");
+        ReflectionTestUtils.setField(sendAndReplyService, "sendAndReplyFutureHearingStatuses", List.of("LISTED"));
+        ReflectionTestUtils.setField(sendAndReplyService, "sendAndReplyPastHearingStatuses",
+            List.of("COMPLETED", "AWAITING_ACTUALS"));
+
+        HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
+            .hearingStartDateTime(LocalDateTime.now().plusDays(5))
+            .build();
+        Hearings hearings = Hearings.hearingsWith().caseRef("1234").hmctsServiceCode("ABA5")
+            .caseHearings(List.of(
+                CaseHearing.caseHearingWith().hearingID(444L).hmcStatus("CANCELLED")
+                    .hearingType("hearingType4").hearingDaySchedule(List.of(schedule)).build(),
+                CaseHearing.caseHearingWith().hearingID(555L).hmcStatus("EXCEPTION")
+                    .hearingType("hearingType5").hearingDaySchedule(List.of(schedule)).build()))
+            .build();
+        when(hearingService.getHearings(auth, "1234")).thenReturn(hearings);
+
+        DynamicList result = sendAndReplyService.getFutureHearingDynamicList(auth, serviceAuthToken, "1234");
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(DynamicListElement.EMPTY, result.getValue());
+        Assert.assertNull(result.getListItems());
+    }
+
+    @Test
+    public void populateDynamicListsForSendAndReplyLocksDropdownToProvidedHearingId() {
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        ReflectionTestUtils.setField(sendAndReplyService, "serviceCode", "serviceCode");
+        ReflectionTestUtils.setField(sendAndReplyService, "hearingTypeCategoryId", "hearingTypeCategoryId");
+        ReflectionTestUtils.setField(sendAndReplyService, "sendAndReplyFutureHearingStatuses", List.of("LISTED"));
+        ReflectionTestUtils.setField(sendAndReplyService, "sendAndReplyPastHearingStatuses",
+            List.of("COMPLETED", "AWAITING_ACTUALS"));
+
+        HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
+            .hearingStartDateTime(LocalDateTime.now().plusDays(5)).build();
+        Hearings hearings = Hearings.hearingsWith().caseRef("123").hmctsServiceCode("ABA5")
+            .caseHearings(List.of(
+                CaseHearing.caseHearingWith().hearingID(111L).hmcStatus("LISTED")
+                    .hearingType("hearingType1").hearingDaySchedule(List.of(schedule)).build(),
+                CaseHearing.caseHearingWith().hearingID(222L).hmcStatus("COMPLETED")
+                    .hearingType("hearingType2").hearingDaySchedule(List.of(schedule)).build()))
+            .build();
+        when(hearingService.getHearings(anyString(), anyString())).thenReturn(hearings);
+        when(coreCaseDataApi.getCategoriesAndDocuments(any(), any(), any()))
+            .thenReturn(new CategoriesAndDocuments(1, List.of(), List.of()));
+        when(refDataService.getRefDataCategoryValueMap(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(Map.of("hearingType1", "val1", "hearingType2", "val2"));
+        DynamicList legalAdviserList = mock(DynamicList.class);
+        when(refDataUserService.getStaffDynamicList(legalAdviserDynamicListElementConverter))
+            .thenReturn(legalAdviserList);
+
+        CaseData updated = sendAndReplyService
+            .populateDynamicListsForSendAndReply(caseData, auth, true, "222");
+
+        DynamicList lockedHearings = updated.getSendOrReplyMessage().getSendMessageObject().getFutureHearingsList();
+        Assert.assertNotNull(lockedHearings);
+        Assert.assertEquals(1, lockedHearings.getListItems().size());
+        Assert.assertEquals("222 - hearingType2", lockedHearings.getListItems().getFirst().getCode());
+        Assert.assertNotNull(lockedHearings.getValue());
+        Assert.assertEquals("222 - hearingType2", lockedHearings.getValue().getCode());
+    }
+
+    @Test
+    public void populateDynamicListsForSendAndReplyFallsBackToFullListWhenHearingIdNotFound() {
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        ReflectionTestUtils.setField(sendAndReplyService, "serviceCode", "serviceCode");
+        ReflectionTestUtils.setField(sendAndReplyService, "hearingTypeCategoryId", "hearingTypeCategoryId");
+        ReflectionTestUtils.setField(sendAndReplyService, "sendAndReplyFutureHearingStatuses", List.of("LISTED"));
+        ReflectionTestUtils.setField(sendAndReplyService, "sendAndReplyPastHearingStatuses",
+            List.of("COMPLETED", "AWAITING_ACTUALS"));
+
+        HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
+            .hearingStartDateTime(LocalDateTime.now().plusDays(5)).build();
+        Hearings hearings = Hearings.hearingsWith().caseRef("123").hmctsServiceCode("ABA5")
+            .caseHearings(List.of(
+                CaseHearing.caseHearingWith().hearingID(111L).hmcStatus("LISTED")
+                    .hearingType("hearingType1").hearingDaySchedule(List.of(schedule)).build(),
+                CaseHearing.caseHearingWith().hearingID(222L).hmcStatus("COMPLETED")
+                    .hearingType("hearingType2").hearingDaySchedule(List.of(schedule)).build()))
+            .build();
+        when(hearingService.getHearings(anyString(), anyString())).thenReturn(hearings);
+        when(coreCaseDataApi.getCategoriesAndDocuments(any(), any(), any()))
+            .thenReturn(new CategoriesAndDocuments(1, List.of(), List.of()));
+        when(refDataService.getRefDataCategoryValueMap(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(Map.of("hearingType1", "val1", "hearingType2", "val2"));
+        DynamicList legalAdviserList = mock(DynamicList.class);
+        when(refDataUserService.getStaffDynamicList(legalAdviserDynamicListElementConverter))
+            .thenReturn(legalAdviserList);
+
+        CaseData updated = sendAndReplyService
+            .populateDynamicListsForSendAndReply(caseData, auth, true, "999");
+
+        DynamicList fallbackHearings = updated.getSendOrReplyMessage().getSendMessageObject().getFutureHearingsList();
+        Assert.assertNotNull(fallbackHearings);
+        Assert.assertEquals(2, fallbackHearings.getListItems().size());
+    }
+
+    @Test
+    public void getAllHearingsDynamicListIncludesBothFutureAndPastStatuses() {
+        ReflectionTestUtils.setField(sendAndReplyService, "serviceCode", "serviceCode");
+        ReflectionTestUtils.setField(sendAndReplyService, "hearingTypeCategoryId", "hearingTypeCategoryId");
+        ReflectionTestUtils.setField(sendAndReplyService, "sendAndReplyFutureHearingStatuses", List.of("LISTED"));
+        ReflectionTestUtils.setField(sendAndReplyService, "sendAndReplyPastHearingStatuses",
+            List.of("COMPLETED", "AWAITING_ACTUALS"));
+
+        HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
+            .hearingStartDateTime(LocalDateTime.now().plusDays(5))
+            .build();
+        Hearings hearings = Hearings.hearingsWith().caseRef("1234").hmctsServiceCode("ABA5")
+            .caseHearings(List.of(
+                CaseHearing.caseHearingWith().hearingID(111L).hmcStatus("LISTED")
+                    .hearingType("hearingType1").hearingDaySchedule(List.of(schedule)).build(),
+                CaseHearing.caseHearingWith().hearingID(222L).hmcStatus("COMPLETED")
+                    .hearingType("hearingType2").hearingDaySchedule(List.of(schedule)).build(),
+                CaseHearing.caseHearingWith().hearingID(333L).hmcStatus("AWAITING_ACTUALS")
+                    .hearingType("hearingType3").hearingDaySchedule(List.of(schedule)).build(),
+                CaseHearing.caseHearingWith().hearingID(444L).hmcStatus("CANCELLED")
+                    .hearingType("hearingType4").hearingDaySchedule(List.of(schedule)).build()))
+            .build();
+        when(hearingService.getHearings(auth, "1234")).thenReturn(hearings);
+        when(refDataService.getRefDataCategoryValueMap(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(Map.of("hearingType1", "val1", "hearingType2", "val2",
+                              "hearingType3", "val3", "hearingType4", "val4"));
+
+        DynamicList result = sendAndReplyService.getAllHearingsDynamicList(auth, serviceAuthToken, "1234");
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(3, result.getListItems().size());
+        List<String> codes = result.getListItems().stream().map(DynamicListElement::getCode).toList();
+        Assert.assertTrue(codes.contains("111 - hearingType1"));
+        Assert.assertTrue(codes.contains("222 - hearingType2"));
+        Assert.assertTrue(codes.contains("333 - hearingType3"));
+        Assert.assertFalse(codes.contains("444 - hearingType4"));
     }
 
     @Test
@@ -3860,5 +4516,14 @@ public class SendAndReplyServiceTest {
         document.originalDocumentName = RANDOM_ALPHA_NUMERIC;
 
         return document;
+    }
+
+    private DynamicList dynamicDocumentList(UUID documentId, String documentName) {
+        return DynamicList.builder()
+            .value(DynamicListElement.builder()
+                       .code(documentId)
+                       .label(documentName)
+                       .build())
+            .build();
     }
 }

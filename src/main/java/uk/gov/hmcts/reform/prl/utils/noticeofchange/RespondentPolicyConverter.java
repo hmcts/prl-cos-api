@@ -21,12 +21,12 @@ public class RespondentPolicyConverter {
             .build();
     }
 
-    private Organisation getCaOrganisation(Optional<Element<PartyDetails>> optionalPartyElement) {
-        return optionalPartyElement.map(Element::getValue)
-            .filter(element ->
-                        isNotEmpty(element.getRepresentativeFirstName())
-                            && isNotEmpty(element.getRepresentativeLastName())
-                            && isNotEmpty(element.getSolicitorOrg()))
+    private Organisation getCaOrganisation(
+        Optional<Element<PartyDetails>> optionalPartyElement
+    ) {
+        return optionalPartyElement
+            .map(Element::getValue)
+            .filter(party -> isNotEmpty(party.getSolicitorOrg()))
             .map(PartyDetails::getSolicitorOrg)
             .orElse(Organisation.builder().build());
     }
@@ -40,12 +40,9 @@ public class RespondentPolicyConverter {
     }
 
     private Organisation getDaOrganisation(PartyDetails partyDetails) {
-        if (isNotEmpty(partyDetails.getRepresentativeFirstName())
-            && isNotEmpty(partyDetails.getRepresentativeLastName())
-            && isNotEmpty(partyDetails.getSolicitorOrg())) {
-            return partyDetails.getSolicitorOrg();
-        }
-
-        return Organisation.builder().build();
+        return Optional.ofNullable(partyDetails)
+            .map(PartyDetails::getSolicitorOrg)
+            .filter(org -> isNotEmpty(org))
+            .orElse(Organisation.builder().build());
     }
 }

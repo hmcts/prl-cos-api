@@ -33,7 +33,11 @@ public enum CafcassReportsEnum {
     @JsonProperty("nonS7Report1")
     nonS7Report1("Other Non s7 Report"),
     @JsonProperty("nonS7Report2")
-    nonS7Report2("Other Non s7 Report");
+    nonS7Report2("Other Non s7 Report"),
+    @JsonProperty("enforcementOrderSuitabilityReport")
+    enforcementOrderSuitabilityReport("Enforcement Order Suitability Report"),
+    @JsonProperty("parentalOrderReporterReport")
+    parentalOrderReporterReport("Parental Order Reporter Report");
 
     private final String displayedValue;
 

@@ -30,6 +30,7 @@ import java.util.Map;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 
 @Slf4j
@@ -85,6 +86,7 @@ public class CitizenDocumentService {
                     CITIZEN,
                     quarantineLegalDocs.get(0)
                 );
+                updatedCaseDataMap.remove(NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS);
 
                 moveCitizenDocumentsToQuarantineTab(
                     quarantineLegalDocs,

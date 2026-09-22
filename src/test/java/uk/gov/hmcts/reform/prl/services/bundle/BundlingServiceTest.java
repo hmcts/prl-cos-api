@@ -37,12 +37,14 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfiden
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateResponse;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.DocumentLink;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -53,8 +55,14 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
+import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
+import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -289,5 +297,57 @@ public class BundlingServiceTest {
             .thenReturn(bundleCreateResponse);
         BundleCreateResponse expectedResponse = bundlingService.createBundleServiceRequest(c100CaseDataOther,"eventId","authorization");
         assertEquals(bundleCreateResponse.documentTaskId, expectedResponse.documentTaskId);
+    }
+
+    @Test
+    public void testCreateBundleServiceFetchesHearingsForPrepareForHearingConductHearingState() {
+        Hearings hearings = Hearings.hearingsWith().build();
+        BundleCreateResponse bundleCreateResponse = BundleCreateResponse.builder().documentTaskId(123).build();
+        CaseData caseData = c100CaseData.toBuilder()
+            .state(PREPARE_FOR_HEARING_CONDUCT_HEARING)
+            .build();
+
+        when(authTokenGenerator.generate()).thenReturn("authToken");
+        when(hearingService.getHearings("authorization", "123456789123")).thenReturn(hearings);
+        when(bundleApiClient.createBundleServiceRequest(
+            eq("authorization"),
+            eq("authToken"),
+            nullable(BundleCreateRequest.class)
+        ))
+            .thenReturn(bundleCreateResponse);
+
+        BundleCreateResponse expectedResponse = bundlingService.createBundleServiceRequest(
+            caseData,
+            "eventId",
+            "authorization"
+        );
+
+        assertEquals(bundleCreateResponse.documentTaskId, expectedResponse.documentTaskId);
+        verify(hearingService).getHearings("authorization", "123456789123");
+    }
+
+    @Test
+    public void testCreateBundleServiceDoesNotFetchHearingsForOtherState() {
+        BundleCreateResponse bundleCreateResponse = BundleCreateResponse.builder().documentTaskId(123).build();
+        CaseData caseData = c100CaseData.toBuilder()
+            .state(SUBMITTED_PAID)
+            .build();
+
+        when(authTokenGenerator.generate()).thenReturn("authToken");
+        when(bundleApiClient.createBundleServiceRequest(
+            eq("authorization"),
+            eq("authToken"),
+            nullable(BundleCreateRequest.class)
+        ))
+            .thenReturn(bundleCreateResponse);
+
+        BundleCreateResponse expectedResponse = bundlingService.createBundleServiceRequest(
+            caseData,
+            "eventId",
+            "authorization"
+        );
+
+        assertEquals(bundleCreateResponse.documentTaskId, expectedResponse.documentTaskId);
+        verify(hearingService, never()).getHearings("authorization", "123456789123");
     }
 }

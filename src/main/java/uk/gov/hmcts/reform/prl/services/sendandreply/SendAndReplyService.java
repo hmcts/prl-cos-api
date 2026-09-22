@@ -53,6 +53,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
@@ -112,6 +113,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
@@ -205,6 +207,12 @@ public class SendAndReplyService {
 
     @Value("${refdata.category-id}")
     private String hearingTypeCategoryId;
+
+    @Value("#{'${hearing_component.futureHearingStatus}'.split(',')}")
+    private List<String> sendAndReplyFutureHearingStatuses;
+
+    @Value("#{'${hearing_component.hearingStatusesToFilter}'.split(',')}")
+    private List<String> sendAndReplyPastHearingStatuses;
 
     private final AuthTokenGenerator authTokenGenerator;
 
@@ -519,13 +527,30 @@ public class SendAndReplyService {
         }
     }
 
-    public CaseData populateDynamicListsForSendAndReply(CaseData caseData, String authorization) {
+    public CaseData populateDynamicListsForSendAndReply(CaseData caseData, String authorization,
+                                                        boolean includePastHearings,
+                                                        String lockToHearingId) {
         String caseReference = String.valueOf(caseData.getId());
         DynamicList documentCategoryList = getCategoriesAndDocuments(authorization, caseReference);
         String s2sToken = authTokenGenerator.generate();
         final String loggedInUserEmail = getLoggedInUserEmail(authorization);
 
         DynamicList legalAdviserList = getLegalAdviserList();
+
+        // includePastHearings=true is reserved for the WA-task chase flow
+        // (waSendOrReplyToMessages), where the user may need to message about a hearing
+        // that has already occurred. Regular send-and-reply paths pass false.
+        DynamicList hearings = includePastHearings
+            ? getAllHearingsDynamicList(authorization, s2sToken, caseReference)
+            : getFutureHearingDynamicList(authorization, s2sToken, caseReference);
+
+        // lockToHearingId is set when the user opened this event from a Request Order WA
+        // task: narrow the dropdown to the hearing the task is bound to, so it appears
+        // selected and non-editable in EXUI (FPVTL-2408/2409). Falls back to the full list
+        // if the hearingId is somehow unmatched.
+        if (lockToHearingId != null) {
+            hearings = lockHearingDropdownTo(hearings, lockToHearingId);
+        }
 
         return caseData.toBuilder().sendOrReplyMessage(
                 SendOrReplyMessage.builder()
@@ -545,11 +570,7 @@ public class SendAndReplyService {
                                            .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder()
                                                                                      .label(loggedInUserEmail).code(
                                                    loggedInUserEmail).build())))
-                                           .futureHearingsList(getFutureHearingDynamicList(
-                                               authorization,
-                                               s2sToken,
-                                               caseReference
-                                           ))
+                                           .futureHearingsList(hearings)
                                            .legalAdviserList(legalAdviserList)
                                            .build())
                     .externalMessageAttachDocsList(List.of(element(SendAndReplyDynamicDoc.builder()
@@ -586,9 +607,34 @@ public class SendAndReplyService {
     }
 
     public DynamicList getFutureHearingDynamicList(String authorization, String s2sToken, String caseId) {
-        Hearings futureHearings = hearingService.getFutureHearings(authorization, caseId);
+        return buildHearingDynamicList(authorization, s2sToken, caseId,
+            ofNullable(sendAndReplyFutureHearingStatuses).orElse(emptyList()).stream()
+                .map(String::trim).distinct().toList());
+    }
 
-        if (futureHearings != null && futureHearings.getCaseHearings() != null && !futureHearings.getCaseHearings().isEmpty()) {
+    public DynamicList getAllHearingsDynamicList(String authorization, String s2sToken, String caseId) {
+        List<String> allowed = Stream.concat(
+                ofNullable(sendAndReplyFutureHearingStatuses).orElse(emptyList()).stream(),
+                ofNullable(sendAndReplyPastHearingStatuses).orElse(emptyList()).stream())
+            .map(String::trim)
+            .distinct()
+            .toList();
+        return buildHearingDynamicList(authorization, s2sToken, caseId, allowed);
+    }
+
+    private DynamicList buildHearingDynamicList(String authorization, String s2sToken, String caseId,
+                                                List<String> allowedStatuses) {
+        Hearings fetched = hearingService.getHearings(authorization, caseId);
+
+        if (fetched != null && fetched.getCaseHearings() != null && !fetched.getCaseHearings().isEmpty()) {
+
+            List<CaseHearing> filteredHearings = fetched.getCaseHearings().stream()
+                .filter(h -> allowedStatuses.contains(h.getHmcStatus()))
+                .toList();
+
+            if (filteredHearings.isEmpty()) {
+                return DynamicList.builder().value(DynamicListElement.EMPTY).build();
+            }
 
             Map<String, String> refDataCategoryValueMap = getRefDataMap(
                 authorization,
@@ -597,7 +643,7 @@ public class SendAndReplyService {
                 hearingTypeCategoryId
             );
 
-            List<DynamicListElement> hearingDropdowns = futureHearings.getCaseHearings().stream()
+            List<DynamicListElement> hearingDropdowns = filteredHearings.stream()
                 .map(caseHearing -> {
                     //get hearingId
                     String hearingId = String.valueOf(caseHearing.getHearingID());
@@ -628,6 +674,32 @@ public class SendAndReplyService {
 
     private List<DynamicListElement> getDynamicListElements(List<CodeAndLabel> dropdowns) {
         return dropdowns.stream().map(dropdown -> DynamicListElement.builder().code(dropdown.getCode()).label(dropdown.getLabel()).build()).toList();
+    }
+
+    /**
+     * Filters a hearings DynamicList down to the single element whose code starts with
+     * "{hearingId} - " and pre-selects it. Returns the input unchanged if no element
+     * matches
+     */
+    private DynamicList lockHearingDropdownTo(DynamicList full, String hearingId) {
+        if (full == null || full.getListItems() == null || full.getListItems().isEmpty()) {
+            return full;
+        }
+        log.info("hearingId associated with task ==>{}", hearingId);
+        DynamicListElement match = full.getListItems().stream()
+            .filter(e -> {
+                log.info("hearing code => {}", e.getCode());
+                return e.getCode() != null && e.getCode().contains(hearingId);
+            })
+            .findFirst()
+            .orElse(null);
+        if (match == null) {
+            return full;
+        }
+        return DynamicList.builder()
+            .value(match)
+            .listItems(List.of(match))
+            .build();
     }
 
     private Map<String, String> getRefDataMap(String authorization, String s2sToken, String serviceCode, String hearingTypeCategoryId) {
@@ -903,11 +975,24 @@ public class SendAndReplyService {
             .replyHistory(null)
             .hearingsLink(isNotBlank(getValueCode(message.getFutureHearingsList())) ? hearingsUrl : null)
             .messageIdentifier(SEND.equals(caseData.getChooseSendOrReply()) ? String.valueOf(UUID.randomUUID()) : null)
-            .externalMessageAttachDocs(getAttachedDocsForExternalMessage(
+            .externalMessageAttachDocs(getExternalMessageAttachedDocs(caseData, message, authorization))
+            .build();
+    }
+
+    private List<Element<Document>> getExternalMessageAttachedDocs(CaseData caseData, Message message, String authorization) {
+        List<Element<Document>> externalMessageAttachDocs = new ArrayList<>();
+        if (SEND.equals(caseData.getChooseSendOrReply())) {
+            externalMessageAttachDocs.addAll(getSendAttachedDocs(caseData, message, authorization));
+        }
+
+        if (caseData.getSendOrReplyMessage() != null) {
+            externalMessageAttachDocs.addAll(getAttachedDocsForExternalMessage(
                 authorization,
                 caseData.getSendOrReplyMessage().getExternalMessageAttachDocsList()
-            ))
-            .build();
+            ));
+        }
+
+        return externalMessageAttachDocs;
     }
 
     private List<Element<Document>> getSendAttachedDocs(CaseData caseData, Message message, String authorization) {
@@ -1365,6 +1450,7 @@ public class SendAndReplyService {
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
 
         if (null != message && ObjectUtils.isNotEmpty(message.getRecipientEmailAddresses())) {
+            log.info("message.getRecipientEmailAddresses()={} for case={}", message.getRecipientEmailAddresses(), caseData.getId());
             final String[] recipientEmailAddresses = message.getRecipientEmailAddresses().split(COMMA);
 
             if (recipientEmailAddresses.length > 0) {
@@ -1615,6 +1701,12 @@ public class SendAndReplyService {
         }
         addJudgeIdamIdIfMessageSentToJudge(caseData, newMessage, caseDataMap);
         applyMessageHandlers(caseData, caseDataMap, newMessage);
+        caseDataMap.put("sendMessageObject", caseData.getSendOrReplyMessage().getSendMessageObject()
+            .toBuilder()
+            .messageContent(caseData.getMessageContent())
+            .messageIdentifier(newMessage.getMessageIdentifier())
+            .build()
+        );
 
         messages.add(element(newMessage));
         messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
@@ -1725,7 +1817,7 @@ public class SendAndReplyService {
                 );
                 if (party.isPresent()) {
 
-                    handleExternalMessageNotifications(caseData, auth, party);
+                    handleExternalMessageNotifications(caseData, auth, party, message);
                 }
             }
             );
@@ -1740,18 +1832,19 @@ public class SendAndReplyService {
             if (StringUtils.isNotEmpty(message.getOtherPartiesEmailAddress())) {
                 emails.addAll(List.of(StringUtils.split(message.getOtherPartiesEmailAddress(), ",")));
             }
-            sendEmailNotificationToCafcassAndOtherParties(caseData, emails, auth);
+            sendEmailNotificationToCafcassAndOtherParties(caseData, message, emails, auth);
 
         }
 
 
     }
 
-    private void handleExternalMessageNotifications(CaseData caseData, String auth, Optional<Element<PartyDetails>> party) {
+    private void handleExternalMessageNotifications(CaseData caseData, String auth, Optional<Element<PartyDetails>> party,
+                                                    Message message) {
         PartyDetails partyDetails = party.get().getValue();
         if (externalMessageToBeSentInEmail(partyDetails)) {
             try {
-                sendEmailNotification(caseData, partyDetails, auth);
+                sendEmailNotification(caseData, partyDetails, message, auth);
             } catch (Exception e) {
                 log.error("Error while sending email notification Case id {} ", caseData.getId(), e);
             }
@@ -1759,7 +1852,7 @@ public class SendAndReplyService {
 
             try {
                 sendPostNotificationToExternalParties(caseData, partyDetails,
-                                                      caseData.getSendOrReplyMessage().getSendMessageObject(), auth
+                                                      message, auth
                 );
 
                 log.info("Message sent as post to external parties");
@@ -1830,12 +1923,11 @@ public class SendAndReplyService {
     }
 
 
-    private void sendEmailNotification(CaseData caseData, PartyDetails partyDetails, String authorization) {
+    private void sendEmailNotification(CaseData caseData, PartyDetails partyDetails, Message message, String authorization) {
         String emailAddress = isSolicitorRepresentative(partyDetails) ? partyDetails.getSolicitorEmail() : partyDetails.getEmail();
 
-        Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
         List<Document>  allSelectedDocuments = getExternalMessageSelectedDocumentList(caseData, authorization, message);
-        Map<String, Object> dynamicDataForEmail = getDynamicDataForEmail(caseData, partyDetails, allSelectedDocuments);
+        Map<String, Object> dynamicDataForEmail = getDynamicDataForEmail(caseData, partyDetails, message, allSelectedDocuments);
 
         sendgridService.sendEmailUsingTemplateWithAttachments(
             SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY,
@@ -1848,8 +1940,8 @@ public class SendAndReplyService {
                 .build());
     }
 
-    private void sendEmailNotificationToCafcassAndOtherParties(CaseData caseData, List<String> emails, String authorization) {
-        Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
+    private void sendEmailNotificationToCafcassAndOtherParties(CaseData caseData, Message message, List<String> emails,
+                                                               String authorization) {
         List<Document>  allSelectedDocuments = getExternalMessageSelectedDocumentList(caseData, authorization, message);
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         setMessageDataForEmail(caseData,message,allSelectedDocuments,dynamicData);
@@ -1877,22 +1969,33 @@ public class SendAndReplyService {
     }
 
     private List<Document> getExternalMessageSelectedDocumentList(CaseData caseData, String authorization, Message message) {
-        List<Document> selectedDocList = new ArrayList<>();
+        Optional<Message> savedMessageWithAttachments = getSavedExternalMessageWithAttachments(caseData, message);
+        return savedMessageWithAttachments
+            .map(Message::getExternalMessageAttachDocs)
+            .orElseGet(() -> getExternalMessageAttachedDocs(caseData, message, authorization)).stream()
+            .map(Element::getValue)
+            .filter(Objects::nonNull)
+            .toList();
+    }
 
-        Document selectedDoc = getSelectedDocument(authorization, message.getSubmittedDocumentsList());
-        if (null != selectedDoc) {
-            selectedDocList.add(selectedDoc);
+    private Optional<Message> getSavedExternalMessageWithAttachments(CaseData caseData, Message message) {
+        if (caseData.getSendOrReplyMessage() == null) {
+            return Optional.empty();
+        }
+        if (StringUtils.isBlank(message.getMessageIdentifier())) {
+            log.warn(
+                "Cannot resolve saved external message attachments because messageIdentifier is missing for caseReference={}",
+                caseData.getId()
+            );
+            return Optional.empty();
         }
 
-        List<Element<Document>> externalMessageDocList = getAttachedDocsForExternalMessage(
-            authorization,
-            caseData.getSendOrReplyMessage().getExternalMessageAttachDocsList()
-        );
-        if (null != externalMessageDocList && !externalMessageDocList.isEmpty()) {
-            externalMessageDocList.forEach(element -> selectedDocList.add(element.getValue()));
-
-        }
-        return selectedDocList;
+        return nullSafeCollection(caseData.getSendOrReplyMessage().getMessages()).stream()
+            .map(Element::getValue)
+            .filter(savedMessage -> InternalExternalMessageEnum.EXTERNAL.equals(savedMessage.getInternalOrExternalMessage()))
+            .filter(savedMessage -> isNotEmpty(savedMessage.getExternalMessageAttachDocs()))
+            .filter(savedMessage -> Objects.equals(savedMessage.getMessageIdentifier(), message.getMessageIdentifier()))
+            .max(Comparator.comparing(Message::getUpdatedTime, Comparator.nullsFirst(Comparator.naturalOrder())));
     }
 
     private Document getMessageDocument(String authorization, CaseData caseData, Message message,
@@ -1921,7 +2024,7 @@ public class SendAndReplyService {
     private Document getCoverSheet(String authorization, CaseData caseData, Address address, String name, String fileName) {
 
         try {
-            return DocumentUtils.toCoverSheetDocument(
+            return DocumentUtils.toDocumentWithFilename(
                 getCoverLetterGeneratedDocInfo(caseData, authorization, address, name), fileName);
         } catch (Exception e) {
             log.error("Failed to generate cover sheet {}", e);
@@ -2050,8 +2153,8 @@ public class SendAndReplyService {
         return applicantsRespondentInCase;
     }
 
-    private Map<String, Object> getDynamicDataForEmail(CaseData caseData, PartyDetails partyDetails, List<Document>  allSelectedDocuments) {
-        Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
+    private Map<String, Object> getDynamicDataForEmail(CaseData caseData, PartyDetails partyDetails, Message message,
+                                                       List<Document> allSelectedDocuments) {
         // get selected Document size
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         String receiverFullName = getReceiverFullName(partyDetails);
@@ -2106,9 +2209,11 @@ public class SendAndReplyService {
     }
 
     private boolean doesThisMessageCloseAwpTasks(CaseData caseData) {
-        DynamicList applicationsList = caseData.getSendOrReplyMessage().getSendMessageObject().getApplicationsList();
-        return nonNull(applicationsList) && applicationsList.getListItems().size() == 1 && nonNull(
-            applicationsList.getValue()) && StringUtils.isNotEmpty(applicationsList.getValue().getCode());
+        Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
+        return nonNull(message) && nonNull(message.getApplicationsList())
+            && message.getApplicationsList().getListItems().size() == 1 && nonNull(
+            message.getApplicationsList().getValue())
+            && StringUtils.isNotEmpty(message.getApplicationsList().getValue().getCode());
     }
 
     public boolean atLeastOnePartySelectedForExternalMessage(Message message) {
@@ -2119,15 +2224,27 @@ public class SendAndReplyService {
 
     public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmitted(CallbackRequest callbackRequest, String authorisation) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        return sendAndReplySubmittedForChoice(caseData, caseData.getChooseSendOrReply().name(), authorisation);
 
-        if (REPLY.equals(caseData.getChooseSendOrReply())
+    }
+
+    public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedTask(CallbackRequest callbackRequest,
+                                                                               String authorisation) {
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        return sendAndReplySubmittedForChoice(caseData, REPLY.name(), authorisation);
+    }
+
+    private ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedForChoice(CaseData caseData,
+            String sendOrReplyChoice, String authorisation) {
+        log.info("sendOrReplyChoice={} for case={}", sendOrReplyChoice, caseData.getId());
+        if (REPLY.name().equals(sendOrReplyChoice)
             && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
             return ok(SubmittedCallbackResponse.builder().confirmationBody(
                 REPLY_AND_CLOSE_MESSAGE
             ).build());
         }
 
-        if (SEND.equals(caseData.getChooseSendOrReply())) {
+        if (SEND.name().equals(sendOrReplyChoice)) {
             sendNotificationToExternalParties(
                 caseData,
                 authorisation
@@ -2145,19 +2262,6 @@ public class SendAndReplyService {
         }
 
         closeAwPTask(caseData);
-
-        return ok(SubmittedCallbackResponse.builder().build());
-    }
-
-    public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedTask(CallbackRequest callbackRequest, String authorisation) {
-        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        String optionSendOrReply = caseData.getOptionSendOrReply();
-        if ((REPLY.name().equalsIgnoreCase(optionSendOrReply) || REPLY.equals(caseData.getChooseSendOrReply()))
-            && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
-            return ok(SubmittedCallbackResponse.builder().confirmationBody(
-                REPLY_AND_CLOSE_MESSAGE
-            ).build());
-        }
 
         return ok(SubmittedCallbackResponse.builder().build());
     }
@@ -2190,8 +2294,8 @@ public class SendAndReplyService {
                 caseData.getMessageIdentifier()
             );
             caseData.getSendOrReplyMessage().setMessageReplyDynamicList(dynamicMessagesListAssociatedWithTask);
-        } else {
-            caseData.setOptionSendOrReply(EMPTY_VALUE);
+        } else if (SEND.name().equalsIgnoreCase(caseData.getOptionSendOrReply())) {
+            caseData.setChooseSendOrReply(SEND);
         }
     }
 }

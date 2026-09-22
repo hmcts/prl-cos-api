@@ -130,13 +130,16 @@ public class CaseUtils {
 
     public static CaseData getCaseData(CaseDetails caseDetails, ObjectMapper objectMapper) {
         State state = State.tryFromValue(caseDetails.getState()).orElse(null);
+
+        if (caseDetails.getData() != null) {
+            log.info("getCaseData case id: {}, tasklistversion: {}", caseDetails.getId(), caseDetails.getData().get("taskListVersion"));
+        }
         CaseData.CaseDataBuilder caseDataBuilder = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
             .toBuilder()
             .id(caseDetails.getId())
             .state(state)
             .createdDate(caseDetails.getCreatedDate())
             .lastModifiedDate(caseDetails.getLastModified());
-
         if ((State.SUBMITTED_PAID.equals(state)) && caseDataBuilder.build().getDateSubmitted() == null) {
             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON));
             caseDataBuilder.dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
@@ -912,9 +915,9 @@ public class CaseUtils {
     public static WaMapper getWaMapper(String clientContext) {
         if (clientContext != null) {
             log.info("clientContext is present");
-            byte[] decodedBytes = Base64.getDecoder().decode(clientContext);
-            String decodedString = new String(decodedBytes);
             try {
+                byte[] decodedBytes = Base64.getDecoder().decode(clientContext);
+                String decodedString = new String(decodedBytes);
                 return new ObjectMapper().readValue(decodedString, WaMapper.class);
             } catch (Exception ex) {
                 log.error("Exception while parsing the Client-Context {}", ex.getMessage());

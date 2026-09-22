@@ -128,6 +128,12 @@ public enum BundlingDocGroupEnum {
     @JsonProperty("childImpactReport2")
     childImpactReport2("childImpactReport2", "childImpactReport2"),
 
+    @JsonProperty("enforcementOrderSuitabilityReport")
+    enforcementOrderSuitabilityReport("enforcementOrderSuitabilityReport", "enforcementOrderSuitabilityReport"),
+
+    @JsonProperty("parentalOrderReporterReport")
+    parentalOrderReporterReport("parentalOrderReporterReport", "parentalOrderReporterReport"),
+
     @JsonProperty("section7Report")
     section7Report("section7Report", "section7Report"),
 

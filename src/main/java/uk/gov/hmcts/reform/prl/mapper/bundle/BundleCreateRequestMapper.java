@@ -44,6 +44,7 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT2;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.DNA_REPORTS_EXPERT_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.DRUG_AND_ALCOHOL_TEST;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ENFORCEMENT_ORDER_SUITABILITY_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.GUARDIAN_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.LA_OTHER_DOCS;
@@ -53,6 +54,7 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ORDERS_FROM_OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.OTHER_DOCS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.OTHER_WITNESS_STATEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.PARENTAL_ORDER_REPORTER_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.POLICE_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.POSITION_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION;
@@ -371,9 +373,9 @@ public class BundleCreateRequestMapper implements IBundleCreateRequestMapper {
             OrderDetails orderDetails = orderDetailsElement.getValue();
             Document document = orderDetails.getOrderDocument();
             // FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
-            addOrderDocument(orders, document);
+            addOrderDocument(orders, document, orderDetails);
             Document welshDocument = orderDetails.getOrderDocumentWelsh();
-            addOrderDocument(orders, welshDocument);
+            addOrderDocument(orders, welshDocument, orderDetails);
         });
         return ElementUtils.wrapElements(orders);
     }
@@ -384,7 +386,7 @@ public class BundleCreateRequestMapper implements IBundleCreateRequestMapper {
      * @param orders   list of BundlingRequestDocument including order documents to be added to the list
      * @param document Order Document to be added to the list
      */
-    void addOrderDocument(List<BundlingRequestDocument> orders, Document document) {
+    void addOrderDocument(List<BundlingRequestDocument> orders, Document document, OrderDetails orderDetails) {
         if (document != null
             && document.getDocumentFileName() != null
             && document.getDocumentUrl() != null
@@ -393,7 +395,8 @@ public class BundleCreateRequestMapper implements IBundleCreateRequestMapper {
             && !document.getDocumentBinaryUrl().endsWith(REDACTED_DOCUMENT_URL_BINARY)
             && !(document.getDocumentFileName()).equalsIgnoreCase(REDACTED_DOCUMENT_FILE_NAME)) {
             orders.add(BundlingRequestDocument.builder().documentGroup(BundlingDocGroupEnum.ordersSubmittedWithApplication)
-                           .documentFileName(document.getDocumentFileName()).documentLink(document).build());
+                           .documentFileName(BundleOrderDocumentNameHelper.getBundleIndexOrderTitle(document, orderDetails))
+                           .documentLink(document).build());
         }
     }
 
@@ -625,11 +628,23 @@ public class BundleCreateRequestMapper implements IBundleCreateRequestMapper {
                 .documentGroup(BundlingDocGroupEnum.cafcassSection37Report).build() : null
         );
         bundleMap.put(
-            OTHER_DOCS, Objects.nonNull(doc.getOtherDocsDocument()) ? BundlingRequestDocument.builder()
-                .documentLink(doc.getOtherDocsDocument())
-                .documentFileName(doc.getOtherDocsDocument().getDocumentFileName())
-                .documentGroup(BundlingDocGroupEnum.cafcassOtherDocuments).build() : null
+            ENFORCEMENT_ORDER_SUITABILITY_REPORT,
+            Objects.nonNull(doc.getEnforcementOrderSuitabilityReportDocument()) ? BundlingRequestDocument.builder()
+                .documentLink(doc.getEnforcementOrderSuitabilityReportDocument())
+                .documentFileName(doc.getEnforcementOrderSuitabilityReportDocument().getDocumentFileName())
+                .documentGroup(BundlingDocGroupEnum.enforcementOrderSuitabilityReport).build() : null
         );
+        bundleMap.put(
+            PARENTAL_ORDER_REPORTER_REPORT,
+            Objects.nonNull(doc.getParentalOrderReporterReportDocument()) ? BundlingRequestDocument.builder()
+                .documentLink(doc.getParentalOrderReporterReportDocument())
+                .documentFileName(doc.getParentalOrderReporterReportDocument().getDocumentFileName())
+                .documentGroup(BundlingDocGroupEnum.parentalOrderReporterReport).build() : null
+        );
+        bundleMap.put(OTHER_DOCS, Objects.nonNull(doc.getOtherDocsDocument()) ? BundlingRequestDocument.builder()
+            .documentLink(doc.getOtherDocsDocument())
+            .documentFileName(doc.getOtherDocsDocument().getDocumentFileName())
+            .documentGroup(BundlingDocGroupEnum.cafcassOtherDocuments).build() : null);
 
     }
 
