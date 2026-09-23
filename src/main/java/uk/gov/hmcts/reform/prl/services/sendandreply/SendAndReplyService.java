@@ -2150,6 +2150,7 @@ public class SendAndReplyService {
     public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmitted(CallbackRequest callbackRequest, String authorisation) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
+        log.info("ChooseSendOrReply={}", caseData.getChooseSendOrReply());
         if (REPLY.equals(caseData.getChooseSendOrReply())
             && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
             return ok(SubmittedCallbackResponse.builder().confirmationBody(
