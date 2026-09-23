@@ -951,7 +951,6 @@ public class NoticeOfChangePartiesServiceTest {
             .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
             .build();
 
-
         CaseData caseDataC100 = CaseData.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
@@ -961,20 +960,25 @@ public class NoticeOfChangePartiesServiceTest {
                                .caApplicantSolicitor1ExternalFlags(Flags.builder().partyName("legacy").build())
                                .caApplicantSolicitor1InternalFlags(Flags.builder().partyName("legacy").build())
                                .build())
-            .solStopRepChooseParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
-                dynamicListElement)).build())
+            .solStopRepChooseParties(DynamicMultiSelectList.builder()
+                                         .value(List.of(dynamicListElement))
+                                         .listItems(List.of(dynamicListElement))
+                                         .build())
             .build();
 
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseDataC100);
         FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
-        findUserCaseRolesResponse.setCaseUsers(List.of(CaseUser.builder().caseId("12345678").caseRole(
-            "[C100APPLICANTSOLICITOR1]").build()));
+        findUserCaseRolesResponse.setCaseUsers(List.of(CaseUser.builder()
+                                                           .caseId("12345678")
+                                                           .caseRole("[APPLICANTSOLICITOR]") // legacy role from CCD
+                                                           .build()));
         when(ccdDataStoreService.findUserCaseRoles(anyString(), anyString()))
             .thenReturn(findUserCaseRolesResponse);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .forename("solicitorResp")
                                                                      .surname("test")
-                                                                     .email("test@hmcts.net").build());
+                                                                     .email("test@hmcts.net")
+                                                                     .build());
         when(time.now()).thenReturn(LocalDateTime.now());
         when(tokenGenerator.generate()).thenReturn("");
         when(systemUserService.getSysUserToken()).thenReturn("");
@@ -990,10 +994,26 @@ public class NoticeOfChangePartiesServiceTest {
             .caseDetails(caseDetails)
             .caseDetailsBefore(caseDetails)
             .build();
+
         noticeOfChangePartiesService.aboutToSubmitStopRepresenting("testAuth", callbackRequest);
+
         verify(assignCaseAccessClient, times(1)).applyDecision(any(), any(), any());
-        verify(caseAssignmentService).removeAmBarristerCaseRole(isA(CaseData.class),
-                                                                ArgumentMatchers.<Map<Optional<SolicitorRole>, Element<PartyDetails>>>any());
+        verify(caseAssignmentService).removeAmBarristerCaseRole(
+            isA(CaseData.class),
+            ArgumentMatchers.<Map<Optional<SolicitorRole>, Element<PartyDetails>>>any()
+        );
+
+        ArgumentCaptor<DecisionRequest> decisionCaptor = ArgumentCaptor.forClass(DecisionRequest.class);
+        verify(assignCaseAccessClient, times(1)).applyDecision(any(), any(), decisionCaptor.capture());
+
+        DecisionRequest sent = decisionCaptor.getValue();
+        Object corfObj = sent.getCaseDetails().getData().get("changeOrganisationRequestField");
+
+        assertThat(corfObj).isInstanceOf(ChangeOrganisationRequest.class);
+        ChangeOrganisationRequest corf = (ChangeOrganisationRequest) corfObj;
+
+        assertThat(corf.getCaseRoleId().getValue().getCode()).isEqualTo("[APPLICANTSOLICITOR]");
+        assertThat(corf.getCaseRoleId().getValue().getCode()).isNotEqualTo("[C100APPLICANTSOLICITOR1]");
     }
 
     @Test
