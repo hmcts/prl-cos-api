@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.clients;
 
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.cloud.openfeign.FeignClientProperties;
 import org.springframework.http.ResponseEntity;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +24,7 @@ import java.util.concurrent.TimeoutException;
 @FeignClient(
     name = "hmc-hearing-feign-api",
     url = "${hearing_component.api.feign-url}",
-    configuration = FeignClientProperties.FeignClientConfiguration.class
+    configuration = TempHmcHearingFeignConfig.class
 )
 public interface HmcHearingApiClient {
 

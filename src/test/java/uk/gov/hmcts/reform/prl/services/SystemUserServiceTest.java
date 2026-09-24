@@ -9,6 +9,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.OAuth2Configuration;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
+import uk.gov.hmcts.reform.prl.config.HmcUserConfiguration;
 import uk.gov.hmcts.reform.prl.config.SystemUserConfiguration;
 
 import java.util.UUID;
@@ -31,13 +32,16 @@ public class SystemUserServiceTest {
     @Mock
     SystemUserConfiguration userConfig;
 
+    @Mock
+    HmcUserConfiguration hmcUserConfig;
+
     SystemUserService systemUserService;
 
     String token = "";
 
     @Before
     public void setUp() {
-        systemUserService = new SystemUserService(auth, userConfig, idamClient);
+        systemUserService = new SystemUserService(auth, userConfig, idamClient, hmcUserConfig );
         token = RandomStringUtils.randomAlphanumeric(10);
     }
 

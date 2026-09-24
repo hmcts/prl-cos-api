@@ -105,3 +105,11 @@ java:
           alias: SEAL_AUDIT_EMAIL_TO
         - name: docmosis-api-key
           alias: DOCMOSIS_ACCESS_KEY
+        - name: hmc_user_name
+          alias: HMC_USER_NAME
+        - name: hmc_user_password
+          alias: HMC_USER_PASSWORD
+        - name: ref_user_name
+          alias: REF_USER_NAME
+        - name: hmc-client-secret
+          alias: HMC_CLIENT_SECRET

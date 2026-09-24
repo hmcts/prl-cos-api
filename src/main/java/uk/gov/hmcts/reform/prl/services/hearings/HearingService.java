@@ -11,8 +11,10 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
 import uk.gov.hmcts.reform.prl.clients.HmcHearingApiClient;
 import uk.gov.hmcts.reform.prl.exception.HearingException;
@@ -88,10 +90,29 @@ public class HearingService {
 
         Hearings hearings = null;
         try {
-            final String hmcUserToken = systemUserService.getSysUserToken();
+
+            final String hmcUserToken = systemUserService.getHmcUserToken();
+            String s2sToken = authTokenGenerator.generate();
+
+            log.info(
+                "Calling HMC getHearingDetails - "
+                    + "caseReferenceNumber={}, "
+                    + "hmcUserToken={}, "
+                    + "s2sToken={}, "
+                    + "hmctsDeploymentId={}, "
+                    + "dataStoreUrl={}, "
+                    + "roleAssignmentUrl={}",
+                caseReferenceNumber,
+                hmcUserToken,
+                s2sToken,
+                hmctsDeploymentId,
+                dataStoreUrl,
+                roleAssignmentUrl
+            );
+            //todo remove those logs del!
             hearings = hmcHearingApiClient.getHearingDetails(
                 hmcUserToken,
-                authTokenGenerator.generate(),
+                s2sToken,
                 hmctsDeploymentId,
                 dataStoreUrl,
                 roleAssignmentUrl,
@@ -130,7 +151,26 @@ public class HearingService {
             return hearings;
 
         } catch (FeignException e) {
-            throw new HearingException("Error in getting hearings for case " + caseReferenceNumber,  e);
+            String body = e.contentUTF8();
+            boolean caseNotFound =
+                body != null && body.toLowerCase().contains("case could not be found");
+
+            if (caseNotFound) {
+                log.info(
+                    "HMC reports no hearings for case {} (status={}). Returning empty hearings.",
+                    caseReferenceNumber, e.status()
+                );
+                return Hearings.hearingsWith()
+                    .caseRef(caseReferenceNumber)
+                    .caseHearings(Collections.emptyList())
+                    .build();
+            }
+
+            log.error(
+                "HMC get hearings failed for case {} - status={}, body={}",
+                caseReferenceNumber, e.status(), body, e
+            );
+            throw new HearingException("Error in getting hearings for case " + caseReferenceNumber, e);
         }
     }
 

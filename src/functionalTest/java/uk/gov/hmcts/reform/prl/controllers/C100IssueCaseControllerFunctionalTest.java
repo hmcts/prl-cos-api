@@ -7,9 +7,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
+import org.springframework.context.annotation.Bean;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
@@ -22,7 +28,13 @@ import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunction
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
+@org.springframework.test.context.TestPropertySource(properties = {
+    "hearing_component.api.feign-url=http://localhost:4044"
+})
 public class C100IssueCaseControllerFunctionalTest {
+
+    @MockBean
+    private RefDataUserService refDataUserService;
 
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;

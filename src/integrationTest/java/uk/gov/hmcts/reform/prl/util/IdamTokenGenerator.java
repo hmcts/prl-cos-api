@@ -26,6 +26,12 @@ public class IdamTokenGenerator {
     @Autowired
     private IdamClient idamClient;
 
+    @Value("${idam.hearingCftUserAuth.username}")
+    private String hearingCftUserName;
+
+    @Value("${idam.hearingCftUserAuth.password}")
+    private String hearingCftPassword;
+
     public String generateIdamTokenForSolicitor() {
         return idamClient.getAccessToken(solicitorUsername, solicitorPassword);
     }
@@ -41,4 +47,5 @@ public class IdamTokenGenerator {
     public UserDetails getUserDetailsFor(final String token) {
         return idamClient.getUserDetails(token);
     }
+
 }

@@ -432,7 +432,12 @@ idam:
   admin:
     username: ${IDAM_COURT_ADMIN_USERNAME:xxxxxx}
     password: ${IDAM_COURT_ADMIN_PASSWORD:xxxxxx}
-
+  hmcCftUserAuth:
+    username: ${HMC_USER_NAME:dummy}
+    password: ${HMC_USER_PASSWORD:dummy}
+  refDataUserAuth:
+    username: ${REF_USER_NAME:dummy}
+    password: ${HMC_USER_PASSWORD:dummy}
 aca:
   api:
     url: ${ACA_SERVICE_API_BASEURL:http://localhost:4454}
@@ -900,3 +905,8 @@ docmosis:
 http:
   connect-timeout: 60s
   read-timeout: 60s
+
+fis:
+  s2s:
+    microservice: fis_hmc_api
+    secret: ${FIS_IDAM_S2S_AUTH_TOTP_SECRET}
