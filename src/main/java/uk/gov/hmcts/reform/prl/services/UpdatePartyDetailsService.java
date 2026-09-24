@@ -172,10 +172,9 @@ public class UpdatePartyDetailsService {
         updatedCaseData.putAll(caseSummaryTabService.updateTab(caseData));
 
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-            updatedCaseData.putAll(noticeOfChangePartiesService.generate(
-                caseData, DARESPONDENT, updatedCaseData));
-            updatedCaseData.putAll(noticeOfChangePartiesService.generate(
-                caseData, DAAPPLICANT, updatedCaseData));
+            Map<String, Object> nocUpdates = noticeOfChangePartiesService.syncNocAnswerFields(caseData,
+                                                                                              List.of(DARESPONDENT, DAAPPLICANT));
+            updatedCaseData.putAll(nocUpdates);
 
             PartyDetails fl401Applicant = caseData
                 .getApplicantsFL401();

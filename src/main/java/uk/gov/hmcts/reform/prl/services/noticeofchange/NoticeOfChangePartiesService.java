@@ -178,6 +178,12 @@ public class NoticeOfChangePartiesService {
             }
         }
 
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            generateRequiredFlOrgPoliciesForNoc(updatedCaseData);
+        } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            generateRequiredCaOrgPoliciesForNoc(updatedCaseData);
+        }
+
         return updatedCaseData;
     }
 
@@ -261,6 +267,21 @@ public class NoticeOfChangePartiesService {
     private void generateRequiredCaOrgPoliciesForNoc(Map<String, Object> data) {
         List<SolicitorRole> solicitorRoles = new ArrayList<>(SolicitorRole.matchingRoles(CAAPPLICANT));
         solicitorRoles.addAll(SolicitorRole.matchingRoles(CARESPONDENT));
+        for (SolicitorRole solicitorRole : solicitorRoles) {
+            OrganisationPolicy organisationPolicy = policyConverter.caGenerate(
+                solicitorRole, Optional.empty());
+            data.put(
+                String.format(
+                    solicitorRole.getRepresenting().getPolicyFieldTemplate(),
+                    (solicitorRole.getIndex() + 1)
+                ), organisationPolicy
+            );
+        }
+    }
+
+    private void generateRequiredFlOrgPoliciesForNoc(Map<String, Object> data) {
+        List<SolicitorRole> solicitorRoles = new ArrayList<>(SolicitorRole.matchingRoles(DAAPPLICANT));
+        solicitorRoles.addAll(SolicitorRole.matchingRoles(DARESPONDENT));
         for (SolicitorRole solicitorRole : solicitorRoles) {
             OrganisationPolicy organisationPolicy = policyConverter.caGenerate(
                 solicitorRole, Optional.empty());

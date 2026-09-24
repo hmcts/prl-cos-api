@@ -2542,7 +2542,7 @@ class UpdatePartyDetailsServiceTest {
         when(confidentialDetailsMapper.mapConfidentialData(any(CaseData.class), Mockito.anyBoolean())).thenReturn(caseData);
         when(confidentialityTabService.updateConfidentialityDetails(caseData)).thenReturn(Map.of());
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(Map.of());
-        when(noticeOfChangePartiesService.generate(any(CaseData.class), any(), anyMap())).thenReturn(Map.of());
+        when(noticeOfChangePartiesService.syncNocAnswerFields(any(), any())).thenReturn(Map.of());
         when(documentGenService.createUpdatedCaseDataWithDocuments(anyString(), any(CaseData.class))).thenReturn(Map.of());
 
         Map<String, Object> updatedCaseData = updatePartyDetailsService.updateApplicantRespondentAndChildData(
