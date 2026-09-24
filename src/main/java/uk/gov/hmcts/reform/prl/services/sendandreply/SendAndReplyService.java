@@ -2235,7 +2235,7 @@ public class SendAndReplyService {
         return sendAndReplySubmittedForChoice(caseData, REPLY, authorisation);
     }
 
-    private ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedForChoice(CaseData caseData,
+    public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedForChoice(CaseData caseData,
             SendOrReply sendOrReplyChoice, String authorisation) {
         log.info("sendOrReplyChoice={} for case={}", sendOrReplyChoice, caseData.getId());
         if (REPLY.equals(sendOrReplyChoice)
