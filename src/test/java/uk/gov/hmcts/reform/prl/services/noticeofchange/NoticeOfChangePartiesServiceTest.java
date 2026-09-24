@@ -264,7 +264,7 @@ public class NoticeOfChangePartiesServiceTest {
         when(partiesConverter.generateCaForSubmission(wrappedRespondents))
             .thenReturn(noticeOfChangeParties);
 
-        Map<String, Object> test = noticeOfChangePartiesService.syncNocAnswerFields(caseData, role.getRepresenting());
+        Map<String, Object> test = noticeOfChangePartiesService.syncNocAnswerFields(caseData, List.of(role.getRepresenting()));
 
         assertTrue(test.containsKey("caRespondent1Policy"));
 
@@ -280,7 +280,8 @@ public class NoticeOfChangePartiesServiceTest {
         when(partiesConverter.generateDaForSubmission(partyDetails))
             .thenReturn(noticeOfChangeParties);
 
-        Map<String, Object> test = noticeOfChangePartiesService.syncNocAnswerFields(caseDataForDa, roleForDa.getRepresenting());
+        Map<String, Object> test = noticeOfChangePartiesService.syncNocAnswerFields(caseDataForDa,
+                                                                                    List.of(roleForDa.getRepresenting()));
 
         assertTrue(test.containsKey("daRespondentPolicy"));
 
@@ -314,16 +315,8 @@ public class NoticeOfChangePartiesServiceTest {
 
     @Test
     public void shouldSyncC100ApplicantNocAnswerFieldsAndClearUnusedFields() {
-        Element<PartyDetails> applicant1 = element(UUID.randomUUID(), PartyDetails.builder()
-            .firstName("Jane")
-            .lastName("Smith")
-            .build());
-
-        Element<PartyDetails> applicant2 = element(UUID.randomUUID(), PartyDetails.builder()
-            .firstName("Alex")
-            .lastName("Brown")
-            .build());
-
+        Element<PartyDetails> applicant1 = buildPartyDetails("Jane", "Smith");
+        Element<PartyDetails> applicant2 = buildPartyDetails("Alex", "Brown");
         NoticeOfChangeParties applicant1Answer = NoticeOfChangeParties.builder().build();
         NoticeOfChangeParties applicant2Answer = NoticeOfChangeParties.builder().build();
 
@@ -335,7 +328,7 @@ public class NoticeOfChangePartiesServiceTest {
         when(partiesConverter.generateCaForSubmission(applicant1)).thenReturn(applicant1Answer);
         when(partiesConverter.generateCaForSubmission(applicant2)).thenReturn(applicant2Answer);
 
-        Map<String, Object> result = noticeOfChangePartiesService.syncNocAnswerFields(caseData, CAAPPLICANT);
+        Map<String, Object> result = noticeOfChangePartiesService.syncNocAnswerFields(caseData, List.of(CAAPPLICANT));
 
         assertThat(result.get("caApplicant1")).isSameAs(applicant1Answer);
         assertThat(result.get("caApplicant2")).isSameAs(applicant2Answer);
@@ -346,16 +339,8 @@ public class NoticeOfChangePartiesServiceTest {
 
     @Test
     public void shouldSyncC100RespondentNocAnswerFieldsAndClearUnusedFields() {
-        Element<PartyDetails> respondent1 = element(UUID.randomUUID(), PartyDetails.builder()
-            .firstName("Bob")
-            .lastName("Jones")
-            .build());
-
-        Element<PartyDetails> respondent2 = element(UUID.randomUUID(), PartyDetails.builder()
-            .firstName("Charlie")
-            .lastName("Green")
-            .build());
-
+        Element<PartyDetails> respondent1 = buildPartyDetails("Bob", "Jones");
+        Element<PartyDetails> respondent2 = buildPartyDetails("Charlie", "Green");
         NoticeOfChangeParties respondent1Answer = NoticeOfChangeParties.builder().build();
         NoticeOfChangeParties respondent2Answer = NoticeOfChangeParties.builder().build();
 
@@ -367,7 +352,7 @@ public class NoticeOfChangePartiesServiceTest {
         when(partiesConverter.generateCaForSubmission(respondent1)).thenReturn(respondent1Answer);
         when(partiesConverter.generateCaForSubmission(respondent2)).thenReturn(respondent2Answer);
 
-        Map<String, Object> result = noticeOfChangePartiesService.syncNocAnswerFields(caseData, CARESPONDENT);
+        Map<String, Object> result = noticeOfChangePartiesService.syncNocAnswerFields(caseData, List.of(CARESPONDENT));
 
         assertThat(result.get("caRespondent1")).isSameAs(respondent1Answer);
         assertThat(result.get("caRespondent2")).isSameAs(respondent2Answer);
@@ -383,13 +368,55 @@ public class NoticeOfChangePartiesServiceTest {
             .applicants(Collections.emptyList())
             .build();
 
-        Map<String, Object> result = noticeOfChangePartiesService.syncNocAnswerFields(caseData, CAAPPLICANT);
+        Map<String, Object> result = noticeOfChangePartiesService.syncNocAnswerFields(caseData, List.of(CAAPPLICANT));
 
         assertThat(result.get("caApplicant1")).isNull();
         assertThat(result.get("caApplicant2")).isNull();
         assertThat(result.get("caApplicant3")).isNull();
         assertThat(result.get("caApplicant4")).isNull();
         assertThat(result.get("caApplicant5")).isNull();
+    }
+
+    @Test
+    public void shouldSyncApplicantAndRespondentOrgPolicies() {
+        Element<PartyDetails> applicant1 = buildPartyDetails("Jane", "Smith", "A1");
+        Element<PartyDetails> applicant2 = buildPartyDetails("Alex", "Brown");
+        Element<PartyDetails> respondent1 = buildPartyDetails("Bob", "Jones", "R1");
+        Element<PartyDetails> respondent2 = buildPartyDetails("Charlie", "Green");
+
+        when(policyConverter.caGenerate(any(), any())).thenCallRealMethod();
+        when(partiesConverter.generateCaForSubmission(any())).thenCallRealMethod();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(applicant1, applicant2))
+            .respondents(List.of(respondent1, respondent2))
+            .build();
+
+        Map<String, Object> result = noticeOfChangePartiesService.syncNocAnswerFields(caseData,
+                                                                                      List.of(CARESPONDENT, CAAPPLICANT));
+
+        verifyOrganisationId(result, "caApplicant1Policy", SolicitorRole.C100APPLICANTSOLICITOR1, "A1");
+        verifyOrganisationId(result, "caApplicant2Policy", SolicitorRole.C100APPLICANTSOLICITOR2, null);
+        verifyOrganisationId(result, "caApplicant3Policy", SolicitorRole.C100APPLICANTSOLICITOR3, null);
+        verifyOrganisationId(result, "caApplicant4Policy", SolicitorRole.C100APPLICANTSOLICITOR4, null);
+        verifyOrganisationId(result, "caApplicant5Policy", SolicitorRole.C100APPLICANTSOLICITOR5, null);
+        verifyOrganisationId(result, "caRespondent1Policy", SolicitorRole.C100RESPONDENTSOLICITOR1, "R1");
+        verifyOrganisationId(result, "caRespondent2Policy", SolicitorRole.C100RESPONDENTSOLICITOR2, null);
+        verifyOrganisationId(result, "caRespondent3Policy", SolicitorRole.C100RESPONDENTSOLICITOR3, null);
+        verifyOrganisationId(result, "caRespondent4Policy", SolicitorRole.C100RESPONDENTSOLICITOR4, null);
+        verifyOrganisationId(result, "caRespondent5Policy", SolicitorRole.C100RESPONDENTSOLICITOR5, null);
+
+        verifyNoticeOfChangeParties(result, "caApplicant1", "Jane", "Smith");
+        verifyNoticeOfChangeParties(result, "caApplicant2", "Alex", "Brown");
+        assertThat(result.get("caApplicant3")).isNull();
+        assertThat(result.get("caApplicant4")).isNull();
+        assertThat(result.get("caApplicant5")).isNull();
+        verifyNoticeOfChangeParties(result, "caRespondent1", "Bob", "Jones");
+        verifyNoticeOfChangeParties(result, "caRespondent2", "Charlie", "Green");
+        assertThat(result.get("caRespondent3")).isNull();
+        assertThat(result.get("caRespondent4")).isNull();
+        assertThat(result.get("caRespondent5")).isNull();
     }
 
     @Test
@@ -580,7 +607,6 @@ public class NoticeOfChangePartiesServiceTest {
         );
         verify(eventPublisher, times(1)).publishEvent(any(NoticeOfChangeEvent.class));
     }
-
 
     @Test
     public void testNocRequestSubmittedForC100ApplicantSolicitor() {
@@ -2418,7 +2444,7 @@ public class NoticeOfChangePartiesServiceTest {
             .thenReturn(daRespondentPolicy);
 
         Map<String, Object> result = noticeOfChangePartiesService.generate(
-            c100CaseData, SolicitorRole.Representing.CARESPONDENT);
+            c100CaseData, CARESPONDENT);
 
         assertThat(result).containsEntry("daRespondentPolicy", daRespondentPolicy);
         assertThat(result).doesNotContainKey("applicantOrganisationPolicy");
@@ -2482,5 +2508,36 @@ public class NoticeOfChangePartiesServiceTest {
 
         assertThat(result).doesNotContainKey("caApplicant1Policy");
         assertThat(result).containsKey("caApplicant2Policy");
+    }
+
+    private Element<PartyDetails> buildPartyDetails(String firstName, String lastName) {
+        return element(UUID.randomUUID(), PartyDetails.builder()
+            .firstName(firstName)
+            .lastName(lastName)
+            .build());
+    }
+
+    private Element<PartyDetails> buildPartyDetails(String firstName, String lastName, String organisationId) {
+        return element(
+            UUID.randomUUID(), PartyDetails.builder()
+                .firstName(firstName)
+                .lastName(lastName)
+                .solicitorOrg(Organisation.builder()
+                                  .organisationID(organisationId)
+                                  .build())
+                .build()
+        );
+    }
+
+    private void verifyOrganisationId(Map<String, Object> caseData, String key, SolicitorRole expectedRole, String expectedOrganisationId) {
+        OrganisationPolicy orgPolicy = (OrganisationPolicy) caseData.get(key);
+        assertThat(orgPolicy.getOrgPolicyCaseAssignedRole()).isEqualTo(expectedRole.getCaseRoleLabel());
+        assertThat(orgPolicy.getOrganisation().getOrganisationID()).isEqualTo(expectedOrganisationId);
+    }
+
+    private void verifyNoticeOfChangeParties(Map<String, Object> caseData, String key, String expectedFirstName, String expectedLastName) {
+        NoticeOfChangeParties nocParties = (NoticeOfChangeParties) caseData.get(key);
+        assertThat(nocParties.getFirstName()).isEqualTo(expectedFirstName);
+        assertThat(nocParties.getLastName()).isEqualTo(expectedLastName);
     }
 }

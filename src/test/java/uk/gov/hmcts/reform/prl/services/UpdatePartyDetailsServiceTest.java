@@ -179,7 +179,7 @@ class UpdatePartyDetailsServiceTest {
             "field4", "value4",
             "field5", "value5"
         );
-        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CARESPONDENT)).thenReturn(nocMap);
+        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, List.of(CARESPONDENT, CAAPPLICANT))).thenReturn(nocMap);
         when(confidentialDetailsMapper.mapConfidentialData(
             Mockito.any(CaseData.class),
             Mockito.anyBoolean()
@@ -383,7 +383,7 @@ class UpdatePartyDetailsServiceTest {
             "field4", "value4",
             "field5", "value5"
         );
-        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CARESPONDENT)).thenReturn(nocMap);
+        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, List.of(CARESPONDENT, CAAPPLICANT))).thenReturn(nocMap);
         when(confidentialDetailsMapper.mapConfidentialData(
             Mockito.any(CaseData.class),
             Mockito.anyBoolean()
@@ -490,7 +490,7 @@ class UpdatePartyDetailsServiceTest {
             "field4", "value4",
             "field5", "value5"
         );
-        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CARESPONDENT)).thenReturn(nocMap);
+        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, List.of(CARESPONDENT, CAAPPLICANT))).thenReturn(nocMap);
         when(confidentialDetailsMapper.mapConfidentialData(
             Mockito.any(CaseData.class),
             Mockito.anyBoolean()
@@ -596,7 +596,7 @@ class UpdatePartyDetailsServiceTest {
             "field4", "value4",
             "field5", "value5"
         );
-        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CARESPONDENT)).thenReturn(nocMap);
+        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, List.of(CARESPONDENT, CAAPPLICANT))).thenReturn(nocMap);
         when(confidentialDetailsMapper.mapConfidentialData(
             Mockito.any(CaseData.class),
             Mockito.anyBoolean()
@@ -711,7 +711,7 @@ class UpdatePartyDetailsServiceTest {
             "field4", "value4",
             "field5", "value5"
         );
-        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CARESPONDENT)).thenReturn(nocMap);
+        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, List.of(CARESPONDENT, CAAPPLICANT))).thenReturn(nocMap);
         when(confidentialDetailsMapper.mapConfidentialData(
             Mockito.any(CaseData.class),
             Mockito.anyBoolean()
@@ -766,7 +766,7 @@ class UpdatePartyDetailsServiceTest {
 
         Map<String, Object> nocMap = Map.of("some", "stuff");
 
-        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CARESPONDENT)).thenReturn(nocMap);
+        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, List.of(CARESPONDENT, CAAPPLICANT))).thenReturn(nocMap);
         when(confidentialDetailsMapper.mapConfidentialData(
             Mockito.any(CaseData.class),
             Mockito.anyBoolean()
@@ -1083,7 +1083,7 @@ class UpdatePartyDetailsServiceTest {
         Map<String, Object> nocMap = Map.of("some", "stuff",
                                             "applicantOrganisationPolicy", organisationPolicy
         );
-        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CARESPONDENT)).thenReturn(nocMap);
+        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, List.of(CARESPONDENT, CAAPPLICANT))).thenReturn(nocMap);
         when(confidentialDetailsMapper.mapConfidentialData(
             Mockito.any(CaseData.class),
             Mockito.anyBoolean()
@@ -1152,7 +1152,7 @@ class UpdatePartyDetailsServiceTest {
             "field4", "value4",
             "field5", "value5"
         );
-        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CARESPONDENT)).thenReturn(nocMap);
+        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, List.of(CARESPONDENT, CAAPPLICANT))).thenReturn(nocMap);
         when(confidentialDetailsMapper.mapConfidentialData(
             Mockito.any(CaseData.class),
             Mockito.anyBoolean()
@@ -1228,7 +1228,7 @@ class UpdatePartyDetailsServiceTest {
         Map<String, Object> nocMap = Map.of("some", "stuff");
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, true);
-        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CARESPONDENT)).thenReturn(nocMap);
+        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, List.of(CARESPONDENT, CAAPPLICANT))).thenReturn(nocMap);
         when(confidentialDetailsMapper.mapConfidentialData(
             Mockito.any(CaseData.class),
             Mockito.anyBoolean()
@@ -1421,7 +1421,7 @@ class UpdatePartyDetailsServiceTest {
         Map<String, Object> nocMap = Map.of("some", "stuff");
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, true);
-        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CARESPONDENT)).thenReturn(nocMap);
+        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, List.of(CARESPONDENT, CAAPPLICANT))).thenReturn(nocMap);
         when(confidentialDetailsMapper.mapConfidentialData(
             Mockito.any(CaseData.class),
             Mockito.anyBoolean()
@@ -2970,8 +2970,8 @@ class UpdatePartyDetailsServiceTest {
         when(confidentialDetailsMapper.mapConfidentialData(caseData, false)).thenReturn(caseData);
         when(confidentialityTabService.updateConfidentialityDetails(caseData)).thenReturn(Map.of());
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(Map.of());
-        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CARESPONDENT)).thenReturn(Map.of());
-        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CAAPPLICANT)).thenReturn(Map.of());
+        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, List.of(CARESPONDENT, CAAPPLICANT)))
+            .thenReturn(Map.of());
 
         Map<String, Object> updatedCaseData = updatePartyDetailsService.updateApplicantRespondentAndChildData(
             callbackRequest,

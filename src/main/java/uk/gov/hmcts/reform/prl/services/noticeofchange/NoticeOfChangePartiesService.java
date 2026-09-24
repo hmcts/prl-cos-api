@@ -151,8 +151,10 @@ public class NoticeOfChangePartiesService {
         log.info("generating noc answers" + caseData.getCaseTypeOfApplication());
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             generateC100NocDetails(caseData, representing, strategy, data);
+            generateRequiredOrgPoliciesForNoc(representing, data);
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             generateFl401NocDetails(caseData, representing, strategy, data);
+            generateRequiredCaOrgPoliciesForNoc(data);
         }
         return data;
     }
@@ -164,11 +166,19 @@ public class NoticeOfChangePartiesService {
      * @param representing the solicitors representing litigants.
      * @return {@code Map<String, Object>} updated map with the noc answers.
      */
-    public Map<String, Object> syncNocAnswerFields(CaseData caseData, SolicitorRole.Representing representing) {
-        log.info("syncing noc answers");
-        Map<String, Object> nocAnswerUpdates = clearNocAnswerFields(caseData, representing);
-        nocAnswerUpdates.putAll(generate(caseData, representing));
-        return nocAnswerUpdates;
+    public Map<String, Object> syncNocAnswerFields(CaseData caseData, List<SolicitorRole.Representing> representing) {
+        Map<String, Object> updatedCaseData = new HashMap<>();
+        for (SolicitorRole.Representing solicitorRole : representing) {
+            updatedCaseData.putAll(clearNocAnswerFields(caseData, solicitorRole));
+
+            if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                generateC100NocDetails(caseData, solicitorRole, POPULATE, updatedCaseData);
+            } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                generateFl401NocDetails(caseData, solicitorRole, POPULATE, updatedCaseData);
+            }
+        }
+
+        return updatedCaseData;
     }
 
     /**
@@ -194,7 +204,7 @@ public class NoticeOfChangePartiesService {
         return nocAnswerUpdates;
     }
 
-    public void generateC100NocDetails(CaseData caseData, SolicitorRole.Representing representing,
+    private void generateC100NocDetails(CaseData caseData, SolicitorRole.Representing representing,
                                        NoticeOfChangeAnswersPopulationStrategy strategy, Map<String, Object> data) {
 
         log.info("generating noc answers for C100");
@@ -222,11 +232,9 @@ public class NoticeOfChangePartiesService {
                 }
             }
         }
-
-        generateRequiredOrgPoliciesForNoc(representing, data);
     }
 
-    public void generateFl401NocDetails(CaseData caseData, SolicitorRole.Representing representing,
+    private void generateFl401NocDetails(CaseData caseData, SolicitorRole.Representing representing,
                                         NoticeOfChangeAnswersPopulationStrategy strategy, Map<String, Object> data) {
         PartyDetails daElements = representing.getDaTarget().apply(caseData);
 
@@ -248,8 +256,6 @@ public class NoticeOfChangePartiesService {
                 );
             }
         }
-
-        generateRequiredCaOrgPoliciesForNoc(data);
     }
 
     private void generateRequiredCaOrgPoliciesForNoc(Map<String, Object> data) {
