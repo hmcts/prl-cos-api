@@ -101,6 +101,7 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.localauthority.RemoveLocalAuthoritySolicitorService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.services.validators.LegalAdviserChecker;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingTransactionRequestMapper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -673,6 +674,7 @@ public class ManageOrderService {
     private final RemoveLocalAuthoritySolicitorService removeLocalAuthoritySolicitorService;
     private final AllTabServiceImpl allTabService;
     private final TaskUtils taskUtils;
+    private final LegalAdviserChecker legalAdviserChecker;
 
     public boolean isSaveAsDraft(CaseData caseData) {
         return isNotEmpty(caseData.getServeOrderData()) && No.equals(
@@ -1382,6 +1384,10 @@ public class ManageOrderService {
     public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType, UserDetails userDetails) {
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
+        Optional<String> legalAdviserName = legalAdviserChecker.validateLegalAdviserName(
+            caseData.getManageOrders().getNameOfLaToReviewOrder(),
+            caseData.getManageOrders().getLegalAdviserToReviewOrder()
+        );
         return DraftOrder.builder().orderType(caseData.getCreateSelectOrderOptions())
             .c21OrderOptions(blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())
                                  ? caseData.getManageOrders().getC21OrderOptions() : null)
@@ -1408,7 +1414,7 @@ public class ManageOrderService {
                               .nameOfJudgeForReview(caseData.getManageOrders().getNameOfJudgeAmendOrder())
                               .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
                               .nameOfJudgeForReviewOrder(String.valueOf(caseData.getManageOrders().getNameOfJudgeToReviewOrder()))
-                              .nameOfLaForReviewOrder(String.valueOf(caseData.getManageOrders().getNameOfLaToReviewOrder()))
+                              .nameOfLaForReviewOrder(legalAdviserName.orElse(null))
                               .additionalRequirementsForHearingReq(getAdditionalRequirementsForHearingReq(
                                                                            caseData.getManageOrders().getOrdersHearingDetails(),
                                                                            true,
