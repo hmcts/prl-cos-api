@@ -161,11 +161,9 @@ public class CafcassCaseDataHelper {
             );
         }
 
-        String authorisation = systemUserService.getSysUserToken();
-
         return !Objects.equals(
-            normaliseForComparison(prepareForComparison(caseDetails, authorisation), eventId),
-            normaliseForComparison(prepareForComparison(caseDetailsBefore, authorisation), eventId)
+            normaliseForComparison(prepareForComparison(caseDetails), eventId),
+            normaliseForComparison(prepareForComparison(caseDetailsBefore), eventId)
         );
     }
 
@@ -522,14 +520,13 @@ public class CafcassCaseDataHelper {
         }
     }
 
-    private CafCassCaseDetail prepareForComparison(CaseDetails caseDetails, String authorisation) {
+    private CafCassCaseDetail prepareForComparison(CaseDetails caseDetails) {
         CafCassCaseDetail cafCassCaseDetail = convertToCafcassCaseDetail(caseDetails);
         if (cafCassCaseDetail == null) {
             return null;
         }
 
         cafCassCaseDetail = applyCafcassFilter(cafCassCaseDetail);
-        cafCassCaseDetail = getHearingDetailsForCase(authorisation, cafCassCaseDetail);
         if (cafCassCaseDetail == null) {
             return null;
         }
@@ -625,40 +622,6 @@ public class CafcassCaseDataHelper {
             .build();
         cafCassCaseDetail.setCaseData(cafCassCaseData);
         log.info("After applying filter Result Size --> {}", 1);
-        return cafCassCaseDetail;
-    }
-
-    private CafCassCaseDetail getHearingDetailsForCase(String authorisation, CafCassCaseDetail cafCassCaseDetail) {
-        Map<String, String> caseIdWithRegionIdMap = new HashMap<>();
-        CaseManagementLocation caseManagementLocation = cafCassCaseDetail.getCaseData().getCaseManagementLocation();
-        if (caseManagementLocation == null) {
-            return null;
-        }
-        if (isCafcassEnglandRegion(caseManagementLocation.getRegionId())) {
-            addCaseRegionMapping(
-                caseIdWithRegionIdMap,
-                cafCassCaseDetail,
-                caseManagementLocation.getRegionId(),
-                caseManagementLocation.getBaseLocationId()
-            );
-        } else if (caseManagementLocation.getRegion() != null && Integer.parseInt(caseManagementLocation.getRegion()) < 7) {
-            addCaseRegionMapping(
-                caseIdWithRegionIdMap,
-                cafCassCaseDetail,
-                caseManagementLocation.getRegion(),
-                caseManagementLocation.getBaseLocation()
-            );
-            cafCassCaseDetail.getCaseData().setCafcassUploadedDocs(null);
-        } else {
-            return null;
-        }
-
-        List<Hearings> listOfHearingDetails = hearingService.getHearingsForAllCases(
-            authorisation,
-            caseIdWithRegionIdMap
-        );
-        filterCancelledHearingsBeforeListing(listOfHearingDetails);
-        updateHearingDataCafcass(cafCassCaseDetail, listOfHearingDetails);
         return cafCassCaseDetail;
     }
 

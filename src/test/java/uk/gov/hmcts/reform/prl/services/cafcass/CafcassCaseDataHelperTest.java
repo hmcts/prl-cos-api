@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -29,9 +28,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CafcassCaseDataHelperTest {
@@ -114,74 +110,6 @@ class CafcassCaseDataHelperTest {
     void shouldReturnTrueWhenOnlyOneCaseDetailsIsNull() {
         assertTrue(
             cafcassCaseDataHelper.hasCafcassCaseDataChanged(caseDetailsWithLocation(caseManagementLocation()), null));
-    }
-
-    @Test
-    void shouldIgnoreChangesWhenCaseManagementLocationIsMissing() {
-        CaseDetails caseDetails = caseDetails(Map.of("caseTypeOfApplication", "FL401"));
-        CaseDetails caseDetailsBefore = caseDetails(Map.of("caseTypeOfApplication", "C100"));
-
-        assertFalse(cafcassCaseDataHelper.hasCafcassCaseDataChanged(caseDetails, caseDetailsBefore));
-    }
-
-    @Test
-    void shouldIgnoreChangesWhenRegionIsNotCafcassCymruRegion() {
-        Map<String, Object> unsupportedLocation = new HashMap<>();
-        unsupportedLocation.put("regionId", "7");
-        unsupportedLocation.put("baseLocationId", "123456");
-
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put("caseManagementLocation", unsupportedLocation);
-        caseData.put("caseTypeOfApplication", "FL401");
-
-        Map<String, Object> caseDataBefore = new HashMap<>();
-        caseDataBefore.put("caseManagementLocation", unsupportedLocation);
-        caseDataBefore.put("caseTypeOfApplication", "C100");
-
-        assertFalse(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
-            caseDetails(caseData),
-            caseDetails(caseDataBefore)
-        ));
-    }
-
-    @Test
-    void shouldUseLegacyRegionAndBaseLocationForHearingSearch() {
-        Map<String, Object> legacyLocation = new HashMap<>();
-        legacyLocation.put("region", "2");
-        legacyLocation.put("baseLocation", "654321");
-
-        assertFalse(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
-            caseDetailsWithLocation(legacyLocation),
-            caseDetailsWithLocation(legacyLocation)
-        ));
-
-        ArgumentCaptor<Map<String, String>> mapCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(hearingService, times(2)).getHearingsForAllCases(anyString(), mapCaptor.capture());
-        assertTrue(mapCaptor.getAllValues().stream().allMatch(map -> map.containsValue("2-654321")));
-    }
-
-    @Test
-    void shouldReturnTrueWhenHearingDetailsAreAddedToCurrentCase() {
-        when(hearingService.getHearingsForAllCases(anyString(), anyMap()))
-            .thenReturn(List.of(hearingWithListedAndCancelledHearing()))
-            .thenReturn(Collections.emptyList());
-
-        assertTrue(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
-            caseDetailsWithLocation(caseManagementLocation()),
-            caseDetailsWithLocation(caseManagementLocation())
-        ));
-    }
-
-    @Test
-    void shouldReturnFalseWhenCancelledBeforeListingHearingIsRemoved() {
-        when(hearingService.getHearingsForAllCases(anyString(), anyMap()))
-            .thenReturn(List.of(hearingWithCancelledBeforeListingOnly()))
-            .thenReturn(Collections.emptyList());
-
-        assertFalse(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
-            caseDetailsWithLocation(caseManagementLocation()),
-            caseDetailsWithLocation(caseManagementLocation())
-        ));
     }
 
     @Test
