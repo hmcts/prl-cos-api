@@ -2418,7 +2418,7 @@ public class NoticeOfChangePartiesServiceTest {
             c100CaseData, SolicitorRole.Representing.CARESPONDENT);
 
         verifyOrganisationId(result, "daRespondentPolicy", SolicitorRole.FL401RESPONDENTSOLICITOR, null);
-        verifyOrganisationId(result, "applicantOrganisationPolicy", SolicitorRole.FL401APPLICANTSOLICITOR, null);
+        assertThat(result).doesNotContainKey("applicantOrganisationPolicy");
     }
 
     @Test
@@ -2513,8 +2513,10 @@ public class NoticeOfChangePartiesServiceTest {
         verifyOrganisationId(result, "caRespondent3Policy", SolicitorRole.C100RESPONDENTSOLICITOR3, "R3");
         verifyOrganisationId(result, "caRespondent4Policy", SolicitorRole.C100RESPONDENTSOLICITOR4, null);
         verifyOrganisationId(result, "caRespondent5Policy", SolicitorRole.C100RESPONDENTSOLICITOR5, null);
-        verifyOrganisationId(result, "applicantOrganisationPolicy", SolicitorRole.FL401APPLICANTSOLICITOR, null);
         verifyOrganisationId(result, "daRespondentPolicy", SolicitorRole.FL401RESPONDENTSOLICITOR, null);
+
+        // See FPVTL-1115
+        assertThat(result.get("applicantOrganisationPolicy")).isNull();
 
         verifyNoticeOfChangeParties(result, "caApplicant1", "Jane", "Smith");
         verifyNoticeOfChangeParties(result, "caApplicant2", "Alex", "Brown");

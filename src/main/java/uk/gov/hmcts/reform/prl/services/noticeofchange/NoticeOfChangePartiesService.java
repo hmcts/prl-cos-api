@@ -707,7 +707,9 @@ public class NoticeOfChangePartiesService {
 
     private void generateRequiredFlOrgPoliciesForNoc(Map<String, Object> data) {
         List<SolicitorRole> solicitorRoles = new ArrayList<>(SolicitorRole.matchingRoles(DARESPONDENT));
-        solicitorRoles.addAll(SolicitorRole.matchingRoles(DAAPPLICANT));
+        // Code commented out due to FPVTL-1115
+        // Error reported was that the applicantOrganisationPolicy was being cleared incorrectly
+        // solicitorRoles.addAll(SolicitorRole.matchingRoles(DAAPPLICANT));
         for (SolicitorRole solicitorRole : solicitorRoles) {
             OrganisationPolicy organisationPolicy = policyConverter.caGenerate(
                 solicitorRole, Optional.empty());
