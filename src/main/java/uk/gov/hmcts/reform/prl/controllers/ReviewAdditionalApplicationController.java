@@ -43,6 +43,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage.temporaryFieldsAboutToStart;
 import static uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage.temporaryFieldsAboutToSubmit;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 
 @Slf4j
 @SuppressWarnings({"squid:S5665"})
@@ -178,7 +179,9 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
     public ResponseEntity<SubmittedCallbackResponse> handleSubmittedSendAndReply(@RequestHeader("Authorization")
                                                                                  @Parameter(hidden = true) String authorisation,
                                                                                  @RequestBody CallbackRequest callbackRequest) {
-        return sendAndReplyService.sendAndReplySubmitted(callbackRequest, authorisation);
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        return sendAndReplyService.sendAndReplySubmittedForChoice(caseData, SEND, authorisation);
     }
 
     @PostMapping("/review-additional-application/clear-dynamic-lists")

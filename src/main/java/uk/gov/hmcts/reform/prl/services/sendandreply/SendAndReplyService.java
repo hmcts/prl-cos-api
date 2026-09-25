@@ -2224,27 +2224,28 @@ public class SendAndReplyService {
 
     public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmitted(CallbackRequest callbackRequest, String authorisation) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        return sendAndReplySubmittedForChoice(caseData, caseData.getChooseSendOrReply().name(), authorisation);
+        SendOrReply chooseAndReply = caseData.getChooseSendOrReply();
+        return sendAndReplySubmittedForChoice(caseData, chooseAndReply, authorisation);
 
     }
 
     public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedTask(CallbackRequest callbackRequest,
                                                                                String authorisation) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        return sendAndReplySubmittedForChoice(caseData, REPLY.name(), authorisation);
+        return sendAndReplySubmittedForChoice(caseData, REPLY, authorisation);
     }
 
-    private ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedForChoice(CaseData caseData,
-            String sendOrReplyChoice, String authorisation) {
+    public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedForChoice(CaseData caseData,
+            SendOrReply sendOrReplyChoice, String authorisation) {
         log.info("sendOrReplyChoice={} for case={}", sendOrReplyChoice, caseData.getId());
-        if (REPLY.name().equals(sendOrReplyChoice)
+        if (REPLY.equals(sendOrReplyChoice)
             && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
             return ok(SubmittedCallbackResponse.builder().confirmationBody(
                 REPLY_AND_CLOSE_MESSAGE
             ).build());
         }
 
-        if (SEND.name().equals(sendOrReplyChoice)) {
+        if (SEND.equals(sendOrReplyChoice)) {
             sendNotificationToExternalParties(
                 caseData,
                 authorisation
