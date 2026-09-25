@@ -49,7 +49,6 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -249,7 +248,7 @@ public class ReviewAdditionalApplicationControllerTest {
 
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(sendAndReplyService.populateDynamicListsForSendAndReply(any(CaseData.class), anyString(), eq(false), eq(null))).thenReturn(caseData);
+        when(sendAndReplyService.populateDynamicListsForSendAndReply(any(CaseData.class), anyString())).thenReturn(caseData);
 
         CallbackResponse response = controller
             .reviewAdditionalApplicatonMidEvent(AUTH_TOKEN, callbackRequest);
@@ -351,10 +350,10 @@ public class ReviewAdditionalApplicationControllerTest {
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(sendAndReplyService.populateDynamicListsForSendAndReply(caseData,auth, false, null)).thenReturn(caseData);
+        when(sendAndReplyService.populateDynamicListsForSendAndReply(caseData,auth)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         controller.reviewAdditionalApplicatonMidEvent(auth, callbackRequest);
-        verify(sendAndReplyService).populateDynamicListsForSendAndReply(caseData,auth, false, null);
+        verify(sendAndReplyService).populateDynamicListsForSendAndReply(caseData,auth);
         verifyNoInteractions(reviewAdditionalApplicationService);
     }
 
@@ -396,12 +395,12 @@ public class ReviewAdditionalApplicationControllerTest {
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(sendAndReplyService.populateDynamicListsForSendAndReply(caseData,auth, false, null)).thenReturn(caseData);
+        when(sendAndReplyService.populateDynamicListsForSendAndReply(caseData,auth)).thenReturn(caseData);
         when(reviewAdditionalApplicationService.getApplicationBundleDynamicCode(any(AdditionalApplicationsBundle.class)))
             .thenReturn(awpOtherCode);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         controller.reviewAdditionalApplicatonMidEvent(auth, callbackRequest);
-        verify(sendAndReplyService).populateDynamicListsForSendAndReply(caseData,auth, false, null);
+        verify(sendAndReplyService).populateDynamicListsForSendAndReply(caseData,auth);
         verify(reviewAdditionalApplicationService).getApplicationBundleDynamicCode(any(AdditionalApplicationsBundle.class));
     }
 
