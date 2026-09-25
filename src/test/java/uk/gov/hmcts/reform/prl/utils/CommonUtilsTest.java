@@ -2,11 +2,14 @@ package uk.gov.hmcts.reform.prl.utils;
 
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CommonUtilsTest {
 
@@ -47,5 +50,27 @@ class CommonUtilsTest {
         // Then
         assertNotNull(result);
         assertEquals("6 Aug 2024 12:30 AM", result);
+    }
+
+    @Test
+    void shouldReturnEmptyOptionalForInvalidDate() {
+        Optional<LocalDate> result = CommonUtils.parseDate("not-a-date");
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void shouldReturnEmptyOptionalForNullDate() {
+        Optional<LocalDate> result = CommonUtils.parseDate(null);
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void shouldParseValidDateUsingReflection() {
+        Optional<LocalDate> result = CommonUtils.parseDate("2025-01-15");
+        assertNotNull(result);
+        assertTrue(result.isPresent());
+        assertEquals(LocalDate.of(2025, 1, 15), result.get());
     }
 }
