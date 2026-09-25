@@ -2581,7 +2581,6 @@ public class NoticeOfChangePartiesServiceTest {
         assertThat(result.get("caRespondent5")).isNull();
     }
 
-
     private Element<PartyDetails> buildPartyDetails(String firstName, String lastName) {
         return element(UUID.randomUUID(), PartyDetails.builder()
             .firstName(firstName)
