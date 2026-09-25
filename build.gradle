@@ -696,9 +696,9 @@ bootWithCCD {
   environment("UPLOAD_TIMESTAMP_FEATURED_CASE_TYPES", "PRLAPPS")
   // xui
   environment("APPINSIGHTS_CONNECTION_STRING", "InstrumentationKey=dummy-key;IngestionEndpoint=https://uksouth-0.in.applicationinsights.azure.com/")
-  environment("FEATURE_WORKALLOCATION_ENABLED", "true")
-  environment("SERVICES_WORK_ALLOCATION_TASK_API", "http://host.docker.internal:9193")
-  environment("HEALTH_WORK_ALLOCATION_TASK_API", "http://host.docker.internal:9193/health")
+  environment("FEATURE_WORKALLOCATION_ENABLED", "false")
+  //environment("SERVICES_WORK_ALLOCATION_TASK_API", "http://host.docker.internal:9193")
+  //environment("HEALTH_WORK_ALLOCATION_TASK_API", "http://host.docker.internal:9193/health")
 }
 
 tasks.register('localFunctionalTests', Test) {
