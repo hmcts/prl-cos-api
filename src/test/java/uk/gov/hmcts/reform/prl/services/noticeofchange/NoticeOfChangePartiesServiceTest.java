@@ -2483,8 +2483,10 @@ public class NoticeOfChangePartiesServiceTest {
     public void shouldSyncC100ApplicantAndRespondentOrgPolicies() {
         Element<PartyDetails> applicant1 = buildPartyDetails("Jane", "Smith", "A1");
         Element<PartyDetails> applicant2 = buildPartyDetails("Alex", "Brown");
+        Element<PartyDetails> applicant3 = buildPartyDetails("Rod", "Tickle", "A3");
         Element<PartyDetails> respondent1 = buildPartyDetails("Bob", "Jones", "R1");
         Element<PartyDetails> respondent2 = buildPartyDetails("Charlie", "Green");
+        Element<PartyDetails> respondent3 = buildPartyDetails("Vera", "Brown", "R3");
 
         when(policyConverter.caGenerate(any(), any())).thenCallRealMethod();
         when(partiesConverter.generateCaForSubmission(any())).thenCallRealMethod();
@@ -2493,8 +2495,8 @@ public class NoticeOfChangePartiesServiceTest {
 
         caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
-            .applicants(List.of(applicant1, applicant2))
-            .respondents(List.of(respondent1, respondent2))
+            .applicants(List.of(applicant1, applicant2, applicant3))
+            .respondents(List.of(respondent1, respondent2, respondent3))
             .build();
 
         Map<String, Object> result = new HashMap<>();
@@ -2503,12 +2505,12 @@ public class NoticeOfChangePartiesServiceTest {
 
         verifyOrganisationId(result, "caApplicant1Policy", SolicitorRole.C100APPLICANTSOLICITOR1, "A1");
         verifyOrganisationId(result, "caApplicant2Policy", SolicitorRole.C100APPLICANTSOLICITOR2, null);
-        verifyOrganisationId(result, "caApplicant3Policy", SolicitorRole.C100APPLICANTSOLICITOR3, null);
+        verifyOrganisationId(result, "caApplicant3Policy", SolicitorRole.C100APPLICANTSOLICITOR3, "A3");
         verifyOrganisationId(result, "caApplicant4Policy", SolicitorRole.C100APPLICANTSOLICITOR4, null);
         verifyOrganisationId(result, "caApplicant5Policy", SolicitorRole.C100APPLICANTSOLICITOR5, null);
         verifyOrganisationId(result, "caRespondent1Policy", SolicitorRole.C100RESPONDENTSOLICITOR1, "R1");
         verifyOrganisationId(result, "caRespondent2Policy", SolicitorRole.C100RESPONDENTSOLICITOR2, null);
-        verifyOrganisationId(result, "caRespondent3Policy", SolicitorRole.C100RESPONDENTSOLICITOR3, null);
+        verifyOrganisationId(result, "caRespondent3Policy", SolicitorRole.C100RESPONDENTSOLICITOR3, "R3");
         verifyOrganisationId(result, "caRespondent4Policy", SolicitorRole.C100RESPONDENTSOLICITOR4, null);
         verifyOrganisationId(result, "caRespondent5Policy", SolicitorRole.C100RESPONDENTSOLICITOR5, null);
         verifyOrganisationId(result, "applicantOrganisationPolicy", SolicitorRole.FL401APPLICANTSOLICITOR, null);
@@ -2516,12 +2518,12 @@ public class NoticeOfChangePartiesServiceTest {
 
         verifyNoticeOfChangeParties(result, "caApplicant1", "Jane", "Smith");
         verifyNoticeOfChangeParties(result, "caApplicant2", "Alex", "Brown");
-        assertThat(result.get("caApplicant3")).isNull();
+        verifyNoticeOfChangeParties(result, "caApplicant3", "Rod", "Tickle");
         assertThat(result.get("caApplicant4")).isNull();
         assertThat(result.get("caApplicant5")).isNull();
         verifyNoticeOfChangeParties(result, "caRespondent1", "Bob", "Jones");
         verifyNoticeOfChangeParties(result, "caRespondent2", "Charlie", "Green");
-        assertThat(result.get("caRespondent3")).isNull();
+        verifyNoticeOfChangeParties(result, "caRespondent3", "Vera", "Brown");
         assertThat(result.get("caRespondent4")).isNull();
         assertThat(result.get("caRespondent5")).isNull();
 
