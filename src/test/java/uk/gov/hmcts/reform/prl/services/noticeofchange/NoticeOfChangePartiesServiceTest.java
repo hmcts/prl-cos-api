@@ -108,6 +108,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -2309,10 +2311,8 @@ public class NoticeOfChangePartiesServiceTest {
 
         // Generate for DARESPONDENT first, then DAAPPLICANT - simulating what callers do
         Map<String, Object> combined = new HashMap<>();
-        combined.putAll(noticeOfChangePartiesService.generate(
-            fl401CaseData, SolicitorRole.Representing.DARESPONDENT));
-        combined.putAll(noticeOfChangePartiesService.generate(
-            fl401CaseData, SolicitorRole.Representing.DAAPPLICANT));
+        combined.putAll(noticeOfChangePartiesService.generate(fl401CaseData, DARESPONDENT));
+        combined.putAll(noticeOfChangePartiesService.generate(fl401CaseData, DAAPPLICANT));
 
         // The respondent policy should still have the real org, not be overwritten with a blank
         OrganisationPolicy resultRespondentPolicy =
@@ -2382,10 +2382,8 @@ public class NoticeOfChangePartiesServiceTest {
 
         // Generate for DAAPPLICANT first, then DARESPONDENT - reversed order
         Map<String, Object> combined = new HashMap<>();
-        combined.putAll(noticeOfChangePartiesService.generate(
-            fl401CaseData, SolicitorRole.Representing.DAAPPLICANT));
-        combined.putAll(noticeOfChangePartiesService.generate(
-            fl401CaseData, SolicitorRole.Representing.DARESPONDENT));
+        combined.putAll(noticeOfChangePartiesService.generate(fl401CaseData, DAAPPLICANT));
+        combined.putAll(noticeOfChangePartiesService.generate(fl401CaseData, DARESPONDENT));
 
         // Both policies should retain their real org data
         OrganisationPolicy resultApplicantPolicy =
@@ -2411,17 +2409,16 @@ public class NoticeOfChangePartiesServiceTest {
             .respondents(List.of(respondent1))
             .build();
 
-        OrganisationPolicy daRespondentPolicy = OrganisationPolicy.builder()
-            .orgPolicyCaseAssignedRole("[FL401RESPONDENTSOLICITOR]")
-            .build();
-        when(policyConverter.daGenerate(eq(SolicitorRole.FL401RESPONDENTSOLICITOR), any(PartyDetails.class)))
-            .thenReturn(daRespondentPolicy);
+        when(policyConverter.caGenerate(any(), any())).thenCallRealMethod();
+        when(partiesConverter.generateCaForSubmission(any())).thenCallRealMethod();
+        when(policyConverter.daGenerate(any(), any())).thenCallRealMethod();
+        when(partiesConverter.generateDaForSubmission(any())).thenCallRealMethod();
 
         Map<String, Object> result = noticeOfChangePartiesService.generate(
             c100CaseData, SolicitorRole.Representing.CARESPONDENT);
 
-        assertThat(result).containsEntry("daRespondentPolicy", daRespondentPolicy);
-        assertThat(result).doesNotContainKey("applicantOrganisationPolicy");
+        verifyOrganisationId(result, "daRespondentPolicy", SolicitorRole.FL401RESPONDENTSOLICITOR, null);
+        verifyOrganisationId(result, "applicantOrganisationPolicy", SolicitorRole.FL401APPLICANTSOLICITOR, null);
     }
 
     @Test
@@ -2444,8 +2441,7 @@ public class NoticeOfChangePartiesServiceTest {
         when(partiesConverter.generateDaForSubmission(any(PartyDetails.class)))
             .thenReturn(NoticeOfChangeParties.builder().build());
 
-        Map<String, Object> result = noticeOfChangePartiesService.generate(
-            fl401CaseData, SolicitorRole.Representing.DARESPONDENT);
+        Map<String, Object> result = noticeOfChangePartiesService.generate(fl401CaseData, DARESPONDENT);
 
         assertThat(result).containsKeys("caApplicant1Policy", "caRespondent1Policy");
     }
@@ -2477,10 +2473,139 @@ public class NoticeOfChangePartiesServiceTest {
         when(partiesConverter.generateDaForSubmission(any(PartyDetails.class)))
             .thenReturn(NoticeOfChangeParties.builder().build());
 
-        Map<String, Object> result = noticeOfChangePartiesService.generate(
-            fl401CaseData, SolicitorRole.Representing.DARESPONDENT, existingCaseData);
+        Map<String, Object> result = noticeOfChangePartiesService.generate(fl401CaseData, DARESPONDENT, existingCaseData);
 
         assertThat(result).doesNotContainKey("caApplicant1Policy");
         assertThat(result).containsKey("caApplicant2Policy");
+    }
+
+    @Test
+    public void shouldSyncC100ApplicantAndRespondentOrgPolicies() {
+        Element<PartyDetails> applicant1 = buildPartyDetails("Jane", "Smith", "A1");
+        Element<PartyDetails> applicant2 = buildPartyDetails("Alex", "Brown");
+        Element<PartyDetails> respondent1 = buildPartyDetails("Bob", "Jones", "R1");
+        Element<PartyDetails> respondent2 = buildPartyDetails("Charlie", "Green");
+
+        when(policyConverter.caGenerate(any(), any())).thenCallRealMethod();
+        when(partiesConverter.generateCaForSubmission(any())).thenCallRealMethod();
+        when(policyConverter.daGenerate(any(), any())).thenCallRealMethod();
+        when(partiesConverter.generateDaForSubmission(any())).thenCallRealMethod();
+
+        caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(applicant1, applicant2))
+            .respondents(List.of(respondent1, respondent2))
+            .build();
+
+        Map<String, Object> result = new HashMap<>();
+        result.putAll(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CARESPONDENT));
+        result.putAll(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CAAPPLICANT));
+
+        verifyOrganisationId(result, "caApplicant1Policy", SolicitorRole.C100APPLICANTSOLICITOR1, "A1");
+        verifyOrganisationId(result, "caApplicant2Policy", SolicitorRole.C100APPLICANTSOLICITOR2, null);
+        verifyOrganisationId(result, "caApplicant3Policy", SolicitorRole.C100APPLICANTSOLICITOR3, null);
+        verifyOrganisationId(result, "caApplicant4Policy", SolicitorRole.C100APPLICANTSOLICITOR4, null);
+        verifyOrganisationId(result, "caApplicant5Policy", SolicitorRole.C100APPLICANTSOLICITOR5, null);
+        verifyOrganisationId(result, "caRespondent1Policy", SolicitorRole.C100RESPONDENTSOLICITOR1, "R1");
+        verifyOrganisationId(result, "caRespondent2Policy", SolicitorRole.C100RESPONDENTSOLICITOR2, null);
+        verifyOrganisationId(result, "caRespondent3Policy", SolicitorRole.C100RESPONDENTSOLICITOR3, null);
+        verifyOrganisationId(result, "caRespondent4Policy", SolicitorRole.C100RESPONDENTSOLICITOR4, null);
+        verifyOrganisationId(result, "caRespondent5Policy", SolicitorRole.C100RESPONDENTSOLICITOR5, null);
+        verifyOrganisationId(result, "applicantOrganisationPolicy", SolicitorRole.FL401APPLICANTSOLICITOR, null);
+        verifyOrganisationId(result, "daRespondentPolicy", SolicitorRole.FL401RESPONDENTSOLICITOR, null);
+
+        verifyNoticeOfChangeParties(result, "caApplicant1", "Jane", "Smith");
+        verifyNoticeOfChangeParties(result, "caApplicant2", "Alex", "Brown");
+        assertThat(result.get("caApplicant3")).isNull();
+        assertThat(result.get("caApplicant4")).isNull();
+        assertThat(result.get("caApplicant5")).isNull();
+        verifyNoticeOfChangeParties(result, "caRespondent1", "Bob", "Jones");
+        verifyNoticeOfChangeParties(result, "caRespondent2", "Charlie", "Green");
+        assertThat(result.get("caRespondent3")).isNull();
+        assertThat(result.get("caRespondent4")).isNull();
+        assertThat(result.get("caRespondent5")).isNull();
+
+        assertThat(result.get("daApplicant")).isNull();
+        assertThat(result.get("daRespondent")).isNull();
+    }
+
+    @Test
+    public void shouldSyncFl401ApplicantAndRespondentOrgPolicies() {
+        Element<PartyDetails> applicant1 = buildPartyDetails("Jane", "Smith", "A1");
+        Element<PartyDetails> respondent1 = buildPartyDetails("Bob", "Jones", "R1");
+
+        when(policyConverter.caGenerate(any(), any())).thenCallRealMethod();
+        when(partiesConverter.generateCaForSubmission(any())).thenCallRealMethod();
+        when(policyConverter.daGenerate(any(), any())).thenCallRealMethod();
+        when(partiesConverter.generateDaForSubmission(any())).thenCallRealMethod();
+
+        caseData = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(applicant1.getValue())
+            .respondentsFL401(respondent1.getValue())
+            .build();
+
+        Map<String, Object> result = new HashMap<>();
+        result.putAll(noticeOfChangePartiesService.syncNocAnswerFields(caseData, DARESPONDENT));
+        result.putAll(noticeOfChangePartiesService.syncNocAnswerFields(caseData, DAAPPLICANT));
+
+        verifyOrganisationId(result, "caApplicant1Policy", SolicitorRole.C100APPLICANTSOLICITOR1, null);
+        verifyOrganisationId(result, "caApplicant2Policy", SolicitorRole.C100APPLICANTSOLICITOR2, null);
+        verifyOrganisationId(result, "caApplicant3Policy", SolicitorRole.C100APPLICANTSOLICITOR3, null);
+        verifyOrganisationId(result, "caApplicant4Policy", SolicitorRole.C100APPLICANTSOLICITOR4, null);
+        verifyOrganisationId(result, "caApplicant5Policy", SolicitorRole.C100APPLICANTSOLICITOR5, null);
+        verifyOrganisationId(result, "caRespondent1Policy", SolicitorRole.C100RESPONDENTSOLICITOR1, null);
+        verifyOrganisationId(result, "caRespondent2Policy", SolicitorRole.C100RESPONDENTSOLICITOR2, null);
+        verifyOrganisationId(result, "caRespondent3Policy", SolicitorRole.C100RESPONDENTSOLICITOR3, null);
+        verifyOrganisationId(result, "caRespondent4Policy", SolicitorRole.C100RESPONDENTSOLICITOR4, null);
+        verifyOrganisationId(result, "caRespondent5Policy", SolicitorRole.C100RESPONDENTSOLICITOR5, null);
+        verifyOrganisationId(result, "applicantOrganisationPolicy", SolicitorRole.FL401APPLICANTSOLICITOR, "A1");
+        verifyOrganisationId(result, "daRespondentPolicy", SolicitorRole.FL401RESPONDENTSOLICITOR, "R1");
+
+        verifyNoticeOfChangeParties(result, "daApplicant", "Jane", "Smith");
+        verifyNoticeOfChangeParties(result, "daRespondent", "Bob", "Jones");
+
+        assertThat(result.get("caApplicant1")).isNull();
+        assertThat(result.get("caApplicant2")).isNull();
+        assertThat(result.get("caApplicant3")).isNull();
+        assertThat(result.get("caApplicant4")).isNull();
+        assertThat(result.get("caApplicant5")).isNull();
+        assertThat(result.get("caRespondent1")).isNull();
+        assertThat(result.get("caRespondent2")).isNull();
+        assertThat(result.get("caRespondent3")).isNull();
+        assertThat(result.get("caRespondent4")).isNull();
+        assertThat(result.get("caRespondent5")).isNull();
+    }
+
+
+    private Element<PartyDetails> buildPartyDetails(String firstName, String lastName) {
+        return element(UUID.randomUUID(), PartyDetails.builder()
+            .firstName(firstName)
+            .lastName(lastName)
+            .build());
+    }
+
+    private Element<PartyDetails> buildPartyDetails(String firstName, String lastName, String organisationId) {
+        return element(
+            UUID.randomUUID(), PartyDetails.builder()
+                .firstName(firstName)
+                .lastName(lastName)
+                .solicitorOrg(Organisation.builder()
+                                  .organisationID(organisationId)
+                                  .build())
+                .build()
+        );
+    }
+
+    private void verifyOrganisationId(Map<String, Object> caseData, String key, SolicitorRole expectedRole, String expectedOrganisationId) {
+        OrganisationPolicy orgPolicy = (OrganisationPolicy) caseData.get(key);
+        assertThat(orgPolicy.getOrgPolicyCaseAssignedRole()).isEqualTo(expectedRole.getCaseRoleLabel());
+        assertThat(orgPolicy.getOrganisation().getOrganisationID()).isEqualTo(expectedOrganisationId);
+    }
+
+    private void verifyNoticeOfChangeParties(Map<String, Object> caseData, String key, String expectedFirstName, String expectedLastName) {
+        NoticeOfChangeParties nocParties = (NoticeOfChangeParties) caseData.get(key);
+        assertThat(nocParties.getFirstName()).isEqualTo(expectedFirstName);
+        assertThat(nocParties.getLastName()).isEqualTo(expectedLastName);
     }
 }
