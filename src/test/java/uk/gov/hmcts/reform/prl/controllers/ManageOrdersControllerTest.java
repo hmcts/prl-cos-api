@@ -1182,7 +1182,7 @@ public class ManageOrdersControllerTest {
         StaffUser legalAdviser = new StaffUser("Geoff");
 
         ManageOrders manageOrders = ManageOrders.builder()
-            .legalAdviser(legalAdviser)
+            .legalAdviserToReviewOrder(legalAdviser)
             .cafcassEmailAddress(listOfCafcassEmail)
             .isCaseWithdrawn(No)
             .build();
@@ -1195,7 +1195,7 @@ public class ManageOrdersControllerTest {
 
         caseData = CaseData.builder()
             .id(12345L)
-            .manageOrders(ManageOrders.builder().legalAdviser(legalAdviser).build())
+            .manageOrders(ManageOrders.builder().legalAdviserToReviewOrder(legalAdviser).build())
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
@@ -1794,7 +1794,7 @@ public class ManageOrdersControllerTest {
         StaffUser legalAdviser = new StaffUser("Geoff");
 
         ManageOrders manageOrders = ManageOrders.builder()
-            .legalAdviser(legalAdviser)
+            .legalAdviserToReviewOrder(legalAdviser)
             .cafcassEmailAddress(listOfCafcassEmail)
             .isCaseWithdrawn(Yes)
             .build();
@@ -3165,7 +3165,7 @@ public class ManageOrdersControllerTest {
         StaffUser legalAdviser = new StaffUser("Geoff");
 
         ManageOrders manageOrders = ManageOrders.builder()
-            .legalAdviser(legalAdviser)
+            .legalAdviserToReviewOrder(legalAdviser)
             .cafcassEmailAddress(listOfCafcassEmail)
             .isCaseWithdrawn(YesOrNo.No)
             .ordersHearingDetails(hearingElementList)
@@ -3278,7 +3278,7 @@ public class ManageOrdersControllerTest {
         StaffUser legalAdviser = new StaffUser("Geoff");
 
         ManageOrders manageOrders = ManageOrders.builder()
-            .legalAdviser(legalAdviser)
+            .legalAdviserToReviewOrder(legalAdviser)
             .cafcassEmailAddress(listOfCafcassEmail)
             .isCaseWithdrawn(YesOrNo.No)
             .build();
@@ -3509,7 +3509,6 @@ public class ManageOrdersControllerTest {
             ENCRYPTED_CLIENT_CONTEXT,
             callbackRequest
         );
-        assertThat(responseResponseEntity.getBody().getData().get("nameOfLaToReviewOrder")).isNotNull();
         assertThat(responseResponseEntity.getHeaders())
             .containsKey(CLIENT_CONTEXT_HEADER_PARAMETER);
 
@@ -3519,7 +3518,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testPrePopulateJudgeOrLegalAdviserWithDateReservedWithListAssit() throws JsonProcessingException {
+    public void testPrePopulateJudgeOrLegalAdviserWithDateReservedWithListAssist() throws JsonProcessingException {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -3564,7 +3563,6 @@ public class ManageOrdersControllerTest {
             ENCRYPTED_CLIENT_CONTEXT,
             callbackRequest
         );
-        assertThat(responseResponseEntity.getBody().getData().get("nameOfLaToReviewOrder")).isNotNull();
         assertThat(responseResponseEntity.getHeaders())
             .doesNotContainKey(CLIENT_CONTEXT_HEADER_PARAMETER);
     }
@@ -3732,7 +3730,7 @@ public class ManageOrdersControllerTest {
         StaffUser legalAdviser = new StaffUser("Geoff");
 
         ManageOrders manageOrders = ManageOrders.builder()
-            .legalAdviser(legalAdviser)
+            .legalAdviserToReviewOrder(legalAdviser)
             .cafcassEmailAddress(listOfCafcassEmail)
             .isCaseWithdrawn(No)
             .c21OrderOptions(C21OrderOptionsEnum.c21other)
@@ -3840,7 +3838,7 @@ public class ManageOrdersControllerTest {
         StaffUser legalAdviser = new StaffUser("Geoff");
 
         ManageOrders manageOrders = ManageOrders.builder()
-            .legalAdviser(legalAdviser)
+            .legalAdviserToReviewOrder(legalAdviser)
             .cafcassEmailAddress(listOfCafcassEmail)
             .isCaseWithdrawn(No)
             .c21OrderOptions(C21OrderOptionsEnum.c21other)

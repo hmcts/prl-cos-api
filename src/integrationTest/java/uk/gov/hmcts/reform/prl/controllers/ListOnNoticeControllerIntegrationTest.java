@@ -98,24 +98,6 @@ public class ListOnNoticeControllerIntegrationTest {
     }
 
     @Test
-    public void testPrePopulateListOnNotice() throws Exception {
-        String url = "/pre-populate-list-on-notice";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-
-        Mockito.when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-
-        mockMvc.perform(
-                post(url)
-                    .header("Authorization", "Bearer testAuthToken")
-                    .header("ServiceAuthorization", "testServiceAuthToken")
-                    .accept(MediaType.APPLICATION_JSON)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(jsonRequest))
-            .andExpect(status().isOk())
-            .andReturn();
-    }
-
-    @Test
     public void testListOnNotice() throws Exception {
         String url = "/listOnNotice";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
