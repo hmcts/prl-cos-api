@@ -41,7 +41,7 @@ public class SystemUserServiceTest {
 
     @Before
     public void setUp() {
-        systemUserService = new SystemUserService(auth, userConfig, idamClient, hmcUserConfig );
+        systemUserService = new SystemUserService(auth, userConfig, idamClient, hmcUserConfig);
         token = RandomStringUtils.randomAlphanumeric(10);
     }
 
