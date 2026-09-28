@@ -78,7 +78,7 @@ public class HearingService {
     @Value("${hearing_component.api.deployment-id:#{null}}")
     private String hmctsDeploymentId;
 
-    @Value("${role-assignment.api.url:#{null}}")
+    @Value("${amRoleAssignment.api.url:#{null}}")
     private String roleAssignmentUrl;
 
     @Value("${core_case_data.api.url:#{null}}")
