@@ -33,11 +33,18 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REDACTED_DOCUME
 @Slf4j
 final class CafcassUpdateHelperUtils {
 
+    private static final int WELSH_REGION_ID = 7;
+
     private CafcassUpdateHelperUtils() {
     }
 
+    /**
+     * Check if the region ID is in England (0 - 6). Wales is region ID 7.
+     * @param region string representation of the region ID.
+     * @return true if the region ID is in England, false otherwise.
+     */
     static boolean isCafcassEnglandRegion(String region) {
-        return region != null && Integer.parseInt(region) < 7;
+        return region != null && Integer.parseInt(region) < WELSH_REGION_ID;
     }
 
     static void filterCancelledHearingsBeforeListing(List<Hearings> listOfHearingDetails) {
