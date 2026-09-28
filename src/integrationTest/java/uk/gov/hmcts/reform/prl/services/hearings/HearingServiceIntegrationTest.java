@@ -96,7 +96,7 @@ public class HearingServiceIntegrationTest {
             .build();
 
         Mockito.when(hmcHearingApiClient.getHearingDetails(
-                eq(AUTH), eq(S2S), any(), any(), any(), eq(CASE_REFERENCE)))
+                anyString(), anyString(), any(), any(), any(), eq(CASE_REFERENCE)))
             .thenReturn(hmcResponse);
 
         Mockito.when(locationRefDataService.getCourtDetailsFromEpimmsId(eq("VENUE1"), anyString()))
