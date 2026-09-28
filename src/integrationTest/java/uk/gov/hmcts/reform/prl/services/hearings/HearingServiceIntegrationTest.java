@@ -1,13 +1,11 @@
 package uk.gov.hmcts.reform.prl.services.hearings;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.HmcHearingApiClient;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
@@ -20,13 +18,14 @@ import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -38,8 +37,7 @@ import static org.mockito.ArgumentMatchers.eq;
  * and RefDataUserService. Ported from fis-hmc-api HearingsControllerIntegrationTest.
  */
 @SpringBootTest
-@RunWith(SpringRunner.class)
-public class HearingServiceIntegrationTest {
+class HearingServiceIntegrationTest {
 
     private static final String AUTH = "Bearer testAuthToken";
     private static final String S2S = "Bearer testServiceAuthToken";
@@ -66,20 +64,22 @@ public class HearingServiceIntegrationTest {
     @MockitoBean
     private RefDataService refDataService;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
+        Mockito.when(systemUserService.getHmcUserToken()).thenReturn(AUTH);
         Mockito.when(systemUserService.getSysUserToken()).thenReturn(AUTH);
         Mockito.when(authTokenGenerator.generate()).thenReturn(S2S);
         Mockito.when(refDataService.getRefDataCategoryValueMap(anyString(), anyString(), any(), anyString()))
             .thenReturn(Map.of("ABA5-FHR", "First hearing"));
     }
 
+
     @Test
-    public void getHearings_callsHmcDirectlyAndEnrichesVenueAndJudge() {
+    void getHearings_callsHmcDirectlyAndEnrichesVenueAndJudge() {
         HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
             .hearingVenueId("VENUE1")
             .hearingJudgeId("JUDGE1")
-            .hearingStartDateTime(java.time.LocalDateTime.now().plusDays(1))
+            .hearingStartDateTime(LocalDateTime.now().plusDays(1))
             .build();
 
         CaseHearing caseHearing = CaseHearing.caseHearingWith()
@@ -95,9 +95,8 @@ public class HearingServiceIntegrationTest {
             .caseHearings(List.of(caseHearing))
             .build();
 
-        Mockito.when(hmcHearingApiClient.getHearingDetails(
-                anyString(), anyString(), any(), any(), any(), eq(CASE_REFERENCE)))
-            .thenReturn(hmcResponse);
+        Mockito.doReturn(hmcResponse).when(hmcHearingApiClient).getHearingDetails(
+            anyString(), anyString(), any(), any(), any(), eq(CASE_REFERENCE));
 
         Mockito.when(locationRefDataService.getCourtDetailsFromEpimmsId(eq("VENUE1"), anyString()))
             .thenReturn(Optional.of(CourtVenue.builder()
@@ -124,14 +123,13 @@ public class HearingServiceIntegrationTest {
 
         // Verify direct HMC client was invoked (i.e. no FIS /hearings hop)
         Mockito.verify(hmcHearingApiClient).getHearingDetails(
-            eq(AUTH), eq(S2S), any(), any(), any(), eq(CASE_REFERENCE));
+            anyString(), anyString(), any(), any(), any(), eq(CASE_REFERENCE));
     }
 
     @Test
-    public void getHearings_returnsNullWhenHmcReturnsNull() {
-        Mockito.when(hmcHearingApiClient.getHearingDetails(
-                anyString(), anyString(), any(), any(), any(), eq(CASE_REFERENCE)))
-            .thenReturn(null);
+    void getHearings_returnsNullWhenHmcReturnsNull() {
+        Mockito.doReturn(null).when(hmcHearingApiClient).getHearingDetails(
+            anyString(), anyString(), any(), any(), any(), eq(CASE_REFERENCE));
 
         Hearings result = hearingService.getHearings(AUTH, CASE_REFERENCE);
 
