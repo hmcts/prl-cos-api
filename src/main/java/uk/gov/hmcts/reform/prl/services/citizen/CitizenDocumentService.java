@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -17,7 +16,6 @@ import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentCategory;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentRequest;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDateTime;
@@ -39,18 +37,13 @@ import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 public class CitizenDocumentService {
 
     private final ObjectMapper objectMapper;
-    private final AllTabServiceImpl allTabService;
+    private final CitizenUserCaseUpdateService citizenUserCaseUpdateService;
     private final UserService userService;
     private final ManageDocumentsService manageDocumentsService;
 
     public CaseDetails citizenSubmitDocuments(String authorisation, DocumentRequest documentRequest) {
 
         String caseId = documentRequest.getCaseId();
-
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
-            = allTabService.getStartUpdateForSpecificEvent(String.valueOf(caseId), CITIZEN_CASE_UPDATE.getValue());
-        Map<String, Object> updatedCaseDataMap = startAllTabsUpdateDataContent.caseDataMap();
-        CaseData updatedCaseData = startAllTabsUpdateDataContent.caseData();
 
         UserDetails userDetails = userService.getUserDetails(authorisation);
 
@@ -67,44 +60,59 @@ public class CitizenDocumentService {
                 ))
                 .toList();
 
-            if (DocumentCategory.FM5_STATEMENTS.equals(category)) {
-                for (QuarantineLegalDoc quarantineLegalDoc : quarantineLegalDocs) {
-                    String userRole = CaseUtils.getUserRole(userDetails);
-                    manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
-                        quarantineLegalDoc,
-                        userDetails,
+            return citizenUserCaseUpdateService.updateCaseUsingCitizenUserAuth(
+                authorisation,
+                caseId,
+                CITIZEN_CASE_UPDATE,
+                startAllTabsUpdateDataContent -> {
+                    Map<String, Object> updatedCaseDataMap = startAllTabsUpdateDataContent.caseDataMap();
+                    CaseData updatedCaseData = startAllTabsUpdateDataContent.caseData();
+
+                    updateCitizenDocuments(
+                        category,
+                        quarantineLegalDocs,
                         updatedCaseData,
                         updatedCaseDataMap,
-                        userRole
+                        userDetails
                     );
                 }
-            } else {
-                //move all documents to citizen quarantine except fm5 documents
-                manageDocumentsService.setFlagsForWaTask(
-                    updatedCaseData,
-                    updatedCaseDataMap,
-                    CITIZEN,
-                    quarantineLegalDocs.get(0)
-                );
-                updatedCaseDataMap.remove(NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS);
-
-                moveCitizenDocumentsToQuarantineTab(
-                    quarantineLegalDocs,
-                    updatedCaseDataMap
-                );
-            }
-
-            //update all tabs
-            return allTabService.submitAllTabsUpdate(
-                startAllTabsUpdateDataContent.authorisation(),
-                caseId,
-                startAllTabsUpdateDataContent.startEventResponse(),
-                startAllTabsUpdateDataContent.eventRequestData(),
-                updatedCaseDataMap
             );
 
         }
         return null;
+    }
+
+    private void updateCitizenDocuments(DocumentCategory category,
+                                        List<QuarantineLegalDoc> quarantineLegalDocs,
+                                        CaseData updatedCaseData,
+                                        Map<String, Object> updatedCaseDataMap,
+                                        UserDetails userDetails) {
+        if (DocumentCategory.FM5_STATEMENTS.equals(category)) {
+            for (QuarantineLegalDoc quarantineLegalDoc : quarantineLegalDocs) {
+                String userRole = CaseUtils.getUserRole(userDetails);
+                manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
+                    quarantineLegalDoc,
+                    userDetails,
+                    updatedCaseData,
+                    updatedCaseDataMap,
+                    userRole
+                );
+            }
+        } else {
+            //move all documents to citizen quarantine except fm5 documents
+            manageDocumentsService.setFlagsForWaTask(
+                updatedCaseData,
+                updatedCaseDataMap,
+                CITIZEN,
+                quarantineLegalDocs.get(0)
+            );
+            updatedCaseDataMap.remove(NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS);
+
+            moveCitizenDocumentsToQuarantineTab(
+                quarantineLegalDocs,
+                updatedCaseDataMap
+            );
+        }
     }
 
     private void moveCitizenDocumentsToQuarantineTab(List<QuarantineLegalDoc> quarantineLegalDocs,

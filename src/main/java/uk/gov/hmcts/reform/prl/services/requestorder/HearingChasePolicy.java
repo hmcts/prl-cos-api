@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.requestorder;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -16,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.services.workingdays.WorkingDayIndicator;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.HearingLabelUtils;
 
 import java.time.LocalDate;
@@ -36,21 +36,31 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 class HearingChasePolicy {
 
     private static final String C100 = "C100";
 
     private final WorkingDayIndicator workingDayIndicator;
 
-    @Value("${request-order-task.cadence-working-days.c100}")
-    private int c100CadenceWorkingDays;
+    private final int c100CadenceWorkingDays;
 
-    @Value("${request-order-task.cadence-working-days.fl401}")
-    private int fl401CadenceWorkingDays;
+    private final int fl401CadenceWorkingDays;
 
-    @Value("#{'${hearing_component.hearingStatusesToFilter}'.split(',')}")
-    private List<String> hearingStatusesToFilter;
+    private final List<String> hearingStatusesToFilter;
+
+    private final LocalDate releaseDate;
+
+    public HearingChasePolicy(WorkingDayIndicator workingDayIndicator,
+                              @Value("${request-order-task.cadence-working-days.c100}") int c100CadenceWorkingDays,
+                              @Value("${request-order-task.cadence-working-days.fl401}") int fl401CadenceWorkingDays,
+                              @Value("#{'${hearing_component.hearingStatusesToFilter}'.split(',')}") List<String> hearingStatusesToFilter,
+                              @Value("${request-order-task.release-date}") String releaseDateStr) {
+        this.workingDayIndicator = workingDayIndicator;
+        this.c100CadenceWorkingDays = c100CadenceWorkingDays;
+        this.fl401CadenceWorkingDays = fl401CadenceWorkingDays;
+        this.hearingStatusesToFilter = hearingStatusesToFilter;
+        this.releaseDate = CommonUtils.parseDate(releaseDateStr).orElse(LocalDate.now());
+    }
 
     static String hearingIdOf(CaseHearing hearing) {
         return hearing.getHearingID() == null ? null : String.valueOf(hearing.getHearingID());
@@ -64,15 +74,18 @@ class HearingChasePolicy {
         if (!allowedStatuses().contains(hearing.getHmcStatus())) {
             return ChaseDecision.skipStatusNotInFilter(hearing.getHmcStatus());
         }
+        LocalDate hearingEndDate = computeHearingEndDate(hearing);
+        if (releaseDate.isAfter(hearingEndDate)) {
+            return ChaseDecision.skipHearingDateIsLessThanReleaseDate(hearingEndDate, hearingId, releaseDate);
+        }
         if (isHearingMappedToOrder(caseData, hearing)) {
             return ChaseDecision.skipLinkedOrderExists();
         }
 
-        LocalDate hearingEndDate = computeHearingEndDate(hearing);
         int cadence = cadenceFor(caseData.getCaseTypeOfApplication());
 
         int workingDaysSinceHearingEndDate = workingDayIndicator.workingDaysBetween(hearingEndDate, cronDate);
-        if (hearingEndDate != null && (cadence > 0 && workingDaysSinceHearingEndDate % cadence != 0)) {
+        if ((workingDaysSinceHearingEndDate == 0) || (hearingEndDate != null && (cadence > 0 && workingDaysSinceHearingEndDate % cadence != 0))) {
             return ChaseDecision.skipHearingNotAtCadence(hearingEndDate, cadence);
         }
 
