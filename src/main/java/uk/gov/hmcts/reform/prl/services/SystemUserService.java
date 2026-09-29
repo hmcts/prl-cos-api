@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -71,13 +72,9 @@ public class SystemUserService {
     }
 
     private void validateCredentials(String username, String password) {
-        if (isBlank(username) || isBlank(password)) {
+        if (StringUtils.isBlank(username) || StringUtils.isBlank(password)) {
             throw new IllegalStateException("Missing IDAM credentials for hearing CFT user");
         }
-    }
-
-    private boolean isBlank(String value) {
-        return value == null || value.trim().isEmpty();
     }
 
     private void sleepBeforeRetry() {
