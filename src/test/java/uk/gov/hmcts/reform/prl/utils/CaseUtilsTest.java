@@ -70,6 +70,10 @@ class CaseUtilsTest {
     @Test
     void shouldUnwrapApplicantRespondentOrganisationPolicies() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.findAndRegisterModules();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
         OrganisationPolicy applicantPolicy = OrganisationPolicy.builder()
             .organisation(Organisation.builder()
                               .organisationID("ORG-123")
