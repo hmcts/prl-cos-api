@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.prl.models.caseaccess.RemoveUserRolesRequest;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 
