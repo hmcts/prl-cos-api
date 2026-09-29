@@ -66,23 +66,11 @@ public class CcdDataStoreService {
         String userId = userDetails.getId();
         FindUserCaseRolesRequest request = buildFindUserCaseRolesRequest(caseId, userId);
 
-        // TEMP DEBUG: local-dev diagnostics for role lookup behaviour.
-        log.info("TEMP-DEBUG findUserCaseRoles request: caseId={}, userId={}", caseId, userId);
-
-        FindUserCaseRolesResponse response = caseRoleClient.findUserCaseRoles(
+        return caseRoleClient.findUserCaseRoles(
             authorisation,
             authTokenGenerator.generate(),
             request
         );
-
-        int roleCount = response != null && response.getCaseUsers() != null ? response.getCaseUsers().size() : 0;
-        String returnedRoles = response != null && response.getCaseUsers() != null
-            ? response.getCaseUsers().stream().map(CaseUser::getCaseRole).collect(Collectors.joining(", "))
-            : "";
-        log.info("TEMP-DEBUG findUserCaseRoles response: caseId={}, userId={}, roleCount={}, roles=[{}]",
-                 caseId, userId, roleCount, returnedRoles);
-
-        return response;
     }
 
     private FindUserCaseRolesRequest buildFindUserCaseRolesRequest(String caseId, String userId) {

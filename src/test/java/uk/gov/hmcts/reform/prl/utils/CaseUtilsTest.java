@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.utils;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -11,7 +12,10 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.Organisation;
+import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ApplicantRespondentOrgPolicies;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 
@@ -61,6 +65,46 @@ class CaseUtilsTest {
         assertThat(caseData.getState()).isEqualTo(State.SUBMITTED_PAID);
         assertThat(caseData.getCreatedDate()).isNotNull();
         assertThat(caseData.getLastModifiedDate()).isNotNull();
+    }
+
+    @Test
+    void shouldUnwrapApplicantRespondentOrganisationPolicies() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        OrganisationPolicy applicantPolicy = OrganisationPolicy.builder()
+            .organisation(Organisation.builder()
+                              .organisationID("ORG-123")
+                              .organisationName("Test organisation")
+                              .build())
+            .orgPolicyReference("applicant-policy-ref")
+            .orgPolicyCaseAssignedRole("[C100APPLICANTSOLICITOR1]")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .applicantRespondentOrgPolicies(ApplicantRespondentOrgPolicies.builder()
+                                                .caApplicant1Policy(applicantPolicy)
+                                                .build())
+            .build();
+
+        JsonNode json = objectMapper.readTree(objectMapper.writeValueAsString(caseData));
+
+        // The crucial JsonUnwrapped assertion:
+        assertThat(json.has("caApplicant1Policy")).isTrue();
+        assertThat(json.has("applicantRespondentOrgPolicies")).isFalse();
+
+        // Verify the CCD policy data has not been altered.
+        assertThat(json.at("/caApplicant1Policy/OrgPolicyReference").asText())
+            .isEqualTo("applicant-policy-ref");
+        assertThat(json.at("/caApplicant1Policy/OrgPolicyCaseAssignedRole").asText())
+            .isEqualTo("[C100APPLICANTSOLICITOR1]");
+        assertThat(json.at("/caApplicant1Policy/Organisation/OrganisationID").asText())
+            .isEqualTo("ORG-123");
+
+        // Also prove incoming flattened CCD JSON binds back to the wrapper.
+        CaseData deserialised = objectMapper.readValue(json.toString(), CaseData.class);
+
+        assertThat(deserialised.getApplicantRespondentOrgPolicies()
+                       .getCaApplicant1Policy().getOrgPolicyReference())
+            .isEqualTo("applicant-policy-ref");
     }
 
     @ParameterizedTest
