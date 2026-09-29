@@ -109,7 +109,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_WELSH_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_CAN_VIEW_ONLINE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
@@ -132,11 +131,13 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_APPLICATION
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C6A_OTHER_PARTIES_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C6A_OTHER_PARTIES_ORDER_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CAFCASS_CYMRU_SERVED_OPTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CONFIDENTIAL_DETAILS_PRESENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CYMRU_EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_DOCUMENT_PLACE_HOLDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_NOTICE_SAFETY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_ORDER_LIST_EMPTY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PARTIES;
@@ -560,7 +561,7 @@ public class ServiceOfApplicationService {
 
         if ("No".equalsIgnoreCase(selection) && hasRecipients(soa)) {
             List<Document> filteredDocs = staticDocs.stream()
-                .filter(d -> !C9_DOCUMENT_FILENAME.equalsIgnoreCase(d.getDocumentFileName())).toList();
+                .filter(d -> !isC9Document(d)).toList();
             sendNotificationsSoaC100NonPersonal(caseData, auth, emails, bulk, filteredDocs);
             caseDataMap.put(UNSERVED_APPLICANT_LIP_RESPONDENT_PACK, null);
             return responsibleParty;
@@ -790,7 +791,7 @@ public class ServiceOfApplicationService {
                 SERVED_PARTY_APPLICANT
             );
         }
-        packFdocs = packFdocs.stream().filter(d -> !SOA_FL415_FILENAME.equalsIgnoreCase(d.getDocumentFileName()))
+        packFdocs = packFdocs.stream().filter(d -> !isFL415Document(d))
             .toList();
         caseDataMap.put(UNSERVED_APPLICANT_LIP_RESPONDENT_PACK, SoaPack.builder()
             .packDocument(wrapElements(packFdocs))
@@ -917,7 +918,7 @@ public class ServiceOfApplicationService {
     private void generateUnservedRespondentPackDaCbCa(CaseData caseData, String authorization, List<Document> staticDocs,
                                                       Map<String, Object> caseDataMap, String personalServiceBy) {
         List<Element<CoverLetterMap>> coverLetterMap = new ArrayList<>();
-        staticDocs = staticDocs.stream().filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME))
+        staticDocs = staticDocs.stream().filter(d -> !isFL415Document(d))
             .toList();
         List<Document> packdDocs = getRespondentPacksForDaPersonaServiceByCourtAdminAndBailiff(
             caseData,
@@ -1057,7 +1058,7 @@ public class ServiceOfApplicationService {
                                                         List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                         List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                         List<Document> staticDocs) {
-        staticDocs = staticDocs.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME)).toList();
+        staticDocs = staticDocs.stream().filter(d -> !isFL415Document(d)).toList();
         List<Element<PartyDetails>> applicantFl401 = Collections.singletonList(element(
             caseData.getApplicantsFL401().getPartyId(),
             caseData.getApplicantsFL401()
@@ -1589,7 +1590,7 @@ public class ServiceOfApplicationService {
                                                                       List<Document> packDocs) {
         //C9 to be excluded for personal service court admin/bailiff
         List<Document> packDocsWithoutC9 = packDocs.stream()
-            .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME)).toList();
+            .filter(d -> !isC9Document(d)).toList();
 
         //Notify applicants based on contact preference
         caseData.getApplicants().forEach(applicant -> {
@@ -1631,7 +1632,7 @@ public class ServiceOfApplicationService {
                                                                       List<Document> packDocs) {
         //C9 to be excluded for personal service court admin/bailiff
         List<Document> packDocsWithoutC9 = packDocs.stream()
-            .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME)).toList();
+            .filter(d -> !isC9Document(d)).toList();
         //Notify applicants based on contact preference
         caseData.getApplicants().forEach(applicant -> {
             if (!CaseUtils.hasLegalRepresentation(applicant.getValue())) {
@@ -2599,7 +2600,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(staticDocs.stream()
-                        .filter(d -> !(d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME)
+                        .filter(d -> !(isC9Document(d)
                             || d.getDocumentFileName().equalsIgnoreCase(SOA_NOTICE_SAFETY))
                         ).toList());
         docs.addAll(getSoaSelectedOrders(caseData));
@@ -2631,7 +2632,7 @@ public class ServiceOfApplicationService {
         // Annex Y to be excluded
         docs.addAll(staticDocs);
         docs = docs.stream()
-                .filter(d -> !(d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME)
+                .filter(d -> !(isC9Document(d)
                 || d.getDocumentFileName().equalsIgnoreCase(PrlAppsConstants.C1A_DOCUMENT_FILENAME)
             || d.getDocumentFileName().equalsIgnoreCase(PrlAppsConstants.C1A_DOCUMENT_WELSH_FILENAME)))
                 .toList();
@@ -2698,7 +2699,7 @@ public class ServiceOfApplicationService {
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(staticDocs.stream()
                         .filter(d -> !(d.getDocumentFileName().equalsIgnoreCase(SOA_NOTICE_SAFETY)
-                        || d.getDocumentFileName().equalsIgnoreCase(C9_DOCUMENT_FILENAME)))
+                        || isC9Document(d)))
                         .toList());
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         docs.addAll(getSoaSelectedOrders(caseData));
@@ -2711,7 +2712,7 @@ public class ServiceOfApplicationService {
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         docs.addAll(staticDocs.stream()
-                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME)).toList());
+                        .filter(d -> !isC9Document(d)).toList());
         return docs;
     }
 
@@ -2725,7 +2726,7 @@ public class ServiceOfApplicationService {
                             C1A_BLANK_DOCUMENT_FILENAME) || d.getDocumentFileName().equalsIgnoreCase(SOA_NOTICE_SAFETY)))
                         .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
                             C1A_BLANK_DOCUMENT_WELSH_FILENAME))
-                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME))
+                        .filter(d -> !isC9Document(d))
                         .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
                             C7_BLANK_DOCUMENT_FILENAME)).toList());
         return docs;
@@ -2785,7 +2786,7 @@ public class ServiceOfApplicationService {
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getWitnessStatement(caseData));
         docs.addAll(staticDocs.stream()
-                                    .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME)).toList());
+                                    .filter(d -> !isFL415Document(d)).toList());
         docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         return docs;
@@ -2796,7 +2797,7 @@ public class ServiceOfApplicationService {
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getWitnessStatement(caseData));
         docs.addAll(staticDocs.stream()
-                                    .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME)).toList());
+                                    .filter(d -> !isFL415Document(d)).toList());
         docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         return docs;
@@ -2826,7 +2827,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(staticDocs.stream()
-                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME)).toList());
+                        .filter(d -> !isFL415Document(d)).toList());
         docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         return docs;
@@ -3553,8 +3554,7 @@ public class ServiceOfApplicationService {
                                                                       Map<String, Object> caseDataUpdated,
                                                                       CaseData caseData,
                                                                       List<Document> c100StaticDocs) {
-        c100StaticDocs = c100StaticDocs.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(
-            C9_DOCUMENT_FILENAME)).collect(
+        c100StaticDocs = c100StaticDocs.stream().filter(d -> !isC9Document(d)).collect(
             Collectors.toList());
         log.info("serving applicants or respondents");
         List<DynamicMultiselectListElement> selectedApplicants = getSelectedApplicantsOrRespondents(
@@ -3637,7 +3637,7 @@ public class ServiceOfApplicationService {
                                                                                                         .getSoaRecipientsOptions().getValue());
         respondentFl401 = getSelectedPartyElements(respondentFl401, caseData.getServiceOfApplication()
             .getSoaRecipientsOptions().getValue());
-        fl401StaticDocs = fl401StaticDocs.stream().filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME))
+        fl401StaticDocs = fl401StaticDocs.stream().filter(d -> !isFL415Document(d))
             .toList();
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
@@ -3700,7 +3700,7 @@ public class ServiceOfApplicationService {
         List<Document> packEDocs = new ArrayList<>();
         packEDocs.addAll(applicantCoverLetters);
         packEDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.E, fl401StaticDocs));
-        fl401StaticDocs = fl401StaticDocs.stream().filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME))
+        fl401StaticDocs = fl401StaticDocs.stream().filter(d -> !isFL415Document(d))
             .toList();
         List<Document> packFDocs = new ArrayList<>();
         Element<PartyDetails> respondent = element(caseData.getRespondentsFL401().getPartyId(), caseData.getRespondentsFL401());
@@ -3739,7 +3739,7 @@ public class ServiceOfApplicationService {
             fl401StaticDocs,
             coverLetterMap
         );
-        packdDocs = packdDocs.stream().filter(d -> !SOA_FL415_FILENAME.equalsIgnoreCase(d.getDocumentFileName()))
+        packdDocs = packdDocs.stream().filter(d -> !isFL415Document(d))
             .toList();
         final SoaPack unservedRespondentPack = SoaPack.builder().packDocument(wrapElements(packdDocs))
             .partyIds(wrapElements(caseData.getRespondentsFL401().getPartyId().toString()))
@@ -3786,7 +3786,7 @@ public class ServiceOfApplicationService {
             .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptions().toString())
             .build();
         caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
-        fl401StaticDocs = fl401StaticDocs.stream().filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME))
+        fl401StaticDocs = fl401StaticDocs.stream().filter(d -> !isFL415Document(d))
             .toList();
         List<Document> packBDocs = getNotificationPack(caseData, PrlAppsConstants.B, fl401StaticDocs);
         Element<PartyDetails> respondent = Element.<PartyDetails>builder()
@@ -4527,4 +4527,17 @@ public class ServiceOfApplicationService {
             && party.getValue().getEmail().equalsIgnoreCase(
             caseData.getUserInfo().get(0).getValue().getEmailAddress());
     }
+
+    private boolean isC9Document(Document document) {
+        return document != null
+            && (SOA_C9_PERSONAL_SERVICE_FILENAME.equalsIgnoreCase(document.getDocumentFileName())
+            || SOA_C9_PERSONAL_SERVICE_FILENAME_WELSH.equalsIgnoreCase(document.getDocumentFileName()));
+    }
+
+    private boolean isFL415Document(Document document) {
+        return document != null
+            && (SOA_FL415_FILENAME.equalsIgnoreCase(document.getDocumentFileName())
+            || SOA_FL415_FILENAME_WELSH.equalsIgnoreCase(document.getDocumentFileName()));
+    }
+
 }
