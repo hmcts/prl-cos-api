@@ -140,7 +140,7 @@ The "Emergency" Skip: If the gate is ON but you need to bypass it for a single c
 UI Refresh: If you toggle the gate in the terminal and IntelliJ doesn't seem to notice, right-click the project root and select "Reload from Disk".
 
 ### ⚓ Git Pre-commit Hook (Opt-In)
-A Git Pre-commit Hook is included to prevent "Red" builds in SonarQube. By default, local commits remain fast and skip the coverage check.
+The shared coverage plugin provides a Git pre-commit hook installer to help prevent "Red" builds in SonarQube. By default, local commits remain fast and skip the coverage check.
 
 * **Installation:** Run `./gradlew installCoverageGateHook` to install or refresh the local hook.
 * **Enable the gate:** Run `gate-on`. Commits will then run `./gradlew testWithCoverage`.

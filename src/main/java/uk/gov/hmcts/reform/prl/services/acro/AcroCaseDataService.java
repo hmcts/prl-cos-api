@@ -239,7 +239,7 @@ public class AcroCaseDataService {
                                                         LocalDateTime endDateForSearch) {
         AcroCaseData caseData = acroCaseDetail.getCaseData();
         caseData.getOrderCollection().stream().map(Element::getValue)
-            .filter(o -> o.getOrderTypeId().equals(NON_MOLESTATION_ORDER_FL_404_A)
+            .filter(o -> NON_MOLESTATION_ORDER_FL_404_A.equals(o.getOrderTypeId())
                 && o.getDateCreated().isAfter(startDateForSearch)
                 && o.getDateCreated().isBefore(endDateForSearch)
             )
