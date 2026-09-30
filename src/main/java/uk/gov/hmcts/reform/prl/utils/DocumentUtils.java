@@ -42,7 +42,7 @@ public class DocumentUtils {
             .build();
     }
 
-    public static Document toCoverSheetDocument(GeneratedDocumentInfo generatedDocumentInfo, String fileName) {
+    public static Document toDocumentWithFilename(GeneratedDocumentInfo generatedDocumentInfo, String fileName) {
         if (null != generatedDocumentInfo) {
             return Document.builder().documentUrl(generatedDocumentInfo.getUrl())
                 .documentHash(generatedDocumentInfo.getHashToken())

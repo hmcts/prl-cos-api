@@ -9,6 +9,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.prl.config.BundleCategoryConfig;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.bundle.DocumentProperties;
 import uk.gov.hmcts.reform.prl.models.bundle.FilterProperties;
 import uk.gov.hmcts.reform.prl.models.bundle.FolderProperties;
@@ -123,6 +125,17 @@ class BundleCreateRequestByCategoryMapperTest {
         CaseData c100CaseData = CaseData.builder()
             .id(123456789123L)
             .applicantName("ApplicantFirstNameAndLastName")
+            .orderCollection(List.of(ElementUtils.element(OrderDetails.builder()
+                                                       .orderTypeId("Notice of proceedings")
+                                                       .otherDetails(OtherOrderDetails.builder()
+                                                                         .orderMadeDate("21 Aug 2026")
+                                                                         .build())
+                                                       .orderDocument(Document.builder()
+                                                                          .documentUrl("documentURL")
+                                                                          .documentBinaryUrl("binaryUrl")
+                                                                          .documentFileName("fileName")
+                                                                          .build())
+                                                       .build())))
             .citizenResponseC7DocumentList(List.of(Element.<ResponseDocuments>builder().id(UUID.randomUUID())
                                                        .value(responseDocuments).build()))
             .additionalApplicationsBundle(List.of(ElementUtils.element(additionalApplicationsBundleWithSubmittedState),
@@ -163,6 +176,11 @@ class BundleCreateRequestByCategoryMapperTest {
             .map(BundlingRequestDocument::getDocumentFileName).toList();
 
         assertEquals(5,allOtherDocs.size());
+        List<String> orderDocs = bundleCreateRequest.getCaseDetails().getCaseData().getData().getOrders().stream()
+            .map(Element::getValue)
+            .map(BundlingRequestDocument::getDocumentFileName).toList();
+
+        assertEquals(List.of("fileName : 21-08-26"), orderDocs);
 
 
     }

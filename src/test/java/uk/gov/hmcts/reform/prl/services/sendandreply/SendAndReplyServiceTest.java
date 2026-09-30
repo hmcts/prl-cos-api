@@ -795,7 +795,7 @@ public class SendAndReplyServiceTest {
             Mockito.any(),
             Mockito.any()
         )).thenReturn(categoriesAndDocuments);
-        when(hearingService.getFutureHearings(anyString(), anyString())).thenReturn(futureHearings);
+        when(hearingService.getHearings(anyString(), anyString())).thenReturn(futureHearings);
 
         Map<String, String> refDataCategoryValueMap = new HashMap<>();
 
@@ -807,6 +807,12 @@ public class SendAndReplyServiceTest {
             sendAndReplyService, "serviceCode", "serviceCode");
         ReflectionTestUtils.setField(
             sendAndReplyService, "hearingTypeCategoryId", "hearingTypeCategoryId");
+        ReflectionTestUtils.setField(
+            sendAndReplyService, "sendAndReplyFutureHearingStatuses",
+            List.of("LISTED", "AWAITING_ACTUALS"));
+        ReflectionTestUtils.setField(
+            sendAndReplyService, "sendAndReplyPastHearingStatuses",
+            List.of("COMPLETED", "AWAITING_ACTUALS"));
 
 
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
@@ -826,7 +832,7 @@ public class SendAndReplyServiceTest {
         DynamicList legalAdviserList = mock(DynamicList.class);
         when(refDataUserService.getStaffDynamicList(legalAdviserDynamicListElementConverter)).thenReturn(legalAdviserList);
 
-        CaseData updatedCaseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, auth);
+        CaseData updatedCaseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, auth, false, null);
 
         assertNotNull(updatedCaseData);
         assertEquals("123 - hearingType1", updatedCaseData.getSendOrReplyMessage().getSendMessageObject()
@@ -869,7 +875,7 @@ public class SendAndReplyServiceTest {
             .build();
         when(userService.getUserDetails(auth)).thenReturn(userDetails);
 
-        CaseData updatedCaseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, auth);
+        CaseData updatedCaseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, auth, false, null);
 
         assertNotNull(updatedCaseData);
         assertEquals("categoryId->documentURL", updatedCaseData.getSendOrReplyMessage()
@@ -3586,8 +3592,177 @@ public class SendAndReplyServiceTest {
                         .build()))
                     .build()))
                 .build();
-        when(hearingService.getFutureHearings(auth, "1234")).thenReturn(futureHearings);
+        when(hearingService.getHearings(auth, "1234")).thenReturn(futureHearings);
         Assert.assertNotNull(sendAndReplyService.getFutureHearingDynamicList(auth,serviceAuthToken,"1234"));
+    }
+
+    @Test
+    public void getFutureHearingDynamicListExcludesPastStatuses() {
+        ReflectionTestUtils.setField(sendAndReplyService, "serviceCode", "serviceCode");
+        ReflectionTestUtils.setField(sendAndReplyService, "hearingTypeCategoryId", "hearingTypeCategoryId");
+        ReflectionTestUtils.setField(sendAndReplyService, "sendAndReplyFutureHearingStatuses", List.of("LISTED"));
+        ReflectionTestUtils.setField(sendAndReplyService, "sendAndReplyPastHearingStatuses",
+            List.of("COMPLETED", "AWAITING_ACTUALS"));
+
+        HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
+            .hearingStartDateTime(LocalDateTime.now().plusDays(5))
+            .build();
+        Hearings hearings = Hearings.hearingsWith().caseRef("1234").hmctsServiceCode("ABA5")
+            .caseHearings(List.of(
+                CaseHearing.caseHearingWith().hearingID(111L).hmcStatus("LISTED")
+                    .hearingType("hearingType1").hearingDaySchedule(List.of(schedule)).build(),
+                CaseHearing.caseHearingWith().hearingID(222L).hmcStatus("COMPLETED")
+                    .hearingType("hearingType2").hearingDaySchedule(List.of(schedule)).build(),
+                CaseHearing.caseHearingWith().hearingID(333L).hmcStatus("AWAITING_ACTUALS")
+                    .hearingType("hearingType3").hearingDaySchedule(List.of(schedule)).build()))
+            .build();
+        when(hearingService.getHearings(auth, "1234")).thenReturn(hearings);
+        when(refDataService.getRefDataCategoryValueMap(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(Map.of("hearingType1", "val1", "hearingType2", "val2", "hearingType3", "val3"));
+
+        DynamicList result = sendAndReplyService.getFutureHearingDynamicList(auth, serviceAuthToken, "1234");
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(1, result.getListItems().size());
+        Assert.assertEquals("111 - hearingType1", result.getListItems().getFirst().getCode());
+    }
+
+    @Test
+    public void getFutureHearingDynamicListReturnsEmptyDynamicListWhenNoHearingsMatchAllowedStatuses() {
+        ReflectionTestUtils.setField(sendAndReplyService, "serviceCode", "serviceCode");
+        ReflectionTestUtils.setField(sendAndReplyService, "hearingTypeCategoryId", "hearingTypeCategoryId");
+        ReflectionTestUtils.setField(sendAndReplyService, "sendAndReplyFutureHearingStatuses", List.of("LISTED"));
+        ReflectionTestUtils.setField(sendAndReplyService, "sendAndReplyPastHearingStatuses",
+            List.of("COMPLETED", "AWAITING_ACTUALS"));
+
+        HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
+            .hearingStartDateTime(LocalDateTime.now().plusDays(5))
+            .build();
+        Hearings hearings = Hearings.hearingsWith().caseRef("1234").hmctsServiceCode("ABA5")
+            .caseHearings(List.of(
+                CaseHearing.caseHearingWith().hearingID(444L).hmcStatus("CANCELLED")
+                    .hearingType("hearingType4").hearingDaySchedule(List.of(schedule)).build(),
+                CaseHearing.caseHearingWith().hearingID(555L).hmcStatus("EXCEPTION")
+                    .hearingType("hearingType5").hearingDaySchedule(List.of(schedule)).build()))
+            .build();
+        when(hearingService.getHearings(auth, "1234")).thenReturn(hearings);
+
+        DynamicList result = sendAndReplyService.getFutureHearingDynamicList(auth, serviceAuthToken, "1234");
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(DynamicListElement.EMPTY, result.getValue());
+        Assert.assertNull(result.getListItems());
+    }
+
+    @Test
+    public void populateDynamicListsForSendAndReplyLocksDropdownToProvidedHearingId() {
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        ReflectionTestUtils.setField(sendAndReplyService, "serviceCode", "serviceCode");
+        ReflectionTestUtils.setField(sendAndReplyService, "hearingTypeCategoryId", "hearingTypeCategoryId");
+        ReflectionTestUtils.setField(sendAndReplyService, "sendAndReplyFutureHearingStatuses", List.of("LISTED"));
+        ReflectionTestUtils.setField(sendAndReplyService, "sendAndReplyPastHearingStatuses",
+            List.of("COMPLETED", "AWAITING_ACTUALS"));
+
+        HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
+            .hearingStartDateTime(LocalDateTime.now().plusDays(5)).build();
+        Hearings hearings = Hearings.hearingsWith().caseRef("123").hmctsServiceCode("ABA5")
+            .caseHearings(List.of(
+                CaseHearing.caseHearingWith().hearingID(111L).hmcStatus("LISTED")
+                    .hearingType("hearingType1").hearingDaySchedule(List.of(schedule)).build(),
+                CaseHearing.caseHearingWith().hearingID(222L).hmcStatus("COMPLETED")
+                    .hearingType("hearingType2").hearingDaySchedule(List.of(schedule)).build()))
+            .build();
+        when(hearingService.getHearings(anyString(), anyString())).thenReturn(hearings);
+        when(coreCaseDataApi.getCategoriesAndDocuments(any(), any(), any()))
+            .thenReturn(new CategoriesAndDocuments(1, List.of(), List.of()));
+        when(refDataService.getRefDataCategoryValueMap(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(Map.of("hearingType1", "val1", "hearingType2", "val2"));
+        DynamicList legalAdviserList = mock(DynamicList.class);
+        when(refDataUserService.getStaffDynamicList(legalAdviserDynamicListElementConverter))
+            .thenReturn(legalAdviserList);
+
+        CaseData updated = sendAndReplyService
+            .populateDynamicListsForSendAndReply(caseData, auth, true, "222");
+
+        DynamicList lockedHearings = updated.getSendOrReplyMessage().getSendMessageObject().getFutureHearingsList();
+        Assert.assertNotNull(lockedHearings);
+        Assert.assertEquals(1, lockedHearings.getListItems().size());
+        Assert.assertEquals("222 - hearingType2", lockedHearings.getListItems().getFirst().getCode());
+        Assert.assertNotNull(lockedHearings.getValue());
+        Assert.assertEquals("222 - hearingType2", lockedHearings.getValue().getCode());
+    }
+
+    @Test
+    public void populateDynamicListsForSendAndReplyFallsBackToFullListWhenHearingIdNotFound() {
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        ReflectionTestUtils.setField(sendAndReplyService, "serviceCode", "serviceCode");
+        ReflectionTestUtils.setField(sendAndReplyService, "hearingTypeCategoryId", "hearingTypeCategoryId");
+        ReflectionTestUtils.setField(sendAndReplyService, "sendAndReplyFutureHearingStatuses", List.of("LISTED"));
+        ReflectionTestUtils.setField(sendAndReplyService, "sendAndReplyPastHearingStatuses",
+            List.of("COMPLETED", "AWAITING_ACTUALS"));
+
+        HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
+            .hearingStartDateTime(LocalDateTime.now().plusDays(5)).build();
+        Hearings hearings = Hearings.hearingsWith().caseRef("123").hmctsServiceCode("ABA5")
+            .caseHearings(List.of(
+                CaseHearing.caseHearingWith().hearingID(111L).hmcStatus("LISTED")
+                    .hearingType("hearingType1").hearingDaySchedule(List.of(schedule)).build(),
+                CaseHearing.caseHearingWith().hearingID(222L).hmcStatus("COMPLETED")
+                    .hearingType("hearingType2").hearingDaySchedule(List.of(schedule)).build()))
+            .build();
+        when(hearingService.getHearings(anyString(), anyString())).thenReturn(hearings);
+        when(coreCaseDataApi.getCategoriesAndDocuments(any(), any(), any()))
+            .thenReturn(new CategoriesAndDocuments(1, List.of(), List.of()));
+        when(refDataService.getRefDataCategoryValueMap(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(Map.of("hearingType1", "val1", "hearingType2", "val2"));
+        DynamicList legalAdviserList = mock(DynamicList.class);
+        when(refDataUserService.getStaffDynamicList(legalAdviserDynamicListElementConverter))
+            .thenReturn(legalAdviserList);
+
+        CaseData updated = sendAndReplyService
+            .populateDynamicListsForSendAndReply(caseData, auth, true, "999");
+
+        DynamicList fallbackHearings = updated.getSendOrReplyMessage().getSendMessageObject().getFutureHearingsList();
+        Assert.assertNotNull(fallbackHearings);
+        Assert.assertEquals(2, fallbackHearings.getListItems().size());
+    }
+
+    @Test
+    public void getAllHearingsDynamicListIncludesBothFutureAndPastStatuses() {
+        ReflectionTestUtils.setField(sendAndReplyService, "serviceCode", "serviceCode");
+        ReflectionTestUtils.setField(sendAndReplyService, "hearingTypeCategoryId", "hearingTypeCategoryId");
+        ReflectionTestUtils.setField(sendAndReplyService, "sendAndReplyFutureHearingStatuses", List.of("LISTED"));
+        ReflectionTestUtils.setField(sendAndReplyService, "sendAndReplyPastHearingStatuses",
+            List.of("COMPLETED", "AWAITING_ACTUALS"));
+
+        HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
+            .hearingStartDateTime(LocalDateTime.now().plusDays(5))
+            .build();
+        Hearings hearings = Hearings.hearingsWith().caseRef("1234").hmctsServiceCode("ABA5")
+            .caseHearings(List.of(
+                CaseHearing.caseHearingWith().hearingID(111L).hmcStatus("LISTED")
+                    .hearingType("hearingType1").hearingDaySchedule(List.of(schedule)).build(),
+                CaseHearing.caseHearingWith().hearingID(222L).hmcStatus("COMPLETED")
+                    .hearingType("hearingType2").hearingDaySchedule(List.of(schedule)).build(),
+                CaseHearing.caseHearingWith().hearingID(333L).hmcStatus("AWAITING_ACTUALS")
+                    .hearingType("hearingType3").hearingDaySchedule(List.of(schedule)).build(),
+                CaseHearing.caseHearingWith().hearingID(444L).hmcStatus("CANCELLED")
+                    .hearingType("hearingType4").hearingDaySchedule(List.of(schedule)).build()))
+            .build();
+        when(hearingService.getHearings(auth, "1234")).thenReturn(hearings);
+        when(refDataService.getRefDataCategoryValueMap(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(Map.of("hearingType1", "val1", "hearingType2", "val2",
+                              "hearingType3", "val3", "hearingType4", "val4"));
+
+        DynamicList result = sendAndReplyService.getAllHearingsDynamicList(auth, serviceAuthToken, "1234");
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(3, result.getListItems().size());
+        List<String> codes = result.getListItems().stream().map(DynamicListElement::getCode).toList();
+        Assert.assertTrue(codes.contains("111 - hearingType1"));
+        Assert.assertTrue(codes.contains("222 - hearingType2"));
+        Assert.assertTrue(codes.contains("333 - hearingType3"));
+        Assert.assertFalse(codes.contains("444 - hearingType4"));
     }
 
     @Test
@@ -4351,4 +4526,216 @@ public class SendAndReplyServiceTest {
                        .build())
             .build();
     }
+
+    private PartyDetails getEmailApplicant() {
+        return PartyDetails.builder()
+            .partyId(UUID.randomUUID())
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .firstName("Applicant firstname")
+            .lastName("Applicant lastName")
+            .email("abc@xyz.com")
+            .solicitorEmail("testSolicitor@xyz.com")
+            .contactPreferences(ContactPreferences.email)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+    }
+
+    @Test
+    public void shouldPreserveMessageLineBreaksForSendgridEmail() {
+        String messageContent =
+            "Test message\n\nSpace above\nNew line\n\n\nEnd message";
+
+        PartyDetails applicant = getEmailApplicant();
+
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder()
+            .id(applicant.getPartyId())
+            .value(applicant)
+            .build();
+
+        DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
+            .value(List.of(
+                DynamicMultiselectListElement.builder()
+                    .code(wrappedApplicant.getId().toString())
+                    .label(applicant.getFirstName() + " " + applicant.getLastName())
+                    .build()
+            ))
+            .build();
+
+        Message message = Message.builder()
+            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+            .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
+            .messageAbout(MessageAboutEnum.APPLICATION)
+            .messageSubject("message subject")
+            .messageContent(messageContent)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .chooseSendOrReply(SEND)
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(wrappedApplicant))
+            .respondents(emptyList())
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(message)
+                    .respondToMessage(YesOrNo.No)
+                    .messages(emptyList())
+                    .build()
+            )
+            .build();
+
+        sendAndReplyService.sendNotificationToExternalParties(
+            caseData,
+            "authorisation"
+        );
+
+        ArgumentCaptor<SendgridEmailConfig> sendgridEmailConfigCaptor =
+            ArgumentCaptor.forClass(SendgridEmailConfig.class);
+
+        verify(sendgridService).sendEmailUsingTemplateWithAttachments(
+            eq(SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY),
+            eq("authorisation"),
+            sendgridEmailConfigCaptor.capture()
+        );
+
+        SendgridEmailConfig capturedConfig =
+            sendgridEmailConfigCaptor.getValue();
+
+        assertEquals(
+            "Test message<br><br>Space above<br>New line<br><br><br>End message",
+            capturedConfig.getDynamicTemplateData().get("messageContent")
+        );
+    }
+
+    @Test
+    public void shouldEscapeHtmlInMessageContentBeforeAddingLineBreaks() {
+        String messageContent =
+            "<strong>hello</strong>\nNext line";
+
+        PartyDetails applicant = getEmailApplicant();
+
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder()
+            .id(applicant.getPartyId())
+            .value(applicant)
+            .build();
+
+        DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
+            .value(List.of(
+                DynamicMultiselectListElement.builder()
+                    .code(wrappedApplicant.getId().toString())
+                    .label(applicant.getFirstName() + " " + applicant.getLastName())
+                    .build()
+            ))
+            .build();
+
+        Message message = Message.builder()
+            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+            .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
+            .messageAbout(MessageAboutEnum.APPLICATION)
+            .messageSubject("message subject")
+            .messageContent(messageContent)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .chooseSendOrReply(SEND)
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(wrappedApplicant))
+            .respondents(emptyList())
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(message)
+                    .respondToMessage(YesOrNo.No)
+                    .messages(emptyList())
+                    .build()
+            )
+            .build();
+
+        sendAndReplyService.sendNotificationToExternalParties(
+            caseData,
+            "authorisation"
+        );
+
+        ArgumentCaptor<SendgridEmailConfig> sendgridEmailConfigCaptor =
+            ArgumentCaptor.forClass(SendgridEmailConfig.class);
+
+        verify(sendgridService).sendEmailUsingTemplateWithAttachments(
+            eq(SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY),
+            eq("authorisation"),
+            sendgridEmailConfigCaptor.capture()
+        );
+
+        SendgridEmailConfig capturedConfig =
+            sendgridEmailConfigCaptor.getValue();
+
+        assertEquals(
+            "&lt;strong&gt;hello&lt;/strong&gt;<br>Next line",
+            capturedConfig.getDynamicTemplateData().get("messageContent")
+        );
+    }
+
+    @Test
+    public void shouldSetNullMessageContentInSendgridDataWhenMessageContentIsNull() {
+        PartyDetails applicant = getEmailApplicant();
+
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder()
+            .id(applicant.getPartyId())
+            .value(applicant)
+            .build();
+
+        DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
+            .value(List.of(
+                DynamicMultiselectListElement.builder()
+                    .code(wrappedApplicant.getId().toString())
+                    .label(applicant.getFirstName() + " " + applicant.getLastName())
+                    .build()
+            ))
+            .build();
+
+        Message message = Message.builder()
+            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+            .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
+            .messageAbout(MessageAboutEnum.APPLICATION)
+            .messageSubject("message subject")
+            .messageContent(null)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .chooseSendOrReply(SEND)
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(wrappedApplicant))
+            .respondents(emptyList())
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(message)
+                    .respondToMessage(YesOrNo.No)
+                    .messages(emptyList())
+                    .build()
+            )
+            .build();
+
+        sendAndReplyService.sendNotificationToExternalParties(
+            caseData,
+            "authorisation"
+        );
+
+        ArgumentCaptor<SendgridEmailConfig> sendgridEmailConfigCaptor =
+            ArgumentCaptor.forClass(SendgridEmailConfig.class);
+
+        verify(sendgridService).sendEmailUsingTemplateWithAttachments(
+            eq(SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY),
+            eq("authorisation"),
+            sendgridEmailConfigCaptor.capture()
+        );
+
+        SendgridEmailConfig capturedConfig =
+            sendgridEmailConfigCaptor.getValue();
+
+        assertNull(
+            capturedConfig.getDynamicTemplateData().get("messageContent")
+        );
+    }
+
 }

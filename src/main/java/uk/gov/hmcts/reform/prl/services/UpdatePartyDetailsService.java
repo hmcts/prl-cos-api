@@ -57,6 +57,7 @@ import java.util.function.Consumer;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -204,12 +205,17 @@ public class UpdatePartyDetailsService {
                     .build();
             }
             try {
-                generateC8DocumentsForRespondents(updatedCaseData,
-                                                  callbackRequest,
-                                                  authorisation,
-                                                  caseData,
-                                                  List.of(ElementUtils.element(fl401respondent.getPartyId(), fl401respondent)),
-                                                  false);
+                // If the respondent has not been added (e.g. when adding applicant), do not generate a respondent C8
+                if (isNotEmpty(fl401respondent)) {
+                    generateC8DocumentsForRespondents(
+                        updatedCaseData,
+                        callbackRequest,
+                        authorisation,
+                        caseData,
+                        List.of(ElementUtils.element(fl401respondent.getPartyId(), fl401respondent)),
+                        false
+                    );
+                }
                 generateC8.accept(caseData);
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for Fl401 case {}, Error: {}",
@@ -651,6 +657,10 @@ public class UpdatePartyDetailsService {
                     .getLabelForDynamicList()))).toList();
         } else {
             PartyDetails respondentDetailsFL401 = caseDataBefore.getRespondentsFL401();
+            // if we did not have a respondent in the before case, the respondent is NEW so isChanged = true
+            if (isEmpty(respondentDetailsFL401)) {
+                return true;
+            }
             if ((CaseUtils.isEmailAddressChanged(respondent.getValue(), respondentDetailsFL401))
                 || !Objects.equals(respondent.getValue().getLiveInRefuge(), respondentDetailsFL401.getLiveInRefuge())
                 || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), respondentDetailsFL401)

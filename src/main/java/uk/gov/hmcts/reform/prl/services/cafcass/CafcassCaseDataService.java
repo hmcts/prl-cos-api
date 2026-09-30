@@ -4,29 +4,19 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
-import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
-import uk.gov.hmcts.reform.prl.models.cafcass.hearing.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
-import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToAllegationsOfHarm;
-import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
-import uk.gov.hmcts.reform.prl.models.dto.cafcass.ApplicantDetails;
-import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CaseManagementLocation;
@@ -45,16 +35,11 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.request.QueryParam;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Range;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Should;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
-import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
-import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -115,6 +100,8 @@ public class CafcassCaseDataService {
     private final ObjectMapper objMapper;
 
     private final FeatureToggleService featureToggleService;
+
+    private final CafcassCaseDataHelper cafcassCaseDataHelper;
 
     @Value("#{'${cafcaas.excludedDocumentCategories}'.split(',')}")
     private List<String> excludedDocumentCategoryList;
@@ -193,30 +180,7 @@ public class CafcassCaseDataService {
     }
 
     private CafCassResponse removeUnnecessaryFieldsFromResponse(CafCassResponse filteredCafcassData) {
-        filteredCafcassData.getCases().forEach(cafCassCaseDetail -> {
-            CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
-            if (caseData.getOrderCollection() != null) {
-                caseData.getOrderCollection().forEach(order -> {
-                    CaseOrder value = order.getValue();
-                    if (value != null) {
-                        log.info(
-                            "Case {} has hearingId={} on orderTypeId={}",
-                            cafCassCaseDetail.getId(),
-                            value.getHearingId(),
-                            value.getOrderType()
-                        );
-                    }
-                });
-            }
-
-            caseData = caseData.toBuilder()
-                .applicants(removeResponse(caseData.getApplicants()))
-                .respondents(removeResponse(caseData.getRespondents()))
-                .orderCollection(removeServeOrderDetails(caseData.getOrderCollection()))
-                .build();
-            cafCassCaseDetail.setCaseData(caseData);
-        });
-        return filteredCafcassData;
+        return cafcassCaseDataHelper.removeUnnecessaryFieldsFromResponse(filteredCafcassData);
     }
 
     private void removeRedactedDocumentsFromResponse(CafCassResponse filteredCafcassData) {
@@ -705,21 +669,7 @@ public class CafcassCaseDataService {
     }
 
     public boolean checkIfDocumentsNeedToExclude(List<String> excludedDocumentList, String documentFilename) {
-        boolean isExcluded = false;
-        for (String excludedDocumentName : excludedDocumentList) {
-            if (documentFilename.contains(excludedDocumentName)) {
-                isExcluded = true;
-            }
-        }
-        return isExcluded;
-    }
-
-    public Document buildFromCaseDocument(uk.gov.hmcts.reform.prl.models.documents.Document caseDocument) throws MalformedURLException {
-        URL url = new URL(caseDocument.getDocumentUrl());
-        return Document.builder()
-            .documentId(CafCassCaseData.getDocumentId(url))
-            .documentFileName(caseDocument.getDocumentFileName())
-            .build();
+        return cafcassCaseDataHelper.checkIfDocumentsNeedToExclude(excludedDocumentList, documentFilename);
     }
 
     private QueryParam buildCcdQueryParam(String startDate, String endDate) {
@@ -770,98 +720,11 @@ public class CafcassCaseDataService {
     }
 
     private CafCassResponse getHearingDetailsForAllCases(String authorisation, CafCassResponse cafCassResponse) {
-        CafCassResponse filteredCafcassResponse = CafCassResponse.builder()
-            .cases(new ArrayList<>())
-            .build();
-        Map<String, String> caseIdWithRegionIdMap = new HashMap<>();
-        for (CafCassCaseDetail caseDetails : cafCassResponse.getCases()) {
-            CaseManagementLocation caseManagementLocation = caseDetails.getCaseData().getCaseManagementLocation();
-            if (caseManagementLocation != null) {
-                if (caseManagementLocation.getRegionId() != null
-                    && Integer.parseInt(caseManagementLocation.getRegionId()) < 7) {
-                    caseIdWithRegionIdMap.put(caseDetails.getId().toString(), caseManagementLocation.getRegionId()
-                        + "-" + caseManagementLocation.getBaseLocationId());
-                    caseDetails.getCaseData().setCourtEpimsId(caseManagementLocation.getBaseLocationId());
-                    filteredCafcassResponse.getCases().add(caseDetails);
-                } else if (caseManagementLocation.getRegion() != null && Integer.parseInt(caseManagementLocation.getRegion()) < 7) {
-                    caseIdWithRegionIdMap.put(
-                        String.valueOf(caseDetails.getId()),
-                        caseManagementLocation.getRegion() + "-" + caseManagementLocation.getBaseLocation()
-                    );
-                    caseDetails.getCaseData().setCourtEpimsId(caseManagementLocation.getBaseLocation());
-                    caseDetails.getCaseData().setCafcassUploadedDocs(null);
-                    filteredCafcassResponse.getCases().add(caseDetails);
-                }
-            }
-        }
-        List<Hearings> listOfHearingDetails = hearingService.getHearingsForAllCases(
-            authorisation,
-            caseIdWithRegionIdMap
-        );
-        //PRL-6431
-        filterCancelledHearingsBeforeListing(listOfHearingDetails);
-
-        updateHearingDataCafcass(filteredCafcassResponse, listOfHearingDetails);
-
-        return filteredCafcassResponse;
+        return cafcassCaseDataHelper.getHearingDetailsForAllCases(authorisation, cafCassResponse);
     }
 
     public void filterCancelledHearingsBeforeListing(List<Hearings> listOfHearingDetails) {
-        if (null != listOfHearingDetails && !listOfHearingDetails.isEmpty()) {
-            for (Hearings hearings : listOfHearingDetails) {
-                List<CaseHearing> filteredCaseHearings = new ArrayList<>();
-                hearings.getCaseHearings().forEach(caseHearing -> {
-                    if (!checkIfHearingCancelledBeforeListing(caseHearing)) {
-                        filteredCaseHearings.add(caseHearing);
-                    }
-                });
-                hearings.setCaseHearings(filteredCaseHearings);
-            }
-        }
-    }
-
-    private static boolean checkIfHearingCancelledBeforeListing(CaseHearing caseHearing) {
-        boolean hearingCancelledBeforeListing = false;
-        if (CANCELLED.equals(caseHearing.getHmcStatus())
-            && null != caseHearing.getHearingDaySchedule()) {
-            for (HearingDaySchedule hearingDaySchedule : caseHearing.getHearingDaySchedule()) {
-                if (ObjectUtils.isEmpty(hearingDaySchedule.getHearingStartDateTime())
-                    && ObjectUtils.isEmpty(hearingDaySchedule.getHearingEndDateTime())) {
-                    hearingCancelledBeforeListing = true;
-                    break;
-                }
-            }
-        }
-        return hearingCancelledBeforeListing;
-    }
-
-    private void updateHearingDataCafcass(CafCassResponse filteredCafcassResponse, List<Hearings> listOfHearingDetails) {
-        if (null != listOfHearingDetails && !listOfHearingDetails.isEmpty()) {
-            for (CafCassCaseDetail cafCassCaseDetail : filteredCafcassResponse.getCases()) {
-                Hearings filteredHearing =
-                    listOfHearingDetails.stream().filter(hearings -> hearings.getCaseRef().equals(String.valueOf(
-                        cafCassCaseDetail.getId()))).findFirst().orElse(null);
-
-                if (filteredHearing != null && CollectionUtils.isNotEmpty(filteredHearing.getCaseHearings())) {
-                    cafCassCaseDetail.getCaseData().setHearingData(filteredHearing);
-                    cafCassCaseDetail.getCaseData().setCourtName(filteredHearing.getCourtName());
-                    cafCassCaseDetail.getCaseData().setCourtTypeId(filteredHearing.getCourtTypeId());
-                    filteredHearing.setCourtName(null);
-                    filteredHearing.setCourtTypeId(null);
-                    filteredHearing.getCaseHearings().forEach(
-                        caseHearing -> {
-                            if (CollectionUtils.isNotEmpty(caseHearing.getHearingDaySchedule())) {
-                                caseHearing.getHearingDaySchedule().forEach(
-                                    hearingDaySchedule -> {
-                                        hearingDaySchedule.setEpimsId(hearingDaySchedule.getHearingVenueId());
-                                        hearingDaySchedule.setHearingVenueId(null);
-                                    }
-                                );
-                            }
-                        });
-                }
-            }
-        }
+        cafcassCaseDataHelper.filterCancelledHearingsBeforeListing(listOfHearingDetails);
     }
 
     private void updateHearingResponse(String authorisation, String s2sToken, CafCassResponse cafCassResponse) {

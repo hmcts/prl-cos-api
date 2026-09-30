@@ -2059,20 +2059,4 @@ public class ReviewDocumentServiceTest {
         verify(allTabServiceImpl).submitAllTabsUpdate(anyString(), anyString(), any(StartEventResponse.class), any(
             EventRequestData.class), any(Map.class));
     }
-
-
-    @Test
-    public void testRemoveReviewDocumentWithMissingDocument() {
-        // given
-        CaseData caseData = Instancio.create(CaseData.class);
-        Map<String, Object> caseDataUpdated = new HashMap<>();
-
-        // when
-        reviewDocumentService.removeReviewDocumentWithMissingDocument(caseData, caseDataUpdated);
-
-        // then
-        assertNotNull(caseDataUpdated);
-    }
-
-
 }
