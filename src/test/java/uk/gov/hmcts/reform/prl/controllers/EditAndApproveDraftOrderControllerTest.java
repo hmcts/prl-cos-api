@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,6 +66,7 @@ import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
+import uk.gov.hmcts.reform.prl.services.MiamForOrderService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
@@ -77,7 +79,6 @@ import uk.gov.hmcts.reform.prl.utils.TaskUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
@@ -111,6 +112,47 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @PropertySource(value = "classpath:application.yaml")
 class EditAndApproveDraftOrderControllerTest {
+
+    private static final String authToken = "Bearer TestAuthToken";
+    private static final String s2sToken = "s2s AuthToken";
+    private static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
+    private static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    private static final String S2S_TOKEN = "s2s AuthToken";
+    private static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
+    private static final String ENCODEDSTRING = "eyJjbGllbnRfY29udGV4dCI6eyJ1c2VyX3Rhc2siOnsidGFza19kYXRhIjp7ImlkIjoiNmI"
+        + "xYzcyOWEtNTYzMC0xMWVmLWEwZDMtZWFmMDM2YWQ5MjBkIiwibmFtZSI6IlJldmlldyBhbmQgQXBwcm92ZSBMZWdhbCBy"
+        + "ZXAgT3JkZXIiLCJhc3NpZ25lZSI6ImQ1YjIwOTEzLTc4ZWEtNDZkMi1iNjVjLTVlMTExZDllN2Y4NCIsInR5cGUiOiJyZXZpZXdTb2"
+        + "xpY2l0b3JPcmRlclByb3ZpZGVkIiwidGFza19zdGF0ZSI6ImFzc2lnbmVkIiwidGFza19zeXN0ZW0iOiJTRUxGIiwic2VjdXJpdHlfY"
+        + "2xhc3NpZmljYXRpb24iOiJQVUJMSUMiLCJ0YXNrX3RpdGxlIjoiUmV2aWV3IGFuZCBBcHByb3ZlIExlZ2FsIHJlcCBPcmRlciAtIFBhcmV"
+        + "udGFsIHJlc3BvbnNpYmlsaXR5IG9yZGVyIChDNDVBKSAtIDkgQXVnIDIwMjQsMDk6MTggQU0iLCJjcmVhdGVkX2RhdGUiOiIyMDI0LTA4LT"
+        + "A5VDA5OjE5OjAyKzAwMDAiLCJkdWVfZGF0ZSI6IjIwMjQtMDgtMTZUMTc6MDA6MDArMDAwMCIsImxvY2F0aW9uX25hbWUiOiJTd2Fuc2V"
+        + "hIiwibG9jYXRpb24iOiIyMzQ5NDYiLCJleGVjdXRpb25fdHlwZSI6IkNhc2UgTWFuYWdlbWVudCBUYXNrIiwianVyaXNkaWN0aW9uIjoiUF"
+        + "JJVkFURUxBVyIsInJlZ2lvbiI6IjciLCJjYXNlX3R5cGVfaWQiOiJQUkxBUFBTIiwiY2FzZV9pZCI6IjE3MjI2MTAyNzYwMDE2ODMiLCJjYXN"
+        + "lX2NhdGVnb3J5IjoiUHJpdmF0ZSBMYXcgLSBDMTAwIiwiY2FzZV9uYW1lIjoiQzEwMCBXQSBMSU5LSU5HIiwiYXV0b19hc3NpZ25lZCI6ZmFsc2U"
+        + "sIndhcm5pbmdzIjpmYWxzZSwid2FybmluZ19saXN0Ijp7InZhbHVlcyI6W119LCJjYXNlX21hbmFnZW1lbnRfY2F0ZWdvcnkiOiJQcml2YXRlIExh"
+        + "dyAtIEMxMDAiLCJ3b3JrX3R5cGVfaWQiOiJkZWNpc2lvbl9tYWtpbmdfd29yayIsIndvcmtfdHlwZV9sYWJlbCI6IkRlY2lzaW9uLW1ha2luZyB3b3Jr"
+        + "IiwicGVybWlzc2lvbnMiOnsidmFsdWVzIjpbIlJlYWQiLCJPd24iLCJDbGFpbSIsIlVuY2xhaW0iLCJVbmNsYWltQXNzaWduIiwiVW5hc3NpZ25DbGF"
+        + "pbSJdfSwiZGVzY3JpcHRpb24iOiJbUmV2aWV3IGFuZCBBcHByb3ZlIExlZ2FsIHJlcCBPcmRlcl0oL2Nhc2VzL2Nhc2UtZGV0YWlscy8ke1tDQVNFX1JFRk"
+        + "VSRU5DRV19L3RyaWdnZXIvZWRpdEFuZEFwcHJvdmVBbk9yZGVyL2VkaXRBbmRBcHByb3ZlQW5PcmRlcjEpIiwicm9sZV9jYXRlZ29yeSI6IkpVRElDSUFMIiwi"
+        + "YWRkaXRpb25hbF9wcm9wZXJ0aWVzIjp7Im9yZGVySWQiOiIwNDhhNmI3ZS1lMmM1LTRlNmYtOGY4MS1mNDkyNmM1OWJiNzQifSwibWlub3JfcHJpb3JpdHkiOjU"
+        + "wMCwibWFqb3JfcHJpb3JpdHkiOjUwMDAsInByaW9yaXR5X2RhdGUiOiIyMDI0LTA4LTE2VDE3OjAwOjAwKzAwMDAifSwiY29tcGxldGVfdGFzayI6dHJ1ZX19fQ==";
+
+    private static final String CLIENT_CONTEXT = """
+        {
+          "client_context": {
+            "user_task": {
+              "task_data": {
+                "additional_properties": {
+                  "hearingId": "12345"
+                }
+              },
+              "complete_task" : true
+            }
+          }
+        }
+        """;
+
+    private static final String ENCRYPTED_CLIENT_CONTEXT = Base64.getEncoder().encodeToString(CLIENT_CONTEXT.getBytes());
 
     @Mock
     private  ObjectMapper objectMapper;
@@ -146,73 +188,21 @@ class EditAndApproveDraftOrderControllerTest {
     private AuthorisationService authorisationService;
 
     @Mock
-    AllTabServiceImpl allTabService;
+    private AllTabServiceImpl allTabService;
 
     @Mock
-    TaskUtils taskUtils;
+    private TaskUtils taskUtils;
 
     @Mock
     private CafcassDateTimeService cafcassDateTimeService;
 
-    public static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
+    @Mock
+    private MiamForOrderService miamForOrderService;
 
-    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
-    public static final String S2S_TOKEN = "s2s AuthToken";
-    public static Map<String, Object> clientContext = new HashMap<>();
-    private static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
-    private static final String ENCODEDSTRING = "eyJjbGllbnRfY29udGV4dCI6eyJ1c2VyX3Rhc2siOnsidGFza19kYXRhIjp7ImlkIjoiNmI"
-        + "xYzcyOWEtNTYzMC0xMWVmLWEwZDMtZWFmMDM2YWQ5MjBkIiwibmFtZSI6IlJldmlldyBhbmQgQXBwcm92ZSBMZWdhbCBy"
-        + "ZXAgT3JkZXIiLCJhc3NpZ25lZSI6ImQ1YjIwOTEzLTc4ZWEtNDZkMi1iNjVjLTVlMTExZDllN2Y4NCIsInR5cGUiOiJyZXZpZXdTb2"
-        + "xpY2l0b3JPcmRlclByb3ZpZGVkIiwidGFza19zdGF0ZSI6ImFzc2lnbmVkIiwidGFza19zeXN0ZW0iOiJTRUxGIiwic2VjdXJpdHlfY"
-        + "2xhc3NpZmljYXRpb24iOiJQVUJMSUMiLCJ0YXNrX3RpdGxlIjoiUmV2aWV3IGFuZCBBcHByb3ZlIExlZ2FsIHJlcCBPcmRlciAtIFBhcmV"
-        + "udGFsIHJlc3BvbnNpYmlsaXR5IG9yZGVyIChDNDVBKSAtIDkgQXVnIDIwMjQsMDk6MTggQU0iLCJjcmVhdGVkX2RhdGUiOiIyMDI0LTA4LT"
-        + "A5VDA5OjE5OjAyKzAwMDAiLCJkdWVfZGF0ZSI6IjIwMjQtMDgtMTZUMTc6MDA6MDArMDAwMCIsImxvY2F0aW9uX25hbWUiOiJTd2Fuc2V"
-        + "hIiwibG9jYXRpb24iOiIyMzQ5NDYiLCJleGVjdXRpb25fdHlwZSI6IkNhc2UgTWFuYWdlbWVudCBUYXNrIiwianVyaXNkaWN0aW9uIjoiUF"
-        + "JJVkFURUxBVyIsInJlZ2lvbiI6IjciLCJjYXNlX3R5cGVfaWQiOiJQUkxBUFBTIiwiY2FzZV9pZCI6IjE3MjI2MTAyNzYwMDE2ODMiLCJjYXN"
-        + "lX2NhdGVnb3J5IjoiUHJpdmF0ZSBMYXcgLSBDMTAwIiwiY2FzZV9uYW1lIjoiQzEwMCBXQSBMSU5LSU5HIiwiYXV0b19hc3NpZ25lZCI6ZmFsc2U"
-        + "sIndhcm5pbmdzIjpmYWxzZSwid2FybmluZ19saXN0Ijp7InZhbHVlcyI6W119LCJjYXNlX21hbmFnZW1lbnRfY2F0ZWdvcnkiOiJQcml2YXRlIExh"
-        + "dyAtIEMxMDAiLCJ3b3JrX3R5cGVfaWQiOiJkZWNpc2lvbl9tYWtpbmdfd29yayIsIndvcmtfdHlwZV9sYWJlbCI6IkRlY2lzaW9uLW1ha2luZyB3b3Jr"
-        + "IiwicGVybWlzc2lvbnMiOnsidmFsdWVzIjpbIlJlYWQiLCJPd24iLCJDbGFpbSIsIlVuY2xhaW0iLCJVbmNsYWltQXNzaWduIiwiVW5hc3NpZ25DbGF"
-        + "pbSJdfSwiZGVzY3JpcHRpb24iOiJbUmV2aWV3IGFuZCBBcHByb3ZlIExlZ2FsIHJlcCBPcmRlcl0oL2Nhc2VzL2Nhc2UtZGV0YWlscy8ke1tDQVNFX1JFRk"
-        + "VSRU5DRV19L3RyaWdnZXIvZWRpdEFuZEFwcHJvdmVBbk9yZGVyL2VkaXRBbmRBcHByb3ZlQW5PcmRlcjEpIiwicm9sZV9jYXRlZ29yeSI6IkpVRElDSUFMIiwi"
-        + "YWRkaXRpb25hbF9wcm9wZXJ0aWVzIjp7Im9yZGVySWQiOiIwNDhhNmI3ZS1lMmM1LTRlNmYtOGY4MS1mNDkyNmM1OWJiNzQifSwibWlub3JfcHJpb3JpdHkiOjU"
-        + "wMCwibWFqb3JfcHJpb3JpdHkiOjUwMDAsInByaW9yaXR5X2RhdGUiOiIyMDI0LTA4LTE2VDE3OjAwOjAwKzAwMDAifSwiY29tcGxldGVfdGFzayI6dHJ1ZX19fQ==";
 
-    private static final String CLIENT_CONTEXT = """
-        {
-          "client_context": {
-            "user_task": {
-              "task_data": {
-                "additional_properties": {
-                  "hearingId": "12345"
-                }
-              },
-              "complete_task" : true
-            }
-          }
-        }
-        """;
-
-    private static final String CLIENT_CONTEXT_FALSE = """
-        {
-          "client_context": {
-            "user_task": {
-              "task_data": {
-                "additional_properties": {
-                  "hearingId": "12345"
-                }
-              },
-              "complete_task" : false
-            }
-          }
-        }
-        """;
-
-    private static final String ENCRYPTED_CLIENT_CONTEXT = Base64.getEncoder().encodeToString(CLIENT_CONTEXT.getBytes());
 
     @BeforeEach
     void setUp() {
-        clientContext.put("test", "test");
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -228,6 +218,8 @@ class EditAndApproveDraftOrderControllerTest {
                                                               Mockito.anyString(),
                                                               Mockito.anyString()
         )).thenReturn(DraftOrder.builder().build());
+        when(miamForOrderService.updateCaseDataWithMiamForOrderDetails(any(),anyString(),anyString(),anyMap()))
+            .thenReturn(new HashMap<>());
     }
 
     @Test
@@ -380,6 +372,8 @@ class EditAndApproveDraftOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId(),
                                                           "clientContext", AUTH_TOKEN)).thenReturn(caseDataMap);
+        when(miamForOrderService.updateCaseDataWithMiamForOrderDetails(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(new HashMap<>());
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
             .populateJudgeOrAdminDraftOrder(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
         assertNotNull(response);
@@ -1102,13 +1096,6 @@ class EditAndApproveDraftOrderControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
-            draftOrderCollection,
-            null,
-            DraftOrder::getLabelForOrdersDynamicList
-        ));
-
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .eventId("adminEditAndApproveAnOrder")
@@ -1457,13 +1444,6 @@ class EditAndApproveDraftOrderControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
-            draftOrderCollection,
-            null,
-            DraftOrder::getLabelForOrdersDynamicList
-        ));
-
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .eventId("adminEditAndApproveAnOrder")
@@ -1521,13 +1501,6 @@ class EditAndApproveDraftOrderControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
-            draftOrderCollection,
-            null,
-            DraftOrder::getLabelForOrdersDynamicList
-        ));
-
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .eventId("adminEditAndApproveAnOrder")
@@ -1581,19 +1554,12 @@ class EditAndApproveDraftOrderControllerTest {
                                 .whatDoWithOrder(WhatToDoWithOrderEnum.finalizeSaveToServeLater)
                                 .doYouWantToServeOrder(Yes).build())
             .caseTypeOfApplication(C100_CASE_TYPE)
-            .standardDirectionOrder(StandardDirectionOrder.builder().sdoPreamblesList(Arrays.asList(SdoPreamblesEnum.rightToAskCourt))
+            .standardDirectionOrder(StandardDirectionOrder.builder().sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
                                         .editedOrderHasDefaultCaseFields(Yes).build())
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
-            draftOrderCollection,
-            null,
-            DraftOrder::getLabelForOrdersDynamicList
-        ));
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -1661,13 +1627,6 @@ class EditAndApproveDraftOrderControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
-            draftOrderCollection,
-            null,
-            DraftOrder::getLabelForOrdersDynamicList
-        ));
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -1778,12 +1737,7 @@ class EditAndApproveDraftOrderControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
-            draftOrderCollection,
-            null,
-            DraftOrder::getLabelForOrdersDynamicList
-        ));
+
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -1828,7 +1782,7 @@ class EditAndApproveDraftOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
             .generateDraftOrderDropDown(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest), RuntimeException.class, "Invalid Client");
     }
@@ -1858,7 +1812,7 @@ class EditAndApproveDraftOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
             .populateJudgeOrAdminDraftOrder(AUTH_TOKEN, S2S_TOKEN, "clientContext", callbackRequest), RuntimeException.class, "Invalid Client");
     }
@@ -1888,7 +1842,7 @@ class EditAndApproveDraftOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
             .prepareDraftOrderCollection(AUTH_TOKEN, S2S_TOKEN, PrlAppsConstants.ENGLISH, callbackRequest), RuntimeException.class, "Invalid Client");
     }
@@ -1918,7 +1872,7 @@ class EditAndApproveDraftOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         assertExpectedException(
             () -> editAndApproveDraftOrderController
                 .saveServeOrderDetails(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest),
@@ -1952,7 +1906,7 @@ class EditAndApproveDraftOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
             .sendEmailNotificationToRecipientsServeOrder(AUTH_TOKEN, S2S_TOKEN, callbackRequest), RuntimeException.class, "Invalid Client");
     }
@@ -2058,7 +2012,7 @@ class EditAndApproveDraftOrderControllerTest {
                              .id(123L)
                              .build())
             .build();
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
             .populateJudgeOrAdminDraftOrderCustomFields(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest), RuntimeException.class, "Invalid Client");
     }
@@ -2071,7 +2025,7 @@ class EditAndApproveDraftOrderControllerTest {
                              .id(123L)
                              .build())
             .build();
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
             .populateCommonFields(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest), RuntimeException.class, "Invalid Client");
     }
@@ -2084,7 +2038,7 @@ class EditAndApproveDraftOrderControllerTest {
                              .id(123L)
                              .build())
             .build();
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
             .editAndServeOrderMidEvent(AUTH_TOKEN, S2S_TOKEN, callbackRequest), RuntimeException.class, "Invalid Client");
     }
@@ -2097,7 +2051,7 @@ class EditAndApproveDraftOrderControllerTest {
                              .id(123L)
                              .build())
             .build();
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
             .editAndServeOrderMidEvent(AUTH_TOKEN, S2S_TOKEN, callbackRequest), RuntimeException.class, "Invalid Client");
     }
@@ -2214,5 +2168,67 @@ class EditAndApproveDraftOrderControllerTest {
         Map<String, Object> updatedCaseDataMap = response.getData();
         assertNotNull(updatedCaseDataMap.get("doYouWantToEditTheOrder"));
         assertEquals("Yes", String.valueOf(updatedCaseDataMap.get("doYouWantToEditTheOrder")));
+    }
+
+    @Test
+    public void testFlagSetForMiamOrderWhenStateIsAwaitingSubmissionToHmcts() {
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        stringObjectMap.put("id", 123L);
+        stringObjectMap.put("state", State.AWAITING_SUBMISSION_TO_HMCTS);
+
+        CaseData customCaseData = setUpCaseDataForMiamTest(State.AWAITING_SUBMISSION_TO_HMCTS);
+
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(customCaseData);
+
+        CallbackRequest callbackRequest = setUpCallbackRequestForMiamTest(stringObjectMap, State.AWAITING_SUBMISSION_TO_HMCTS);
+
+        AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController.handleServeOrderAboutToStart(
+            authToken,
+            s2sToken,
+            ENCRYPTED_CLIENT_CONTEXT,
+            callbackRequest
+        );
+
+        assertNotNull(response);
+    }
+
+    @Test
+    public void testFlagSetToNoForMiamOrderWhenStateIsSubmittedNotPaid() {
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        stringObjectMap.put("id", 12345L);
+        stringObjectMap.put("state", State.SUBMITTED_NOT_PAID);
+
+
+        CallbackRequest callbackRequest = setUpCallbackRequestForMiamTest(stringObjectMap, State.SUBMITTED_NOT_PAID);
+
+        Assert.assertThrows(Exception.class, () -> {
+            editAndApproveDraftOrderController.handleServeOrderAboutToStart(
+                authToken,
+                s2sToken,
+                "ENCRYPTED_CLIENT_CONTEXT",
+                callbackRequest
+            );
+        });
+    }
+
+    private CallbackRequest setUpCallbackRequestForMiamTest(Map<String, Object> stringObjectMap, State state) {
+
+        return CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .state(state.getValue())
+                             .build())
+            .eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .build();
+    }
+
+    private CaseData setUpCaseDataForMiamTest(State state) {
+
+        return CaseData.builder()
+            .id(12345L)
+            .state(state)
+            .build();
     }
 }

@@ -1399,6 +1399,7 @@ public class ManageOrderService {
                 CreateSelectOrderOptionsEnum.other.equals(caseData.getCreateSelectOrderOptions())
                     ? caseData.getUploadOrderDoc() : caseData.getPreviewOrderDoc())
             .orderDocumentWelsh(caseData.getPreviewOrderDocWelsh())
+            .miamForOrder(caseData.getMiamForOrder())
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .orderCreatedBy(userDetails.getFullName())
@@ -1579,6 +1580,7 @@ public class ManageOrderService {
             .orderDocument(createCustomOrder.equals(caseData.getManageOrdersOptions())
                 ? caseData.getManageOrders().getCustomOrderDoc()
                 : caseData.getUploadOrderDoc())
+            .miamForOrder(caseData.getMiamForOrder())
             .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
             .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
             .childOption(getChildOption(caseData))
@@ -2571,6 +2573,7 @@ public class ManageOrderService {
             .withdrawnRequestType(null != caseData.getManageOrders().getWithdrawnOrRefusedOrder()
                                       ? caseData.getManageOrders().getWithdrawnOrRefusedOrder().getDisplayedValue() : null)
             .isWithdrawnRequestApproved(getWithdrawRequestInfo(caseData))
+            .miamForOrder(caseData.getMiamForOrder())
             .typeOfOrder(typeOfOrder != null
                              ? typeOfOrder.getDisplayedValue() : null)
             .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
@@ -2780,6 +2783,7 @@ public class ManageOrderService {
         }
         // Remove temporary field used for auto-selecting newly created order
         caseDataUpdated.remove("newOrderId");
+        caseDataUpdated.remove("miamForOrder");
     }
 
     /**

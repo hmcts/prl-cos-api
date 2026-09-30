@@ -92,6 +92,7 @@ public class DraftOrder {
     private final LocalDate manageOrdersDateOfhearing;
     private final String dateOfHearingTime;
     private final String dateOfHearingTimeEstimate;
+    private final YesOrNo miamForOrder;
 
     /**
      * C43.

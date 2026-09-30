@@ -668,6 +668,7 @@ public class DraftAnOrderService {
             .adminNotes(caseData.getCourtAdminNotes())
             .dateCreated(draftOrder.getOtherDetails().getDateCreated())
             .judgeNotes(draftOrder.getJudgeNotes())
+            .miamForOrder(caseData.getMiamForOrder())
             .otherDetails(
                 OtherOrderDetails.builder().createdBy(draftOrder.getOtherDetails().getCreatedBy())
                     .orderCreatedBy(draftOrder.getOtherDetails().getOrderCreatedBy())
@@ -1237,6 +1238,9 @@ public class DraftAnOrderService {
                     && manageOrderService.isEligibleForAutomatedHearing(
                         caseData.getManageOrders().getOrdersHearingDetails())) {
                     draftOrder = draftOrder.toBuilder().isAutoHearingReqPending(Yes).build();
+                }
+                if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)) {
+                    draftOrder = draftOrder.toBuilder().miamForOrder(caseData.getMiamForOrder()).build();
                 }
                 draftOrderCollection.set(
                     draftOrderCollection.indexOf(e),
