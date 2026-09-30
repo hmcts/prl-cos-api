@@ -1,0 +1,1023 @@
+package uk.gov.hmcts.reform.prl.services.cafcass;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
+import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToAllegationsOfHarm;
+import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.DocumentLink;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.ApplicantDetails;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.CaseManagementLocation;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.Element;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherPersonInTheCase;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.CaseOrder;
+import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Consumer;
+
+import static uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum.applicantApplication;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUpdateHelperUtils.addInOtherDocuments;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUpdateHelperUtils.buildCaseDataWithProcessedDocumentsCleared;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUpdateHelperUtils.isCafcassEnglandRegion;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUpdateHelperUtils.isDocumentPresent;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUpdateHelperUtils.parseQuarantineLegalDocs;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUpdateHelperUtils.removeRedactedDocuments;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUpdateHelperUtils.shouldExcludeDocument;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUpdateHelperUtils.updateCaseWithHearingData;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+public class CafcassCaseDataHelper {
+
+    public static final String CONFIDENTIAL = "confidential";
+    public static final String ANY_OTHER_DOC = "anyOtherDoc";
+    private static final String AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED = "amendOtherPeopleInTheCaseRevised";
+    private static final String AMEND_CHILDREN_AND_APPLICANTS = "amendChildrenAndApplicants";
+    private static final String CHILDREN_AND_APPLICANTS = "childrenAndApplicants";
+    private static final String CHILD_AND_APPLICANT_RELATIONS = "childAndApplicantRelations";
+    private static final String BUFF_CHILD_AND_APPLICANT_RELATIONS = "buffChildAndApplicantRelations";
+    private static final List<String> AMEND_PARTY_AND_RELATIONSHIP_EVENTS = List.of(
+        "amendChildDetailsRevised",
+        AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED,
+        AMEND_CHILDREN_AND_APPLICANTS,
+        "childDetailsRevised",
+        "otherPeopleInTheCaseRevised",
+        CHILDREN_AND_APPLICANTS
+    );
+    private static final Map<String, List<String>> EVENT_SPECIFIC_COMPARISON_FIELDS = Map.of(
+        AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED,
+        List.of("otherPeopleInTheCaseTable", "childAndOtherPeopleRelations"),
+        AMEND_CHILDREN_AND_APPLICANTS,
+        List.of(CHILD_AND_APPLICANT_RELATIONS),
+        CHILDREN_AND_APPLICANTS,
+        List.of(CHILD_AND_APPLICANT_RELATIONS)
+    );
+    private static final Map<String, List<String>> EVENT_SPECIFIC_SOURCE_FIELDS = Map.of(
+        AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED,
+        List.of("otherPartyInTheCaseRevised", "childAndOtherPeopleRelations"),
+        AMEND_CHILDREN_AND_APPLICANTS,
+        List.of(CHILD_AND_APPLICANT_RELATIONS),
+        CHILDREN_AND_APPLICANTS,
+        List.of(CHILD_AND_APPLICANT_RELATIONS)
+    );
+    private static final List<String> OTHER_PARTY_COMPARISON_FIELDS = List.of(
+        "firstName",
+        "lastName",
+        "previousName",
+        "isDateOfBirthKnown",
+        "dateOfBirth",
+        "gender",
+        "otherGender",
+        "isPlaceOfBirthKnown",
+        "placeOfBirth",
+        "isCurrentAddressKnown",
+        "address",
+        "canYouProvideEmailAddress",
+        "email",
+        "canYouProvidePhoneNumber",
+        "phoneNumber",
+        "isAddressConfidential",
+        "isEmailAddressConfidential",
+        "isPhoneNumberConfidential"
+    );
+    private static final List<String> CHILD_AND_APPLICANT_RELATION_COMPARISON_FIELDS = List.of(
+        "childAndApplicantRelation",
+        "childAndApplicantRelationOtherDetails",
+        "childLivesWith"
+    );
+    private static final List<String> CHILD_AND_OTHER_PEOPLE_RELATION_COMPARISON_FIELDS = List.of(
+        "childAndOtherPeopleRelation",
+        "childAndOtherPeopleRelationOtherDetails",
+        "childLivesWith",
+        "isChildLivesWithPersonConfidential"
+    );
+    private static final Map<String, String> RELATIONSHIP_VALUE_ALIASES = Map.ofEntries(
+        Map.entry("father", "father"),
+        Map.entry("mother", "mother"),
+        Map.entry("stepfather", "stepFather"),
+        Map.entry("step-father", "stepFather"),
+        Map.entry("step father", "stepFather"),
+        Map.entry("stepmother", "stepMother"),
+        Map.entry("step-mother", "stepMother"),
+        Map.entry("step mother", "stepMother"),
+        Map.entry("grandparent", "grandParent"),
+        Map.entry("specialguardian", "specialGuardian"),
+        Map.entry("special guardian", "specialGuardian"),
+        Map.entry("guardian", "guardian"),
+        Map.entry("other", "other")
+    );
+
+    private final CafCassFilter cafCassFilter;
+    private final HearingService hearingService;
+    private final SystemUserService systemUserService;
+    private final ObjectMapper objMapper;
+
+    @Value("#{'${cafcaas.excludedDocumentCategories}'.split(',')}")
+    private List<String> excludedDocumentCategoryList;
+
+    @Value("#{'${cafcaas.excludedDocuments}'.split(',')}")
+    private List<String> excludedDocumentList;
+
+    public boolean hasCafcassCaseDataChanged(CaseDetails caseDetails, CaseDetails caseDetailsBefore) {
+        return hasCafcassCaseDataChanged(caseDetails, caseDetailsBefore, null);
+    }
+
+    public boolean hasCafcassCaseDataChanged(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String eventId) {
+        if (eventId != null && EVENT_SPECIFIC_SOURCE_FIELDS.containsKey(eventId)) {
+            return !Objects.equals(
+                normaliseEventSpecificSourceFields(caseDetails, eventId),
+                normaliseEventSpecificSourceFields(caseDetailsBefore, eventId)
+            );
+        }
+
+        return !Objects.equals(
+            normaliseForComparison(prepareForComparison(caseDetails), eventId),
+            normaliseForComparison(prepareForComparison(caseDetailsBefore), eventId)
+        );
+    }
+
+    private Map<String, Object> normaliseEventSpecificSourceFields(CaseDetails caseDetails, String eventId) {
+        if (caseDetails == null || !hasCafcassEnglandLocation(caseDetails)) {
+            return null;
+        }
+        Map<String, Object> caseData = caseDetails.getData();
+        if (caseData == null) {
+            return null;
+        }
+
+        Map<String, Object> eventData = new HashMap<>();
+        EVENT_SPECIFIC_SOURCE_FIELDS.get(eventId).stream()
+            .map(fieldName -> normaliseEventSourceField(caseData, fieldName))
+            .filter(Objects::nonNull)
+            .forEach(field -> eventData.put(field.name(), normaliseSourceField(field.name(), field.value())));
+        removeEmptyValues(eventData);
+        return eventData;
+    }
+
+    private EventSourceField normaliseEventSourceField(Map<String, Object> caseData, String fieldName) {
+        if (CHILD_AND_APPLICANT_RELATIONS.equals(fieldName)) {
+            Object relationValue = caseData.get(CHILD_AND_APPLICANT_RELATIONS);
+            if (isEmptyRelationCollection(relationValue)) {
+                relationValue = caseData.get(BUFF_CHILD_AND_APPLICANT_RELATIONS);
+            }
+            return isEmptyRelationCollection(relationValue)
+                ? null : new EventSourceField(CHILD_AND_APPLICANT_RELATIONS, relationValue);
+        }
+        return caseData.containsKey(fieldName) ? new EventSourceField(fieldName, caseData.get(fieldName)) : null;
+    }
+
+    private record EventSourceField(String name, Object value) {
+    }
+
+    private boolean isEmptyRelationCollection(Object relationValue) {
+        return relationValue == null
+            || relationValue instanceof List<?> relationValues && relationValues.isEmpty();
+    }
+
+    private boolean hasCafcassEnglandLocation(CaseDetails caseDetails) {
+        Object caseManagementLocation = caseDetails.getData() == null ? null : caseDetails.getData().get("caseManagementLocation");
+        if (caseManagementLocation == null) {
+            return false;
+        }
+        Map<String, Object> location = objMapper.convertValue(caseManagementLocation, new TypeReference<>() {
+        });
+        String region = stringValue(location.get("regionId"));
+        if (region == null) {
+            region = stringValue(location.get("region"));
+        }
+        try {
+            return isCafcassEnglandRegion(region);
+        } catch (NumberFormatException e) {
+            log.warn("Unable to parse Cafcass region while comparing amend event data: {}", region);
+            return false;
+        }
+    }
+
+    private Object normaliseSourceField(String fieldName, Object fieldValue) {
+        Object convertedValue = objMapper.convertValue(fieldValue, new TypeReference<>() {
+        });
+        if (convertedValue instanceof List<?> elements) {
+            List<Object> normalisedElements = elements.stream()
+                .map(element -> normaliseSourceElement(fieldName, element))
+                .filter(Objects::nonNull)
+                .sorted((first, second) -> String.valueOf(first).compareTo(String.valueOf(second)))
+                .toList();
+            return normalisedElements.isEmpty() ? null : normalisedElements;
+        }
+        return convertedValue;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Object normaliseSourceElement(String fieldName, Object element) {
+        if (!(element instanceof Map<?, ?> elementMap)) {
+            return element;
+        }
+        Object value = elementMap.get("value");
+        if (!(value instanceof Map<?, ?> valueMap)) {
+            return value;
+        }
+
+        Map<String, Object> normalisedValue = new HashMap<>((Map<String, Object>) valueMap);
+        if ("otherPartyInTheCaseRevised".equals(fieldName)) {
+            normaliseOtherPartySourceValue(normalisedValue);
+        } else {
+            normaliseRelationshipSourceValue(fieldName, normalisedValue);
+        }
+        removeEmptyValues(normalisedValue);
+        return normalisedValue.isEmpty() ? null : normalisedValue;
+    }
+
+    private void normaliseOtherPartySourceValue(Map<String, Object> party) {
+        party.keySet().removeIf(fieldName -> !OTHER_PARTY_COMPARISON_FIELDS.contains(fieldName));
+        normaliseValues(party,
+                        "gender",
+                        "isDateOfBirthKnown",
+                        "isPlaceOfBirthKnown",
+                        "isCurrentAddressKnown",
+                        "canYouProvideEmailAddress",
+                        "canYouProvidePhoneNumber",
+                        "isAddressConfidential",
+                        "isEmailAddressConfidential",
+                        "isPhoneNumberConfidential");
+        if (!"other".equalsIgnoreCase(stringValue(party.get("gender")))) {
+            party.remove("otherGender");
+        }
+        if (!isYes(party.get("isDateOfBirthKnown"))) {
+            party.remove("dateOfBirth");
+        }
+        if (!isYes(party.get("isPlaceOfBirthKnown"))) {
+            party.remove("placeOfBirth");
+        }
+        if (!isYes(party.get("isCurrentAddressKnown"))) {
+            party.remove("address");
+            party.remove("isAddressConfidential");
+        }
+        if (isNo(party.get("canYouProvideEmailAddress"))) {
+            party.remove("email");
+            party.remove("isEmailAddressConfidential");
+        }
+        if (isNo(party.get("canYouProvidePhoneNumber"))) {
+            party.remove("phoneNumber");
+            party.remove("isPhoneNumberConfidential");
+        }
+    }
+
+    private void normaliseRelationshipSourceValue(String fieldName, Map<String, Object> relationship) {
+        if (CHILD_AND_APPLICANT_RELATIONS.equals(fieldName)) {
+            relationship.keySet().removeIf(field -> !CHILD_AND_APPLICANT_RELATION_COMPARISON_FIELDS.contains(field));
+            normaliseValues(relationship, "childAndApplicantRelation", "childLivesWith");
+            removeOtherDetailsWhenNotOther(relationship, "childAndApplicantRelation", "childAndApplicantRelationOtherDetails");
+        } else if ("childAndOtherPeopleRelations".equals(fieldName)) {
+            relationship.keySet().removeIf(field -> !CHILD_AND_OTHER_PEOPLE_RELATION_COMPARISON_FIELDS.contains(field));
+            normaliseValues(
+                relationship,
+                "childAndOtherPeopleRelation",
+                "childLivesWith",
+                "isChildLivesWithPersonConfidential"
+            );
+            removeOtherDetailsWhenNotOther(relationship, "childAndOtherPeopleRelation", "childAndOtherPeopleRelationOtherDetails");
+        }
+        if (!isYes(relationship.get("childLivesWith"))) {
+            relationship.remove("isChildLivesWithPersonConfidential");
+        }
+    }
+
+    private void normaliseValues(Map<String, Object> map, String... fieldNames) {
+        Arrays.stream(fieldNames)
+            .filter(map::containsKey)
+            .forEach(fieldName -> map.put(fieldName, canonicalValue(fieldName, map.get(fieldName))));
+    }
+
+    private String canonicalValue(String fieldName, Object value) {
+        String stringValue = stringValue(value);
+        if (stringValue == null) {
+            return null;
+        }
+        if (fieldName.toLowerCase().contains("relation")) {
+            return RELATIONSHIP_VALUE_ALIASES.getOrDefault(stringValue.toLowerCase(), stringValue);
+        }
+        if ("childLivesWith".equals(fieldName)
+            || fieldName.startsWith("is")
+            || fieldName.startsWith("can")) {
+            if ("yes".equalsIgnoreCase(stringValue)) {
+                return "Yes";
+            }
+            if ("no".equalsIgnoreCase(stringValue)) {
+                return "No";
+            }
+        }
+        return stringValue;
+    }
+
+    private void removeOtherDetailsWhenNotOther(Map<String, Object> relationship,
+                                                String relationshipField,
+                                                String otherDetailsField) {
+        if (!"other".equalsIgnoreCase(stringValue(relationship.get(relationshipField)))) {
+            relationship.remove(otherDetailsField);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void removeEmptyValues(Map<String, Object> map) {
+        map.entrySet().removeIf(entry -> {
+            Object value = entry.getValue();
+            if (value instanceof Map<?, ?> nestedMap) {
+                removeEmptyValues((Map<String, Object>) nestedMap);
+                return nestedMap.isEmpty();
+            }
+            if (value instanceof List<?> nestedList) {
+                nestedList.stream()
+                    .filter(Map.class::isInstance)
+                    .map(nestedElement -> (Map<String, Object>) nestedElement)
+                    .forEach(this::removeEmptyValues);
+                return nestedList.isEmpty();
+            }
+            return value == null || "".equals(value);
+        });
+    }
+
+    private boolean isYes(Object value) {
+        return "Yes".equalsIgnoreCase(stringValue(value)) || "yes".equalsIgnoreCase(stringValue(value));
+    }
+
+    private boolean isNo(Object value) {
+        return "No".equalsIgnoreCase(stringValue(value)) || "no".equalsIgnoreCase(stringValue(value));
+    }
+
+    private String stringValue(Object value) {
+        if (value instanceof Map<?, ?> mapValue) {
+            Object id = mapValue.get("id");
+            if (id != null) {
+                return String.valueOf(id);
+            }
+            Object code = mapValue.get("code");
+            if (code != null) {
+                return String.valueOf(code);
+            }
+            Object valueField = mapValue.get("value");
+            if (valueField != null) {
+                return String.valueOf(valueField);
+            }
+        }
+        return value == null ? null : String.valueOf(value);
+    }
+
+    private Map<String, Object> normaliseForComparison(CafCassCaseDetail cafCassCaseDetail, String eventId) {
+        if (cafCassCaseDetail == null) {
+            return null;
+        }
+        Map<String, Object> caseDetailMap = objMapper.convertValue(cafCassCaseDetail, new TypeReference<>() {
+        });
+        Object caseData = caseDetailMap.get("case_data");
+        if (caseData instanceof Map<?, ?> caseDataMap) {
+            boolean amendPartyAndRelationshipEvent = eventId != null
+                && AMEND_PARTY_AND_RELATIONSHIP_EVENTS.contains(eventId);
+            if (amendPartyAndRelationshipEvent) {
+                normaliseChildElementIds(caseDataMap);
+                removeElementIds(caseDataMap, "otherPeopleInTheCaseTable");
+                sortElementCollectionByValue(caseDataMap, "children");
+                sortElementCollectionByValue(caseDataMap, "otherPeopleInTheCaseTable");
+            }
+            normaliseRelationshipElementIds(caseDataMap, "childAndApplicantRelations", amendPartyAndRelationshipEvent);
+            normaliseRelationshipElementIds(caseDataMap, "childAndRespondentRelations", amendPartyAndRelationshipEvent);
+            normaliseRelationshipElementIds(
+                caseDataMap,
+                "childAndOtherPeopleRelations",
+                amendPartyAndRelationshipEvent
+            );
+            sortElementCollectionByValue(caseDataMap, "childAndApplicantRelations");
+            sortElementCollectionByValue(caseDataMap, "childAndRespondentRelations");
+            sortElementCollectionByValue(caseDataMap, "childAndOtherPeopleRelations");
+            retainEventSpecificComparisonFields(caseDataMap, eventId);
+        }
+        return caseDetailMap;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void retainEventSpecificComparisonFields(Map<?, ?> caseDataMap, String eventId) {
+        if (eventId == null) {
+            return;
+        }
+        List<String> comparisonFields = EVENT_SPECIFIC_COMPARISON_FIELDS.get(eventId);
+        if (comparisonFields == null) {
+            return;
+        }
+
+        Map<String, Object> eventCaseData = new HashMap<>();
+        comparisonFields.stream()
+            .filter(caseDataMap::containsKey)
+            .forEach(fieldName -> eventCaseData.put(fieldName, caseDataMap.get(fieldName)));
+        ((Map<String, Object>) caseDataMap).clear();
+        ((Map<String, Object>) caseDataMap).putAll(eventCaseData);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void sortElementCollectionByValue(Map<?, ?> caseDataMap, String fieldName) {
+        Object collection = caseDataMap.get(fieldName);
+        if (collection instanceof List<?> elements) {
+            List<?> sortedElements = elements.stream()
+                .sorted((first, second) -> String.valueOf(getElementValue(first))
+                    .compareTo(String.valueOf(getElementValue(second))))
+                .toList();
+            ((Map<String, Object>) caseDataMap).put(fieldName, sortedElements);
+        }
+    }
+
+    private Object getElementValue(Object element) {
+        if (element instanceof Map<?, ?> elementMap) {
+            return elementMap.get("value");
+        }
+        return element;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void removeElementIds(Map<?, ?> caseDataMap, String fieldName) {
+        Object collection = caseDataMap.get(fieldName);
+        if (collection instanceof List<?> elements) {
+            elements.stream()
+                .filter(Map.class::isInstance)
+                .map(element -> (Map<String, Object>) element)
+                .forEach(element -> element.remove("id"));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void normaliseChildElementIds(Map<?, ?> caseDataMap) {
+        Object collection = caseDataMap.get("children");
+        if (collection instanceof List<?> elements) {
+            elements.stream()
+                .filter(Map.class::isInstance)
+                .map(element -> (Map<String, Object>) element)
+                .forEach(element -> {
+                    element.remove("id");
+                    if (element.get("value") instanceof Map<?, ?> child
+                        && child.get("whoDoesTheChildLiveWith") instanceof Map<?, ?> whoDoesTheChildLiveWith) {
+                        ((Map<String, Object>) whoDoesTheChildLiveWith).remove("partyId");
+                    }
+                });
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void normaliseRelationshipElementIds(Map<?, ?> caseDataMap,
+                                                 String fieldName,
+                                                 boolean normaliseGeneratedPartyIds) {
+        Object collection = caseDataMap.get(fieldName);
+        if (collection instanceof List<?> elements) {
+            elements.stream()
+                .filter(Map.class::isInstance)
+                .map(element -> (Map<String, Object>) element)
+                .forEach(element -> {
+                    element.remove("id");
+                    if (normaliseGeneratedPartyIds && element.get("value") instanceof Map<?, ?> value) {
+                        removeGeneratedRelationshipIds((Map<String, Object>) value);
+                    }
+                });
+        }
+    }
+
+    private void removeGeneratedRelationshipIds(Map<String, Object> relationship) {
+        relationship.remove("partyId");
+        relationship.remove("partyFullName");
+        relationship.remove("childId");
+        relationship.remove("childFullName");
+        if (!"other".equalsIgnoreCase(String.valueOf(relationship.get("relationType")))) {
+            relationship.remove("otherRelationDetails");
+        }
+        if (!"Yes".equalsIgnoreCase(String.valueOf(relationship.get("childLivesWith")))) {
+            relationship.remove("isChildLivesWithPersonConfidential");
+        }
+    }
+
+    private CafCassCaseDetail prepareForComparison(CaseDetails caseDetails) {
+        CafCassCaseDetail cafCassCaseDetail = convertToCafcassCaseDetail(caseDetails);
+        if (cafCassCaseDetail == null) {
+            return null;
+        }
+
+        cafCassCaseDetail = applyCafcassFilter(cafCassCaseDetail);
+        if (cafCassCaseDetail == null) {
+            return null;
+        }
+        addSpecificDocumentsFromCaseFileViewBasedOnCategories(cafCassCaseDetail);
+        cafCassCaseDetail = removeUnnecessaryFieldsFromResponse(cafCassCaseDetail);
+        removeRedactedDocumentsFromResponse(cafCassCaseDetail);
+
+        // return data with the dates updated by individual events nullified, so we don't compare them
+        return cafCassCaseDetail.toBuilder()
+            .lastModified(null)
+            .lastStateModifiedDate(null)
+            .build();
+    }
+
+    public CafCassResponse getHearingDetailsForAllCases(String authorisation, CafCassResponse cafCassResponse) {
+        CafCassResponse filteredCafcassResponse = CafCassResponse.builder()
+            .cases(new ArrayList<>())
+            .build();
+        Map<String, String> caseIdWithRegionIdMap = new HashMap<>();
+
+        cafCassResponse.getCases().forEach(caseDetails -> {
+            CaseManagementLocation caseManagementLocation = caseDetails.getCaseData().getCaseManagementLocation();
+            if (caseManagementLocation != null) {
+                if (isCafcassEnglandRegion(caseManagementLocation.getRegionId())) {
+                    addCaseRegionMapping(
+                        caseIdWithRegionIdMap,
+                        caseDetails,
+                        caseManagementLocation.getRegionId(),
+                        caseManagementLocation.getBaseLocationId()
+                    );
+                    filteredCafcassResponse.getCases().add(caseDetails);
+                } else if (isCafcassEnglandRegion(caseManagementLocation.getRegion())) {
+                    addCaseRegionMapping(
+                        caseIdWithRegionIdMap,
+                        caseDetails,
+                        caseManagementLocation.getRegion(),
+                        caseManagementLocation.getBaseLocation()
+                    );
+                    caseDetails.getCaseData().setCafcassUploadedDocs(null);
+                    filteredCafcassResponse.getCases().add(caseDetails);
+                }
+            }
+        });
+
+        List<Hearings> listOfHearingDetails = hearingService.getHearingsForAllCases(
+            authorisation,
+            caseIdWithRegionIdMap
+        );
+        filterCancelledHearingsBeforeListing(listOfHearingDetails);
+        updateHearingDataCafcass(filteredCafcassResponse, listOfHearingDetails);
+
+        return filteredCafcassResponse;
+    }
+
+    public void filterCancelledHearingsBeforeListing(List<Hearings> listOfHearingDetails) {
+        CafcassUpdateHelperUtils.filterCancelledHearingsBeforeListing(listOfHearingDetails);
+    }
+
+    public boolean checkIfDocumentsNeedToExclude(List<String> excludedDocumentList, String documentFilename) {
+        return shouldExcludeDocument(excludedDocumentList, documentFilename);
+    }
+
+    private CafCassCaseDetail convertToCafcassCaseDetail(CaseDetails caseData) {
+        if (caseData == null) {
+            return null;
+        }
+
+        ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        objectMapper.registerModule(new ParameterNamesModule());
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+        CafCassCaseDetail cafCassCaseDetail = objectMapper.convertValue(caseData, CafCassCaseDetail.class);
+        CafCassCaseData cafCassCaseData = caseData.getData() == null
+            ? CafCassCaseData.builder().build()
+            : objectMapper.convertValue(caseData.getData(), CafCassCaseData.class);
+        cafCassCaseDetail.setCaseData(cafCassCaseData);
+        return cafCassCaseDetail;
+    }
+
+    private CafCassCaseDetail applyCafcassFilter(CafCassCaseDetail cafCassCaseDetail) {
+        CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
+        final CafCassCaseData cafCassCaseData = caseData.toBuilder()
+            .applicants(cafCassFilter.filterNonValueList(caseData.getApplicants()))
+            .otherPeopleInTheCaseTable(cafCassFilter.filterNonValueList(caseData.getOtherPeopleInTheCaseTable()))
+            .respondents(cafCassFilter.filterNonValueList(caseData.getRespondents()))
+            .children(cafCassFilter.filterNonValueList(caseData.getChildren()))
+            .interpreterNeeds(cafCassFilter.filterNonValueList(caseData.getInterpreterNeeds()))
+            .otherDocuments(cafCassFilter.filterNonValueList(caseData.getOtherDocuments()))
+            .manageOrderCollection(cafCassFilter.filterNonValueList(caseData.getManageOrderCollection()))
+            .orderCollection(cafCassFilter.filterNonValueList(caseData.getOrderCollection()))
+            .build();
+        cafCassCaseDetail.setCaseData(cafCassCaseData);
+        log.info("After applying filter Result Size --> {}", 1);
+        return cafCassCaseDetail;
+    }
+
+    private void addCaseRegionMapping(Map<String, String> caseIdWithRegionIdMap,
+                                      CafCassCaseDetail cafCassCaseDetail,
+                                      String region,
+                                      String baseLocation) {
+        caseIdWithRegionIdMap.put(String.valueOf(cafCassCaseDetail.getId()), region + "-" + baseLocation);
+        cafCassCaseDetail.getCaseData().setCourtEpimsId(baseLocation);
+    }
+
+    private void updateHearingDataCafcass(CafCassCaseDetail cafCassCaseDetail, List<Hearings> listOfHearingDetails) {
+        if (CollectionUtils.isNotEmpty(listOfHearingDetails)) {
+            Hearings filteredHearing =
+                listOfHearingDetails.stream().filter(hearings -> hearings.getCaseRef().equals(String.valueOf(
+                    cafCassCaseDetail.getId()))).findFirst().orElse(null);
+
+            if (filteredHearing != null && CollectionUtils.isNotEmpty(filteredHearing.getCaseHearings())) {
+                updateCaseWithHearingData(cafCassCaseDetail, filteredHearing);
+            }
+        }
+    }
+
+    private void updateHearingDataCafcass(CafCassResponse filteredCafcassResponse, List<Hearings> listOfHearingDetails) {
+        filteredCafcassResponse.getCases().forEach(cafCassCaseDetail -> updateHearingDataCafcass(
+            cafCassCaseDetail,
+            listOfHearingDetails
+        ));
+    }
+
+    public void addSpecificDocumentsFromCaseFileViewBasedOnCategories(CafCassResponse cafCassResponse) {
+        cafCassResponse.getCases().forEach(this::addSpecificDocumentsFromCaseFileViewBasedOnCategories);
+    }
+
+    private void addSpecificDocumentsFromCaseFileViewBasedOnCategories(CafCassCaseDetail cafCassCaseDetail) {
+        log.info("Adding documents for case ID {} ", cafCassCaseDetail.getId());
+        List<Element<OtherDocuments>> otherDocsList = new ArrayList<>();
+        CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
+        populateReviewDocuments(otherDocsList, caseData);
+        populateRespondentC1AResponseDoc(caseData.getRespondents(), otherDocsList);
+        populateConfidentialDoc(caseData, otherDocsList);
+        populateBundleDoc(caseData, otherDocsList);
+        populateAnyOtherDoc(caseData, otherDocsList);
+        populateAdditionalOrderDocuments(caseData, otherDocsList);
+
+        List<Element<ApplicantDetails>> respondents = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(caseData.getRespondents())) {
+            caseData.getRespondents().forEach(applicantDetailsElement -> {
+                ApplicantDetails applicantDetails = applicantDetailsElement.getValue().toBuilder().response(null).build();
+                respondents.add(Element.<ApplicantDetails>builder().id(applicantDetailsElement.getId()).value(
+                    applicantDetails).build());
+            });
+        }
+
+        cafCassCaseDetail.setCaseData(buildCaseDataWithProcessedDocumentsCleared(caseData, otherDocsList, respondents));
+    }
+
+    private void populateAnyOtherDoc(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
+        addCaseDocuments(ANY_OTHER_DOC, caseData.getOtherDocumentsUploaded(), otherDocsList);
+        addInOtherDocuments(ANY_OTHER_DOC, caseData.getUploadOrderDoc(), otherDocsList);
+        populateServiceOfApplicationUploadDocs(caseData, otherDocsList);
+        populateStatementOfServiceDocs(caseData, otherDocsList);
+    }
+
+    private void addCaseDocuments(String category,
+                                  List<uk.gov.hmcts.reform.prl.models.documents.Document> documents,
+                                  List<Element<OtherDocuments>> otherDocsList) {
+        nullSafeList(documents).forEach(document -> addInOtherDocuments(category, document, otherDocsList));
+    }
+
+    private void populateStatementOfServiceDocs(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
+        addStatementOfServiceDocuments(caseData.getStmtOfServiceForOrder(), otherDocsList);
+        addStatementOfServiceDocuments(caseData.getStmtOfServiceForApplication(), otherDocsList);
+        addStatementOfServiceDocuments(caseData.getStmtOfServiceAddRecipient(), otherDocsList);
+    }
+
+    private void addStatementOfServiceDocuments(List<uk.gov.hmcts.reform.prl.models.Element<StmtOfServiceAddRecipient>> documents,
+                                                List<Element<OtherDocuments>> otherDocsList) {
+        nullSafeList(documents).forEach(
+            documentElement -> addInOtherDocuments(
+                ANY_OTHER_DOC,
+                documentElement.getValue().getStmtOfServiceDocument(),
+                otherDocsList
+            ));
+    }
+
+    private void populateAdditionalOrderDocuments(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
+        nullSafeList(caseData.getAdditionalOrderDocuments())
+            .stream()
+            .flatMap(el -> el.getValue().getAdditionalDocuments().stream())
+            .forEach(doc -> addInOtherDocuments(applicantApplication.getId(), doc.getValue(), otherDocsList));
+    }
+
+    private void populateServiceOfApplicationUploadDocs(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
+        addInOtherDocuments(ANY_OTHER_DOC, caseData.getSpecialArrangementsLetter(), otherDocsList);
+        addInOtherDocuments(ANY_OTHER_DOC, caseData.getAdditionalDocuments(), otherDocsList);
+        addDocumentElements(ANY_OTHER_DOC, caseData.getAdditionalDocumentsList(), otherDocsList);
+
+        if (CollectionUtils.isNotEmpty(caseData.getFinalServedApplicationDetailsList())) {
+            caseData.getFinalServedApplicationDetailsList().forEach(
+                servedApplicationDetails -> {
+                    nullSafeList(servedApplicationDetails.getValue().getBulkPrintDetails()).forEach(
+                        bulkPrintDetailsElement ->
+                            processServiceOfApplicationBulkPrintDocs(bulkPrintDetailsElement.getValue(), otherDocsList)
+                    );
+                    nullSafeList(servedApplicationDetails.getValue().getEmailNotificationDetails())
+                        .forEach(emailNotificationDetailsElement -> processServiceOfApplicationEmailedDocs(
+                            emailNotificationDetailsElement.getValue(),
+                            otherDocsList
+                        ));
+                }
+            );
+        }
+    }
+
+    private void addDocumentElements(
+        String category,
+        List<uk.gov.hmcts.reform.prl.models.Element<uk.gov.hmcts.reform.prl.models.documents.Document>> documents,
+        List<Element<OtherDocuments>> otherDocsList
+    ) {
+        nullSafeList(documents).forEach(documentElement -> addInOtherDocuments(category, documentElement.getValue(), otherDocsList));
+    }
+
+    private void processServiceOfApplicationBulkPrintDocs(BulkPrintDetails bulkPrintDetails,
+                                                          List<Element<OtherDocuments>> otherDocsList) {
+        addDocumentElementsIfMissing(bulkPrintDetails.getPrintDocs(), otherDocsList);
+    }
+
+    private void processServiceOfApplicationEmailedDocs(EmailNotificationDetails emailNotificationDetails,
+                                                        List<Element<OtherDocuments>> otherDocsList) {
+        addDocumentElementsIfMissing(emailNotificationDetails.getDocs(), otherDocsList);
+    }
+
+    private void addDocumentElementsIfMissing(
+        List<uk.gov.hmcts.reform.prl.models.Element<uk.gov.hmcts.reform.prl.models.documents.Document>> documents,
+        List<Element<OtherDocuments>> otherDocsList
+    ) {
+        nullSafeList(documents).forEach(
+            docElement -> addOtherDocumentIfMissing(docElement.getValue(), otherDocsList)
+        );
+    }
+
+    private void addOtherDocumentIfMissing(uk.gov.hmcts.reform.prl.models.documents.Document caseDocument,
+                                           List<Element<OtherDocuments>> otherDocsList) {
+        if (!isDocumentPresent(caseDocument, otherDocsList)) {
+            addInOtherDocuments(ANY_OTHER_DOC, caseDocument, otherDocsList);
+        }
+    }
+
+    private void populateBundleDoc(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
+        if (null != caseData.getBundleInformation()
+            && null != caseData.getBundleInformation().getCaseBundles()
+            && CollectionUtils.isNotEmpty(caseData.getBundleInformation().getCaseBundles())) {
+            caseData.getBundleInformation().getCaseBundles().forEach(bundle -> {
+                DocumentLink stitchedDocument = bundle.getValue().getStitchedDocument();
+                addBundleDocument(stitchedDocument, otherDocsList);
+            });
+        }
+    }
+
+    private void populateReviewDocuments(List<Element<OtherDocuments>> otherDocsList, CafCassCaseData caseData) {
+        Arrays.asList(
+            caseData.getCourtStaffUploadDocListDocTab(),
+            caseData.getLegalProfUploadDocListDocTab(),
+            caseData.getCafcassUploadDocListDocTab(),
+            caseData.getLocalAuthorityUploadDocListDocTab(),
+            caseData.getCitizenUploadedDocListDocTab(),
+            caseData.getConfidentialDocuments(),
+            caseData.getBulkScannedDocListDocTab(),
+            caseData.getRestrictedDocuments()
+        ).forEach(quarantineLegalDocs -> parseQuarantineLegalDocsIfPresent(otherDocsList, quarantineLegalDocs));
+    }
+
+    private void addBundleDocument(DocumentLink stitchedDocument, List<Element<OtherDocuments>> otherDocsList) {
+        if (ObjectUtils.isNotEmpty(stitchedDocument)) {
+            uk.gov.hmcts.reform.prl.models.documents.Document document =
+                uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                    .documentFileName(stitchedDocument.getDocumentFilename())
+                    .documentUrl(stitchedDocument.getDocumentUrl())
+                    .build();
+            addInOtherDocuments("courtBundle", document, otherDocsList);
+        }
+    }
+
+    private void parseQuarantineLegalDocsIfPresent(
+        List<Element<OtherDocuments>> otherDocsList,
+        List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> quarantineLegalDocs
+    ) {
+        if (CollectionUtils.isNotEmpty(quarantineLegalDocs)) {
+            parseQuarantineLegalDocs(
+                otherDocsList,
+                quarantineLegalDocs,
+                objMapper,
+                excludedDocumentCategoryList,
+                excludedDocumentList
+            );
+        }
+    }
+
+    private void populateConfidentialDoc(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
+        Arrays.asList(
+            caseData.getRespondentAc8Documents(),
+            caseData.getRespondentBc8Documents(),
+            caseData.getRespondentCc8Documents(),
+            caseData.getRespondentDc8Documents(),
+            caseData.getRespondentEc8Documents(),
+            caseData.getOtherPartyC8Documents()
+        ).forEach(responseDocuments -> populateRespondentC8Documents(responseDocuments, otherDocsList));
+        addCaseDocuments(CONFIDENTIAL, caseData.getC8FormDocumentsUploaded(), otherDocsList);
+    }
+
+    private void populateRespondentC8Documents(List<uk.gov.hmcts.reform.prl.models.Element<ResponseDocuments>> responseDocuments,
+                                               List<Element<OtherDocuments>> otherDocsList) {
+        nullSafeList(responseDocuments).forEach(responseDocumentsElement -> populateRespondentDocument(
+            responseDocumentsElement.getValue().getRespondentC8Document(),
+            responseDocumentsElement.getValue().getRespondentC8DocumentWelsh(),
+            CONFIDENTIAL,
+            otherDocsList
+        ));
+    }
+
+    private void populateRespondentDocument(uk.gov.hmcts.reform.prl.models.documents.Document responseDocumentEng,
+                                            uk.gov.hmcts.reform.prl.models.documents.Document responseDocumentWelsh,
+                                            String category,
+                                            List<Element<OtherDocuments>> otherDocsList) {
+        if (null != responseDocumentEng) {
+            addInOtherDocuments(category, responseDocumentEng, otherDocsList);
+        }
+        if (null != responseDocumentWelsh) {
+            addInOtherDocuments(category, responseDocumentWelsh, otherDocsList);
+        }
+    }
+
+    private void populateRespondentC1AResponseDoc(List<Element<ApplicantDetails>> respondents,
+                                                  List<Element<OtherDocuments>> otherDocsList) {
+        if (CollectionUtils.isNotEmpty(respondents)) {
+            respondents.forEach(respondent -> {
+                if (null != respondent.getValue().getResponse()
+                    && null != respondent.getValue().getResponse().getResponseToAllegationsOfHarm()) {
+                    ResponseToAllegationsOfHarm responseToAllegationsOfHarm =
+                        respondent.getValue().getResponse().getResponseToAllegationsOfHarm();
+                    populateRespondentDocument(
+                        responseToAllegationsOfHarm.getResponseToAllegationsOfHarmDocument(),
+                        responseToAllegationsOfHarm.getResponseToAllegationsOfHarmWelshDocument(),
+                        "respondentC1AResponse",
+                        otherDocsList
+                    );
+                }
+            });
+        }
+    }
+
+    public CafCassResponse removeUnnecessaryFieldsFromResponse(CafCassResponse filteredCafcassData) {
+        filteredCafcassData.getCases().forEach(this::removeUnnecessaryFieldsFromResponse);
+        return filteredCafcassData;
+    }
+
+    private CafCassCaseDetail removeUnnecessaryFieldsFromResponse(CafCassCaseDetail cafCassCaseDetail) {
+        CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
+        if (caseData.getOrderCollection() != null) {
+            caseData.getOrderCollection().forEach(order -> {
+                CaseOrder value = order.getValue();
+                if (value != null) {
+                    log.info(
+                        "Case {} has hearingId={} on orderTypeId={}",
+                        cafCassCaseDetail.getId(),
+                        value.getHearingId(),
+                        value.getOrderType()
+                    );
+                }
+            });
+        }
+
+        caseData = caseData.toBuilder()
+            .applicants(removeResponse(caseData.getApplicants()))
+            .respondents(removeResponse(caseData.getRespondents()))
+            .otherPeopleInTheCaseTable(normaliseOtherPeople(caseData.getOtherPeopleInTheCaseTable()))
+            .children(normaliseChildren(caseData.getChildren()))
+            .orderCollection(removeServeOrderDetails(caseData.getOrderCollection()))
+            .build();
+        cafCassCaseDetail.setCaseData(caseData);
+        return cafCassCaseDetail;
+    }
+
+    public void removeRedactedDocumentsFromResponse(CafCassResponse filteredCafcassData) {
+        filteredCafcassData.getCases().forEach(this::removeRedactedDocumentsFromResponse);
+    }
+
+    private void removeRedactedDocumentsFromResponse(CafCassCaseDetail cafCassCaseDetail) {
+        CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
+        if (caseData != null) {
+            caseData.setOtherDocuments(removeRedactedDocuments(caseData.getOtherDocuments(), this::getOtherDocumentId));
+            cafCassCaseDetail.setCaseData(caseData.toBuilder()
+                                              .orderCollection(removeRedactedDocuments(
+                                                  caseData.getOrderCollection(),
+                                                  this::getOrderDocumentId
+                                              ))
+                                              .build());
+        }
+    }
+
+    private String getOtherDocumentId(OtherDocuments otherDocument) {
+        return otherDocument.getDocumentOther() != null ? otherDocument.getDocumentOther().getDocumentId() : null;
+    }
+
+    private String getOrderDocumentId(CaseOrder order) {
+        return order.getOrderDocument() != null ? order.getOrderDocument().getDocumentId() : null;
+    }
+
+    private List<Element<CaseOrder>> removeServeOrderDetails(List<Element<CaseOrder>> orderCollection) {
+        return updateElementValues(orderCollection, order -> order.setServeOrderDetails(null));
+    }
+
+    private List<Element<ApplicantDetails>> removeResponse(List<Element<ApplicantDetails>> partyDetails) {
+        return updateElementValues(partyDetails, partyDetail -> {
+            partyDetail.setResponse(null);
+            normalisePartyDetails(partyDetail);
+        });
+    }
+
+    private List<Element<OtherPersonInTheCase>> normaliseOtherPeople(List<Element<OtherPersonInTheCase>> otherPeople) {
+        return updateElementValues(otherPeople, this::normaliseOtherPerson);
+    }
+
+    private List<Element<uk.gov.hmcts.reform.prl.models.dto.cafcass.Child>> normaliseChildren(
+        List<Element<uk.gov.hmcts.reform.prl.models.dto.cafcass.Child>> children
+    ) {
+        return updateElementValues(children, child -> {
+            if (child.getGender() != null && !"other".equalsIgnoreCase(child.getGender().name())) {
+                child.setOtherGender(null);
+            }
+        });
+    }
+
+    private void normalisePartyDetails(ApplicantDetails partyDetail) {
+        if (partyDetail.getIsDateOfBirthKnown() != null && !YesOrNo.Yes.equals(partyDetail.getIsDateOfBirthKnown())) {
+            partyDetail.setDateOfBirth(null);
+        }
+        if (partyDetail.getIsPlaceOfBirthKnown() != null && !YesOrNo.Yes.equals(partyDetail.getIsPlaceOfBirthKnown())) {
+            partyDetail.setPlaceOfBirth(null);
+        }
+        if (partyDetail.getIsCurrentAddressKnown() != null && !YesOrNo.Yes.equals(partyDetail.getIsCurrentAddressKnown())) {
+            partyDetail.setAddress(null);
+            partyDetail.setIsAddressConfidential(null);
+        }
+        normaliseAddressHistory(partyDetail);
+        if (YesOrNo.No.equals(partyDetail.getCanYouProvideEmailAddress())) {
+            partyDetail.setEmail(null);
+            partyDetail.setIsEmailAddressConfidential(null);
+        }
+        if (YesOrNo.No.equals(partyDetail.getCanYouProvidePhoneNumber())) {
+            partyDetail.setPhoneNumber(null);
+            partyDetail.setIsPhoneNumberConfidential(null);
+        }
+    }
+
+    private void normaliseAddressHistory(ApplicantDetails partyDetail) {
+        boolean addressHistoryQuestionPresent = partyDetail.getIsAtAddressLessThan5Years() != null
+            || partyDetail.getIsAtAddressLessThan5YearsWithDontKnow() != null;
+        boolean livedAtAddressLessThanFiveYears = YesOrNo.Yes.equals(partyDetail.getIsAtAddressLessThan5Years())
+            || YesNoDontKnow.yes.equals(partyDetail.getIsAtAddressLessThan5YearsWithDontKnow());
+        if (addressHistoryQuestionPresent && !livedAtAddressLessThanFiveYears) {
+            partyDetail.setAddressLivedLessThan5YearsDetails(null);
+        }
+    }
+
+    private void normaliseOtherPerson(OtherPersonInTheCase otherPerson) {
+        if (otherPerson.getGender() != null && !"other".equalsIgnoreCase(otherPerson.getGender())) {
+            otherPerson.setOtherGender(null);
+        }
+        if (otherPerson.getIsDateOfBirthKnown() != null && !YesOrNo.Yes.equals(otherPerson.getIsDateOfBirthKnown())) {
+            otherPerson.setDateOfBirth(null);
+        }
+        if (otherPerson.getIsPlaceOfBirthKnown() != null && !YesOrNo.Yes.equals(otherPerson.getIsPlaceOfBirthKnown())) {
+            otherPerson.setPlaceOfBirth(null);
+        }
+        if (otherPerson.getIsCurrentAddressKnown() != null && !YesOrNo.Yes.equals(otherPerson.getIsCurrentAddressKnown())) {
+            otherPerson.setAddress(null);
+            otherPerson.setIsAddressConfidential(null);
+        }
+        if (YesOrNo.No.equals(otherPerson.getCanYouProvideEmailAddress())) {
+            otherPerson.setEmail(null);
+            otherPerson.setIsEmailAddressConfidential(null);
+        }
+        if (YesOrNo.No.equals(otherPerson.getCanYouProvidePhoneNumber())) {
+            otherPerson.setPhoneNumber(null);
+            otherPerson.setIsPhoneNumberConfidential(null);
+        }
+    }
+
+    private <T> List<Element<T>> updateElementValues(List<Element<T>> elements, Consumer<T> valueUpdater) {
+        nullSafeList(elements).forEach(element -> {
+            if (null != element.getValue()) {
+                valueUpdater.accept(element.getValue());
+            }
+        });
+        return elements;
+    }
+}
