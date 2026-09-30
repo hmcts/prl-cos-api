@@ -59,6 +59,7 @@ public class DraftOrder {
     private final LocalDate approvalDate;
     private final YesOrNo isTheOrderAboutAllChildren;
     private final String recitalsOrPreamble;
+    private final YesOrNo checkIsThisUrgent;
     @JsonProperty("orderDirections")
     private final String orderDirections;
     @JsonProperty("furtherDirectionsIfRequired")
@@ -78,6 +79,7 @@ public class DraftOrder {
     private final LocalDate manageOrdersDateOfhearing;
     private final String dateOfHearingTime;
     private final String dateOfHearingTimeEstimate;
+    private final YesOrNo miamForOrder;
 
     /**
      * C43.

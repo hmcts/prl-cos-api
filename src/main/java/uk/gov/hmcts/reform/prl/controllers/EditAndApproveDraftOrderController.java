@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -39,6 +40,7 @@ import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
+import uk.gov.hmcts.reform.prl.services.MiamForOrderService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -50,19 +52,21 @@ import uk.gov.hmcts.reform.prl.utils.TaskUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_COLLECTION_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_APPROVED;
 import static uk.gov.hmcts.reform.prl.enums.Event.DRAFT_AN_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.OrderUtils.getOrderId;
 
 @Slf4j
 @SuppressWarnings({"squid:S5665"})
@@ -80,6 +84,7 @@ public class EditAndApproveDraftOrderController {
     private final AllTabServiceImpl allTabService;
     private final TaskUtils taskUtils;
     private final CafcassDateTimeService cafcassDateTimeService;
+    private final MiamForOrderService miamForOrderService;
 
     public static final String CONFIRMATION_HEADER = "# Order approved";
     public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
@@ -157,6 +162,8 @@ public class EditAndApproveDraftOrderController {
 
     }
 
+
+
     @PostMapping(path = "/judge-or-admin-edit-approve/mid-event", consumes = APPLICATION_JSON,
         produces = APPLICATION_JSON)
     @Operation(description = "Callback to generate draft order collection")
@@ -233,6 +240,8 @@ public class EditAndApproveDraftOrderController {
                 if (draftOrderId == null) {
                     return AboutToStartOrSubmitCallbackResponse.builder()
                         .errors(List.of(ERROR_RETRIEVE_DRAFT_ORDER)).build();
+                } else {
+                    caseDataUpdated.put(WA_ORDER_COLLECTION_ID, draftOrderId);
                 }
                 editAndApproveOrder(
                     authorisation,
@@ -258,6 +267,33 @@ public class EditAndApproveDraftOrderController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
+
+
+    @PostMapping(path = "/manage-orders/serve-order-about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "about to start callback for Serve Order.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse handleServeOrderAboutToStart(
+        @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
+        @RequestBody CallbackRequest callbackRequest) {
+
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseDetails caseDetails = callbackRequest.getCaseDetails();
+            Map<String, Object> caseDataUpdated = miamForOrderService.updateCaseDataWithMiamForOrderDetails(
+                caseDetails,
+                callbackRequest.getEventId(),
+                clientContext,
+                caseDetails.getData()
+            );
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
 
     private String getDraftOrderIdFromContext(String clientContext) {
         String draftOrderId = null;
@@ -318,19 +354,28 @@ public class EditAndApproveDraftOrderController {
             caseData.getDraftOrderCollection(),
             UUID.fromString(draftOrderId)
         );
+
         caseDataUpdated.put(
             WA_ORDER_NAME_JUDGE_APPROVED,
             selectedOrder != null ? selectedOrder.getLabelForOrdersDynamicList() : null
         );
 
-        caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(
+
+        Map<String, Object> dataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
             authorisation,
             callbackRequest.getEventId(),
-            draftOrderId
-        ));
+            draftOrderId,
+            caseDataUpdated
+        );
+
+        caseDataUpdated.putAll(dataMap);
+
+
 
     }
+
+
 
     @PostMapping(path = "/judge-or-admin-populate-draft-order-custom-fields", consumes = APPLICATION_JSON,
         produces = APPLICATION_JSON)
@@ -435,11 +480,15 @@ public class EditAndApproveDraftOrderController {
                 Optional.ofNullable(clientContext)
             );
 
+            Map<String, Object> updatedResponse = miamForOrderService.updateCaseDataWithMiamForOrderDetails(
+                callbackRequest.getCaseDetails(), callbackRequest.getEventId(), clientContext, response
+            );
+
             if (ManageOrdersUtils.isOrderEdited(caseData, callbackRequest.getEventId())) {
-                response.put("doYouWantToEditTheOrder", Yes);
+                updatedResponse.put("doYouWantToEditTheOrder", Yes);
             }
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(response).build();
+                .data(updatedResponse).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -481,7 +530,7 @@ public class EditAndApproveDraftOrderController {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, errorList, language)
                 && DraftAnOrderService.validationIfDirectionForFactFindingSelected(caseData, errorList, language)) {
-                if (Objects.nonNull(caseData.getStandardDirectionOrder())
+                if (nonNull(caseData.getStandardDirectionOrder())
                     && Yes.equals(caseData.getStandardDirectionOrder().getEditedOrderHasDefaultCaseFields())) {
                     draftAnOrderService.populateStandardDirectionOrderDefaultFields(
                         authorisation,
@@ -543,6 +592,7 @@ public class EditAndApproveDraftOrderController {
             }
             ManageOrdersUtils.clearFieldsAfterApprovalAndServe(caseDataUpdated);
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
+            manageOrderService.removeLocalAuthorityFromCase(caseData, caseDataUpdated);
             allTabService.submitAllTabsUpdate(
                 startAllTabsUpdateDataContent.authorisation(),
                 String.valueOf(callbackRequest.getCaseDetails().getId()),
@@ -550,7 +600,9 @@ public class EditAndApproveDraftOrderController {
                 startAllTabsUpdateDataContent.eventRequestData(),
                 caseDataUpdated
             );
-            manageOrderService.orchestrateCirDocumentsRequestedTask(caseData, authorisation);
+
+            UUID newDraftOrderCollectionId = getOrderId(caseDataUpdated);
+            manageOrderService.orchestrateCirDocumentsRequestedTask(caseData, authorisation, newDraftOrderCollectionId);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

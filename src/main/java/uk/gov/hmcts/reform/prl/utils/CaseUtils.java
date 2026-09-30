@@ -132,7 +132,7 @@ public class CaseUtils {
         State state = State.tryFromValue(caseDetails.getState()).orElse(null);
 
         if (caseDetails.getData() != null) {
-            log.info("temp log in getCaseData, tasklistversion is {}", caseDetails.getData().get("taskListVersion"));
+            log.info("getCaseData case id: {}, tasklistversion: {}", caseDetails.getId(), caseDetails.getData().get("taskListVersion"));
         }
         CaseData.CaseDataBuilder caseDataBuilder = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
             .toBuilder()
@@ -915,9 +915,9 @@ public class CaseUtils {
     public static WaMapper getWaMapper(String clientContext) {
         if (clientContext != null) {
             log.info("clientContext is present");
-            byte[] decodedBytes = Base64.getDecoder().decode(clientContext);
-            String decodedString = new String(decodedBytes);
             try {
+                byte[] decodedBytes = Base64.getDecoder().decode(clientContext);
+                String decodedString = new String(decodedBytes);
                 return new ObjectMapper().readValue(decodedString, WaMapper.class);
             } catch (Exception ex) {
                 log.error("Exception while parsing the Client-Context {}", ex.getMessage());

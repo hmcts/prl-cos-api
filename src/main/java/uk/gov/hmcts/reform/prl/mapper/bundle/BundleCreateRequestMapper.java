@@ -373,9 +373,9 @@ public class BundleCreateRequestMapper implements IBundleCreateRequestMapper {
             OrderDetails orderDetails = orderDetailsElement.getValue();
             Document document = orderDetails.getOrderDocument();
             // FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
-            addOrderDocument(orders, document);
+            addOrderDocument(orders, document, orderDetails);
             Document welshDocument = orderDetails.getOrderDocumentWelsh();
-            addOrderDocument(orders, welshDocument);
+            addOrderDocument(orders, welshDocument, orderDetails);
         });
         return ElementUtils.wrapElements(orders);
     }
@@ -386,7 +386,7 @@ public class BundleCreateRequestMapper implements IBundleCreateRequestMapper {
      * @param orders   list of BundlingRequestDocument including order documents to be added to the list
      * @param document Order Document to be added to the list
      */
-    void addOrderDocument(List<BundlingRequestDocument> orders, Document document) {
+    void addOrderDocument(List<BundlingRequestDocument> orders, Document document, OrderDetails orderDetails) {
         if (document != null
             && document.getDocumentFileName() != null
             && document.getDocumentUrl() != null
@@ -395,7 +395,8 @@ public class BundleCreateRequestMapper implements IBundleCreateRequestMapper {
             && !document.getDocumentBinaryUrl().endsWith(REDACTED_DOCUMENT_URL_BINARY)
             && !(document.getDocumentFileName()).equalsIgnoreCase(REDACTED_DOCUMENT_FILE_NAME)) {
             orders.add(BundlingRequestDocument.builder().documentGroup(BundlingDocGroupEnum.ordersSubmittedWithApplication)
-                           .documentFileName(document.getDocumentFileName()).documentLink(document).build());
+                           .documentFileName(BundleOrderDocumentNameHelper.getBundleIndexOrderTitle(document, orderDetails))
+                           .documentLink(document).build());
         }
     }
 
