@@ -13,8 +13,8 @@ import java.util.Arrays;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum CreateSelectOrderOptionsEnum {
     @JsonProperty("standardDirectionsOrder")
-    standardDirectionsOrder("standardDirectionsOrder", "Standard directions order","1",
-        "Gorchymyn cyfarwyddo safonol"),
+    standardDirectionsOrder("standardDirectionsOrder", "Directions on issue","1",
+        "Cyfarwyddyd ar gychwyn achos"),
     @JsonProperty("directionOnIssue")
     directionOnIssue("directionOnIssue", "Directions on issue","2",
         "Cyfarwyddyd ar gychwyn achos"),
