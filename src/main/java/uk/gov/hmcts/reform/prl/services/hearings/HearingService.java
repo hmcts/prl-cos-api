@@ -94,20 +94,10 @@ public class HearingService {
 
             log.info(
                 "Calling HMC getHearingDetails - "
-                    + "caseReferenceNumber={}, "
-                    + "hmcUserToken={}, "
-                    + "s2sToken={}, "
-                    + "hmctsDeploymentId={}, "
-                    + "dataStoreUrl={}, "
-                    + "roleAssignmentUrl={}",
-                caseReferenceNumber,
-                hmcUserToken,
-                s2sToken,
-                hmctsDeploymentId,
-                dataStoreUrl,
-                roleAssignmentUrl
+                    + "caseReferenceNumber={}",
+                caseReferenceNumber
             );
-            //todo remove those logs del!
+
             hearings = hmcHearingApiClient.getHearingDetails(
                 hmcUserToken,
                 s2sToken,
