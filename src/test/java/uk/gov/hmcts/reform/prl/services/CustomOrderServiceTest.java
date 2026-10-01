@@ -1718,7 +1718,7 @@ class CustomOrderServiceTest {
 
     @ParameterizedTest
     @CsvSource({
-        "standardDirectionsOrder, Standard directions order",
+        "standardDirectionsOrder, Directions on issue",
         "blankOrderOrDirections, Blank order or directions (C21)",
         "nonMolestation, Non-molestation order (FL404A)"
     })
