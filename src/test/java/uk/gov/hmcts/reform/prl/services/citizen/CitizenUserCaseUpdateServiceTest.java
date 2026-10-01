@@ -5,6 +5,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -19,11 +21,12 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class CitizenUserCaseUpdateServiceTest {
+class CitizenUserCaseUpdateServiceTest {
 
     private static final String AUTHORISATION = "Bearer test";
     private static final String CASE_ID = "123";
@@ -34,8 +37,35 @@ public class CitizenUserCaseUpdateServiceTest {
     @Mock
     private AllTabServiceImpl allTabService;
 
+    @Mock
+    private CitizenCoreCaseDataService citizenCoreCaseDataService;
+
     @Test
-    public void shouldStartAndSubmitCaseUpdateUsingCitizenUserAuth() {
+    void shouldValidateCitizenCaseAccessByReadingCaseAsCitizen() {
+        when(citizenCoreCaseDataService.hasCitizenAccess(AUTHORISATION, CASE_ID)).thenReturn(true);
+
+        citizenUserCaseUpdateService.validateCitizenCaseAccess(
+            AUTHORISATION,
+            CASE_ID
+        );
+
+        verify(citizenCoreCaseDataService).hasCitizenAccess(AUTHORISATION, CASE_ID);
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenCitizenDoesNotHaveCaseAccess() {
+        when(citizenCoreCaseDataService.hasCitizenAccess(AUTHORISATION, CASE_ID)).thenReturn(false);
+
+        ResponseStatusException exception = assertThrows(
+            ResponseStatusException.class,
+            () -> citizenUserCaseUpdateService.validateCitizenCaseAccess(AUTHORISATION, CASE_ID)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+    }
+
+    @Test
+    void shouldStartAndSubmitCaseUpdateUsingCitizenUserAuth() {
         Map<String, Object> caseDataMap = new HashMap<>();
         CaseData caseData = CaseData.builder().build();
         EventRequestData eventRequestData = EventRequestData.builder().build();
@@ -90,7 +120,7 @@ public class CitizenUserCaseUpdateServiceTest {
     }
 
     @Test
-    public void shouldStartSubmitAndReturnValueFromCitizenUserAuthUpdate() {
+    void shouldStartSubmitAndReturnValueFromCitizenUserAuthUpdate() {
         Map<String, Object> caseDataMap = new HashMap<>();
         CaseData caseData = CaseData.builder().build();
         EventRequestData eventRequestData = EventRequestData.builder().build();
