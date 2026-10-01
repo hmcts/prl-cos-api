@@ -12,7 +12,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(SpringExtension.class)
-@TestPropertySource(properties = "acro.cronjob.enabled=true")
+@TestPropertySource(properties = {"acro.cronjob.enabled=true","hearing_component.api.feign-url="})
 class BaisDocumentUploadTaskTest {
     @InjectMocks
     BaisDocumentUploadTask baisDocumentUploadTask;

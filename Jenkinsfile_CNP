@@ -79,7 +79,12 @@ def secrets = [
       secret('judge-testpassword', 'JUDGE_PASSWORD'),
       secret("courtadmin-swansea-testuser", "IDAM_COURT_ADMIN_USERNAME"),
       secret("courtadmin-swansea-testuser-password", "IDAM_COURT_ADMIN_PASSWORD"),
-      secret("docmosis-api-key", "DOCMOSIS_ACCESS_KEY")
+      secret("docmosis-api-key", "DOCMOSIS_ACCESS_KEY"),
+      secret('hmc-user-name', 'HMC_USER_NAME'),
+      secret('hmc-user-password', 'HMC_USER_PASSWORD'),
+      secret('hmc-client-secret', 'HMC_CLIENT_SECRET'),
+
+
    ]
 ]
 

@@ -41,4 +41,5 @@ public class IdamTokenGenerator {
     public UserDetails getUserDetailsFor(final String token) {
         return idamClient.getUserDetails(token);
     }
+
 }
