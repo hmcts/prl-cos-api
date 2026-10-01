@@ -113,3 +113,5 @@ java:
           alias: REF_USER_NAME
         - name: hmc-client-secret
           alias: HMC_CLIENT_SECRET
+        - name: hmc-s2s-secret
+          alias: FIS_IDAM_S2S_AUTH_TOTP_SECRET
