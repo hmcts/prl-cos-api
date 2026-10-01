@@ -22,6 +22,7 @@ public class QuarantineLegalDoc {
     private final String documentType;
     private final String categoryId;
     private final String categoryName;
+    private final String courtNavDocumentId;
     private final List<RestrictToCafcassHmcts> restrictCheckboxCorrespondence;
     private final String documentParty;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")

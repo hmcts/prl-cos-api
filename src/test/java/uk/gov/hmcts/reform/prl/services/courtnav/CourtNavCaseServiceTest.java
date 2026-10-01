@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -45,8 +46,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -57,11 +64,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class CourtNavCaseServiceTest {
 
     private final String authToken = "Bearer abc";
-    private static final String systemUpdateUser = "system User";
-    private final String jurisdiction = "PRIVATELAW";
-    private final String caseType = "PRLAPPS";
-    private final String eventName = "system-update";
-    private final String systemUserId = "systemUserID";
     private final String eventToken = "eventToken";
     private final String s2sToken = "s2s token";
     private final String randomUserId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
@@ -196,7 +198,7 @@ public class CourtNavCaseServiceTest {
             .thenReturn(startEventResponse);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         courtNavCaseService.uploadDocument("Bearer abc", file, "WITNESS_STATEMENT",
-                                           "1234567891234567"
+                                           "1234567891234567", null
         );
         verify(caseDocumentClient, times(1)).uploadDocuments(
             Mockito.anyString(),
@@ -214,17 +216,65 @@ public class CourtNavCaseServiceTest {
         );
     }
 
+    @Test
+    public void shouldStoreNullDocumentIdOnQuarantineDocWhenDocumentIdIsNull() {
+        caseData = buildCaseDataForUpload(null);
+        when(CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper)).thenReturn(caseData);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any()))
+            .thenReturn(new UploadResponse(List.of(testDocument())));
+
+        courtNavCaseService.uploadDocument(authToken, file, "WITNESS_STATEMENT", "1234567891234567", null);
+
+        ArgumentCaptor<QuarantineLegalDoc> docCaptor = ArgumentCaptor.forClass(QuarantineLegalDoc.class);
+        verify(manageDocumentsService).moveDocumentsToQuarantineTab(docCaptor.capture(), any(), any(), eq(COURTNAV));
+        assertNull(docCaptor.getValue().getCourtNavDocumentId());
+        assertNotNull(docCaptor.getValue().getCourtNavQuarantineDocument());
+        verify(caseDocumentClient, times(1)).uploadDocuments(any(), any(), any(), any(), any());
+        verify(ccdCoreCaseDataService, times(1)).submitUpdate(any(), any(), any(), any(), eq(true));
+    }
+
+    @Test
+    public void shouldStoreDocumentIdOnQuarantineDocWhenDocumentIdIsUnique() {
+        String uniqueDocumentId = "courtnav-unique-id";
+        caseData = buildCaseDataForUpload("another-existing-id");
+        when(CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper)).thenReturn(caseData);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any()))
+            .thenReturn(new UploadResponse(List.of(testDocument())));
+
+        courtNavCaseService.uploadDocument(authToken, file, "WITNESS_STATEMENT", "1234567891234567", uniqueDocumentId);
+
+        ArgumentCaptor<QuarantineLegalDoc> docCaptor = ArgumentCaptor.forClass(QuarantineLegalDoc.class);
+        verify(manageDocumentsService).moveDocumentsToQuarantineTab(docCaptor.capture(), any(), any(), eq(COURTNAV));
+        assertEquals(uniqueDocumentId, docCaptor.getValue().getCourtNavDocumentId());
+        assertNotNull(docCaptor.getValue().getCourtNavQuarantineDocument());
+        verify(caseDocumentClient, times(1)).uploadDocuments(any(), any(), any(), any(), any());
+        verify(ccdCoreCaseDataService, times(1)).submitUpdate(any(), any(), any(), any(), eq(true));
+    }
+
+    @Test
+    public void shouldNotUploadDuplicateDocumentWhenDocumentIdAlreadyExists() {
+        String existingDocumentId = "courtnav-existing-id";
+        caseData = buildCaseDataForUpload(existingDocumentId);
+        when(CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper)).thenReturn(caseData);
+
+        courtNavCaseService.uploadDocument(authToken, file, "WITNESS_STATEMENT", "1234567891234567", existingDocumentId);
+
+        verify(caseDocumentClient, never()).uploadDocuments(any(), any(), any(), any(), any());
+        verify(manageDocumentsService, never()).moveDocumentsToQuarantineTab(any(), any(), any(), anyString());
+        verify(ccdCoreCaseDataService, never()).submitUpdate(any(), any(), any(), any(), anyBoolean());
+    }
+
     @Test(expected = ResponseStatusException.class)
     public void shouldNotUploadDocumentWhenInvalidDocumentTypeOfDocumentIsRequested() {
         courtNavCaseService.uploadDocument("Bearer abc", file, "InvalidTypeOfDocument",
-                                           "1234567891234567"
+                                           "1234567891234567", null
         );
     }
 
     @Test(expected = ResponseStatusException.class)
     public void shouldNotUploadDocumentWhenInvalidDocumentFormatIsRequested() {
         courtNavCaseService.uploadDocument("Bearer abc", file, "InvalidTypeOfDocument",
-                                           "1234567891234567"
+                                           "1234567891234567", null
         );
     }
 
@@ -249,7 +299,7 @@ public class CourtNavCaseServiceTest {
             .numberOfAttachments("2").reviewDocuments(reviewDocuments).build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         courtNavCaseService.uploadDocument("Bearer abc", file, "WITNESS_STATEMENT",
-                                           "1234567891234567"
+                                           "1234567891234567", null
         );
     }
 
@@ -262,7 +312,7 @@ public class CourtNavCaseServiceTest {
             "FL401 case".getBytes()
         );
         courtNavCaseService.uploadDocument("Bearer abc", file, "WITNESS_STATEMENT",
-                                           "1234567891234567"
+                                           "1234567891234567", null
         );
     }
 
@@ -279,6 +329,21 @@ public class CourtNavCaseServiceTest {
         verify(documentGenService, times(1))
             .createUpdatedCaseDataWithDocuments(Mockito.anyString(),
                                Mockito.any(CaseData.class));
+    }
+
+    private CaseData buildCaseDataForUpload(String existingDocumentId) {
+        List<Element<QuarantineLegalDoc>> existingCourtNavDocs = existingDocumentId == null
+            ? new ArrayList<>()
+            : List.of(element(QuarantineLegalDoc.builder().courtNavDocumentId(existingDocumentId).build()));
+
+        return CaseData.builder()
+            .id(1234567891234567L)
+            .applicantCaseName("xyz")
+            .reviewDocuments(ReviewDocuments.builder().build())
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .courtNavQuarantineDocumentList(existingCourtNavDocs)
+                                           .build())
+            .build();
     }
 
     public static Document testDocument() {
