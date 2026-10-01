@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +17,7 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
@@ -27,8 +29,12 @@ import java.util.Map;
 
 import static java.util.Collections.emptyList;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CitizenCoreCaseDataServiceTest {
@@ -153,6 +159,64 @@ public class CitizenCoreCaseDataServiceTest {
         CaseDetails retrievedCaseDetails = citizenCoreCaseDataService.getCase(bearerToken, "12345L");
 
         Assert.assertEquals(caseDetails, retrievedCaseDetails);
+    }
+
+    @Test
+    public void shouldGetCaseUsingCitizenScopedEndpoint() {
+        UserInfo userInfo = UserInfo.builder().uid("testUser").build();
+        when(idamClient.getUserInfo(bearerToken)).thenReturn(userInfo);
+        when(coreCaseDataApi.readForCitizen(
+            bearerToken,
+            serviceAuth,
+            userInfo.getUid(),
+            JURISDICTION,
+            CASE_TYPE,
+            "12345L"
+        )).thenReturn(caseDetails);
+
+        CaseDetails retrievedCaseDetails = citizenCoreCaseDataService.getCaseForCitizen(bearerToken, "12345L");
+
+        Assert.assertEquals(caseDetails, retrievedCaseDetails);
+        verify(coreCaseDataApi).readForCitizen(
+            bearerToken,
+            serviceAuth,
+            userInfo.getUid(),
+            JURISDICTION,
+            CASE_TYPE,
+            "12345L"
+        );
+    }
+
+    @Test
+    public void shouldReturnTrueWhenCitizenHasAccessToCase() {
+        UserInfo userInfo = UserInfo.builder().uid("testUser").build();
+        when(idamClient.getUserInfo(bearerToken)).thenReturn(userInfo);
+        when(coreCaseDataApi.readForCitizen(
+            bearerToken,
+            serviceAuth,
+            userInfo.getUid(),
+            JURISDICTION,
+            CASE_TYPE,
+            "12345L"
+        )).thenReturn(caseDetails);
+
+        Assert.assertTrue(citizenCoreCaseDataService.hasCitizenAccess(bearerToken, "12345L"));
+    }
+
+    @Test
+    public void shouldReturnFalseWhenCitizenDoesNotHaveAccessToCase() {
+        UserInfo userInfo = UserInfo.builder().uid("testUser").build();
+        when(idamClient.getUserInfo(bearerToken)).thenReturn(userInfo);
+        when(coreCaseDataApi.readForCitizen(
+            bearerToken,
+            serviceAuth,
+            userInfo.getUid(),
+            JURISDICTION,
+            CASE_TYPE,
+            "12345L"
+        )).thenThrow(mock(FeignException.NotFound.class));
+
+        Assert.assertFalse(citizenCoreCaseDataService.hasCitizenAccess(bearerToken, "12345L"));
     }
 
     @Test
