@@ -132,6 +132,8 @@ import static uk.gov.hmcts.reform.prl.enums.State.AWAITING_INFORMATION;
 import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUED;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.C100APPLICANTSOLICITOR1;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.FL401APPLICANTSOLICITOR;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
@@ -834,20 +836,35 @@ public class CallbackController {
                                       .organisationName(userOrganisation.get().getName())
                                       .build())
                     .build();
-                if (caseData.getApplicantOrganisationPolicy() != null) {
+
+                OrganisationPolicy existingOrgPolicy;
+                if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())
+                    && caseData.getApplicantRespondentOrgPolicies() != null) {
+                    existingOrgPolicy = caseData.getApplicantRespondentOrgPolicies().getCaApplicant1Policy();
+                } else {
+                    existingOrgPolicy = caseData.getApplicantOrganisationPolicy();
+                }
+                if (existingOrgPolicy != null) {
                     applicantOrganisationPolicy = applicantOrganisationPolicy.toBuilder()
-                        .orgPolicyReference(caseData.getApplicantOrganisationPolicy().getOrgPolicyReference())
-                        .orgPolicyCaseAssignedRole(caseData.getApplicantOrganisationPolicy()
-                                                       .getOrgPolicyCaseAssignedRole())
+                        .orgPolicyReference(existingOrgPolicy.getOrgPolicyReference())
+                        .orgPolicyCaseAssignedRole(existingOrgPolicy.getOrgPolicyCaseAssignedRole())
                         .build();
                 } else {
+                    String role = C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())
+                        ? C100APPLICANTSOLICITOR1.getCaseRoleLabel()
+                        : FL401APPLICANTSOLICITOR.getCaseRoleLabel();
                     applicantOrganisationPolicy = applicantOrganisationPolicy.toBuilder()
                         .orgPolicyReference(StringUtils.EMPTY)
-                        .orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]")
+                        .orgPolicyCaseAssignedRole(role)
                         .build();
                 }
-                log.info("putting applicantOrganisationPolicy: {}", applicantOrganisationPolicy);
-                caseDataUpdated.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
+                if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+                    log.info("putting caApplicant1Policy: {}", applicantOrganisationPolicy);
+                    caseDataUpdated.put("caApplicant1Policy", applicantOrganisationPolicy);
+                } else {
+                    log.info("putting applicantOrganisationPolicy: {}", applicantOrganisationPolicy);
+                    caseDataUpdated.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
+                }
             }
 
         } catch (Exception e) {
