@@ -39,6 +39,7 @@ class CitizenUserCaseUpdateServiceTest {
 
     @InjectMocks
     private CitizenUserCaseUpdateService citizenUserCaseUpdateService;
+
     @Test
     void shouldValidateCitizenCaseAccessByReadingCaseAsCitizen() {
         when(citizenCoreCaseDataService.hasCitizenAccess(AUTHORISATION, CASE_ID)).thenReturn(true);
@@ -64,6 +65,60 @@ class CitizenUserCaseUpdateServiceTest {
     }
 
     @Test
+    void shouldStartAndSubmitCaseUpdateUsingCitizenUserAuth() {
+        Map<String, Object> caseDataMap = new HashMap<>();
+        EventRequestData eventRequestData = EventRequestData.builder().build();
+        StartEventResponse startEventResponse = StartEventResponse.builder().build();
+        UserDetails userDetails = UserDetails.builder().id("citizen-id").build();
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            AUTHORISATION,
+            eventRequestData,
+            startEventResponse,
+            caseDataMap,
+            CaseData.builder().build(),
+            userDetails
+        );
+
+        when(allTabService.getStartUpdateForSpecificUserEvent(
+            CASE_ID,
+            CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
+            AUTHORISATION
+        )).thenReturn(updateData);
+        when(allTabService.submitUpdateForSpecificUserEvent(
+            AUTHORISATION,
+            CASE_ID,
+            startEventResponse,
+            eventRequestData,
+            caseDataMap,
+            userDetails
+        )).thenReturn(caseDetails);
+
+        CaseDetails result = citizenUserCaseUpdateService.updateCaseUsingCitizenUserAuth(
+            AUTHORISATION,
+            CASE_ID,
+            CaseEvent.CITIZEN_CASE_UPDATE,
+            startUpdateData -> startUpdateData.caseDataMap().put("testKey", "testValue")
+        );
+
+        assertSame(caseDetails, result);
+        assertEquals("testValue", caseDataMap.get("testKey"));
+        verify(allTabService).getStartUpdateForSpecificUserEvent(
+            CASE_ID,
+            CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
+            AUTHORISATION
+        );
+        verify(allTabService).submitUpdateForSpecificUserEvent(
+            AUTHORISATION,
+            CASE_ID,
+            startEventResponse,
+            eventRequestData,
+            caseDataMap,
+            userDetails
+        );
+    }
+
+    @Test
     void shouldStartUpdateSubmitAndReturnUsingCitizenAuthorisation() {
         Map<String, Object> caseDataMap = new HashMap<>();
         EventRequestData eventRequestData = EventRequestData.builder().build();
@@ -80,7 +135,7 @@ class CitizenUserCaseUpdateServiceTest {
 
         when(allTabService.getStartUpdateForSpecificUserEvent(
             CASE_ID,
-            CITIZEN_CASE_UPDATE.getValue(),
+            CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
             AUTHORISATION
         )).thenReturn(updateData);
         when(allTabService.submitUpdateForSpecificUserEvent(
@@ -95,7 +150,7 @@ class CitizenUserCaseUpdateServiceTest {
         String result = citizenUserCaseUpdateService.updateCaseUsingCitizenUserAuthAndReturn(
             AUTHORISATION,
             CASE_ID,
-            CITIZEN_CASE_UPDATE,
+            CaseEvent.CITIZEN_CASE_UPDATE,
             startUpdateData -> {
                 startUpdateData.caseDataMap().put("paymentReferenceNumber", "RC-reference");
                 return "payment-response";
@@ -106,7 +161,7 @@ class CitizenUserCaseUpdateServiceTest {
         assertEquals("RC-reference", caseDataMap.get("paymentReferenceNumber"));
         verify(allTabService).getStartUpdateForSpecificUserEvent(
             CASE_ID,
-            CITIZEN_CASE_UPDATE.getValue(),
+            CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
             AUTHORISATION
         );
         verify(allTabService).submitUpdateForSpecificUserEvent(

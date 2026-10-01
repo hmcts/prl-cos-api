@@ -30,9 +30,8 @@ import java.util.Map;
 import static java.util.Collections.emptyList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
@@ -233,38 +232,6 @@ public class CitizenCoreCaseDataServiceTest {
             CASE_TYPE,
             "12345L"
         );
-    }
-
-    @Test
-    public void shouldReturnTrueWhenCitizenHasAccessToCase() {
-        UserInfo userInfo = UserInfo.builder().uid("testUser").build();
-        when(idamClient.getUserInfo(bearerToken)).thenReturn(userInfo);
-        when(coreCaseDataApi.readForCitizen(
-            bearerToken,
-            serviceAuth,
-            userInfo.getUid(),
-            JURISDICTION,
-            CASE_TYPE,
-            "12345L"
-        )).thenReturn(caseDetails);
-
-        Assert.assertTrue(citizenCoreCaseDataService.hasCitizenAccess(bearerToken, "12345L"));
-    }
-
-    @Test
-    public void shouldReturnFalseWhenCitizenDoesNotHaveAccessToCase() {
-        UserInfo userInfo = UserInfo.builder().uid("testUser").build();
-        when(idamClient.getUserInfo(bearerToken)).thenReturn(userInfo);
-        when(coreCaseDataApi.readForCitizen(
-            bearerToken,
-            serviceAuth,
-            userInfo.getUid(),
-            JURISDICTION,
-            CASE_TYPE,
-            "12345L"
-        )).thenThrow(mock(FeignException.NotFound.class));
-
-        Assert.assertFalse(citizenCoreCaseDataService.hasCitizenAccess(bearerToken, "12345L"));
     }
 
     @Test
