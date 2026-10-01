@@ -4724,6 +4724,7 @@ public class DraftAnOrderServiceTest {
             .courtName(SWANSEA_COURT_NAME)
             .caseTypeOfApplication("C100")
             .children(children)
+            .draftOrdersDynamicList(DynamicList.builder().build())
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
             .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
             .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.districtJudge).c21OrderOptions(
