@@ -164,6 +164,40 @@ public class CitizenCoreCaseDataService {
         }
     }
 
+    public CaseDetails getCaseForCitizen(String authorisation, String caseId) {
+        String cosApis2sToken = authTokenGenerator.generate();
+        UserInfo userInfo = idamClient.getUserInfo(authorisation);
+
+        return readCaseForCitizen(authorisation, cosApis2sToken, userInfo.getUid(), caseId);
+    }
+
+    private CaseDetails readCaseForCitizen(String authorisation,
+                                           String cosApis2sToken,
+                                           String userId,
+                                           String caseId) {
+        return coreCaseDataApi.readForCitizen(
+            authorisation,
+            cosApis2sToken,
+            userId,
+            JURISDICTION,
+            CASE_TYPE,
+            caseId
+        );
+    }
+
+    public boolean hasCitizenAccess(String authorisation, String caseId) {
+        String cosApis2sToken = authTokenGenerator.generate();
+        UserInfo userInfo = idamClient.getUserInfo(authorisation);
+
+        try {
+            readCaseForCitizen(authorisation, cosApis2sToken, userInfo.getUid(), caseId);
+            return true;
+        } catch (FeignException.NotFound | FeignException.Forbidden exception) {
+            log.warn("Citizen {} does not have access to case {}", userInfo.getUid(), caseId);
+            return false;
+        }
+    }
+
     public boolean hasAccess(String authorisation, String caseId) {
         try {
             getCase(authorisation, caseId);

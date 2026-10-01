@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
@@ -19,10 +20,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 
 @ExtendWith(MockitoExtension.class)
 class CitizenUserCaseUpdateServiceTest {
@@ -38,6 +39,17 @@ class CitizenUserCaseUpdateServiceTest {
 
     @InjectMocks
     private CitizenUserCaseUpdateService citizenUserCaseUpdateService;
+    @Test
+    void shouldValidateCitizenCaseAccessByReadingCaseAsCitizen() {
+        when(citizenCoreCaseDataService.hasCitizenAccess(AUTHORISATION, CASE_ID)).thenReturn(true);
+
+        citizenUserCaseUpdateService.validateCitizenCaseAccess(
+            AUTHORISATION,
+            CASE_ID
+        );
+
+        verify(citizenCoreCaseDataService).hasCitizenAccess(AUTHORISATION, CASE_ID);
+    }
 
     @Test
     void shouldReturnNotFoundWhenCitizenDoesNotHaveCaseAccess() {
