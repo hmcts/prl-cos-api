@@ -14,7 +14,7 @@ import java.util.Arrays;
 public enum CreateSelectOrderOptionsEnum {
     @JsonProperty("standardDirectionsOrder")
     standardDirectionsOrder("standardDirectionsOrder", "Directions on issue","1",
-        "Cyfarwyddyd ar gychwyn achos"),
+        "Cyfarwyddiadau ar gyhoeddi"),
     @JsonProperty("directionOnIssue")
     directionOnIssue("directionOnIssue", "Directions on issue","2",
         "Cyfarwyddyd ar gychwyn achos"),
