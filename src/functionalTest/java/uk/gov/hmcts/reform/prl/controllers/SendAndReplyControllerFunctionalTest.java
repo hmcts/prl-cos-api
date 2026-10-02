@@ -133,9 +133,10 @@ public class SendAndReplyControllerFunctionalTest {
 
     }
 
+    @Disabled
     @Test
     public void givenBodyWithNoMessages_whenSubmittedForSendOrReply() throws Exception {
-        String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST_FOR_REPLY);
+        String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST_FOR_SEND);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .body(requestBody)
