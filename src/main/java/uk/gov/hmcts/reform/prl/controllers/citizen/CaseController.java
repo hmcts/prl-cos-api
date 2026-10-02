@@ -287,6 +287,7 @@ public class CaseController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             try {
                 Court court = courtFinderService.getC100NearestFamilyCourt(postcode);
+                log.info("Citizen postcode court lookup result: {}", court);
                 return court == null ? "No Court Fetched" : court.getCourtName();
             } catch (Exception e) {
                 return null;

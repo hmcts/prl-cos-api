@@ -66,6 +66,10 @@ public class OsCourtFinderService {
     }
 
     public Court getC100NearestFamilyCourt(String postcode) throws NotFoundException {
+        return getFamilyCourtByOsPostcodeLookup(postcode);
+    }
+
+    public Court getFamilyCourtByOsPostcodeLookup(String postcode) throws NotFoundException {
         ImmutablePair<CourtVenue, Court> courtCourtVenueMap = getC100NearestFamilyCourtAndVenue(postcode);
         if (courtCourtVenueMap != null) {
             return courtCourtVenueMap.getRight();
@@ -77,6 +81,18 @@ public class OsCourtFinderService {
         OsPlacesResponse osPlacesResponse = null;
         try {
             osPlacesResponse = osCourtFinderApi.findCouncilByPostcode(postCode);
+            if (osPlacesResponse != null) {
+                List<String> localAuthorities = isEmpty(osPlacesResponse.getResults())
+                    ? List.of()
+                    : osPlacesResponse.getResults().stream()
+                        .filter(result -> result != null && result.getDpa() != null)
+                        .map(result -> result.getDpa().getLocalCustodianCode()
+                            + ": " + result.getDpa().getLocalCustodianCodeDescription())
+                        .toList();
+                log.info("OS postcode lookup response for postcode {}: resultCount={}, localAuthorities={}",
+                         postCode, osPlacesResponse.getResults() == null ? 0 : osPlacesResponse.getResults().size(),
+                         localAuthorities);
+            }
         } catch (Exception e) {
             log.info("OsCourtFinderService.getLocalCustodianCodeByPostCode() method is throwing exception : {}",e);
         }

@@ -50,11 +50,16 @@ public class CourtFinderService {
 
     public Court getNearestFamilyCourt(CaseData caseData) throws NotFoundException {
         ServiceArea serviceArea = null;
+        log.info("Finding nearest family court for case type : {}", caseData.getCaseTypeOfApplication());
         try {
             if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                serviceArea = courtFinderApi
-                  .findClosestDomesticAbuseCourtByPostCode(
-                      getPostcodeFromWrappedParty(caseData.getApplicantsFL401()));
+                String postcode = getPostcodeFromWrappedParty(caseData.getApplicantsFL401());
+                // TODO: WE can remove this toggle check now. It has been live for a while.
+                if (featureToggleService.isOsCourtLookupFeatureEnabled()) {
+                    log.info("OS Court Lookup feature is enabled, calling OS Court Finder Service  : {}", postcode);
+                    return osCourtFinderService.getFamilyCourtByOsPostcodeLookup(postcode);
+                }
+                serviceArea = courtFinderApi.findClosestDomesticAbuseCourtByPostCode(postcode);
                 if (serviceArea != null && !serviceArea.getCourts().isEmpty()) {
                     return getCourtDetails(serviceArea.getCourts()
                                                .get(0)

@@ -1,0 +1,149 @@
+[
+  {
+    "postcode": "SA1 2FA",
+    "localCustodianCode": "6855",
+    "epimmsId": "234946",
+    "courtSlug": "swansea-civil-justice-centre",
+    "courtName": "Swansea Civil Justice Centre"
+  },
+  {
+    "postcode": "SA1 1SP",
+    "localCustodianCode": "6855",
+    "epimmsId": "234946",
+    "courtSlug": "swansea-civil-justice-centre",
+    "courtName": "Swansea Civil Justice Centre"
+  },
+  {
+    "postcode": "SW1H 9AJ",
+    "localCustodianCode": "5990",
+    "epimmsId": "356855",
+    "courtSlug": "central-family-court",
+    "courtName": "Central Family Court"
+  },
+  {
+    "postcode": "HU1 2EZ",
+    "localCustodianCode": "2004",
+    "epimmsId": "195520",
+    "courtSlug": "kingston-upon-hull-combined-court-centre",
+    "courtName": "Kingston-upon-Hull Combined Court Centre"
+  },
+  {
+    "postcode": "DN31 1HX",
+    "localCustodianCode": "2002",
+    "epimmsId": "195520",
+    "courtSlug": "kingston-upon-hull-combined-court-centre",
+    "courtName": "Kingston-upon-Hull Combined Court Centre"
+  },
+  {
+    "postcode": "CM2 0PP",
+    "localCustodianCode": "1525",
+    "epimmsId": "816875",
+    "courtSlug": "chelmsford-county-and-family-court",
+    "courtName": "Chelmsford Justice Centre"
+  },
+  {
+    "postcode": "CM20 9QF",
+    "localCustodianCode": "1540",
+    "epimmsId": "816875",
+    "courtSlug": "chelmsford-county-and-family-court",
+    "courtName": "Chelmsford Justice Centre"
+  },
+  {
+    "postcode": "CM1 1NT",
+    "localCustodianCode": "1525",
+    "epimmsId": "816875",
+    "courtSlug": "chelmsford-county-and-family-court",
+    "courtName": "Chelmsford Justice Centre"
+  },
+  {
+    "postcode": "CM1 9PZ",
+    "localCustodianCode": "1525",
+    "epimmsId": "816875",
+    "courtSlug": "chelmsford-county-and-family-court",
+    "courtName": "Chelmsford Justice Centre"
+  },
+  {
+    "postcode": "WV1 3LQ",
+    "localCustodianCode": "4635",
+    "epimmsId": "41047",
+    "courtSlug": "wolverhampton-combined-court-centre",
+    "courtName": "Wolverhampton Combined Court Centre"
+  },
+  {
+    "postcode": "WV1 1RA",
+    "localCustodianCode": "4635",
+    "epimmsId": "41047",
+    "courtSlug": "wolverhampton-combined-court-centre",
+    "courtName": "Wolverhampton Combined Court Centre"
+  },
+  {
+    "postcode": "DY1 1RY",
+    "localCustodianCode": "4615",
+    "epimmsId": "41047",
+    "courtSlug": "wolverhampton-combined-court-centre",
+    "courtName": "Wolverhampton Combined Court Centre"
+  },
+  {
+    "postcode": "SY23 1AS",
+    "localCustodianCode": "6820",
+    "epimmsId": "234946",
+    "courtSlug": "swansea-civil-justice-centre",
+    "courtName": "Swansea Civil Justice Centre"
+  },
+  {
+    "postcode": "SA31 3BT",
+    "localCustodianCode": "6825",
+    "epimmsId": "234946",
+    "courtSlug": "swansea-civil-justice-centre",
+    "courtName": "Swansea Civil Justice Centre"
+  },
+  {
+    "postcode": "SA15 3AL",
+    "localCustodianCode": "6825",
+    "epimmsId": "234946",
+    "courtSlug": "swansea-civil-justice-centre",
+    "courtName": "Swansea Civil Justice Centre"
+  },
+  {
+    "postcode": "SA61 2AX",
+    "localCustodianCode": "6845",
+    "epimmsId": "234946",
+    "courtSlug": "swansea-civil-justice-centre",
+    "courtName": "Swansea Civil Justice Centre"
+  },
+  {
+    "postcode": "SA15 3AW",
+    "localCustodianCode": "6825",
+    "epimmsId": "234946",
+    "courtSlug": "swansea-civil-justice-centre",
+    "courtName": "Swansea Civil Justice Centre"
+  },
+  {
+    "postcode": "WS1 1JQ",
+    "localCustodianCode": "4630",
+    "epimmsId": "41047",
+    "courtSlug": "wolverhampton-combined-court-centre",
+    "courtName": "Wolverhampton Combined Court Centre"
+  },
+  {
+    "postcode": "TF3 4HX",
+    "localCustodianCode": "3240",
+    "epimmsId": "41047",
+    "courtSlug": "wolverhampton-combined-court-centre",
+    "courtName": "Wolverhampton Combined Court Centre"
+  },
+  {
+    "postcode": "SO15 2XQ",
+    "localCustodianCode": "1780",
+    "epimmsId": "43104",
+    "courtSlug": "southampton-combined-court-centre",
+    "courtName": "Southampton Combined Court Centre"
+  },
+  {
+    "postcode": "ST1 3BP",
+    "localCustodianCode": "3455",
+    "epimmsId": "195496",
+    "courtSlug": "stoke-on-trent-combined-court",
+    "courtName": "Stoke-on-Trent Combined Court"
+  }
+]

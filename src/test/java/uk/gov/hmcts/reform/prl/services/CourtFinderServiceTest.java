@@ -47,9 +47,11 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
@@ -221,6 +223,20 @@ public class CourtFinderServiceTest {
         when(featureToggleService.isOsCourtLookupFeatureEnabled()).thenReturn(true);
         when(osCourtFinderService.getC100NearestFamilyCourt(anyString())).thenReturn(westLondonCourt);
         assertThat(courtFinderService.getNearestFamilyCourt(caseData), is(westLondonCourt));
+    }
+
+    @Test
+    public void givenOsCourtLookupEnabled_whenPostcodesAreInLiveC100Areas_thenUseOsLookup() throws NotFoundException {
+        List<String> postcodes = List.of("SA1 2FA", "YO14 9LT", "HU1 2EZ", "CM2 0PP", "WV1 3LQ");
+        when(featureToggleService.isOsCourtLookupFeatureEnabled()).thenReturn(true);
+        when(osCourtFinderService.getC100NearestFamilyCourt(anyString())).thenReturn(londonCourt);
+
+        for (String postcode : postcodes) {
+            assertThat(courtFinderService.getC100NearestFamilyCourt(postcode), is(londonCourt));
+            verify(osCourtFinderService).getC100NearestFamilyCourt(postcode);
+        }
+
+        verifyNoInteractions(courtFinderApi);
     }
 
 
@@ -872,6 +888,23 @@ public class CourtFinderServiceTest {
             .build();
 
         assertThat(courtFinderService.getNearestFamilyCourt(caseData), is(horshamCourt));
+        verify(courtFinderApi).findClosestDomesticAbuseCourtByPostCode("AB12 3AL");
+        verifyNoInteractions(osCourtFinderService);
+    }
+
+    @Test
+    public void givenDaCaseAndOsCourtLookupEnabled_thenUseOsLookup() throws NotFoundException {
+        CaseData caseData = CaseData.builder()
+            .applicantsFL401(applicant)
+            .caseTypeOfApplication("FL401")
+            .build();
+        when(featureToggleService.isOsCourtLookupFeatureEnabled()).thenReturn(true);
+        when(osCourtFinderService.getFamilyCourtByOsPostcodeLookup("AB12 3AL")).thenReturn(westLondonCourt);
+
+        assertThat(courtFinderService.getNearestFamilyCourt(caseData), is(westLondonCourt));
+
+        verify(osCourtFinderService).getFamilyCourtByOsPostcodeLookup("AB12 3AL");
+        verify(courtFinderApi, never()).findClosestDomesticAbuseCourtByPostCode(anyString());
     }
 
     @Test
