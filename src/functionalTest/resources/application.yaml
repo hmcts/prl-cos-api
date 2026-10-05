@@ -725,3 +725,8 @@ update-hearing-actuals:
 docmosis:
   url: ${DOCMOSIS_SERVICE_BASE_URL:https://docmosis.aat.platform.hmcts.net}
   access-key: ${DOCMOSIS_ACCESS_KEY:}
+
+fis:
+  s2s:
+    microservice: fis_hmc_api
+    secret: ${FIS_IDAM_S2S_AUTH_TOTP_SECRET:test-secret}
