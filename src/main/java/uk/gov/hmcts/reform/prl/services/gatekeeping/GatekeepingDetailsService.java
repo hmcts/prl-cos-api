@@ -6,18 +6,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.SendToGatekeeperTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.gatekeeping.WhoToSendToGatekeeperTypeEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
-import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 
 import java.util.List;
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_NAME;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getIdamId;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
@@ -28,20 +27,14 @@ import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class GatekeepingDetailsService {
 
-    private final RoleAssignmentService roleAssignmentService;
+    private static final String WHO_TO_SEND_TO_GATEKEEPER = "whoToSendToGatekeeper";
 
     public GatekeepingDetails getGatekeepingDetails(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList,
-                                                    RefDataUserService refDataUserService) {
-        return mapGatekeepingDetails(caseDataUpdated, legalAdviserList, refDataUserService);
-
-    }
-
-    private GatekeepingDetails mapGatekeepingDetails(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList,
                                                      RefDataUserService refDataUserService) {
         GatekeepingDetails.GatekeepingDetailsBuilder gatekeepingDetailsBuilder = GatekeepingDetails.builder();
-        if (null != caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING)) {
-            if (SendToGatekeeperTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(
-                IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING)))
+        if (null != caseDataUpdated.get(WHO_TO_SEND_TO_GATEKEEPER)) {
+            if (WhoToSendToGatekeeperTypeEnum.SEND_TO_A_SPECIFIC_JUDGE.getId()
+                .equalsIgnoreCase(String.valueOf(caseDataUpdated.get(WHO_TO_SEND_TO_GATEKEEPER)))
                 && null != caseDataUpdated.get("judgeName")) {
                 String[] judgePersonalCode = getPersonalCode(caseDataUpdated.get(JUDGE_NAME));
 
