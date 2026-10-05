@@ -69,7 +69,8 @@ final class CafcassUpdateHelperUtils {
 
     static void addInOtherDocuments(String category,
                                     uk.gov.hmcts.reform.prl.models.documents.Document caseDocument,
-                                    List<Element<OtherDocuments>> otherDocsList) {
+                                    List<Element<OtherDocuments>> otherDocsList,
+                                    Long caseId) {
         try {
             if (null != caseDocument && caseDocument.getDocumentUrl() != null
                 && !caseDocument.getDocumentUrl().endsWith(REDACTED_DOCUMENT_UUID)) {
@@ -84,7 +85,8 @@ final class CafcassUpdateHelperUtils {
                                       .build());
             }
         } catch (MalformedURLException | IllegalArgumentException e) {
-            log.error("Error in populating otherDocsList for CAFCASS {}", e.getMessage());
+            log.error("Error in populating otherDocsList for document id {} with category {} of a caseId {} for CAFCASS {}",
+                      caseDocument.getDocumentId(), category, caseId, e.getMessage());
         }
     }
 
@@ -92,7 +94,8 @@ final class CafcassUpdateHelperUtils {
                                          List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> quarantineLegalDocs,
                                          ObjectMapper objectMapper,
                                          List<String> excludedDocumentCategoryList,
-                                         List<String> excludedDocumentList) {
+                                         List<String> excludedDocumentList,
+                                         Long caseId) {
         quarantineLegalDocs.forEach(quarantineLegalDocElement -> {
             uk.gov.hmcts.reform.prl.models.documents.Document document = null;
             if (!StringUtils.isEmpty(quarantineLegalDocElement.getValue().getCategoryId())) {
@@ -110,7 +113,8 @@ final class CafcassUpdateHelperUtils {
                     document,
                     otherDocsList,
                     excludedDocumentCategoryList,
-                    excludedDocumentList
+                    excludedDocumentList,
+                    caseId
                 );
             }
         });
@@ -160,13 +164,14 @@ final class CafcassUpdateHelperUtils {
     }
 
     static boolean isDocumentPresent(uk.gov.hmcts.reform.prl.models.documents.Document caseDocument,
-                                     List<Element<OtherDocuments>> otherDocsList) {
+                                     List<Element<OtherDocuments>> otherDocsList,
+                                     Long caseId) {
         if (isNotEmpty(caseDocument)) {
             return otherDocsList.stream().anyMatch(el -> {
                 try {
                     return el.getValue().getDocumentOther().equals(buildFromCaseDocument(caseDocument));
                 } catch (MalformedURLException | IllegalArgumentException e) {
-                    log.error("Error in populating otherDocsList for CAFCASS {}", e.getMessage());
+                    log.error("Error in building a other document from caseDocument for caseId {}, {}",caseId, e.getMessage());
                 }
                 return false;
             });
@@ -189,13 +194,14 @@ final class CafcassUpdateHelperUtils {
                                                 uk.gov.hmcts.reform.prl.models.documents.Document caseDocument,
                                                 List<Element<OtherDocuments>> otherDocsList,
                                                 List<String> excludedDocumentCategoryList,
-                                                List<String> excludedDocumentList) {
+                                                List<String> excludedDocumentList,
+                                                Long caseId) {
         boolean categoryIncluded = CollectionUtils.isEmpty(excludedDocumentCategoryList)
             || !excludedDocumentCategoryList.contains(category);
         boolean documentIncluded = CollectionUtils.isEmpty(excludedDocumentList)
             || !shouldExcludeDocument(excludedDocumentList, caseDocument.getDocumentFileName());
         if (categoryIncluded && documentIncluded) {
-            addInOtherDocuments(category, caseDocument, otherDocsList);
+            addInOtherDocuments(category, caseDocument, otherDocsList, caseId);
         }
     }
 

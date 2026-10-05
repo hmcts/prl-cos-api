@@ -715,10 +715,10 @@ class CafcassCaseDataServiceTest {
         List<Element<OtherDocuments>> otherDocsList = new ArrayList<>();
         Method privateMethod = CafcassUpdateHelperUtils.class.getDeclaredMethod(
             "addInOtherDocuments",
-            String.class, Document.class, List.class
+            String.class, Document.class, List.class, Long.class
         );
         privateMethod.setAccessible(true);
-        privateMethod.invoke(cafcassCaseDataService, category, document, otherDocsList);
+        privateMethod.invoke(cafcassCaseDataService, category, document, otherDocsList, 1L);
 
         assertTrue(otherDocsList.isEmpty());
 
@@ -814,10 +814,10 @@ class CafcassCaseDataServiceTest {
         List<Element<OtherDocuments>> otherDocsList = new ArrayList<>();
         Method privateMethod = CafcassUpdateHelperUtils.class.getDeclaredMethod(
             "addInOtherDocuments",
-            String.class, Document.class, List.class
+            String.class, Document.class, List.class, Long.class
         );
         privateMethod.setAccessible(true);
-        privateMethod.invoke(cafcassCaseDataService, category, document, otherDocsList);
+        privateMethod.invoke(cafcassCaseDataService, category, document, otherDocsList, 1L);
 
         assertFalse(otherDocsList.isEmpty());
         assertEquals("test", otherDocsList.get(0).getValue().getDocumentName());
