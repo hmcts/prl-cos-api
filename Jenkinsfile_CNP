@@ -83,8 +83,8 @@ def secrets = [
       secret('hmc-user-name', 'HMC_USER_NAME'),
       secret('hmc-user-password', 'HMC_USER_PASSWORD'),
       secret('hmc-client-secret', 'HMC_CLIENT_SECRET'),
-
-
+      secret('ref-user-name', 'REF_USER_NAME'),
+      secret('hmc-s2s-secret', 'FIS_IDAM_S2S_AUTH_TOTP_SECRET'),
    ]
 ]
 
