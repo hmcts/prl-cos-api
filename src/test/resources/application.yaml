@@ -908,9 +908,7 @@ http:
 fis:
   s2s:
     microservice: fis_hmc_api
-    secret: ${FIS_IDAM_S2S_AUTH_TOTP_SECRET}
-
-FIS_IDAM_S2S_AUTH_TOTP_SECRET: test-secret
+    secret: ${FIS_IDAM_S2S_AUTH_TOTP_SECRET:test-secret}
 
 bankHolidays:
   api:
