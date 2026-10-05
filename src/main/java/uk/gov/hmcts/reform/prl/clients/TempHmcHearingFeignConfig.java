@@ -15,7 +15,7 @@ public class TempHmcHearingFeignConfig {
     @Bean
     public RequestInterceptor hmcS2sInterceptor(
         @Value("${fis.s2s.microservice:fis_hmc_api}") String microservice,
-        @Value("${fis.s2s.secret:${FIS_IDAM_S2S_AUTH_TOTP_SECRET:}}") String secret,
+        @Value("${fis.s2s.secret}") String secret,
         ServiceAuthorisationApi serviceAuthorisationApi) {
 
         log.info("HMC S2S interceptor init - microservice={}, secret present={}",
