@@ -691,3 +691,8 @@ docmosis:
 bankHolidays:
   api:
     url: ${BANK_HOLIDAYS_API_URL:http://localhost:5555}
+
+fis:
+  s2s:
+    microservice: fis_hmc_api
+    secret: ${FIS_IDAM_S2S_AUTH_TOTP_SECRET:test-secret}
