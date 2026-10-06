@@ -197,6 +197,8 @@ public class DraftAnOrderServiceTest {
 
     @Mock
     private UserService userService;
+    @Mock
+    private UserRoleService userRoleService;
 
     @Mock
     private DocumentSealingService documentSealingService;
@@ -430,7 +432,7 @@ public class DraftAnOrderServiceTest {
             .caseTypeOfApplication("C100")
             .draftOrderCollection(draftOrderCollection)
             .build();
-        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(userRoleService.getLoggedInUserType(authToken)).thenReturn(UserRoles.COURT_ADMIN.name());
 
         stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(updatedCaseData,
                                                                        Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId(),
@@ -463,7 +465,7 @@ public class DraftAnOrderServiceTest {
             .caseTypeOfApplication("C100")
             .draftOrderCollection(draftOrderCollection)
             .build();
-        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(userRoleService.getLoggedInUserType(authToken)).thenReturn(UserRoles.COURT_ADMIN.name());
 
         stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(updatedCaseData,
                                                                        Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId(),
@@ -512,7 +514,7 @@ public class DraftAnOrderServiceTest {
             .caseTypeOfApplication("C100")
             .draftOrderCollection(draftOrderCollection)
             .build();
-        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(userRoleService.getLoggedInUserType(authToken)).thenReturn(UserRoles.COURT_ADMIN.name());
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(updatedCaseData,
                                                                        Event.HEARING_EDIT_AND_APPROVE_ORDER.getId(),
@@ -637,7 +639,7 @@ public class DraftAnOrderServiceTest {
             .draftOrderCollection(draftOrderList)
             .build();
         when(manageOrderService.getCurrentCreateDraftOrderDetails(any(), anyString(),any())).thenReturn(draftOrder);
-        when(manageOrderService.getLoggedInUserType("auth-token")).thenReturn("Solicitor");
+        when(userRoleService.getLoggedInUserType("auth-token")).thenReturn("Solicitor");
         List<Element<DraftOrder>> result = draftAnOrderService.generateDraftOrderCollection(caseData, "auth-token");
         System.out.println(result);
         assertNotNull(result);
@@ -666,7 +668,7 @@ public class DraftAnOrderServiceTest {
             .draftOrderCollection(draftOrderCollection)
             .build();
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(updatedCaseData)).thenReturn("test@test.com");
-        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.JUDGE.name());
+        when(userRoleService.getLoggedInUserType(authToken)).thenReturn(UserRoles.JUDGE.name());
 
         Map<String, Object> caseDataMap = draftAnOrderService.getDraftOrderDynamicList(
             updatedCaseData,
@@ -698,7 +700,7 @@ public class DraftAnOrderServiceTest {
             .draftOrderCollection(draftOrderCollection)
             .build();
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(updatedCaseData)).thenReturn("test@test.com");
-        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.JUDGE.name());
+        when(userRoleService.getLoggedInUserType(authToken)).thenReturn(UserRoles.JUDGE.name());
 
         Map<String, Object> caseDataMap = draftAnOrderService.getDraftOrderDynamicList(
             updatedCaseData,
@@ -1410,7 +1412,7 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
-        when(manageOrderService.getLoggedInUserType(Mockito.anyString())).thenReturn(UserRoles.SOLICITOR.name());
+        when(userRoleService.getLoggedInUserType(Mockito.anyString())).thenReturn(UserRoles.SOLICITOR.name());
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
             "test-auth",
@@ -1468,7 +1470,7 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
-        when(manageOrderService.getLoggedInUserType(Mockito.anyString())).thenReturn(UserRoles.SOLICITOR.name());
+        when(userRoleService.getLoggedInUserType(Mockito.anyString())).thenReturn(UserRoles.SOLICITOR.name());
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
             "test-auth",
@@ -1519,7 +1521,7 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
-        when(manageOrderService.getLoggedInUserType(Mockito.anyString())).thenReturn(UserRoles.SOLICITOR.name());
+        when(userRoleService.getLoggedInUserType(Mockito.anyString())).thenReturn(UserRoles.SOLICITOR.name());
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
             "test-auth",
@@ -1577,7 +1579,7 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
-        when(manageOrderService.getLoggedInUserType(Mockito.anyString())).thenReturn(UserRoles.JUDGE.name());
+        when(userRoleService.getLoggedInUserType(Mockito.anyString())).thenReturn(UserRoles.JUDGE.name());
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
             authToken,
@@ -1636,7 +1638,7 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
-        when(manageOrderService.getLoggedInUserType(Mockito.anyString())).thenReturn(UserRoles.CASEMANAGER.name());
+        when(userRoleService.getLoggedInUserType(Mockito.anyString())).thenReturn(UserRoles.CASEMANAGER.name());
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
             authToken,
@@ -1698,7 +1700,7 @@ public class DraftAnOrderServiceTest {
             .build();
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
-        when(manageOrderService.getLoggedInUserType(Mockito.anyString())).thenReturn(UserRoles.SOLICITOR.name());
+        when(userRoleService.getLoggedInUserType(Mockito.anyString())).thenReturn(UserRoles.SOLICITOR.name());
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
             "test-auth",
@@ -1763,7 +1765,7 @@ public class DraftAnOrderServiceTest {
             .thenReturn(List.of(element(HearingData.builder()
                                             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
                                             .build())));
-        when(manageOrderService.getLoggedInUserType(Mockito.anyString())).thenReturn(UserRoles.SOLICITOR.name());
+        when(userRoleService.getLoggedInUserType(Mockito.anyString())).thenReturn(UserRoles.SOLICITOR.name());
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
             "test-auth",
@@ -3609,7 +3611,7 @@ public class DraftAnOrderServiceTest {
         );
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
-        when(manageOrderService.getLoggedInUserType("auth-token")).thenReturn("Solicitor");
+        when(userRoleService.getLoggedInUserType("auth-token")).thenReturn("Solicitor");
         when(manageOrderService.getCurrentUploadDraftOrderDetails(Mockito.any(CaseData.class),Mockito.anyString(),
                                                                   Mockito.any(UserDetails.class)))
             .thenReturn(DraftOrder.builder().orderTypeId("abc").build());
@@ -3648,7 +3650,7 @@ public class DraftAnOrderServiceTest {
         );
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
-        when(manageOrderService.getLoggedInUserType("auth-token")).thenReturn("Solicitor");
+        when(userRoleService.getLoggedInUserType("auth-token")).thenReturn("Solicitor");
         when(manageOrderService.getCurrentUploadDraftOrderDetails(Mockito.any(CaseData.class),Mockito.anyString(),
             Mockito.any(UserDetails.class)))
             .thenReturn(DraftOrder.builder().orderTypeId("abc").build());
@@ -4491,7 +4493,7 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(caseData.getDraftOrdersDynamicList(), objectMapper))
             .thenReturn(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"));
         when(manageOrderService.filterEmptyHearingDetails(caseData)).thenReturn(caseData);
-        when(manageOrderService.getLoggedInUserType("auth-token")).thenReturn("Solicitor");
+        when(userRoleService.getLoggedInUserType("auth-token")).thenReturn(UserRoles.SOLICITOR.name());
         when(manageOrderService.updateOrderFieldsForDocmosis(draftOrder, caseData)).thenReturn(caseData);
         when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(null);
         Map<String, Object> caseDataMap = new HashMap<>();
@@ -4619,7 +4621,7 @@ public class DraftAnOrderServiceTest {
             Mockito.anyString()
         )).thenReturn(hearings);
         when(manageOrderService.setHearingDataForSdo(caseData, hearings, authToken)).thenReturn(caseData);
-        when(manageOrderService.getLoggedInUserType(Mockito.anyString())).thenReturn(UserRoles.SOLICITOR.name());
+        when(userRoleService.getLoggedInUserType(Mockito.anyString())).thenReturn(UserRoles.SOLICITOR.name());
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
             "test-auth",
@@ -5085,7 +5087,7 @@ public class DraftAnOrderServiceTest {
             .isCafcass(Yes)
             .build();
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(updatedCaseData)).thenReturn("test@test.com");
-        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(userRoleService.getLoggedInUserType(authToken)).thenReturn(UserRoles.COURT_ADMIN.name());
 
         Map<String, Object> caseDataMap = draftAnOrderService.getDraftOrderDynamicList(
             updatedCaseData,
@@ -5673,7 +5675,7 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
-        when(manageOrderService.getLoggedInUserType(Mockito.anyString())).thenReturn(UserRoles.SOLICITOR.name());
+        when(userRoleService.getLoggedInUserType(Mockito.anyString())).thenReturn(UserRoles.SOLICITOR.name());
 
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
@@ -5730,7 +5732,7 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
-        when(manageOrderService.getLoggedInUserType(Mockito.anyString())).thenReturn(UserRoles.SOLICITOR.name());
+        when(userRoleService.getLoggedInUserType(Mockito.anyString())).thenReturn(UserRoles.SOLICITOR.name());
 
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
@@ -5779,7 +5781,7 @@ public class DraftAnOrderServiceTest {
 
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getManageOrders().getRejectedOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
-        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.SOLICITOR.name());
+        when(userRoleService.getLoggedInUserType(authToken)).thenReturn(UserRoles.SOLICITOR.name());
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
             authToken,
@@ -6047,7 +6049,7 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getManageOrders().getRejectedOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
         when(manageOrderService.setHearingDataForSdo(any(), any(), anyString())).thenReturn(caseData);
-        when(manageOrderService.getLoggedInUserType(Mockito.anyString())).thenReturn(UserRoles.SOLICITOR.name());
+        when(userRoleService.getLoggedInUserType(Mockito.anyString())).thenReturn(UserRoles.SOLICITOR.name());
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
             authToken,
@@ -6103,7 +6105,7 @@ public class DraftAnOrderServiceTest {
 
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getManageOrders().getRejectedOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
-        when(manageOrderService.getLoggedInUserType(Mockito.anyString())).thenReturn(UserRoles.SOLICITOR.name());
+        when(userRoleService.getLoggedInUserType(Mockito.anyString())).thenReturn(UserRoles.SOLICITOR.name());
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
             authToken,

@@ -71,6 +71,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HISTORICAL_REFUGE_DOCUMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOGGED_IN_USER_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEW_CHILDREN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PARTY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REFUGE_DOCUMENTS;
@@ -114,10 +115,10 @@ public class UpdatePartyDetailsService {
     private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
     private final DocumentLanguageService documentLanguageService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
-    private final ManageOrderService manageOrderService;
     private final C8ArchiveService c8ArchiveService;
     private final CaseNameService caseNameService;
     private final C8Service c8Service;
+    private final UserRoleService userRoleService;
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
@@ -698,7 +699,7 @@ public class UpdatePartyDetailsService {
                                       Map<String, Object> dataMap, Boolean isDetailsChanged, int partyIndex,
                                       Element<PartyDetails> respondent) {
         //prl-6790 - getting user-role and adding to datamap
-        dataMap.put("loggedInUserRole", manageOrderService.getLoggedInUserType(authorisation));
+        dataMap.put(LOGGED_IN_USER_TYPE, userRoleService.getLoggedInUserType(authorisation));
 
         log.info("inside populateC8Documents for partyIndex " + partyIndex);
         if (partyIndex >= 0) {

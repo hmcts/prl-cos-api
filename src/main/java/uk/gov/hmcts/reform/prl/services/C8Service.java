@@ -51,7 +51,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
 @AllArgsConstructor
 public class C8Service {
 
-    private final ManageOrderService manageOrderService;
+    private final UserRoleService userRoleService;
     private final DocumentLanguageService documentLanguageService;
     private final DocumentGenService documentGenService;
     private final ObjectMapper objectMapper;
@@ -82,7 +82,7 @@ public class C8Service {
     private ResponseDocuments generateC8ForOtherParty(CaseData caseData, Element<PartyDetails> partyDetails, String authorisation) {
         String loggedInUserRole = isNotEmpty(caseData.getLoggedInUserRole())
             ? caseData.getLoggedInUserRole()
-            : manageOrderService.getLoggedInUserType(authorisation);
+            : userRoleService.getLoggedInUserType(authorisation);
         Map<String, Object> dataMap = populateDataMap(caseData);
 
         dataMap.put("party", objectMapper.convertValue(partyDetails.getValue(), new TypeReference<Map<String, Object>>() {}));

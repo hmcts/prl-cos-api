@@ -110,13 +110,13 @@ class UpdatePartyDetailsServiceTest {
     @Mock
     ConfidentialityC8RefugeService confidentialityC8RefugeService;
     @Mock
-    ManageOrderService manageOrderService;
-    @Mock
     C8ArchiveService c8ArchiveService;
     @Mock
     C8Service c8Service;
     @Mock
     CaseNameService caseNameService;
+    @Mock
+    UserRoleService userRoleService;
 
     @Test
     void updateApplicantAndChildNames() {
@@ -2247,7 +2247,7 @@ class UpdatePartyDetailsServiceTest {
                 ResponseDocuments.builder().dateTimeCreated(LocalDateTime.now()).build())))).build())
             .state(State.CASE_ISSUED)
             .build();
-        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
+        when(userRoleService.getLoggedInUserType("authToken")).thenReturn("testUser");
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenWelsh(true).build());
         Map<String, Object> updatedCaseData = new HashMap<>();
         Map<String, Object> dataMap = new HashMap<>();
@@ -2268,7 +2268,7 @@ class UpdatePartyDetailsServiceTest {
                 ResponseDocuments.builder().dateTimeCreated(LocalDateTime.now()).build())))).build())
             .state(State.CASE_ISSUED)
             .build();
-        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
+        when(userRoleService.getLoggedInUserType("authToken")).thenReturn("testUser");
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenWelsh(false).build());
         Map<String, Object> updatedCaseData = new HashMap<>();
         Map<String, Object> dataMap = new HashMap<>();
@@ -2288,7 +2288,7 @@ class UpdatePartyDetailsServiceTest {
             .respondentC8Document(RespondentC8Document.builder().respondentCc8Documents(new ArrayList<>(List.of(element(
                 ResponseDocuments.builder().dateTimeCreated(LocalDateTime.now()).build())))).build())
             .build();
-        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
+        when(userRoleService.getLoggedInUserType("authToken")).thenReturn("testUser");
         Map<String, Object> updatedCaseData = new HashMap<>();
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, new ArrayList<>());
@@ -2308,7 +2308,7 @@ class UpdatePartyDetailsServiceTest {
                 ResponseDocuments.builder().dateTimeCreated(LocalDateTime.now()).build())))).build())
             .state(State.CASE_ISSUED)
             .build();
-        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
+        when(userRoleService.getLoggedInUserType("authToken")).thenReturn("testUser");
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().build());
         Map<String, Object> updatedCaseData = new HashMap<>();
         Map<String, Object> dataMap = new HashMap<>();
@@ -2328,7 +2328,7 @@ class UpdatePartyDetailsServiceTest {
             .respondentC8Document(RespondentC8Document.builder().respondentEc8Documents(new ArrayList<>(List.of(element(
                 ResponseDocuments.builder().dateTimeCreated(LocalDateTime.now()).build())))).build())
             .build();
-        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
+        when(userRoleService.getLoggedInUserType("authToken")).thenReturn("testUser");
         Map<String, Object> updatedCaseData = new HashMap<>();
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, new ArrayList<>());
@@ -2347,7 +2347,7 @@ class UpdatePartyDetailsServiceTest {
             .respondentC8Document(RespondentC8Document.builder().respondentEc8Documents(new ArrayList<>(List.of(element(
                 ResponseDocuments.builder().dateTimeCreated(LocalDateTime.now()).build())))).build())
             .build();
-        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
+        when(userRoleService.getLoggedInUserType("authToken")).thenReturn("testUser");
         Map<String, Object> updatedCaseData = new HashMap<>();
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, new ArrayList<>());
@@ -2371,7 +2371,7 @@ class UpdatePartyDetailsServiceTest {
             .respondentC8Document(RespondentC8Document.builder().build())
             .state(State.CASE_ISSUED)
             .build();
-        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
+        when(userRoleService.getLoggedInUserType("authToken")).thenReturn("testUser");
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenEng(true).build());
 
         Map<String, Object> updatedCaseData = new HashMap<>();
@@ -2391,7 +2391,7 @@ class UpdatePartyDetailsServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .respondentC8Document(RespondentC8Document.builder().build())
             .build();
-        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
+        when(userRoleService.getLoggedInUserType("authToken")).thenReturn("testUser");
         Map<String, Object> updatedCaseData = new HashMap<>();
         Map<String, Object> dataMap = new HashMap<>();
         updatePartyDetailsService.populateC8Documents(
@@ -2411,7 +2411,7 @@ class UpdatePartyDetailsServiceTest {
                                      .respondentAc8Documents(List.of(existingResponseDocument()))
                                      .build())
             .build();
-        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
+        when(userRoleService.getLoggedInUserType("authToken")).thenReturn("testUser");
 
         Map<String, Object> updatedCaseData = new HashMap<>();
         Map<String, Object> dataMap = new HashMap<>();
@@ -2436,7 +2436,7 @@ class UpdatePartyDetailsServiceTest {
                                      .respondentAc8Documents(List.of(existingResponseDocument()))
                                      .build())
             .build();
-        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
+        when(userRoleService.getLoggedInUserType("authToken")).thenReturn("testUser");
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenWelsh(false).build());
         when(documentGenService.generateSingleDocument(anyString(), any(), anyString(), Mockito.anyBoolean(), anyMap()))
             .thenReturn(Document.builder().build());
@@ -2462,7 +2462,7 @@ class UpdatePartyDetailsServiceTest {
             .state(State.CASE_ISSUED)
             .respondentC8Document(RespondentC8Document.builder().build())
             .build();
-        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
+        when(userRoleService.getLoggedInUserType("authToken")).thenReturn("testUser");
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenWelsh(false).build());
         when(documentGenService.generateSingleDocument(anyString(), any(), anyString(), Mockito.anyBoolean(), anyMap()))
             .thenReturn(Document.builder().build());
@@ -2491,7 +2491,7 @@ class UpdatePartyDetailsServiceTest {
                                      .respondentBc8Documents(List.of(existingResponseDocument()))
                                      .build())
             .build();
-        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
+        when(userRoleService.getLoggedInUserType("authToken")).thenReturn("testUser");
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenWelsh(false).build());
         when(documentGenService.generateSingleDocument(anyString(), any(), anyString(), Mockito.anyBoolean(), anyMap()))
             .thenReturn(Document.builder().build());

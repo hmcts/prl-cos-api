@@ -68,6 +68,7 @@ import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.MiamForOrderService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
+import uk.gov.hmcts.reform.prl.services.UserRoleService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
@@ -199,6 +200,8 @@ class EditAndApproveDraftOrderControllerTest {
     @Mock
     private MiamForOrderService miamForOrderService;
 
+    @Mock
+    private UserRoleService userRoleService;
 
 
     @BeforeEach
@@ -1189,7 +1192,7 @@ class EditAndApproveDraftOrderControllerTest {
             DraftOrder::getLabelForOrdersDynamicList
         ));
 
-        when(manageOrderService.getLoggedInUserType(AUTH_TOKEN)).thenReturn(UserRoles.JUDGE.name());
+        when(userRoleService.getLoggedInUserType(AUTH_TOKEN)).thenReturn(UserRoles.JUDGE.name());
         caseDataMap.put(DRAFT_ORDER_COLLECTION, List.of(Element.builder().build()));
         when(draftAnOrderService.updateDraftOrderCollection(Mockito.any(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
             .thenReturn(caseDataMap);
@@ -1312,7 +1315,7 @@ class EditAndApproveDraftOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseData);
-        when(manageOrderService.getLoggedInUserType(AUTH_TOKEN)).thenReturn(UserRoles.CASEMANAGER.name());
+        when(userRoleService.getLoggedInUserType(AUTH_TOKEN)).thenReturn(UserRoles.CASEMANAGER.name());
         stringObjectMap.put(DRAFT_ORDER_COLLECTION, draftOrderCollection);
         AutomatedHearingResponse automatedHearingResponse = AutomatedHearingResponse.builder().build();
         when(hearingService.createAutomatedHearing(
