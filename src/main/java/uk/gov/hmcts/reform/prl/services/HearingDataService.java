@@ -115,6 +115,10 @@ public class HearingDataService {
     public static final String APPLICANT = "(Applicant)";
     public static final String APPLICANT_1 = "(Applicant1)";
     public static final String RESPONDENT_1 = "(Respondent1)";
+    private static final String HOURS = "hours";
+    private static final String HOUR = "hour";
+    private static final String MINUTES = "minutes";
+    private static final String MINUTE = "minute";
     private final RefDataUserService refDataUserService;
 
     private final HearingService hearingService;
@@ -127,7 +131,6 @@ public class HearingDataService {
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     DateTimeFormatter customDateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
-
 
     public HearingDataPrePopulatedDynamicLists populateHearingDynamicLists(String authorisation, String caseReferenceNumber,
                                                                            CaseData caseData, Hearings hearings) {
@@ -752,33 +755,26 @@ public class HearingDataService {
     }
 
     private String getHearingDuration(LocalDateTime start, LocalDateTime end) {
-        long minutes = Duration.between(start.toLocalTime(), end.toLocalTime()).toMinutes();
-        long durationInHours = (minutes / 60);
-        long durationInMinutes = (minutes % 60);
-        StringBuilder durationInText = new StringBuilder();
-        if (durationInHours > 0) {
-            durationInText = durationInText.append(durationInHours);
-            if (durationInHours > 1) {
-                durationInText = durationInText.append(" hours");
-            } else {
-                durationInText = durationInText.append(" hour");
-            }
-        }
-        if (durationInMinutes > 0) {
-            if (durationInHours > 0) {
-                durationInText = durationInText.append(COMMA + " ");
-            }
-            durationInText = durationInText.append(durationInMinutes);
-            if (durationInMinutes > 1) {
-                durationInText = durationInText.append(" minutes");
-            } else {
-                durationInText = durationInText.append(" minute");
-            }
-        }
-        return durationInText.toString();
+        Map<String, String> englishTranslations = Map.of(
+            HOURS, " hours",
+            HOUR, " hour",
+            MINUTES, " minutes",
+            MINUTE, " minute"
+        );
+        return generateHearingDurationText(start, end, englishTranslations);
     }
 
     private String getHearingDurationWelsh(LocalDateTime start, LocalDateTime end) {
+        Map<String, String> welshTranslations = Map.of(
+            HOURS, " oriau",
+            HOUR, " awr",
+            MINUTES, " munudau",
+            MINUTE, " munud"
+        );
+        return generateHearingDurationText(start, end, welshTranslations);
+    }
+
+    private String generateHearingDurationText(LocalDateTime start, LocalDateTime end, Map translations) {
         long minutes = Duration.between(start.toLocalTime(), end.toLocalTime()).toMinutes();
         long durationInHours = (minutes / 60);
         long durationInMinutes = (minutes % 60);
@@ -786,9 +782,9 @@ public class HearingDataService {
         if (durationInHours > 0) {
             durationInText = durationInText.append(durationInHours);
             if (durationInHours > 1) {
-                durationInText = durationInText.append(" oriau");
+                durationInText = durationInText.append(translations.get(HOURS));
             } else {
-                durationInText = durationInText.append(" awr");
+                durationInText = durationInText.append(translations.get(HOUR));
             }
         }
         if (durationInMinutes > 0) {
@@ -797,9 +793,9 @@ public class HearingDataService {
             }
             durationInText = durationInText.append(durationInMinutes);
             if (durationInMinutes > 1) {
-                durationInText = durationInText.append(" munudau");
+                durationInText = durationInText.append(translations.get(MINUTES));
             } else {
-                durationInText = durationInText.append(" munud");
+                durationInText = durationInText.append(translations.get(MINUTE));
             }
         }
         return durationInText.toString();
