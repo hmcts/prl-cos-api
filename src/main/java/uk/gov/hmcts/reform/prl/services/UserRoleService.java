@@ -28,22 +28,16 @@ public class UserRoleService {
     private final AuthTokenGenerator authTokenGenerator;
     private final IdamClient idamClient;
 
-    /*
-     *This method is a duplicate found in manageOrderService.
-     *It is required to stop having circular dependencies in dgsservice.
-     */
     public String getLoggedInUserType(String authorisation) {
         UserDetails userDetails = getUserDetails(authorisation);
         UserRoles loggedInUserType;
         if (launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)) {
-            //This would check for roles from AM for Judge/Legal advisor/Court admin
-            //if it doesn't find then it will check for idam roles for rest of the users
             loggedInUserType = getUserRoleFromRoleAssignmentService(authorisation, userDetails);
         } else {
             loggedInUserType = getUserRoleFromIdam(userDetails);
         }
 
-        return loggedInUserType != null ? loggedInUserType.name() : null;
+        return loggedInUserType != null ? loggedInUserType.name() : "";
     }
 
     private UserDetails getUserDetails(String authorisation) {
