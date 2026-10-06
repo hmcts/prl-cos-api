@@ -65,7 +65,6 @@ import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
-import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -160,7 +159,6 @@ public class CallbackController {
     private final ConfidentialityTabService confidentialityTabService;
     private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
     private final LaunchDarklyClient launchDarklyClient;
-    private final RefDataUserService refDataUserService;
     private final GatekeepingDetailsService gatekeepingDetailsService;
     private final AuthorisationService authorisationService;
     private final ManageDocumentsService manageDocumentsService;
@@ -473,8 +471,7 @@ public class CallbackController {
 
             GatekeepingDetails gatekeepingDetails = gatekeepingDetailsService.getGatekeepingDetails(
                 caseDataUpdated,
-                caseData.getLegalAdviserList(),
-                refDataUserService
+                caseData.getLegalAdviserList()
             );
             caseData = caseData.toBuilder().gatekeepingDetails(gatekeepingDetails).build();
 

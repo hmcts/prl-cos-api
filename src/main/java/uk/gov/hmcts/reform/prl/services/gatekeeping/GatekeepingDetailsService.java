@@ -10,11 +10,7 @@ import uk.gov.hmcts.reform.prl.enums.gatekeeping.WhoToSendToGatekeeperTypeEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
-import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
-import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
-import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 
-import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_NAME;
@@ -29,8 +25,7 @@ public class GatekeepingDetailsService {
 
     private static final String WHO_TO_SEND_TO_GATEKEEPER = "whoToSendToGatekeeper";
 
-    public GatekeepingDetails getGatekeepingDetails(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList,
-                                                     RefDataUserService refDataUserService) {
+    public GatekeepingDetails getGatekeepingDetails(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList) {
         GatekeepingDetails.GatekeepingDetailsBuilder gatekeepingDetailsBuilder = GatekeepingDetails.builder();
         if (null != caseDataUpdated.get(WHO_TO_SEND_TO_GATEKEEPER)) {
             if (WhoToSendToGatekeeperTypeEnum.SEND_TO_A_SPECIFIC_JUDGE.getId()
@@ -38,19 +33,18 @@ public class GatekeepingDetailsService {
                 && null != caseDataUpdated.get("judgeName")) {
                 String[] judgePersonalCode = getPersonalCode(caseDataUpdated.get(JUDGE_NAME));
 
-                List<JudicialUsersApiResponse> judgeDetails =
-                    refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
-                                                                     .personalCode(getPersonalCode(caseDataUpdated.get(
-                                                                         JUDGE_NAME))).build());
                 gatekeepingDetailsBuilder.isSpecificGateKeeperNeeded(YesOrNo.Yes);
                 gatekeepingDetailsBuilder.isJudgeOrLegalAdviserGatekeeping((SendToGatekeeperTypeEnum.judge));
-                if (null != judgeDetails && !judgeDetails.isEmpty()) {
-                    gatekeepingDetailsBuilder.judgeName(JudicialUser.builder()
-                                                            .idamId(getIdamId(caseDataUpdated.get(JUDGE_NAME))[0])
-                                                            .personalCode(getPersonalCode(caseDataUpdated.get(JUDGE_NAME))[0]).build());
-                    gatekeepingDetailsBuilder.judgePersonalCode(judgePersonalCode[0]);
 
+                if (null != getIdamId(caseDataUpdated.get(JUDGE_NAME))[0]
+                    && null != getPersonalCode(caseDataUpdated.get(JUDGE_NAME))[0]) {
+                    gatekeepingDetailsBuilder
+                        .judgeName(JudicialUser.builder()
+                                       .idamId(getIdamId(caseDataUpdated.get(JUDGE_NAME))[0])
+                                       .personalCode(getPersonalCode(caseDataUpdated.get(JUDGE_NAME))[0]).build());
                 }
+
+                gatekeepingDetailsBuilder.judgePersonalCode(judgePersonalCode[0]);
             } else if (null != legalAdviserList && null != legalAdviserList.getValue()) {
                 gatekeepingDetailsBuilder.isSpecificGateKeeperNeeded(YesOrNo.Yes);
                 gatekeepingDetailsBuilder.isJudgeOrLegalAdviserGatekeeping((SendToGatekeeperTypeEnum.legalAdviser));
