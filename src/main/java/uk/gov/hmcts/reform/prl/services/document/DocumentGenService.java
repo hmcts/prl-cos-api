@@ -1541,6 +1541,7 @@ public class DocumentGenService {
     }
 
     public DocumentResponse uploadDocument(String authorization, MultipartFile file) throws IOException {
+        log.info("--- We are in cos uploadDocument");
         try {
             uk.gov.hmcts.reform.ccd.document.am.model.Document stampedDocument
                 = uploadService.uploadDocument(
