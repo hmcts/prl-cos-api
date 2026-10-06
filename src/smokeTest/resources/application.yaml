@@ -249,6 +249,9 @@ idam:
     url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
     microservice: prl_cos_api
     totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
+  hmcCftUserAuth:
+    username: ${HMC_USER_NAME:dummy}
+    password: ${HMC_USER_PASSWORD:dummy}
   api:
     url: https://idam-api.aat.platform.hmcts.net
   client:
