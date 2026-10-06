@@ -1542,7 +1542,7 @@ public class DocumentGenService {
 
     public DocumentResponse uploadDocument(String authorization, MultipartFile file) throws IOException {
         log.info("--- We are in cos uploadDocument");
-        log.info("--- file given is: {}", file);
+        log.info("--- file given is: {}", file.getResource());
         try {
             uk.gov.hmcts.reform.ccd.document.am.model.Document stampedDocument
                 = uploadService.uploadDocument(
@@ -1552,7 +1552,7 @@ public class DocumentGenService {
                 authorization
             );
             log.info("Stored Doc Detail: " + stampedDocument.toString());
-            return DocumentResponse.builder().status("Success").document(Document.builder()
+            return DocumentResponse.builder().status("success").document(Document.builder()
                                                                              .documentBinaryUrl(stampedDocument.links.binary.href)
                                                                              .documentUrl(stampedDocument.links.self.href)
                                                                              .documentFileName(stampedDocument.originalDocumentName)
