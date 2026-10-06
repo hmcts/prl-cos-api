@@ -119,6 +119,18 @@ public class HearingDataService {
     private static final String HOUR = "hour";
     private static final String MINUTES = "minutes";
     private static final String MINUTE = "minute";
+    private static final Map<String, String> WELSH_TRANSLATIONS = Map.of(
+        HOURS, " oriau",
+        HOUR, " awr",
+        MINUTES, " munudau",
+        MINUTE, " munud"
+    );
+    private static final Map<String, String> ENGLISH_TRANSLATIONS = Map.of(
+        HOURS, " hours",
+        HOUR, " hour",
+        MINUTES, " minutes",
+        MINUTE, " minute"
+    );
     private final RefDataUserService refDataUserService;
 
     private final HearingService hearingService;
@@ -755,23 +767,11 @@ public class HearingDataService {
     }
 
     private String getHearingDuration(LocalDateTime start, LocalDateTime end) {
-        Map<String, String> englishTranslations = Map.of(
-            HOURS, " hours",
-            HOUR, " hour",
-            MINUTES, " minutes",
-            MINUTE, " minute"
-        );
-        return generateHearingDurationText(start, end, englishTranslations);
+        return generateHearingDurationText(start, end, ENGLISH_TRANSLATIONS);
     }
 
     private String getHearingDurationWelsh(LocalDateTime start, LocalDateTime end) {
-        Map<String, String> welshTranslations = Map.of(
-            HOURS, " oriau",
-            HOUR, " awr",
-            MINUTES, " munudau",
-            MINUTE, " munud"
-        );
-        return generateHearingDurationText(start, end, welshTranslations);
+        return generateHearingDurationText(start, end, WELSH_TRANSLATIONS);
     }
 
     private String generateHearingDurationText(LocalDateTime start, LocalDateTime end, Map translations) {
