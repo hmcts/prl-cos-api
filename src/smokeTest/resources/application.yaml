@@ -617,6 +617,18 @@ fis_hearing:
   api:
     url: ${HEARING_API_BASEURL:http://fis-hmc-api-aat.service.core-compute-aat.internal}
 
+hearing_component:
+  api:
+    feign-url: ${HMC_HEARING_API_BASEURL:http://hmc-cft-hearing-service-aat.service.core-compute-aat.internal}
+    deployment-id: ${HMC_DEPLOYMENT_ID:}
+  futureHearingStatus: HEARING_REQUESTED, AWAITING_LISTING, LISTED, UPDATE_REQUESTED, UPDATE_SUBMITTED, EXCEPTION, CANCELLATION_REQUESTED, CANCELLATION_SUBMITTED, AWAITING_ACTUALS
+  hearingStatusesToFilter: COMPLETED, AWAITING_ACTUALS
+
+fis:
+  s2s:
+    microservice: fis_hmc_api
+    secret: ${FIS_IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
+
 postcodelookup:
   api:
     url: https://api.os.uk/search/places/v1
