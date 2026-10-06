@@ -28,20 +28,23 @@ public class UserRoleService {
     private final AuthTokenGenerator authTokenGenerator;
     private final IdamClient idamClient;
 
-    public String getLoggedInUserType(String authorisation) {
+    public UserRoles getLoggedInUserRole(String authorisation) {
         UserDetails userDetails = getUserDetails(authorisation);
-        UserRoles loggedInUserType;
         if (launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)) {
-            loggedInUserType = getUserRoleFromRoleAssignmentService(authorisation, userDetails);
+            return getUserRoleFromRoleAssignmentService(authorisation, userDetails);
         } else {
-            loggedInUserType = getUserRoleFromIdam(userDetails);
+            return getUserRoleFromIdam(userDetails);
+        }
+    }
+
+    public String getLoggedInUserType(String authorisation) {
+        UserRoles loggedInUserRole = getLoggedInUserRole(authorisation);
+
+        if (UserRoles.LEGAL_ADVISER.equals(loggedInUserRole)) {
+            loggedInUserRole = UserRoles.JUDGE;
         }
 
-        if (UserRoles.LEGAL_ADVISER.equals(loggedInUserType)) {
-            loggedInUserType = UserRoles.JUDGE;
-        }
-
-        return loggedInUserType != null ? loggedInUserType.name() : "";
+        return loggedInUserRole != null ? loggedInUserRole.name() : "";
     }
 
     private UserDetails getUserDetails(String authorisation) {

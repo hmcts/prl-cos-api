@@ -14,7 +14,8 @@ public enum OrderStatusEnum {
     reviewedByManager("reviewedByManager", "Reviewed by Manager", 4),
     createdByJudge("createdByJudge", "Created by Judge", 5),
     reviewedByJudge("reviewedByJudge", "Reviewed by Judge", 6),
-    rejectedByJudge("rejectedByJudge", "Rejected by Judge", 7);
+    rejectedByJudge("rejectedByJudge", "Rejected by Judge", 7),
+    createdByLA("createdByLA", "Created by Legal Adviser", 8);
 
 
     private final String id;
