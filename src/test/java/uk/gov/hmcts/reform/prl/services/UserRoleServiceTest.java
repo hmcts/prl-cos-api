@@ -42,6 +42,27 @@ class UserRoleServiceTest {
     private IdamClient idamClient;
 
     @Test
+    void testGetLoggedInUserTypeJudge() {
+        when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                    .roles(List.of(Roles.JUDGE.getValue())).build());
+        assertEquals(UserRoles.JUDGE.name(), userRoleService.getLoggedInUserType("test"));
+    }
+
+    @Test
+    void testGetLoggedInUserTypeLegalAdviser() {
+        when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                    .roles(List.of(Roles.LEGAL_ADVISER.getValue())).build());
+        assertEquals(UserRoles.JUDGE.name(), userRoleService.getLoggedInUserType("test"));
+    }
+
+    @Test
+    void testGetLoggedInUserTypeCourtAdmin() {
+        when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                    .roles(List.of(Roles.COURT_ADMIN.getValue())).build());
+        assertEquals(UserRoles.COURT_ADMIN.name(), userRoleService.getLoggedInUserType("test"));
+    }
+
+    @Test
     void testGetLoggedInUserTypeSolicitor() {
         when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder()
             .roles(List.of(Roles.SOLICITOR.getValue())).build());
@@ -104,7 +125,20 @@ class UserRoleServiceTest {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("allocated-magistrate");
         when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder()
             .id("123")
-            .roles(List.of(Roles.LEGAL_ADVISER.getValue())).build());
+            .roles(List.of(Roles.JUDGE.getValue())).build());
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(roleAssignmentServiceResponse);
+        assertEquals(UserRoles.JUDGE.name(), userRoleService.getLoggedInUserType("test"));
+    }
+
+    @Test
+    void testGetLoggedInUserTypeLegalAdviserFromAmRoleAssignment() {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("tribunal-caseworker");
+        when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                    .id("123")
+                                                                    .roles(List.of(Roles.LEGAL_ADVISER.getValue())).build());
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
 
