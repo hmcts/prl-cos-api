@@ -111,7 +111,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GATEKEEPING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MIAM_ERROR_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PARTY;
@@ -131,6 +130,7 @@ import static uk.gov.hmcts.reform.prl.enums.State.AWAITING_INFORMATION;
 import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUED;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.services.gatekeeping.GatekeepingDetailsService.WHO_TO_SEND_TO_GATEKEEPER;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
@@ -476,6 +476,8 @@ public class CallbackController {
             caseData = caseData.toBuilder().gatekeepingDetails(gatekeepingDetails).build();
 
             caseDataUpdated.put("gatekeepingDetails", gatekeepingDetails);
+            caseDataUpdated.put("gateKeepingTaskType", gatekeepingDetailsService.identifyGatekeepingTaskType(caseData));
+
             List<Element<PartyDetails>> respondents = C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())
                 ? nullSafeList(caseData.getRespondents())
                 : List.of(element(caseData.getRespondentsFL401()));
@@ -485,7 +487,7 @@ public class CallbackController {
 
             Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
             caseDataUpdated.putAll(allTabsFields);
-            if (caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING) != null
+            if (caseDataUpdated.get(WHO_TO_SEND_TO_GATEKEEPER) != null
                 && (gatekeepingDetails.getJudgeName() != null
                 || (gatekeepingDetails.getLegalAdviserList() != null
                 && CollectionUtils.isNotEmpty(gatekeepingDetails.getLegalAdviserList().getListItems())))) {

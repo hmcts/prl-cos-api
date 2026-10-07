@@ -2,13 +2,17 @@ package uk.gov.hmcts.reform.prl.services.gatekeeping;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.gatekeeping.GatekeepingTaskTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.gatekeeping.JudgeOrLegalAdviserGatekeepingEnum;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.SendToGatekeeperTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.WhoToSendToGatekeeperTypeEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 
 import java.util.Map;
@@ -23,7 +27,8 @@ import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class GatekeepingDetailsService {
 
-    private static final String WHO_TO_SEND_TO_GATEKEEPER = "whoToSendToGatekeeper";
+    public static final String WHO_TO_SEND_TO_GATEKEEPER = "whoToSendTheCaseToForGatekeeping";
+    private static final String JUDGE_OR_LEGAL_ADVISER_GATEKEEPING = "judgeOrLegalAdviserForGatekeeping";
 
     public GatekeepingDetails getGatekeepingDetails(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList) {
         GatekeepingDetails.GatekeepingDetailsBuilder gatekeepingDetailsBuilder = GatekeepingDetails.builder();
@@ -54,6 +59,42 @@ public class GatekeepingDetailsService {
         return gatekeepingDetailsBuilder.build();
     }
 
+    /**
+     * This method is used to identify the gatekeeping task type based on the case data.
+     *
+     * @param caseData The updated case data.
+     * @return The gatekeeping task type as an Enum value.
+     */
+    public GatekeepingTaskTypeEnum identifyGatekeepingTaskType (CaseData caseData) {
+
+        if (ObjectUtils.isEmpty(caseData.getJudgeOrLegalAdviserForGatekeeping())
+            || (caseData.getJudgeOrLegalAdviserForGatekeeping()
+                    .contains((JudgeOrLegalAdviserGatekeepingEnum.SEND_TO_A_JUDGE))
+                && caseData.getJudgeOrLegalAdviserForGatekeeping()
+                    .contains((JudgeOrLegalAdviserGatekeepingEnum.SEND_TO_A_LEGAL_ADVISER)))) {
+
+            return GatekeepingTaskTypeEnum.JUDGE_OR_LEGAL_ADVISER;
+
+        } else if (caseData.getJudgeOrLegalAdviserForGatekeeping()
+            .contains((JudgeOrLegalAdviserGatekeepingEnum.SEND_TO_A_JUDGE))
+            && !caseData.getJudgeOrLegalAdviserForGatekeeping()
+            .contains((JudgeOrLegalAdviserGatekeepingEnum.SEND_TO_A_LEGAL_ADVISER))) {
+
+            return GatekeepingTaskTypeEnum.JUDGE;
+
+        } else if (!caseData.getJudgeOrLegalAdviserForGatekeeping()
+            .contains((JudgeOrLegalAdviserGatekeepingEnum.SEND_TO_A_JUDGE))
+            && caseData.getJudgeOrLegalAdviserForGatekeeping()
+            .contains((JudgeOrLegalAdviserGatekeepingEnum.SEND_TO_A_LEGAL_ADVISER))) {
+
+            return GatekeepingTaskTypeEnum.LEGAL_ADVISER;
+
+        } else {
+
+            return GatekeepingTaskTypeEnum.JUDGE_OR_LEGAL_ADVISER;
+
+        }
+    }
 
 }
 
