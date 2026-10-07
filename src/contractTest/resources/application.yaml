@@ -266,16 +266,6 @@ prl:
     username: ${PRL_IDAM_REFDATA_USERNAME:xxxxxx}
     password: ${PRL_IDAM_REFDATA_PASSWORD:xxxxxx}
 
-security:
-  oauth2:
-    client:
-      provider:
-        oidc:
-          issuer-uri: ${idam.web.url}/o
-      registration:
-        oidc:
-          client-id: internal
-          client-secret: internal
 core_case_data:
   api:
     url: ${CORE_CASE_DATA_API_URL:http://localhost:4452}
