@@ -1,14 +1,14 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherChildrenDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.ChildDetail;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.DateofBirth;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.PersonalDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherChildrenNotInTheCase;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDate;
@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 public class CaseDataOtherChildrenDetailsElementsMapper {
@@ -27,24 +28,27 @@ public class CaseDataOtherChildrenDetailsElementsMapper {
                                                                   C100RebuildOtherChildrenDetailsElements c100RebuildOtherChildrenDetailsElements) {
 
         if (PrlAppsConstants.YES.equals(c100RebuildOtherChildrenDetailsElements.getHasOtherChildren())) {
-            caseDataBuilder
-                .otherChildren(buildChildDetails(c100RebuildOtherChildrenDetailsElements.getOtherChildrenDetails()));
+            List<Element<OtherChildrenNotInTheCase>> otherChildrenNotInTheCase =
+                buildOtherChildrenNotInTheCase(c100RebuildOtherChildrenDetailsElements.getOtherChildrenDetails());
+            caseDataBuilder.childrenNotPartInTheCaseYesNo(YesOrNo.Yes);
+            caseDataBuilder.childrenNotInTheCase(otherChildrenNotInTheCase);
         }
     }
 
-    private static List<Element<Child>> buildChildDetails(List<ChildDetail> childDetails) {
+    private static List<Element<OtherChildrenNotInTheCase>> buildOtherChildrenNotInTheCase(List<ChildDetail> childDetails) {
         return childDetails.stream()
-            .map(CaseDataOtherChildrenDetailsElementsMapper::mapToChildDetails)
+            .map(CaseDataOtherChildrenDetailsElementsMapper::mapToOtherChildrenNotInTheCase)
             .toList();
     }
 
-    private static Element<Child> mapToChildDetails(ChildDetail childDetail) {
-
-        return Element.<Child>builder().id(UUID.fromString(childDetail.getId())).value(Child.builder()
+    private static Element<OtherChildrenNotInTheCase> mapToOtherChildrenNotInTheCase(ChildDetail childDetail) {
+        return Element.<OtherChildrenNotInTheCase>builder()
+            .id(UUID.fromString(childDetail.getId()))
+            .value(OtherChildrenNotInTheCase.builder()
                    .firstName(childDetail.getFirstName())
                    .lastName(childDetail.getLastName())
                    .dateOfBirth(getDateOfBirth(childDetail))
-                   .isDateOfBirthUnknown(buildDateOfBirthUnknown(childDetail.getPersonalDetails()))
+                   .isDateOfBirthKnown(buildDateOfBirthKnown(childDetail.getPersonalDetails()))
                    .gender(Gender.getDisplayedValueFromEnumString((childDetail.getPersonalDetails().getGender())))
                    .otherGender(childDetail.getPersonalDetails().getOtherGenderDetails())
                    .build()
@@ -56,8 +60,8 @@ public class CaseDataOtherChildrenDetailsElementsMapper {
         return dateOfBirth != null ? dateOfBirth : buildDateOfBirth(childDetail.getPersonalDetails().getApproxDateOfBirth());
     }
 
-    private static DontKnow buildDateOfBirthUnknown(PersonalDetails personalDetails) {
-        return Yes.name().equals(personalDetails.getIsDateOfBirthUnknown()) ? DontKnow.dontKnow : null;
+    private static YesOrNo buildDateOfBirthKnown(PersonalDetails personalDetails) {
+        return Yes.name().equals(personalDetails.getIsDateOfBirthUnknown()) ? No : Yes;
     }
 
     private static LocalDate buildDateOfBirth(DateofBirth dateOfBirth) {

@@ -15,6 +15,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.CitizenUpdatePartyDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherChildrenNotInTheCase;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
@@ -46,6 +48,8 @@ import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesServ
 import uk.gov.hmcts.reform.prl.utils.TestUtil;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.Month;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.Date;
@@ -966,6 +970,54 @@ class CitizenPartyDetailsMapperTest {
             assertNotNull(result.getApplicantsConfidentialDetails());
             assertEquals(0, result.getApplicantsConfidentialDetails().size());
         }
+    }
+
+    @Test
+    void testBuildUpdatedCaseDataContainsChildrenNotInTheCase() throws IOException {
+        c100RebuildData = C100RebuildData.builder()
+            .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
+            .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))
+            .c100RebuildTypeOfOrder(TestUtil.readFileFrom("classpath:c100-rebuild/too.json"))
+            .c100RebuildOtherProceedings(TestUtil.readFileFrom("classpath:c100-rebuild/op.json"))
+            .c100RebuildMaim(TestUtil.readFileFrom("classpath:c100-rebuild/miam.json"))
+            .c100RebuildHearingUrgency(TestUtil.readFileFrom("classpath:c100-rebuild/hu.json"))
+            .c100RebuildChildDetails(TestUtil.readFileFrom("classpath:c100-rebuild/cd.json"))
+            .c100RebuildApplicantDetails(TestUtil.readFileFrom("classpath:c100-rebuild/appl.json"))
+            .c100RebuildOtherChildrenDetails(TestUtil.readFileFrom("classpath:c100-rebuild/ocd1.json"))
+            .c100RebuildReasonableAdjustments(TestUtil.readFileFrom("classpath:c100-rebuild/ra.json"))
+            .c100RebuildOtherPersonsDetails(TestUtil.readFileFrom("classpath:c100-rebuild/oprs.json"))
+            .c100RebuildRespondentDetails(TestUtil.readFileFrom("classpath:c100-rebuild/resp.json"))
+            .c100RebuildConsentOrderDetails(TestUtil.readFileFrom("classpath:c100-rebuild/co.json"))
+            .applicantPcqId("123")
+            .c100RebuildHelpWithFeesDetails(TestUtil.readFileFrom("classpath:c100-rebuild/hwf.json"))
+            .build();
+        caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .c100RebuildData(c100RebuildData)
+            .build();
+        CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(caseData, c100RebuildData);
+
+        assertEquals(YesOrNo.Yes, caseDataResult.getChildrenNotPartInTheCaseYesNo());
+        List<Element<OtherChildrenNotInTheCase>> childrenNotInTheCase = caseDataResult.getChildrenNotInTheCase();
+        assertEquals(2, childrenNotInTheCase.size());
+        verifyChildrenNotInTheCase(childrenNotInTheCase.getFirst().getValue(), "test1", "test11", Gender.male,
+            YesOrNo.Yes, LocalDate.of(2000, Month.DECEMBER, 7)
+        );
+        verifyChildrenNotInTheCase(childrenNotInTheCase.get(1).getValue(), "test2", "test22", Gender.other,
+            YesOrNo.No, LocalDate.of(2012, Month.AUGUST, 8)
+        );
+    }
+
+    private void verifyChildrenNotInTheCase(OtherChildrenNotInTheCase value, String firstName, String lastName,
+                                                 Gender gender,
+                                                 YesOrNo dateOfBirthKnown,
+                                                 LocalDate dateOfBirth) {
+        assertEquals(firstName, value.getFirstName());
+        assertEquals(lastName, value.getLastName());
+        assertEquals(gender, value.getGender());
+        assertEquals(dateOfBirthKnown, value.getIsDateOfBirthKnown());
+        assertEquals(dateOfBirth, value.getDateOfBirth());
     }
 
     private static PartyDetails createPartyDetailsWithConfidentiality(UUID partyId,
