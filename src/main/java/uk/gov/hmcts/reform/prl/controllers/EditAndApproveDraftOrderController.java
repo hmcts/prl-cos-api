@@ -42,6 +42,7 @@ import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.MiamForOrderService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
+import uk.gov.hmcts.reform.prl.services.UserRoleService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingUtils;
@@ -85,6 +86,7 @@ public class EditAndApproveDraftOrderController {
     private final TaskUtils taskUtils;
     private final CafcassDateTimeService cafcassDateTimeService;
     private final MiamForOrderService miamForOrderService;
+    private final UserRoleService userRoleService;
 
     public static final String CONFIRMATION_HEADER = "# Order approved";
     public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
@@ -216,7 +218,6 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
             manageOrderService.resetChildOptions(callbackRequest);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             CaseData caseData = objectMapper.convertValue(
@@ -248,7 +249,6 @@ public class EditAndApproveDraftOrderController {
                     callbackRequest,
                     caseDataUpdated,
                     caseData,
-                    loggedInUserType,
                     clientContext
                 );
             } else if (Event.EDIT_RETURNED_ORDER.getId()
@@ -340,9 +340,9 @@ public class EditAndApproveDraftOrderController {
     }
 
     private void editAndApproveOrder(String authorisation, CallbackRequest callbackRequest,
-                                     Map<String, Object> caseDataUpdated,
-                                     CaseData caseData, String loggedInUserType, String clientContext) {
+                                     Map<String, Object> caseDataUpdated, CaseData caseData, String clientContext) {
         String draftOrderId = getDraftOrderIdFromContext(clientContext);
+        String loggedInUserType = userRoleService.getLoggedInUserType(authorisation);
         manageOrderService.setHearingOptionDetailsForTask(
             caseData,
             caseDataUpdated,

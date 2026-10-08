@@ -221,6 +221,7 @@ public class DraftAnOrderService {
     private final ManageOrderService manageOrderService;
     private final DgsService dgsService;
     private final UserService userService;
+    private final UserRoleService userRoleService;
     private final DocumentLanguageService documentLanguageService;
     private final LocationRefDataService locationRefDataService;
     private final PartiesListGenerator partiesListGenerator;
@@ -244,7 +245,7 @@ public class DraftAnOrderService {
     private final FinalisationDetailsService finalisationDetailsService;
 
     public List<Element<DraftOrder>> generateDraftOrderCollection(CaseData caseData, String authorisation) {
-        String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+        String loggedInUserType = userRoleService.getLoggedInUserType(authorisation);
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData, loggedInUserType, authorisation));
         //By default all the hearing will be option 1 (dateReservedWithListAssit) as per ticket PRL-4766
@@ -283,7 +284,7 @@ public class DraftAnOrderService {
                                                         String eventId,
                                                         String clientContext,
                                                         String authorisation) {
-        String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+        String loggedInUserType = userRoleService.getLoggedInUserType(authorisation);
         Map<String, Object> caseDataMap = new HashMap<>();
         List<Element<DraftOrder>> supportedDraftOrderList = new ArrayList<>();
         caseData.getDraftOrderCollection().forEach(
@@ -399,7 +400,7 @@ public class DraftAnOrderService {
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper);
-        String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+        String loggedInUserType = userRoleService.getLoggedInUserType(authorisation);
         updatedCaseData.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
@@ -516,7 +517,7 @@ public class DraftAnOrderService {
     }
 
     private Element<OrderDetails> convertDraftOrderToFinal(String auth, CaseData caseData, DraftOrder draftOrder, String eventId) {
-        String loggedInUserType = manageOrderService.getLoggedInUserType(auth);
+        String loggedInUserType = userRoleService.getLoggedInUserType(auth);
         OrderDetails orderDetails = getOrderDetails(
             caseData,
             draftOrder,
@@ -1181,7 +1182,7 @@ public class DraftAnOrderService {
     public Map<String, Object> updateDraftOrderCollection(CaseData caseData, String authorisation, String eventId,
                                                           String draftOrderId, Map<String, Object> caseDataUpdated) {
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
-        String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+        String loggedInUserType = userRoleService.getLoggedInUserType(authorisation);
         UUID selectedOrderId;
         if (StringUtils.isEmpty(draftOrderId)) {
             if (Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(eventId)) {
@@ -2695,7 +2696,7 @@ public class DraftAnOrderService {
             draftOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), dynamicList, clientContext, callbackRequest.getEventId());
 
             if (ManageOrdersUtils.isOrderEdited(caseData, callbackRequest.getEventId())) {
-                String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+                String loggedInUserType = userRoleService.getLoggedInUserType(authorisation);
                 errorList = validateEditedOrderDetails(caseData, draftOrder, language, loggedInUserType);
                 if (!errorList.isEmpty()) {
                     return Map.of("errorList", errorList);
