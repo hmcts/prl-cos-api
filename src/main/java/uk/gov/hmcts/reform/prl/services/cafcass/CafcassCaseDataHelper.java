@@ -36,12 +36,14 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotif
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import static uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum.applicantApplication;
@@ -62,6 +64,11 @@ public class CafcassCaseDataHelper {
 
     public static final String CONFIDENTIAL = "confidential";
     public static final String ANY_OTHER_DOC = "anyOtherDoc";
+    public static final String NOTICE_OF_HEARING = "noticeOfHearing";
+    private static final Set<String> NOTICE_OF_HEARING_ORDER_TYPES = Set.of(
+        NOTICE_OF_HEARING,
+        "noticeOfHearingParties"
+    );
     private static final String AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED = "amendOtherPeopleInTheCaseRevised";
     private static final String AMEND_CHILDREN_AND_APPLICANTS = "amendChildrenAndApplicants";
     private static final String CHILDREN_AND_APPLICANTS = "childrenAndApplicants";
@@ -725,12 +732,13 @@ public class CafcassCaseDataHelper {
                 servedApplicationDetails -> {
                     nullSafeList(servedApplicationDetails.getValue().getBulkPrintDetails()).forEach(
                         bulkPrintDetailsElement ->
-                            processServiceOfApplicationBulkPrintDocs(bulkPrintDetailsElement.getValue(), otherDocsList)
+                            processServiceOfApplicationBulkPrintDocs(bulkPrintDetailsElement.getValue(), otherDocsList, caseData)
                     );
                     nullSafeList(servedApplicationDetails.getValue().getEmailNotificationDetails())
                         .forEach(emailNotificationDetailsElement -> processServiceOfApplicationEmailedDocs(
                             emailNotificationDetailsElement.getValue(),
-                            otherDocsList
+                            otherDocsList,
+                            caseData
                         ));
                 }
             );
@@ -746,28 +754,40 @@ public class CafcassCaseDataHelper {
     }
 
     private void processServiceOfApplicationBulkPrintDocs(BulkPrintDetails bulkPrintDetails,
-                                                          List<Element<OtherDocuments>> otherDocsList) {
-        addDocumentElementsIfMissing(bulkPrintDetails.getPrintDocs(), otherDocsList);
+                                                          List<Element<OtherDocuments>> otherDocsList, CafCassCaseData caseData) {
+        addDocumentElementsIfMissing(bulkPrintDetails.getPrintDocs(), otherDocsList, caseData);
     }
 
     private void processServiceOfApplicationEmailedDocs(EmailNotificationDetails emailNotificationDetails,
-                                                        List<Element<OtherDocuments>> otherDocsList) {
-        addDocumentElementsIfMissing(emailNotificationDetails.getDocs(), otherDocsList);
+                                                        List<Element<OtherDocuments>> otherDocsList, CafCassCaseData caseData) {
+        addDocumentElementsIfMissing(emailNotificationDetails.getDocs(), otherDocsList, caseData);
     }
 
     private void addDocumentElementsIfMissing(
         List<uk.gov.hmcts.reform.prl.models.Element<uk.gov.hmcts.reform.prl.models.documents.Document>> documents,
-        List<Element<OtherDocuments>> otherDocsList
+        List<Element<OtherDocuments>> otherDocsList,
+        CafCassCaseData caseData
     ) {
         nullSafeList(documents).forEach(
-            docElement -> addOtherDocumentIfMissing(docElement.getValue(), otherDocsList)
+            docElement -> addOtherDocumentIfMissing(
+                docElement.getValue(),
+                otherDocsList,
+                caseData
+            )
         );
     }
 
-    private void addOtherDocumentIfMissing(uk.gov.hmcts.reform.prl.models.documents.Document caseDocument,
-                                           List<Element<OtherDocuments>> otherDocsList) {
+    private void addOtherDocumentIfMissing(
+        uk.gov.hmcts.reform.prl.models.documents.Document caseDocument,
+        List<Element<OtherDocuments>> otherDocsList,
+        CafCassCaseData caseData
+    ) {
         if (!isDocumentPresent(caseDocument, otherDocsList)) {
-            addInOtherDocuments(ANY_OTHER_DOC, caseDocument, otherDocsList);
+            String category = isNoticeOfHearingOrder(caseData, caseDocument)
+                ? NOTICE_OF_HEARING
+                : ANY_OTHER_DOC;
+
+            addInOtherDocuments(category, caseDocument, otherDocsList);
         }
     }
 
@@ -931,8 +951,23 @@ public class CafcassCaseDataHelper {
         return order.getOrderDocument() != null ? order.getOrderDocument().getDocumentId() : null;
     }
 
-    private List<Element<CaseOrder>> removeServeOrderDetails(List<Element<CaseOrder>> orderCollection) {
-        return updateElementValues(orderCollection, order -> order.setServeOrderDetails(null));
+    private List<Element<CaseOrder>> removeServeOrderDetails(
+        List<Element<CaseOrder>> orderCollection
+    ) {
+        return updateElementValues(
+            orderCollection,
+            order -> {
+                order.setServeOrderDetails(null);
+                try {
+                    order.setOrderDocumentWelsh(null);
+                } catch (MalformedURLException e) {
+                    log.error(
+                        "Error clearing orderDocumentWelsh for case order: {}",
+                        e.getMessage()
+                    );
+                }
+            }
+        );
     }
 
     private List<Element<ApplicantDetails>> removeResponse(List<Element<ApplicantDetails>> partyDetails) {
@@ -1019,5 +1054,34 @@ public class CafcassCaseDataHelper {
             }
         });
         return elements;
+    }
+
+    private boolean isNoticeOfHearingOrder(
+        CafCassCaseData caseData,
+        uk.gov.hmcts.reform.prl.models.documents.Document uploadOrderDoc
+    ) {
+        if (CollectionUtils.isEmpty(caseData.getOrderCollection()) || uploadOrderDoc == null) {
+            return false;
+        }
+
+        return caseData.getOrderCollection().stream()
+            .map(Element::getValue)
+            .filter(Objects::nonNull)
+            .anyMatch(order ->
+                          (matchesDocumentId(order.getOrderDocument(), uploadOrderDoc)
+                              || matchesDocumentId(order.getOrderDocumentWelsh(), uploadOrderDoc))
+                              && NOTICE_OF_HEARING_ORDER_TYPES.contains(order.getOrderType())
+            );
+    }
+
+    private boolean matchesDocumentId(
+        uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.OrderDocument orderDocument,
+        uk.gov.hmcts.reform.prl.models.documents.Document uploadOrderDoc
+    ) {
+        return orderDocument != null
+            && Objects.equals(
+            orderDocument.getDocumentId(),
+            uploadOrderDoc.getDocumentId()
+        );
     }
 }
