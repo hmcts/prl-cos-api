@@ -28,16 +28,23 @@ public class UserRoleService {
     private final AuthTokenGenerator authTokenGenerator;
     private final IdamClient idamClient;
 
-    public String getLoggedInUserType(String authorisation) {
+    public UserRoles getLoggedInUserRole(String authorisation) {
         UserDetails userDetails = getUserDetails(authorisation);
-        UserRoles loggedInUserType;
         if (launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)) {
-            loggedInUserType = getUserRoleFromRoleAssignmentService(authorisation, userDetails);
+            return getUserRoleFromRoleAssignmentService(authorisation, userDetails);
         } else {
-            loggedInUserType = getUserRoleFromIdam(userDetails);
+            return getUserRoleFromIdam(userDetails);
+        }
+    }
+
+    public String getLoggedInUserType(String authorisation) {
+        UserRoles loggedInUserRole = getLoggedInUserRole(authorisation);
+
+        if (UserRoles.LEGAL_ADVISER.equals(loggedInUserRole)) {
+            loggedInUserRole = UserRoles.JUDGE;
         }
 
-        return loggedInUserType != null ? loggedInUserType.name() : "";
+        return loggedInUserRole != null ? loggedInUserRole.name() : "";
     }
 
     private UserDetails getUserDetails(String authorisation) {
@@ -55,9 +62,10 @@ public class UserRoleService {
             .map(RoleAssignmentResponse::getRoleName)
             .collect(Collectors.toSet());
 
-        if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)
-            || roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LEGAL_ADVISER.getRoles()::contains)) {
+        if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)) {
             return UserRoles.JUDGE;
+        } else if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LEGAL_ADVISER.getRoles()::contains)) {
+            return UserRoles.LEGAL_ADVISER;
         } else if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.COURT_ADMIN.getRoles()::contains)) {
             return UserRoles.COURT_ADMIN;
         } else if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
@@ -72,8 +80,10 @@ public class UserRoleService {
     }
 
     private UserRoles getUserRoleFromIdam(UserDetails userDetails) {
-        if (userDetails.getRoles().contains(Roles.JUDGE.getValue()) || userDetails.getRoles().contains(Roles.LEGAL_ADVISER.getValue())) {
+        if (userDetails.getRoles().contains(Roles.JUDGE.getValue())) {
             return UserRoles.JUDGE;
+        } else if (userDetails.getRoles().contains(Roles.LEGAL_ADVISER.getValue())) {
+            return UserRoles.LEGAL_ADVISER;
         } else if (userDetails.getRoles().contains(Roles.COURT_ADMIN.getValue())) {
             return UserRoles.COURT_ADMIN;
         } else if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
