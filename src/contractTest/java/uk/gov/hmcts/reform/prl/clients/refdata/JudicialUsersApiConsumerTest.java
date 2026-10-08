@@ -35,10 +35,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @TestPropertySource(
     properties = {"bundle.api.url=","idam.api.url=localhost:5000","commonData.api.url=http://localhost:8899",
         "fis_hearing.api.url=localhost:5000",
+        "hearing_component.api.feign-url=",
         "refdata.api.url=",
         "courtfinder.api.url=",
         "fees-register.api.url=",
-        "fis_hearing.api.url=",
         "judicialUsers.api.url=http://localhost:8899",
         "locationfinder.api.url=",
         "rd_professional.api.url=",

@@ -70,6 +70,16 @@ java:
           alias: ACRO_SFTP_USER_PASSWORD
         - name: docmosis-api-key
           alias: DOCMOSIS_ACCESS_KEY
+        - name: hmc-user-name
+          alias: HMC_USER_NAME
+        - name: hmc-user-password
+          alias: HMC_USER_PASSWORD
+        - name: ref-user-name
+          alias: REF_USER_NAME
+        - name: hmc-client-secret
+          alias: HMC_CLIENT_SECRET
+        - name: hmc-s2s-secret
+          alias: FIS_IDAM_S2S_AUTH_TOTP_SECRET
   environment:
     PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PAY_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
