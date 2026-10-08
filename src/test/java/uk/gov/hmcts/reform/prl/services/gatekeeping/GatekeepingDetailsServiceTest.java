@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
-import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 
 import java.util.List;
 import java.util.Map;
@@ -34,9 +33,6 @@ public class GatekeepingDetailsServiceTest {
 
     @InjectMocks
     GatekeepingDetailsService gatekeepingDetailsService;
-
-    @Mock
-    RoleAssignmentService roleAssignmentService;
 
     @Mock
     ObjectMapper objectMapper;
