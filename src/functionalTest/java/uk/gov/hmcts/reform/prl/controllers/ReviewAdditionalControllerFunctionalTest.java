@@ -4,7 +4,6 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -72,7 +71,7 @@ public class ReviewAdditionalControllerFunctionalTest {
 
     @Test
     public void givenBodyWithNoMessages_whenAboutToSubmitForSendOrReply() throws Exception {
-        String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST_FOR_REPLY);
+        String requestBody = ResourceLoader.loadJson(REVIEW_ADDITIONAL_APPLICATION_REQUEST_FOR_SEND);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .body(requestBody)
@@ -84,10 +83,9 @@ public class ReviewAdditionalControllerFunctionalTest {
 
     }
 
-    @Disabled
     @Test
     public void givenBodyWithNoMessages_whenSubmittedForSendOrReply() throws Exception {
-        String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST_FOR_REPLY);
+        String requestBody = ResourceLoader.loadJson(REVIEW_ADDITIONAL_APPLICATION_REQUEST_FOR_SEND);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .body(requestBody)
