@@ -138,6 +138,25 @@ public class CitizenCoreCaseDataService {
         return coreCaseDataApi.getCase(authorisation, cosApis2sToken, caseId);
     }
 
+    public boolean hasCitizenAccess(String authorisation, String caseId) {
+        String cosApis2sToken = authTokenGenerator.generate();
+        UserInfo userInfo;
+        try {
+            userInfo = idamClient.getUserInfo(authorisation);
+        } catch (FeignException exception) {
+            log.error("Unable to retrieve citizen information while checking access to case {}", caseId, exception);
+            throw exception;
+        }
+
+        try {
+            readCaseForCitizen(authorisation, cosApis2sToken, userInfo.getUid(), caseId);
+            return true;
+        } catch (FeignException.NotFound | FeignException.Forbidden exception) {
+            log.warn("Citizen {} does not have access to case {}", userInfo.getUid(), caseId);
+            return false;
+        }
+    }
+
     public CaseDetails getCaseForCitizen(String authorisation, String caseId) {
         String cosApis2sToken = authTokenGenerator.generate();
         UserInfo userInfo = idamClient.getUserInfo(authorisation);
@@ -157,19 +176,6 @@ public class CitizenCoreCaseDataService {
             CASE_TYPE,
             caseId
         );
-    }
-
-    public boolean hasCitizenAccess(String authorisation, String caseId) {
-        String cosApis2sToken = authTokenGenerator.generate();
-        UserInfo userInfo = idamClient.getUserInfo(authorisation);
-
-        try {
-            readCaseForCitizen(authorisation, cosApis2sToken, userInfo.getUid(), caseId);
-            return true;
-        } catch (FeignException.NotFound | FeignException.Forbidden exception) {
-            log.warn("Citizen {} does not have access to case {}", userInfo.getUid(), caseId);
-            return false;
-        }
     }
 
     public boolean hasAccess(String authorisation, String caseId) {
