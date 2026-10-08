@@ -11,5 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class DocumentResponse {
     private String status;
+    private FileUploadSuccess success;
     private Document document;
 }

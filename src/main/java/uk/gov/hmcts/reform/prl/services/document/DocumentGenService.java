@@ -25,10 +25,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
-import uk.gov.hmcts.reform.prl.models.documents.CitizenDocumentResponse;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
-import uk.gov.hmcts.reform.prl.models.documents.FileUploadSuccess;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentCategory;
@@ -1560,36 +1558,6 @@ public class DocumentGenService {
                                                                              .documentFileName(stampedDocument.originalDocumentName)
                                                                              .documentCreatedOn(stampedDocument.createdOn)
                                                                              .build()).build();
-
-        } catch (Exception e) {
-            log.error("Error while uploading document .{}", e.getMessage());
-            throw e;
-        }
-    }
-
-    public CitizenDocumentResponse uploadCitizenDocument(String authorization, MultipartFile file) throws IOException {
-        log.info("--- We are in cos uploadCitizenDocument");
-        log.info("--- file given is: {}", file.getResource());
-        try {
-            uk.gov.hmcts.reform.ccd.document.am.model.Document stampedDocument
-                = uploadService.uploadDocument(
-                file.getBytes(),
-                file.getOriginalFilename(),
-                file.getContentType(),
-                authorization
-            );
-            log.info("Stored Doc Detail: " + stampedDocument.toString());
-            return CitizenDocumentResponse.builder()
-                .status("Success")
-                .success(FileUploadSuccess.builder()
-                             .messageHtml(stampedDocument.originalDocumentName)
-                             .messageText(stampedDocument.originalDocumentName).build())
-                .file(Document.builder()
-                          .documentBinaryUrl(stampedDocument.links.binary.href)
-                          .documentUrl(stampedDocument.links.self.href)
-                          .documentFileName(stampedDocument.originalDocumentName)
-                          .documentCreatedOn(stampedDocument.createdOn)
-                          .build()).build();
 
         } catch (Exception e) {
             log.error("Error while uploading document .{}", e.getMessage());

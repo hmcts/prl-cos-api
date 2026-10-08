@@ -42,7 +42,6 @@ import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
-import uk.gov.hmcts.reform.prl.models.documents.CitizenDocumentResponse;
 import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
@@ -358,7 +357,7 @@ public class CaseDocumentController {
         if (!isAuthorized(authorisation, serviceAuthorization)) {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-        CitizenDocumentResponse docResp = documentGenService.uploadCitizenDocument(authorisation, file);
+        DocumentResponse docResp = documentGenService.uploadDocument(authorisation, file);
         return ResponseEntity.ok(docResp);
     }
 
