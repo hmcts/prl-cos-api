@@ -32,6 +32,9 @@ public class CaseDataOtherChildrenDetailsElementsMapper {
                 buildOtherChildrenNotInTheCase(c100RebuildOtherChildrenDetailsElements.getOtherChildrenDetails());
             caseDataBuilder.childrenNotPartInTheCaseYesNo(YesOrNo.Yes);
             caseDataBuilder.childrenNotInTheCase(otherChildrenNotInTheCase);
+        } else {
+            caseDataBuilder.childrenNotPartInTheCaseYesNo(YesOrNo.No);
+            caseDataBuilder.childrenNotInTheCase(null);
         }
     }
 
