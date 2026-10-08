@@ -44,7 +44,6 @@ public class GatekeepingDetailsServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        stringObjectMap.put("isJudgeOrLegalAdviserGatekeeping", SendToGatekeeperTypeEnum.legalAdviser);
         stringObjectMap.put("whoToSendTheCaseToForGatekeeping",
                             WhoToSendToGatekeeperTypeEnum.SEND_TO_A_SPECIFIC_LEGAL_ADVISER);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -64,7 +63,6 @@ public class GatekeepingDetailsServiceTest {
         String[] personalCodes = new String[3];
         personalCodes[0] = "123456";
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        stringObjectMap.put("isJudgeOrLegalAdviserGatekeeping", SendToGatekeeperTypeEnum.judge);
         stringObjectMap.put("whoToSendTheCaseToForGatekeeping", WhoToSendToGatekeeperTypeEnum.SEND_TO_A_SPECIFIC_JUDGE);
         stringObjectMap.put("judgeName", JudicialUser.builder().idamId("123").personalCode("123456").build());
         stringObjectMap.put(JURISDICTION, JURISDICTION);
@@ -100,7 +98,6 @@ public class GatekeepingDetailsServiceTest {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        stringObjectMap.put("isJudgeOrLegalAdviserGatekeeping", SendToGatekeeperTypeEnum.judge);
         stringObjectMap.put("whoToSendTheCaseToForGatekeeping", WhoToSendToGatekeeperTypeEnum.SEND_TO_A_SPECIFIC_JUDGE);
         stringObjectMap.put("judgeName", JudicialUser.builder().idamId(null).personalCode(null).build());
         stringObjectMap.put(JURISDICTION, JURISDICTION);
@@ -118,10 +115,10 @@ public class GatekeepingDetailsServiceTest {
     public void testIdentifyGatekeepingTaskTypeJudgeOrLegalAdviser() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .judgeOrLegalAdviserForGatekeeping(List.of(new JudgeOrLegalAdviserGatekeepingEnum[]{
+            .judgeOrLegalAdviserForGatekeeping(List.of(
                 JudgeOrLegalAdviserGatekeepingEnum.SEND_TO_A_JUDGE,
                 JudgeOrLegalAdviserGatekeepingEnum.SEND_TO_A_LEGAL_ADVISER
-            })).build();
+            )).build();
 
         GatekeepingTaskTypeEnum taskType = gatekeepingDetailsService.identifyGatekeepingTaskType(caseData);
         assertEquals(GatekeepingTaskTypeEnum.JUDGE_OR_LEGAL_ADVISER, taskType);
@@ -131,9 +128,8 @@ public class GatekeepingDetailsServiceTest {
     public void testIdentifyGatekeepingTaskTypeJudge() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .judgeOrLegalAdviserForGatekeeping(List.of(new JudgeOrLegalAdviserGatekeepingEnum[]{
-                JudgeOrLegalAdviserGatekeepingEnum.SEND_TO_A_JUDGE
-            })).build();
+            .judgeOrLegalAdviserForGatekeeping(List.of(JudgeOrLegalAdviserGatekeepingEnum.SEND_TO_A_JUDGE))
+            .build();
 
         GatekeepingTaskTypeEnum taskType = gatekeepingDetailsService.identifyGatekeepingTaskType(caseData);
         assertEquals(GatekeepingTaskTypeEnum.JUDGE, taskType);
@@ -143,9 +139,8 @@ public class GatekeepingDetailsServiceTest {
     public void testIdentifyGatekeepingTaskTypeLegalAdviser() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .judgeOrLegalAdviserForGatekeeping(List.of(new JudgeOrLegalAdviserGatekeepingEnum[]{
-                JudgeOrLegalAdviserGatekeepingEnum.SEND_TO_A_LEGAL_ADVISER
-            })).build();
+            .judgeOrLegalAdviserForGatekeeping(List.of(JudgeOrLegalAdviserGatekeepingEnum.SEND_TO_A_LEGAL_ADVISER))
+            .build();
 
         GatekeepingTaskTypeEnum taskType = gatekeepingDetailsService.identifyGatekeepingTaskType(caseData);
         assertEquals(GatekeepingTaskTypeEnum.LEGAL_ADVISER, taskType);
