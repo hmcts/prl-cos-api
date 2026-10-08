@@ -1566,6 +1566,8 @@ public class DocumentGenService {
     }
 
     public DocumentResponse deleteDocument(String authorization, String documentId) {
+        log.info("--- We are in cos deleteDocument");
+        log.info("--- documentId given is: {}", documentId);
         try {
             uploadService.deleteDocument(
                 authorization,

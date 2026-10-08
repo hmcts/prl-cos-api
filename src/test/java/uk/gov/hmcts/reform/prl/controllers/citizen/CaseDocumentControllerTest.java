@@ -45,7 +45,7 @@ import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenDocumentService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
-//import java.io.IOException;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -257,27 +257,27 @@ class CaseDocumentControllerTest {
         );
     }
 
-    //    @Test
-    //    void testDocumentUpload() throws IOException {
-    //        //Given
-    //        MultipartFile mockFile = mock(MultipartFile.class);
-    //        Document mockDocument = Document.builder().build();
-    //        DocumentResponse documentResponse = DocumentResponse
-    //            .builder()
-    //            .status("SUCCESS")
-    //            .document(mockDocument)
-    //            .build();
-    //
-    //        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Optional.of(userInfo));
-    //        when(authorisationService.authoriseService(S2S_TOKEN)).thenReturn(Boolean.TRUE);
-    //        when(documentGenService.uploadDocument(AUTH_TOKEN, mockFile)).thenReturn(documentResponse);
-    //
-    //        //When
-    //        ResponseEntity<?> response = caseDocumentController
-    //            .uploadCitizenDocument(AUTH_TOKEN, S2S_TOKEN, mockFile);
-    //        //Then
-    //        assertEquals(documentResponse, response.getBody());
-    //    }
+    @Test
+    void testDocumentUpload() throws IOException {
+        //Given
+        MultipartFile mockFile = mock(MultipartFile.class);
+        Document mockDocument = Document.builder().build();
+        DocumentResponse documentResponse = DocumentResponse
+            .builder()
+            .status("SUCCESS")
+            .document(mockDocument)
+            .build();
+
+        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Optional.of(userInfo));
+        when(authorisationService.authoriseService(S2S_TOKEN)).thenReturn(Boolean.TRUE);
+        when(documentGenService.uploadDocument(AUTH_TOKEN, mockFile)).thenReturn(documentResponse);
+
+        //When
+        ResponseEntity<?> response = caseDocumentController
+            .uploadCitizenDocument(AUTH_TOKEN, S2S_TOKEN, mockFile);
+        //Then
+        assertEquals(documentResponse, response.getBody());
+    }
 
     @Test
     void testGenerateCitizenStatementDocumentt() throws Exception {
