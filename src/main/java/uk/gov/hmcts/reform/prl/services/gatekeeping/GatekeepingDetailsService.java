@@ -65,7 +65,7 @@ public class GatekeepingDetailsService {
      * @param caseData The updated case data.
      * @return The gatekeeping task type as an Enum value.
      */
-    public GatekeepingTaskTypeEnum identifyGatekeepingTaskType (CaseData caseData) {
+    public GatekeepingTaskTypeEnum identifyGatekeepingTaskType(CaseData caseData) {
 
         if (ObjectUtils.isEmpty(caseData.getJudgeOrLegalAdviserForGatekeeping())
             || (caseData.getJudgeOrLegalAdviserForGatekeeping()
