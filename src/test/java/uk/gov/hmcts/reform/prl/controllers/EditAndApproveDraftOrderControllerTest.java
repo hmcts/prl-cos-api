@@ -626,6 +626,8 @@ class EditAndApproveDraftOrderControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
             .populateJudgeOrAdminDraftOrderCustomFields(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
+        verify(draftAnOrderService).updateCustomFieldsWithApplicantRespondentDetails(any(), any(), any(), any());
+        verify(manageOrderService).updatePrefilledOrderFields(any(), any());
         assertNotNull(response);
     }
 
@@ -858,6 +860,7 @@ class EditAndApproveDraftOrderControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
             .populateJudgeOrAdminDraftOrderCustomFields(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
+        verify(manageOrderService).updatePrefilledOrderFields(any(), any());
         assertNotNull(response);
     }
 
