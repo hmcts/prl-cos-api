@@ -476,7 +476,7 @@ public class CallbackController {
             caseData = caseData.toBuilder().gatekeepingDetails(gatekeepingDetails).build();
 
             caseDataUpdated.put("gatekeepingDetails", gatekeepingDetails);
-            caseDataUpdated.put("gateKeepingTaskType", gatekeepingDetailsService.identifyGatekeepingTaskType(caseData));
+            caseDataUpdated.put("gatekeepingTaskType", gatekeepingDetailsService.identifyGatekeepingTaskType(caseData));
 
             List<Element<PartyDetails>> respondents = C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())
                 ? nullSafeList(caseData.getRespondents())
