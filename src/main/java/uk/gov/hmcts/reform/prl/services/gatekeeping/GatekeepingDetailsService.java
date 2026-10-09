@@ -28,7 +28,6 @@ import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 public class GatekeepingDetailsService {
 
     public static final String WHO_TO_SEND_TO_GATEKEEPER = "whoToSendTheCaseToForGatekeeping";
-    private static final String JUDGE_OR_LEGAL_ADVISER_GATEKEEPING = "judgeOrLegalAdviserForGatekeeping";
 
     public GatekeepingDetails getGatekeepingDetails(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList) {
         GatekeepingDetails.GatekeepingDetailsBuilder gatekeepingDetailsBuilder = GatekeepingDetails.builder();
