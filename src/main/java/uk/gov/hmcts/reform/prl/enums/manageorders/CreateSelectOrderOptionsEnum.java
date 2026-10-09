@@ -47,30 +47,34 @@ public enum CreateSelectOrderOptionsEnum {
     @JsonProperty("appointmentOfGuardian")
     appointmentOfGuardian("appointmentOfGuardian", "Appointment of a guardian (C47A)","10",
         "Penodi gwarcheidwad (C47A)"),
+    @JsonProperty("noticeOfHearingParties")
+    noticeOfHearingParties("noticeOfHearingParties", "Notice of Hearing (CA)", "11", "Hysbysiad o Wrandawiad (CA)"),
     @JsonProperty("nonMolestation")
-    nonMolestation("nonMolestation", "Non-molestation order (FL404A)","11",
+    nonMolestation("nonMolestation", "Non-molestation order (FL404A)","12",
         "Gorchymyn rhag molestu (FL404A)"),
     @JsonProperty("occupation")
-    occupation("occupation", "Occupation order (FL404)","12",
+    occupation("occupation", "Occupation order (FL404)","13",
         "Gorchymyn Anheddu (FL404)"),
     @JsonProperty("powerOfArrest")
-    powerOfArrest("powerOfArrest", "Power of arrest (FL406)","13",
+    powerOfArrest("powerOfArrest", "Power of arrest (FL406)","14",
         "Pŵer i arestio (FL406)"),
     @JsonProperty("amendDischargedVaried")
-    amendDischargedVaried("amendDischargedVaried", "Amended, discharged or varied order (FL404B)","14",
+    amendDischargedVaried("amendDischargedVaried", "Amended, discharged or varied order (FL404B)","15",
         "Gorchymyn sydd wedi ei ddiwygio, ei ryddhau neu ei amrywio (FL404B)"),
     @JsonProperty("blank")
-    blank("blank", "Blank order (FL404B)","15",
+    blank("blank", "Blank order (FL404B)","16",
         "Gorchymyn gwag (FL404B)"),
     @JsonProperty("generalForm")
-    generalForm("generalForm", "General form of undertaking (N117)","16",
+    generalForm("generalForm", "General form of undertaking (N117)","17",
         "Ffurfeln gyffredinol am ymgymeriad (N117)"),
     @JsonProperty("noticeOfProceedings")
-    noticeOfProceedings("noticeOfProceedings", "Notice of proceedings (FL402)","17",
+    noticeOfProceedings("noticeOfProceedings", "Notice of proceedings (FL402)","18",
         "Rhybudd o achos (FL402)"),
     @JsonProperty("other")
-    other("other", "Other (upload an order)","18",
-        "Arall (uwchlwythwch orchymyn)");
+    other("other", "Other (upload an order)","19",
+        "Arall (uwchlwythwch orchymyn)"),
+    @JsonProperty("noticeOfHearing")
+    noticeOfHearing("noticeOfHearing", "Notice of Hearing (DA)", "20", "Hysbysiad o Wrandawiad (DA)");
 
     private final String id;
     private final String displayedValue;

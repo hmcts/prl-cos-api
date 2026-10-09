@@ -208,8 +208,6 @@ public class NoticeOfChangePartiesService {
         return nocAnswerUpdates;
     }
 
-
-
     public void generateC100NocDetails(CaseData caseData, SolicitorRole.Representing representing,
                                        NoticeOfChangeAnswersPopulationStrategy strategy, Map<String, Object> data) {
 
@@ -239,10 +237,10 @@ public class NoticeOfChangePartiesService {
             }
         }
 
-        generateRequiredOrgPoliciesForNoc(representing, data);
+        generateRequiredFlOrgPoliciesForNoc(data);
     }
 
-    public void generateFl401NocDetails(CaseData caseData, SolicitorRole.Representing representing,
+    private void generateFl401NocDetails(CaseData caseData, SolicitorRole.Representing representing,
                                         NoticeOfChangeAnswersPopulationStrategy strategy, Map<String, Object> data) {
         PartyDetails daElements = representing.getDaTarget().apply(caseData);
 
@@ -718,6 +716,23 @@ public class NoticeOfChangePartiesService {
                     solicitorRole, PartyDetails.builder().build());
                 data.put(solicitorRole.getRepresenting().getPolicyFieldTemplate(), organisationPolicy);
             }
+        }
+    }
+
+    private void generateRequiredFlOrgPoliciesForNoc(Map<String, Object> data) {
+        List<SolicitorRole> solicitorRoles = new ArrayList<>(SolicitorRole.matchingRoles(DARESPONDENT));
+        // Code commented out due to FPVTL-1115
+        // Error reported was that the applicantOrganisationPolicy was being cleared incorrectly
+        // solicitorRoles.addAll(SolicitorRole.matchingRoles(DAAPPLICANT));
+        for (SolicitorRole solicitorRole : solicitorRoles) {
+            OrganisationPolicy organisationPolicy = policyConverter.caGenerate(
+                solicitorRole, Optional.empty());
+            data.put(
+                String.format(
+                    solicitorRole.getRepresenting().getPolicyFieldTemplate(),
+                    (solicitorRole.getIndex() + 1)
+                ), organisationPolicy
+            );
         }
     }
 
