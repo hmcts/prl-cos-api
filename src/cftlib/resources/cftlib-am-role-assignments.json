@@ -1304,6 +1304,94 @@
     "overrideAll": true
   },
   {
+    "email": "prl_ctscadmin22_swnsea@justice.gov.uk",
+    "id": "b8ae631d-b302-4a2b-a30a-14625a782ebf",
+    "roleAssignments": [
+      {
+        "roleType": "ORGANISATION",
+        "roleName": "ctsc",
+        "grantType": "STANDARD",
+        "roleCategory": "CTSC",
+        "classification": "PUBLIC",
+        "readOnly": false,
+        "attributes": {
+          "workTypes": "routine_work,hearing_work,applications",
+          "substantive": "Y",
+          "jurisdiction": "PRIVATELAW",
+          "primaryLocation": "234946"
+        },
+        "authorisations": [
+          "SKILL:ABA5:CHECKAPPLICATIONC100",
+          "SKILL:ABA5:SERVEAPPLICATIONC100",
+          "SKILL:ABA5:HEARINGMANAGEMENTC100",
+          "SKILL:ABA5:ORDERMANAGEMENTC100",
+          "SKILL:ABA5:REVIEWCORRESPONDENCEC100"
+        ]
+      },
+      {
+        "roleType": "ORGANISATION",
+        "roleName": "hearing-manager",
+        "grantType": "STANDARD",
+        "roleCategory": "CTSC",
+        "classification": "PUBLIC",
+        "readOnly": false,
+        "attributes": {
+          "substantive": "N",
+          "jurisdiction": "PRIVATELAW",
+          "primaryLocation": "234946"
+        },
+        "authorisations": []
+      },
+      {
+        "roleType": "ORGANISATION",
+        "roleName": "hearing-viewer",
+        "grantType": "STANDARD",
+        "roleCategory": "CTSC",
+        "classification": "PUBLIC",
+        "readOnly": false,
+        "attributes": {
+          "substantive": "N",
+          "jurisdiction": "PRIVATELAW",
+          "primaryLocation": "234946"
+        },
+        "authorisations": []
+      },
+      {
+        "roleType": "ORGANISATION",
+        "roleName": "hmcts-ctsc",
+        "grantType": "BASIC",
+        "roleCategory": "CTSC",
+        "classification": "PRIVATE",
+        "readOnly": true,
+        "attributes": {
+          "substantive": "N"
+        },
+        "authorisations": []
+      },
+      {
+        "roleType": "ORGANISATION",
+        "roleName": "case-allocator",
+        "grantType": "STANDARD",
+        "roleCategory": "CTSC",
+        "classification": "PUBLIC",
+        "readOnly": false,
+        "attributes": {
+          "substantive": "N",
+          "jurisdiction": "PRIVATELAW",
+          "primaryLocation": "234946"
+        },
+        "authorisations": [
+          "SKILL:ABA5:CHECKAPPLICATIONC100",
+          "SKILL:ABA5:SERVEAPPLICATIONC100",
+          "SKILL:ABA5:HEARINGMANAGEMENTC100",
+          "SKILL:ABA5:ORDERMANAGEMENTC100",
+          "SKILL:ABA5:REVIEWCORRESPONDENCEC100"
+        ]
+      }
+    ],
+    "overrideAll": true
+  },
+  {
     "email": "prl_case_manager_swansea@hmcts.net",
     "id": "14dd3aff-02da-46e6-acb3-a2c8756b0bd3",
     "roleAssignments": [
