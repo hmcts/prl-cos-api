@@ -1322,7 +1322,10 @@
         },
         "authorisations": [
           "SKILL:ABA5:CHECKAPPLICATIONC100",
-          "SKILL:ABA5:CHECKAPPLICATIONFL401"
+          "SKILL:ABA5:SERVEAPPLICATIONC100",
+          "SKILL:ABA5:HEARINGMANAGEMENTC100",
+          "SKILL:ABA5:ORDERMANAGEMENTC100",
+          "SKILL:ABA5:REVIEWCORRESPONDENCEC100"
         ]
       },
       {
@@ -1364,6 +1367,26 @@
           "substantive": "N"
         },
         "authorisations": []
+      },
+      {
+        "roleType": "ORGANISATION",
+        "roleName": "case-allocator",
+        "grantType": "STANDARD",
+        "roleCategory": "CTSC",
+        "classification": "PUBLIC",
+        "readOnly": false,
+        "attributes": {
+          "substantive": "N",
+          "jurisdiction": "PRIVATELAW",
+          "primaryLocation": "234946"
+        },
+        "authorisations": [
+          "SKILL:ABA5:CHECKAPPLICATIONC100",
+          "SKILL:ABA5:SERVEAPPLICATIONC100",
+          "SKILL:ABA5:HEARINGMANAGEMENTC100",
+          "SKILL:ABA5:ORDERMANAGEMENTC100",
+          "SKILL:ABA5:REVIEWCORRESPONDENCEC100"
+        ]
       }
     ],
     "overrideAll": true
