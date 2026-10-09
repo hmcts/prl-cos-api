@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.ManageOrderFieldsEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
+import uk.gov.hmcts.reform.prl.enums.PenalNoticeOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.ServeOrderFieldsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -170,6 +171,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NAME_OF_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENAL_NOTICE_RTF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
@@ -202,6 +204,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum.noCheck;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.blankOrderOrDirections;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.other;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.standardDirectionsOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum.draftAnOrder;
@@ -264,6 +267,9 @@ public class ManageOrderService {
         + " people's address is given.";
     public static final String INVALID_EMAIL_ADDRESS_ERROR = "Invalid email address. Please check the email address entered. "
         + "To send to multiple recipients please use the add new button.";
+    public static final String STATIC_PENAL_NOTICE_RTF = "<STRONG>IMPORTANT WARNING TO [NAME] "
+        + "If you [NAME] of [ADDRESS] disobey [this order] / [paragraph[s] [insert paragraph number(s)] of this order] "
+        + "you may be held to be in contempt of court and may be imprisoned, fined or have your assets seized.</STRONG>";
 
     public static final String EMAIL = "email";
     public static final String POST = "post";
@@ -643,6 +649,58 @@ public class ManageOrderService {
     @Value("${hearing_component.hearingStatusesToFilter}")
     private String hearingStatusesToFilter;
 
+    // --------------------Notice of Hearing (CA) Start ----------------------------
+    @Value("${document.templates.common.prl_notice_of_hearing_c100_draft_template}")
+    protected String noticeOfHearingC100DraftTemplate;
+
+    @Value("${document.templates.common.prl_notice_of_hearing_c100_draft_filename}")
+    protected String noticeOfHearingC100DraftFile;
+
+    @Value("${document.templates.common.prl_notice_of_hearing_c100_template}")
+    protected String noticeOfHearingC100Template;
+
+    @Value("${document.templates.common.prl_notice_of_hearing_c100_filename}")
+    protected String noticeOfHearingC100File;
+
+    @Value("${document.templates.common.prl_notice_of_hearing_c100_welsh_draft_template}")
+    protected String noticeOfHearingC100WelshDraftTemplate;
+
+    @Value("${document.templates.common.prl_notice_of_hearing_c100_welsh_draft_filename}")
+    protected String noticeOfHearingC100WelshDraftFile;
+
+    @Value("${document.templates.common.prl_notice_of_hearing_c100_welsh_template}")
+    protected String noticeOfHearingC100WelshTemplate;
+
+    @Value("${document.templates.common.prl_notice_of_hearing_c100_welsh_filename}")
+    protected String noticeOfHearingC100WelshFile;
+    // --------------------Notice of Hearing (CA) End ----------------------------
+
+    // --------------------Notice of Hearing (DA) Start ----------------------------
+    @Value("${document.templates.common.prl_notice_of_hearing_fl402_draft_template}")
+    protected String noticeOfHearingFl402DraftTemplate;
+
+    @Value("${document.templates.common.prl_notice_of_hearing_fl402_draft_filename}")
+    protected String noticeOfHearingFl402DraftFile;
+
+    @Value("${document.templates.common.prl_notice_of_hearing_fl402_final_template}")
+    protected String noticeOfHearingFl402FinalTemplate;
+
+    @Value("${document.templates.common.prl_notice_of_hearing_fl402_final_filename}")
+    protected String noticeOfHearingFl402FinalFile;
+
+    @Value("${document.templates.common.prl_notice_of_hearing_fl402_welsh_draft_template}")
+    protected String noticeOfHearingFl402WelshDraftTemplate;
+
+    @Value("${document.templates.common.prl_notice_of_hearing_fl402_welsh_draft_filename}")
+    protected String noticeOfHearingFl402WelshDraftFile;
+
+    @Value("${document.templates.common.prl_notice_of_hearing_fl402_welsh_final_template}")
+    protected String noticeOfHearingFl402WelshFinalTemplate;
+
+    @Value("${document.templates.common.prl_notice_of_hearing_fl402_welsh_final_filename}")
+    protected String noticeOfHearingFl402WelshFinalFile;
+    // --------------------Notice of Hearing (DA) End ----------------------------
+
     private final DocumentLanguageService documentLanguageService;
 
     private final DgsService dgsService;
@@ -658,6 +716,7 @@ public class ManageOrderService {
     private final ElementUtils elementUtils;
 
     private final RefDataUserService refDataUserService;
+    private final PopulateRichTextFieldsService populateRichTextFieldsService;
     private static final String BOLD_BEGIN = "<span class='heading-h3'>";
     private static final String BOLD_END = "</span>";
 
@@ -981,6 +1040,28 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, nopNonPartiesWelshDraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, nopNonPartiesWelshTemplate);
                 fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, nopNonPartiesWelshFile);
+                break;
+            case noticeOfHearing:
+                // Notice of Hearing (DA)
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, noticeOfHearingFl402DraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, noticeOfHearingFl402DraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, noticeOfHearingFl402FinalTemplate);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, noticeOfHearingFl402FinalFile);
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, noticeOfHearingFl402WelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, noticeOfHearingFl402WelshDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, noticeOfHearingFl402WelshFinalTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, noticeOfHearingFl402WelshFinalFile);
+                break;
+            case noticeOfHearingParties:
+                // Notice of Hearing (CA)
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, noticeOfHearingC100DraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, noticeOfHearingC100DraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, noticeOfHearingC100Template);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, noticeOfHearingC100File);
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, noticeOfHearingC100WelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, noticeOfHearingC100WelshDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, noticeOfHearingC100WelshTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, noticeOfHearingC100WelshFile);
                 break;
             default:
                 break;
@@ -1432,11 +1513,21 @@ public class ManageOrderService {
             .judgeOrMagistratesLastName(caseData.getJudgeOrMagistratesLastName())
             .justiceLegalAdviserFullName(caseData.getJusticeLegalAdviserFullName())
             .magistrateLastName(caseData.getMagistrateLastName())
-            .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
+            .partiesAndRepresentation(caseData.getManageOrders().getPartiesAndRepresentation())
+            .recitalsOrPreamble(getRecitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble(),
+                                                      caseData.getManageOrders().getRecitalsOrPreambleRtf()))
+            .recitalsOrPreambleRtf(getRecitalsOrPreambleForRtf(caseData.getManageOrders().getRecitalsOrPreamble(),
+                                                               caseData.getManageOrders().getRecitalsOrPreambleRtf()))
             .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
             .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
             .childOption(getChildOption(caseData))
-            .orderDirections(caseData.getManageOrders().getOrderDirections())
+            .orderDirections(getOrderDirections(caseData.getManageOrders().getOrderDirections(),
+                                                   caseData.getManageOrders().getOrderDirectionsRtf()))
+            .orderDirectionsRtf(getOrderDirectionsForRtf(caseData.getManageOrders().getOrderDirections(),
+                                                         caseData.getManageOrders().getOrderDirectionsRtf()))
+            .scheduleToOrderRtf(caseData.getManageOrders().getScheduleToOrderRtf())
+            .penalNoticeNeeded(caseData.getManageOrders().getPenalNoticeNeeded())
+            .penalNoticeRtf(getPenalNotice(caseData.getManageOrders().getPenalNoticeNeeded(), caseData.getManageOrders().getPenalNoticeRtf()))
             .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
             .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
             .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
@@ -1487,6 +1578,52 @@ public class ManageOrderService {
             .isOrderCreatedBySolicitor(UserRoles.SOLICITOR.name().equals(loggedInUserType) ? Yes : No)
             .judgeNotes(caseData.getJudgeDirectionsToAdmin())
             .build();
+    }
+
+    public String getPenalNotice(List<PenalNoticeOptionEnum> penalNoticeNeeded, String penalNoticeRtf) {
+        if (penalNoticeNeeded != null && !penalNoticeNeeded.isEmpty()
+            && penalNoticeNeeded.get(0).getDisplayedValue().equals("Yes")) {
+            return penalNoticeRtf;
+        }
+        return "";
+    }
+
+    private String getRecitalsOrPreamble(String recitalsOrPreamble, String recitalsOrPreambleRtf) {
+        if (StringUtils.isNotBlank(recitalsOrPreambleRtf)) {
+            return "";
+        }
+        return recitalsOrPreamble;
+    }
+
+    private String getRecitalsOrPreambleForRtf(String recitalsOrPreamble, String recitalsOrPreambleRtf) {
+        if (StringUtils.isNotBlank(recitalsOrPreamble)) {
+            return populateRichTextFieldsService.populateRichTextFieldAsParagraph(recitalsOrPreamble);
+        }
+        return recitalsOrPreambleRtf;
+    }
+
+    private String getOrderDirections(String orderDirections, String orderDirectionsRtf) {
+        if (StringUtils.isNotBlank(orderDirectionsRtf)) {
+            return "";
+        }
+        return orderDirections;
+    }
+
+    private String getOrderDirectionsForRtf(String orderDirections, String orderDirectionsRtf) {
+        if (StringUtils.isNotBlank(orderDirections)) {
+            return populateRichTextFieldsService.populateRichTextFieldAsParagraph(orderDirections);
+        }
+        return orderDirectionsRtf;
+    }
+
+    public void updatePrefilledOrderFields(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        if (caseDataUpdated.get(PENAL_NOTICE_RTF) == null
+            || StringUtils.isBlank(caseDataUpdated.get(PENAL_NOTICE_RTF).toString())) {
+            if (blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())
+                ||  childArrangementsSpecificProhibitedOrder.equals(caseData.getCreateSelectOrderOptions())) {
+                caseDataUpdated.put(PENAL_NOTICE_RTF, ManageOrderService.STATIC_PENAL_NOTICE_RTF);
+            }
+        }
     }
 
     public DynamicMultiSelectList getChildOption(CaseData caseData) {
