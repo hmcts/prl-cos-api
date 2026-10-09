@@ -68,7 +68,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamPolicyUpgradeDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
-import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
@@ -93,7 +92,6 @@ import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
-import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
@@ -207,9 +205,6 @@ public class CallbackControllerTest {
 
     @Mock
     private MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
-
-    @Mock
-    RefDataUserService refDataUserService;
 
     @Mock
     AmendCourtService amendCourtService;
@@ -2492,8 +2487,6 @@ public class CallbackControllerTest {
         stringObjectMap.put("isJudgeOrLegalAdviserGatekeeping", SendToGatekeeperTypeEnum.judge);
         stringObjectMap.put("judgeName", JudicialUser.builder().idamId("123").personalCode("123456").build());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder().ccdServiceName(null)
-                                                              .personalCode(personalCodes).build())).thenReturn(apiResponseList);
         GatekeepingDetails gatekeepingDetails = GatekeepingDetails.builder()
             .isSpecificGateKeeperNeeded(Yes)
             .isJudgeOrLegalAdviserGatekeeping(SendToGatekeeperTypeEnum.judge)
@@ -2502,10 +2495,11 @@ public class CallbackControllerTest {
                            .personalCode("testCode")
                            .build())
             .build();
-        when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null,
-            refDataUserService)).thenReturn(gatekeepingDetails);
+        when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null))
+            .thenReturn(gatekeepingDetails);
         Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
-        AboutToStartOrSubmitCallbackResponse response = callbackController.sendToGatekeeper(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = callbackController
+            .sendToGatekeeper(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         assertEquals(SendToGatekeeperTypeEnum.judge,gatekeepingDetails.getIsJudgeOrLegalAdviserGatekeeping());
         assertEquals(gatekeepingDetails,response.getData().get("gatekeepingDetails"));
 
@@ -2588,8 +2582,6 @@ public class CallbackControllerTest {
         apiResponseList.add(JudicialUsersApiResponse.builder().personalCode("123456").emailId("test@Email.com").surname("testSurname").build());
         stringObjectMap.put("judgeName", JudicialUser.builder().idamId("123").personalCode("123456").build());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder().ccdServiceName(null)
-            .personalCode(personalCodes).build())).thenReturn(apiResponseList);
         GatekeepingDetails gatekeepingDetails = GatekeepingDetails.builder()
             .isSpecificGateKeeperNeeded(Yes)
             .judgeName(JudicialUser.builder()
@@ -2597,10 +2589,11 @@ public class CallbackControllerTest {
                 .personalCode("testCode")
                 .build())
             .build();
-        when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null,
-            refDataUserService)).thenReturn(gatekeepingDetails);
+        when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null))
+            .thenReturn(gatekeepingDetails);
         Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
-        AboutToStartOrSubmitCallbackResponse response = callbackController.sendToGatekeeper(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = callbackController
+            .sendToGatekeeper(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         assertEquals(gatekeepingDetails,response.getData().get("gatekeepingDetails"));
 
     }
@@ -2683,16 +2676,15 @@ public class CallbackControllerTest {
         stringObjectMap.put("isJudgeOrLegalAdviserGatekeeping", SendToGatekeeperTypeEnum.judge);
         stringObjectMap.put("judgeName", JudicialUser.builder().idamId("123").personalCode("123456").build());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder().ccdServiceName(null)
-            .personalCode(personalCodes).build())).thenReturn(apiResponseList);
         GatekeepingDetails gatekeepingDetails = GatekeepingDetails.builder()
             .isSpecificGateKeeperNeeded(Yes)
             .isJudgeOrLegalAdviserGatekeeping(SendToGatekeeperTypeEnum.judge)
             .build();
-        when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null,
-            refDataUserService)).thenReturn(gatekeepingDetails);
+        when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null))
+            .thenReturn(gatekeepingDetails);
         Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
-        AboutToStartOrSubmitCallbackResponse response = callbackController.sendToGatekeeper(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = callbackController
+            .sendToGatekeeper(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         assertEquals(SendToGatekeeperTypeEnum.judge,gatekeepingDetails.getIsJudgeOrLegalAdviserGatekeeping());
         assertEquals(gatekeepingDetails,response.getData().get("gatekeepingDetails"));
 
@@ -2774,8 +2766,6 @@ public class CallbackControllerTest {
         stringObjectMap.put("isJudgeOrLegalAdviserGatekeeping", SendToGatekeeperTypeEnum.judge);
         stringObjectMap.put("judgeName", JudicialUser.builder().idamId("123").personalCode("123456").build());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder().ccdServiceName(null)
-            .personalCode(personalCodes).build())).thenReturn(apiResponseList);
         DynamicList legalAdviserList = DynamicList.builder().value(DynamicListElement.builder()
             .code("test1(test1@test.com)").label("test1(test1@test.com)").build()).build();
         GatekeepingDetails gatekeepingDetails = GatekeepingDetails.builder()
@@ -2783,10 +2773,11 @@ public class CallbackControllerTest {
             .legalAdviserList(legalAdviserList)
             .isJudgeOrLegalAdviserGatekeeping(SendToGatekeeperTypeEnum.judge)
             .build();
-        when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null,
-            refDataUserService)).thenReturn(gatekeepingDetails);
+        when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null))
+            .thenReturn(gatekeepingDetails);
         Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
-        AboutToStartOrSubmitCallbackResponse response = callbackController.sendToGatekeeper(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = callbackController
+            .sendToGatekeeper(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         assertEquals(SendToGatekeeperTypeEnum.judge,gatekeepingDetails.getIsJudgeOrLegalAdviserGatekeeping());
         assertEquals(gatekeepingDetails,response.getData().get("gatekeepingDetails"));
 
