@@ -25,9 +25,12 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CafcassCaseDataHelperTest {
@@ -50,6 +53,20 @@ class CafcassCaseDataHelperTest {
         );
         lenient().when(systemUserService.getSysUserToken()).thenReturn("authorisation");
         lenient().when(hearingService.getHearingsForAllCases(anyString(), anyMap())).thenReturn(Collections.emptyList());
+    }
+
+    @Test
+    void shouldReturnTrueWhenExceptionCaught() {
+        CafCassFilter cafCassFilter = mock(CafCassFilter.class);
+        cafcassCaseDataHelper = new CafcassCaseDataHelper(
+            cafCassFilter,
+            hearingService,
+            systemUserService,
+            null
+        );
+        when(cafCassFilter.filterNonValueList(anyList())).thenThrow(new RuntimeException("Test exception"));
+
+        assertTrue(cafcassCaseDataHelper.hasCafcassCaseDataChanged(mock(CaseDetails.class), mock(CaseDetails.class)));
     }
 
     @Test
