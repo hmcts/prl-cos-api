@@ -1541,6 +1541,8 @@ public class DocumentGenService {
     }
 
     public DocumentResponse uploadDocument(String authorization, MultipartFile file) throws IOException {
+        log.info("--- We are in cos uploadDocument");
+        log.info("--- file given is: {}", file.getResource());
         try {
             uk.gov.hmcts.reform.ccd.document.am.model.Document stampedDocument
                 = uploadService.uploadDocument(
@@ -1564,6 +1566,8 @@ public class DocumentGenService {
     }
 
     public DocumentResponse deleteDocument(String authorization, String documentId) {
+        log.info("--- We are in cos deleteDocument");
+        log.info("--- documentId given is: {}", documentId);
         try {
             uploadService.deleteDocument(
                 authorization,
