@@ -161,17 +161,28 @@ public class CafcassCaseDataHelper {
     }
 
     public boolean hasCafcassCaseDataChanged(CaseDetails caseDetails, CaseDetails caseDetailsBefore, String eventId) {
-        if (eventId != null && EVENT_SPECIFIC_SOURCE_FIELDS.containsKey(eventId)) {
-            return !Objects.equals(
-                normaliseEventSpecificSourceFields(caseDetails, eventId),
-                normaliseEventSpecificSourceFields(caseDetailsBefore, eventId)
-            );
-        }
+        try {
+            if (eventId != null && EVENT_SPECIFIC_SOURCE_FIELDS.containsKey(eventId)) {
+                return !Objects.equals(
+                    normaliseEventSpecificSourceFields(caseDetails, eventId),
+                    normaliseEventSpecificSourceFields(caseDetailsBefore, eventId)
+                );
+            }
 
-        return !Objects.equals(
-            normaliseForComparison(prepareForComparison(caseDetails), eventId),
-            normaliseForComparison(prepareForComparison(caseDetailsBefore), eventId)
-        );
+            return !Objects.equals(
+                normaliseForComparison(prepareForComparison(caseDetails), eventId),
+                normaliseForComparison(prepareForComparison(caseDetailsBefore), eventId)
+            );
+        } catch (Exception e) {
+            log.error(
+                "Error while comparing Cafcass case data for case: {} and eventId: {}",
+                caseDetails.getId(),
+                eventId,
+                e
+            );
+
+            return true;
+        }
     }
 
     private Map<String, Object> normaliseEventSpecificSourceFields(CaseDetails caseDetails, String eventId) {
