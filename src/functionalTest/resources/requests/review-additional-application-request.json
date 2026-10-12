@@ -103,24 +103,50 @@
         }
       },
       "respondToMessage": "Yes",
-      "openMessages": [{
+      "messages": [{
         "id": "559c3c44-a2fc-475d-9822-42747c29469c",
         "value": {
-          "senderEmail": "sender@email.com",
-          "recipientEmail": "recipient@email.com",
-          "messageContent": "testContet",
-          "messageUrgency": "testUrgnecy",
-          "messageSubject": "testSubject",
-          "sendReplyJudgeName": {
-            "idamId": "testIdamId"
-          },
           "status": "OPEN",
-          "recipientEmailAddresses": "fprl_caseworker_solicitor@mailinator.com",
+          "senderName": "Sender",
+          "senderRole": "Court admin",
+          "senderEmail": "sender@email.com",
           "updatedTime": "2022-12-12T12:12:12.000000",
-          "latestMessage": "latestMessage"
+          "hearingsLink": null,
+          "messageAbout": "OTHER",
+          "messageContent": "testContet",
+          "messageHistory": null,
+          "messageSubject": "testSubject",
+          "messageIdentifier": "2a19a28c-7b8e-45d5-89a7-b60432f6b039",
+          "internalOrExternalSentTo": "fprl_caseworker_solicitor@mailinator.com",
+          "recipientEmailAddresses": "fprl_caseworker_solicitor@mailinator.com",
+          "otherPartiesEmailAddress": null,
+          "selectedApplicationValue": null,
+          "internalOrExternalMessage": "EXTERNAL",
+          "selectedFutureHearingCode": null,
+          "sendMessageToOtherParties": null,
+          "externalMessageWhoToSendTo": {
+            "value": [],
+            "list_items": [
+              {
+                "code": "7a4243bf-bb95-43ee-910a-5a6317a8619f",
+                "label": "App name (Applicant 1)"
+              },
+              {
+                "code": "2223860f-d652-460c-bccd-3e677cae9c59",
+                "label": "Res name (Respondent 1)"
+              }
+            ]
+          },
+          "internalMessageWhoToSendTo": null,
+          "selectedFutureHearingValue": null,
+          "judicialOrMagistrateTierCode": null,
+          "judicialOrMagistrateTierList": null,
+          "judicialOrMagistrateTierValue": null,
+          "selectedSubmittedDocumentCode": null,
+          "selectedSubmittedDocumentValue": null
         }
       }],
-      "messageObject": {
+      "sendMessageObject": {
         "senderEmail": "fprl_caseworker_solicitor@mailinator.com",
         "recipientEmail": null,
         "messageSubject": null,
