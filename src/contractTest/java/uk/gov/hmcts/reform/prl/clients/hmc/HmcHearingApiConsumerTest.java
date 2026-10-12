@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ExtendWith(PactConsumerTestExt.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(SpringExtension.class)
-@PactTestFor(providerName = "hmcHearingApi", port = "8900")
+@PactTestFor(providerName = "hearingData_cftInternal", port = "8900")
 @ContextConfiguration(
     classes = {HmcHearingApiClientConsumerApplication.class, IdamApiConsumerApplication.class}
 )
@@ -75,11 +75,11 @@ public class HmcHearingApiConsumerTest {
 
     private final String getHearingDetailsResponseBody = "listwithoutnotice/GetHearingDetailsResponseBody.json";
 
-    @Pact(provider = "hmcHearingApi", consumer = "prl_cos_api")
+    @Pact(provider = "hearingData_cftInternal", consumer = "prl_cos_api")
     public RequestResponsePact generatePactFragmentForGetHearingDetails(PactDslWithProvider builder) throws Exception {
         // @formatter:off
         return builder
-            .given("Hearings exist for a case reference")
+            .given("Hearings exists for given caseRefNo")
             .uponReceiving("A Request to get hearing details for a case reference")
             .method("GET")
             .headers(SERVICE_AUTHORIZATION_HEADER, SERVICE_AUTH_TOKEN)
