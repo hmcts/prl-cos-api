@@ -51,7 +51,8 @@ public class StatementOfServiceControllerFunctionalTest {
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
-    private static CaseDetails caseDetails;
+    private static CaseDetails systemCaseDetails;
+    private static CaseData citizenCaseData;
 
     @Test
     @Order(2)
@@ -114,18 +115,18 @@ public class StatementOfServiceControllerFunctionalTest {
     }
 
     @Test
-    @Order(5)
+    @Order(6)
     public void saveStatementOfServiceByCitizen() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
 
         request
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForCitizen())
             .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType(APPLICATION_JSON_VALUE)
-            .pathParam("caseId", caseDetails.getId())
+            .pathParam("caseId", citizenCaseData.getId())
             .pathParam("eventId","citizenStatementOfService")
             .post("/{caseId}/{eventId}/save-statement-of-service-by-citizen")
             .then()
@@ -138,7 +139,7 @@ public class StatementOfServiceControllerFunctionalTest {
     @Order(1)
     public void createCcdTestCase() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
-        caseDetails =  request
+        systemCaseDetails =  request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -150,7 +151,43 @@ public class StatementOfServiceControllerFunctionalTest {
             .extract()
             .as(CaseDetails.class);
 
-        Assertions.assertNotNull(caseDetails);
-        Assertions.assertNotNull(caseDetails.getId());
+        Assertions.assertNotNull(systemCaseDetails);
+        Assertions.assertNotNull(systemCaseDetails.getId());
+    }
+
+    @Test
+    @Order(5)
+    public void createCitizenCcdTestCase() {
+        citizenCaseData = request
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForCitizen())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .when()
+            .contentType(APPLICATION_JSON)
+            .post("/testing-support/create-dummy-citizen-case")
+            .then()
+            .assertThat().statusCode(200)
+            .extract()
+            .as(CaseData.class);
+
+        Assertions.assertNotNull(citizenCaseData);
+        Assertions.assertNotNull(citizenCaseData.getId());
+    }
+
+    @Test
+    @Order(7)
+    public void shouldRejectStatementOfServiceForCaseCitizenCannotAccess() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+
+        request
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForCitizen())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType(APPLICATION_JSON_VALUE)
+            .pathParam("caseId", systemCaseDetails.getId())
+            .pathParam("eventId", "citizenStatementOfService")
+            .post("/{caseId}/{eventId}/save-statement-of-service-by-citizen")
+            .then()
+            .statusCode(404);
     }
 }

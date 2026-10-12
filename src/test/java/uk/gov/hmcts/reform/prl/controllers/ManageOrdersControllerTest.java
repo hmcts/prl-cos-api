@@ -80,6 +80,7 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.TaskUtils;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
@@ -111,6 +112,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CURRENT_ORDER_A_DRAFT_ORDER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum.dateConfirmedByListingTeam;
@@ -1467,6 +1469,10 @@ public class ManageOrdersControllerTest {
             callbackRequest, authToken, s2sToken
         );
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseTypeOfApplication"));
+        assertEquals(
+            LocalDate.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)),
+            aboutToStartOrSubmitCallbackResponse.getData().get("dateOrderMade")
+        );
     }
 
     @Test
@@ -1624,6 +1630,20 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
+
         verify(manageOrderEmailService, times(1))
             .sendEmailWhenOrderIsServed("Bearer TestAuthToken", caseData, stringObjectMap);
         verify(manageOrderService, times(1))
@@ -1717,13 +1737,14 @@ public class ManageOrdersControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(manageOrderService.getOrderToAmendDownloadLink(caseData)).thenReturn(new HashMap<>());
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.populateOrderToAmendDownloadLink(
+
+        manageOrdersController.populateOrderToAmendDownloadLink(
             authToken,
             s2sToken,
             callbackRequest
         );
-        verify(manageOrderService, times(1))
-            .getOrderToAmendDownloadLink(caseData);
+
+        verify(manageOrderService, times(1)).getOrderToAmendDownloadLink(caseData);
     }
 
     @Test
@@ -1814,7 +1835,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
             OrderDetails.builder().build()).build());
-        when(amendOrderService.updateOrder(caseData, authToken))
+        when(amendOrderService.updateOrder(any(CaseData.class), eq(authToken)))
             .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
@@ -1832,6 +1853,9 @@ public class ManageOrdersControllerTest {
             callbackRequest
         );
         assertEquals(orderDetailsList,aboutToStartOrSubmitCallbackResponse.getData().get("orderCollection"));
+        ArgumentCaptor<CaseData> caseDataCaptor = ArgumentCaptor.forClass(CaseData.class);
+        verify(amendOrderService).updateOrder(caseDataCaptor.capture(), eq(authToken));
+        assertNull(caseDataCaptor.getValue().getDateOrderMade());
     }
 
     @Test
@@ -2472,9 +2496,8 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        assertExpectedException(
-            () -> manageOrdersController.populatePreviewOrderWhenOrderUploaded(authToken, s2sToken,
-                            PrlAppsConstants.ENGLISH, callbackRequest), RuntimeException.class, "Invalid Client");
+        assertExpectedException(() -> manageOrdersController.populatePreviewOrderWhenOrderUploaded(authToken, s2sToken,
+                                PrlAppsConstants.ENGLISH, callbackRequest), RuntimeException.class, "Invalid Client");
     }
 
     @Test
@@ -3129,7 +3152,6 @@ public class ManageOrdersControllerTest {
             .childLiveWith(childLiveWithList)
             .build();
 
-
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
@@ -3246,7 +3268,6 @@ public class ManageOrdersControllerTest {
         Child child = Child.builder()
             .childLiveWith(childLiveWithList)
             .build();
-
 
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
@@ -3396,9 +3417,6 @@ public class ManageOrdersControllerTest {
             .build();
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         Map<String, Object> stringObjectMap = expectedCaseData.toMap(new ObjectMapper());
-        Map<String, String> dataFieldMap = new HashMap<>();
-        dataFieldMap.put(PrlAppsConstants.TEMPLATE, "templateName");
-        dataFieldMap.put(PrlAppsConstants.FILE_NAME, "fileName");
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
@@ -3497,7 +3515,6 @@ public class ManageOrdersControllerTest {
         assertThat(responseResponseEntity.getBody().getData().get("nameOfLaToReviewOrder")).isNotNull();
         assertThat(responseResponseEntity.getHeaders())
             .containsKey(CLIENT_CONTEXT_HEADER_PARAMETER);
-
 
         assertThat(objectMapper.readTree(
             responseResponseEntity.getHeaders().getFirst(CLIENT_CONTEXT_HEADER_PARAMETER)))
@@ -3927,7 +3944,6 @@ public class ManageOrdersControllerTest {
         Child child = Child.builder()
             .childLiveWith(childLiveWithList)
             .build();
-
 
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
@@ -5037,7 +5053,7 @@ public class ManageOrdersControllerTest {
 
         // Then
         assertNotNull(response);
-        assertEquals("Test Judge", response.getData().get("judgeOrMagistratesLastName"));
+        assertEquals("Judge", response.getData().get("judgeOrMagistratesLastName"));
         assertEquals(JudgeOrMagistrateTitleEnum.circuitJudge, response.getData().get("judgeOrMagistrateTitle"));
     }
 
@@ -5121,7 +5137,7 @@ public class ManageOrdersControllerTest {
 
         // Then
         assertNotNull(response);
-        assertEquals("Jane Wilson", response.getData().get("justiceLegalAdviserFullName"));
+        assertEquals("Wilson", response.getData().get("justiceLegalAdviserFullName"));
         assertNull(response.getData().get("judgeOrMagistratesLastName"));
         assertEquals(JudgeOrMagistrateTitleEnum.justicesLegalAdviser, response.getData().get("judgeOrMagistrateTitle"));
     }
@@ -5169,7 +5185,7 @@ public class ManageOrdersControllerTest {
 
         // Then
         assertNotNull(response);
-        assertEquals("Sarah Adams", response.getData().get("justiceLegalAdviserFullName"));
+        assertEquals("Adams", response.getData().get("justiceLegalAdviserFullName"));
         assertNull(response.getData().get("judgeOrMagistratesLastName"));
         assertEquals(JudgeOrMagistrateTitleEnum.justicesLegalAdviser, response.getData().get("judgeOrMagistrateTitle"));
     }

@@ -27,6 +27,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
@@ -36,7 +37,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STR
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getWaMapper;
-
 
 @Slf4j
 public class CommonUtils {
@@ -227,6 +227,18 @@ public class CommonUtils {
             return LocalDate.parse(date, formatter);
         }
         return null;
+    }
+
+    public static Optional<LocalDate> parseDate(String dateStr) {
+        if (dateStr == null || dateStr.isBlank()) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(LocalDate.parse(dateStr));
+        } catch (Exception e) {
+            log.warn("Failed to parse date: {}", dateStr);
+            return Optional.empty();
+        }
     }
 
     public static String formatDateTime(String pattern, LocalDateTime localDateTime) {

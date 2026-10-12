@@ -104,7 +104,8 @@ public class CourtNavCaseController {
         @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
         @PathVariable("caseId") String caseId,
         @RequestParam MultipartFile file,
-        @RequestParam String typeOfDocument
+        @RequestParam String typeOfDocument,
+        @RequestParam(required = false) String documentId
     ) {
         Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
         if (userInfo.isPresent() && Boolean.TRUE.equals(
@@ -120,7 +121,7 @@ public class CourtNavCaseController {
                 );
             } else {
                 if (userInfo.get().getRoles().contains(COURTNAV_USER)) {
-                    courtNavCaseService.uploadDocument(authorisation, file, typeOfDocument, caseId);
+                    courtNavCaseService.uploadDocument(authorisation, file, typeOfDocument, caseId, documentId);
                 } else {
                     throw new ResponseStatusException(HttpStatus.FORBIDDEN);
                 }

@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.sealaudit.SealDetectionService.SealStatus;
+import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.service.notify.NotificationClient;
 import uk.gov.service.notify.NotificationClientException;
 
@@ -33,7 +34,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static uk.gov.service.notify.NotificationClient.prepareUpload;
@@ -83,7 +83,7 @@ public class SealAuditService {
         log.info("*** Starting Seal Audit Task ***");
         long startTime = System.currentTimeMillis();
 
-        LocalDate fromDate = parseDate(fromDateStr).orElse(LocalDate.of(2024, 4, 1));
+        LocalDate fromDate = CommonUtils.parseDate(fromDateStr).orElse(LocalDate.of(2024, 4, 1));
         LocalDate toDate = LocalDate.now();
 
         log.info("Audit case created date range: {} to {}", fromDate, toDate);
@@ -387,18 +387,6 @@ public class SealAuditService {
 
         List<Element<ServedParties>> servedParties = order.getServeOrderDetails().getServedParties();
         return servedParties != null && !servedParties.isEmpty();
-    }
-
-    private Optional<LocalDate> parseDate(String dateStr) {
-        if (dateStr == null || dateStr.isBlank()) {
-            return Optional.empty();
-        }
-        try {
-            return Optional.of(LocalDate.parse(dateStr));
-        } catch (Exception e) {
-            log.warn("Failed to parse date: {}", dateStr);
-            return Optional.empty();
-        }
     }
 
     private String getFirstServedDateTime(OrderDetails order) {

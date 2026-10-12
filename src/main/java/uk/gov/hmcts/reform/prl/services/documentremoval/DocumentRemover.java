@@ -35,7 +35,6 @@ public class DocumentRemover {
     }
 
     private void removeDocumentFromJson(JsonNode root, String documentId) {
-        log.info("Removing document {} from JSON node", documentId);
         List<DocumentNode> documentNodesToRemove = new ArrayList<>();
 
         if (root.isObject()) {

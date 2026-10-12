@@ -154,6 +154,19 @@ public class CaseOrder {
         this.orderDocument = orderDocument;
     }
 
+    @JsonProperty("orderDocumentWelsh")
+    private OrderDocument orderDocumentWelsh;
+
+    public void setOrderDocumentWelsh(OrderDocument orderDocumentWelsh) throws MalformedURLException {
+        if (orderDocumentWelsh != null
+            && StringUtils.hasText(orderDocumentWelsh.getDocumentUrl())) {
+            URL url = new URL(orderDocumentWelsh.getDocumentUrl());
+            orderDocumentWelsh.setDocumentId(getDocumentId(url));
+            orderDocumentWelsh.setDocumentUrl(null);
+        }
+        this.orderDocumentWelsh = orderDocumentWelsh;
+    }
+
     private String getDocumentId(URL url) {
         String path = url.getPath();
         String documentId = path.split("/")[path.split("/").length - 1];

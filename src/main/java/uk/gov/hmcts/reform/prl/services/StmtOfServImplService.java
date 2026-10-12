@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotif
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
+import uk.gov.hmcts.reform.prl.services.citizen.CitizenUserCaseUpdateService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -57,7 +58,6 @@ import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C10
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE8;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
@@ -67,7 +67,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_T
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOS_COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOS_PENDING;
@@ -99,6 +102,7 @@ public class StmtOfServImplService {
     private final ServiceOfApplicationPostService serviceOfApplicationPostService;
     private final LaunchDarklyClient launchDarklyClient;
     private final ManageDocumentsService manageDocumentsService;
+    private final CitizenUserCaseUpdateService citizenUserCaseUpdateService;
 
     public Map<String, Object> retrieveRespondentsList(CaseDetails caseDetails) {
         CaseData caseData = objectMapper.convertValue(
@@ -362,9 +366,8 @@ public class StmtOfServImplService {
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         List<Element<Document>> docs = new ArrayList<>(unServedRespondentPack.getPackDocument()
                                                            .stream()
-                                                           .filter(d -> !SOA_FL415_FILENAME.equalsIgnoreCase(d.getValue().getDocumentFileName()))
-                                                           .filter(d -> !C9_DOCUMENT_FILENAME.equalsIgnoreCase(d.getValue()
-                                                                                                                   .getDocumentFileName()))
+                                                           .filter(d -> !isFL415Document(d.getValue()))
+                                                           .filter(d -> !isC9Document(d.getValue()))
                                                            .toList());
         docs = wrapElements(serviceOfApplicationService.removeCoverLettersFromThePacks(unwrapElements(docs)));
         if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
@@ -451,9 +454,39 @@ public class StmtOfServImplService {
             .build();
     }
 
+    private boolean isC9Document(Document document) {
+        return document != null
+            && (SOA_C9_PERSONAL_SERVICE_FILENAME.equalsIgnoreCase(document.getDocumentFileName())
+            || SOA_C9_PERSONAL_SERVICE_FILENAME_WELSH.equalsIgnoreCase(document.getDocumentFileName()));
+    }
+
+    private boolean isFL415Document(Document document) {
+        return document != null
+            && (SOA_FL415_FILENAME.equalsIgnoreCase(document.getDocumentFileName())
+            || SOA_FL415_FILENAME_WELSH.equalsIgnoreCase(document.getDocumentFileName()));
+    }
+
     public void saveCitizenSos(String caseId, String eventId,String authorisation, CitizenSos sosObject) {
+        citizenUserCaseUpdateService.validateCitizenCaseAccess(
+            authorisation,
+            caseId
+        );
+
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
             = allTabService.getStartUpdateForSpecificEvent(caseId, eventId);
+        updateCitizenSosCaseData(authorisation, sosObject, startAllTabsUpdateDataContent);
+        allTabService.submitAllTabsUpdate(
+            startAllTabsUpdateDataContent.authorisation(),
+            caseId,
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            startAllTabsUpdateDataContent.caseDataMap()
+        );
+    }
+
+    private void updateCitizenSosCaseData(String authorisation,
+                                          CitizenSos sosObject,
+                                          StartAllTabsUpdateDataContent startAllTabsUpdateDataContent) {
         Map<String, Object> updatedCaseDataMap = startAllTabsUpdateDataContent.caseDataMap();
         CaseData updatedCaseData = startAllTabsUpdateDataContent.caseData();
         if (YesOrNo.No.equals(sosObject.getIsOrder())) {
@@ -481,13 +514,6 @@ public class StmtOfServImplService {
         } else if (YesOrNo.Yes.equals(sosObject.getIsOrder())) {
             updateSosAndOrderCollectionForCitizenSos(sosObject, updatedCaseDataMap, updatedCaseData, authorisation);
         }
-        allTabService.submitAllTabsUpdate(
-            startAllTabsUpdateDataContent.authorisation(),
-            caseId,
-            startAllTabsUpdateDataContent.startEventResponse(),
-            startAllTabsUpdateDataContent.eventRequestData(),
-            updatedCaseDataMap
-        );
     }
 
     private void updateSosAndOrderCollectionForCitizenSos(CitizenSos sosObject, Map<String, Object> updatedCaseDataMap,

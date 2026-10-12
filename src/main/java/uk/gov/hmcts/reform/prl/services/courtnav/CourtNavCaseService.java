@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS;
@@ -50,6 +51,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_TRIGGERED_BY;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
 
 @Slf4j
 @Service
@@ -99,7 +101,8 @@ public class CourtNavCaseService {
         );
     }
 
-    public void uploadDocument(String authorisation, MultipartFile document, String typeOfDocument, String caseId) {
+    public void uploadDocument(String authorisation, MultipartFile document, String typeOfDocument, String caseId,
+                               String documentId) {
 
         if (null != document && null != document.getOriginalFilename()
             && checkFileFormat(document.getOriginalFilename())
@@ -113,6 +116,11 @@ public class CourtNavCaseService {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND);
             }
             CaseData tempCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
+            // check if the document is already on the case (by documentId), if so, return without uploading again
+            if (courtNavDocumentAlreadyPresentOnCase(tempCaseData, documentId)) {
+                log.info("Document with documentId {} is already present on the case {}", documentId, caseId);
+                return;
+            }
             int alreadyUploadedCourtNavDocSize = getAlreadyUploadedCourtNavDocsSize(tempCaseData);
             if (tempCaseData.getNumberOfAttachments() != null
                 && Integer.parseInt(tempCaseData.getNumberOfAttachments()) <= alreadyUploadedCourtNavDocSize) {
@@ -134,7 +142,8 @@ public class CourtNavCaseService {
                 document.getOriginalFilename(),
                 tempCaseData,
                 uploadResponse.getDocuments().getFirst(),
-                typeOfDocument
+                typeOfDocument,
+                documentId
             );
 
             manageDocumentsService.moveDocumentsToQuarantineTab(
@@ -179,6 +188,22 @@ public class CourtNavCaseService {
         }
     }
 
+    /**
+     * Check if the document with the given documentId is already present on the case, ignoring nulls.
+     * @param caseData current version of the case data prior to this request.
+     * @param documentId the courtnav-provided ID of the document to check for.
+     * @return true if a document with that ID has already been saved on the case.
+     */
+    private boolean courtNavDocumentAlreadyPresentOnCase(CaseData caseData, String documentId) {
+        if (isEmpty(caseData.getDocumentManagementDetails()) || documentId == null) {
+            return false;
+        }
+        return nullSafeList(caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList())
+            .stream()
+            .filter(doc -> !isEmpty(doc.getValue().getCourtNavDocumentId()))
+            .anyMatch(doc -> doc.getValue().getCourtNavDocumentId().equals(documentId));
+    }
+
     private static int getAlreadyUploadedCourtNavDocsSize(CaseData tempCaseData) {
         int alreadyUploadedCourtNavDocSize = !CollectionUtils.isEmpty(tempCaseData.getReviewDocuments().getCourtNavUploadedDocListDocTab())
             ? tempCaseData.getReviewDocuments().getCourtNavUploadedDocListDocTab().size() : 0;
@@ -208,7 +233,8 @@ public class CourtNavCaseService {
     private QuarantineLegalDoc getCourtNavQuarantineDocument(String fileName,
                                                              CaseData caseData,
                                                              Document uploadedDocument,
-                                                             String typeOfDocument) {
+                                                             String typeOfDocument,
+                                                             String documentId) {
 
         String partyName = caseData.getApplicantsFL401() != null
             ? caseData.getApplicantsFL401().getLabelForDynamicList() : COURTNAV;
@@ -222,6 +248,7 @@ public class CourtNavCaseService {
         return QuarantineLegalDoc.builder()
             .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
             .documentType(typeOfDocument)
+            .courtNavDocumentId(documentId)
             .categoryId("applicantStatements")
             .categoryName("Applicant's statements")
             .isConfidential(Yes)

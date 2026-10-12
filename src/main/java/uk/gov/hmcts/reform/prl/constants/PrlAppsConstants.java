@@ -134,6 +134,7 @@ public class PrlAppsConstants {
 
     public static final String URL_STRING = "/";
     public static final String D_MMM_YYYY = "d MMM yyyy";
+    public static final String DD_MM_YY = "dd-MM-yy";
 
     public static final String APPLICANT_SOLICITOR = " (Applicant's Solicitor)";
     public static final String RESPONDENT_SOLICITOR = " (Respondent's Solicitor)";
@@ -202,7 +203,8 @@ public class PrlAppsConstants {
     public static final String SERVICE_ID = "ABA5";
     public static final String FAMILY_COURT_TYPE_ID = "18";
     public static final String[] HEARING_PAGE_NEEDED_ORDER_IDS = {"noticeOfProceedings","childArrangementsSpecificProhibitedOrder",
-        "occupation","nonMolestation","amendDischargedVaried","noticeOfProceedingsNonParties","noticeOfProceedingsParties", "blank"};
+        "occupation","nonMolestation","amendDischargedVaried","noticeOfProceedingsNonParties","noticeOfProceedingsParties", "blank",
+        "noticeOfHearingParties", "noticeOfHearing"};
     public static final String RIGHT_TO_ASK_COURT = "As the direction has been made without a hearing,"
         + " you may ask the court to reconsider this order. "
         + "You must do that within 7 days of receiving this order by writing to the court"
@@ -792,7 +794,6 @@ public class PrlAppsConstants {
     public static final String PRIVACY_DOCUMENT_FILENAME_WELSH = "Privacy_Notice_Welsh.pdf";
     public static final String ANNEX1_FILENAME = "Annex 1 - Confidential contact details notice.pdf";
     public static final String ANNEX1_FILENAME_WELSH = "Annex 1 - Confidential contact details notice - welsh.pdf";
-    public static final String C9_DOCUMENT_FILENAME = "C9_personal_service.pdf";
     public static final String C1A_BLANK_DOCUMENT_FILENAME = "C1A_Blank.pdf";
     public static final String C1A_DOCUMENT_FILENAME = "C1A_Document.pdf";
     public static final String C1A_DOCUMENT_WELSH_FILENAME = "C1A_Document_Welsh.pdf";
@@ -805,7 +806,9 @@ public class PrlAppsConstants {
     public static final String SOA_FAMILY_PRESIDENTS_NOTE_WELSH = "Family President's letter to parties - Welsh.pdf";
     public static final String SOA_NOTICE_SAFETY = "Notice-safety.pdf";
     public static final String SOA_C9_PERSONAL_SERVICE_FILENAME = "C9_personal_service.pdf";
+    public static final String SOA_C9_PERSONAL_SERVICE_FILENAME_WELSH = "C9_personal_service_CY.pdf";
     public static final String SOA_FL415_FILENAME = "FL415.pdf";
+    public static final String SOA_FL415_FILENAME_WELSH = "FL415_CY.pdf";
 
 
     public static final String SOA_MULTIPART_FILE = "files";
@@ -900,6 +903,13 @@ public class PrlAppsConstants {
         + "sgrin flaenorol ac uwchlwytho gorchymyn oherwydd bod gan yr achos hwn nifer o geiswyr neu atebwyr.";
 
     public static final String ORDER_COLLECTION = "orderCollection";
+
+    public static final String PARTIES_AND_REPRESENTATION = "partiesAndRepresentation";
+    public static final String PENAL_NOTICE_NEEDED = "penalNoticeNeeded";
+    public static final String PENAL_NOTICE_RTF = "penalNoticeRtf";
+    public static final String ORDER_DIRECTIONS_RTF = "orderDirectionsRtf";
+    public static final String RECITALS_OR_PREAMBLE_RTF = "recitalsOrPreambleRtf";
+    public static final String SCHEDULE_TO_ORDER_RTF = "scheduleToOrderRtf";
 
     public static final String WA_PERFORMING_USER = "performingUser";
     public static final String WA_PERFORMING_ACTION = "performingAction";

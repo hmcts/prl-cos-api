@@ -60,6 +60,8 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 import uk.gov.hmcts.reform.prl.utils.TaskUtils;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -86,6 +88,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_DO
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_NAME_OPTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DO_YOU_WANT_TO_SERVE_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
@@ -174,6 +177,8 @@ public class ManageOrdersController {
                 return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
             }
 
+            manageOrderService.updatePrefilledOrderFields(caseData, caseDataUpdated);
+
             String language = CaseUtils.getLanguage(clientContext);
             List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData, CaseUtils.getLanguage(clientContext));
             errorList.addAll(getErrorForOccupationScreen(caseData, caseData.getCreateSelectOrderOptions(), language));
@@ -254,7 +259,7 @@ public class ManageOrdersController {
 
     private void prepopulateHeaderFields(Map<String, Object> caseData, String authorisation) {
         caseData.put(IS_INVOKED_FROM_TASK, No);
-        caseData.put("dateOrderMade", java.time.LocalDate.now());
+        caseData.put("dateOrderMade", LocalDate.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)));
 
         ManageOrderService.LoggedInUserTypeDetails userTypeDetails = manageOrderService.getLoggedInUserTypeDetails(authorisation);
         if (UserRoles.JUDGE.name().equals(userTypeDetails.userType())) {
@@ -277,13 +282,13 @@ public class ManageOrdersController {
 
                 if (JudgeOrMagistrateTitleEnum.justicesLegalAdviser == judgeTitle
                     || JudgeOrMagistrateTitleEnum.justicesClerk == judgeTitle) {
-                    caseData.put("justiceLegalAdviserFullName", userDetails.getFullName());
+                    caseData.put("justiceLegalAdviserFullName", userDetails.getSurname().orElse(userDetails.getForename()));
                 } else if (JudgeOrMagistrateTitleEnum.magistrate == judgeTitle) {
                     caseData.put("magistrateLastName", List.of(uk.gov.hmcts.reform.prl.utils.ElementUtils.element(
                         uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName.builder()
-                            .lastName(userDetails.getFullName()).build())));
+                            .lastName(userDetails.getSurname().orElse(userDetails.getForename())).build())));
                 } else {
-                    caseData.put("judgeOrMagistratesLastName", userDetails.getFullName());
+                    caseData.put("judgeOrMagistratesLastName", userDetails.getSurname().orElse(userDetails.getForename()));
                 }
             }
         }
@@ -594,13 +599,13 @@ public class ManageOrdersController {
 
 
 
-    /*
+    /**
      *  setHearingData is a misnomer this does setHearingData but then goes on to other action based on selection
-     *  including serving an order
+     *  including serving an order.
      * @param caseData original
      * @param caseDataUpdated updated
      * @param authorisation need auth for changes
-     */
+     **/
     private void setHearingData(CaseData caseData, Map<String, Object> caseDataUpdated, String authorisation) {
         try {
             doSetHearingData(caseData, caseDataUpdated, authorisation);
