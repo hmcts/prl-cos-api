@@ -16,6 +16,8 @@ import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.ccd.sdk.type.TTL;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.gatekeeping.JudgeOrLegalAdviserGatekeepingEnum;
+import uk.gov.hmcts.reform.prl.enums.gatekeeping.WhoToSendToGatekeeperTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.reopenclosedcases.ValidReopenClosedCasesStatusEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
@@ -206,4 +208,8 @@ public class BaseCaseData {
     private List<Element<ResponseDocuments>> otherPartyC8DocumentsArchived;
     private YesOrNo miamForOrder;
     private DynamicList customOrderHearingsType;
+
+    private WhoToSendToGatekeeperTypeEnum whoToSendTheCaseToForGatekeeping;
+    private List<JudgeOrLegalAdviserGatekeepingEnum> judgeOrLegalAdviserForGatekeeping;
+
 }
