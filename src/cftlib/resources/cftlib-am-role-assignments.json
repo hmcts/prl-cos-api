@@ -1304,8 +1304,8 @@
     "overrideAll": true
   },
   {
-    "email": "prl_ctscadmin22_swnsea@justice.gov.uk",
-    "id": "b8ae631d-b302-4a2b-a30a-14625a782ebf",
+    "email": "prl_ctscadmin266_swansea@hmcts.net",
+    "id": "e287a674-5b88-4404-a700-3094bfb98801",
     "roleAssignments": [
       {
         "roleType": "ORGANISATION",
@@ -1323,9 +1323,8 @@
         "authorisations": [
           "SKILL:ABA5:CHECKAPPLICATIONC100",
           "SKILL:ABA5:SERVEAPPLICATIONC100",
-          "SKILL:ABA5:HEARINGMANAGEMENTC100",
-          "SKILL:ABA5:ORDERMANAGEMENTC100",
-          "SKILL:ABA5:REVIEWCORRESPONDENCEC100"
+          "SKILL:ABA5:CHECKAPPLICATIONFL401",
+          "SKILL:ABA5:SERVEAPPLICATIONFL401"
         ]
       },
       {
@@ -1383,9 +1382,8 @@
         "authorisations": [
           "SKILL:ABA5:CHECKAPPLICATIONC100",
           "SKILL:ABA5:SERVEAPPLICATIONC100",
-          "SKILL:ABA5:HEARINGMANAGEMENTC100",
-          "SKILL:ABA5:ORDERMANAGEMENTC100",
-          "SKILL:ABA5:REVIEWCORRESPONDENCEC100"
+          "SKILL:ABA5:CHECKAPPLICATIONFL401",
+          "SKILL:ABA5:SERVEAPPLICATIONFL401"
         ]
       }
     ],
