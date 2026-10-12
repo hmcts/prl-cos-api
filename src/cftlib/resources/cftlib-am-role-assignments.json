@@ -1385,6 +1385,26 @@
           "SKILL:ABA5:CHECKAPPLICATIONFL401",
           "SKILL:ABA5:SERVEAPPLICATIONFL401"
         ]
+      },
+      {
+        "roleType": "ORGANISATION",
+        "roleName": "ctsc-team-leader",
+        "grantType": "STANDARD",
+        "roleCategory": "CTSC",
+        "classification": "PUBLIC",
+        "readOnly": false,
+        "attributes": {
+          "workTypes": "routine_work,hearing_work,applications",
+          "substantive": "Y",
+          "jurisdiction": "PRIVATELAW",
+          "primaryLocation": "234946"
+        },
+        "authorisations": [
+          "SKILL:ABA5:CHECKAPPLICATIONC100",
+          "SKILL:ABA5:SERVEAPPLICATIONC100",
+          "SKILL:ABA5:CHECKAPPLICATIONFL401",
+          "SKILL:ABA5:SERVEAPPLICATIONFL401"
+        ]
       }
     ],
     "overrideAll": true
