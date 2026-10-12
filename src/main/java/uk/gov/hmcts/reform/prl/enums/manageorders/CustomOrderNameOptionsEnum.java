@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum CustomOrderNameOptionsEnum {
-    standardDirectionsOrder("standardDirectionsOrder", "Standard directions order"),
+    standardDirectionsOrder("standardDirectionsOrder", "Directions on issue"),
     directionOnIssue("directionOnIssue", "Directions on issue"),
     blankOrderOrDirections("blankOrderOrDirections", "Blank order or directions (C21)"),
     childArrangementsSpecificProhibitedOrder(
