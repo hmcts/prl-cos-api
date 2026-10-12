@@ -2624,7 +2624,7 @@ class ManageOrderServiceTest {
     void testPopulateDraftOrderForJudge(String amRole) {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
             amRole);
-        when(userRoleService.getLoggedInUserType(anyString())).thenReturn(UserRoles.JUDGE.name());
+        when(userRoleService.getLoggedInUserRole(anyString())).thenReturn(UserRoles.JUDGE);
 
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
         when(roleAssignmentApi.getRoleAssignments(any(), any(), any(), any()))
@@ -2662,14 +2662,15 @@ class ManageOrderServiceTest {
         List<Element<DraftOrder>> drafts = (List<Element<DraftOrder>>) result.get("draftOrderCollection");
         assertThat(drafts).hasSize(1);
         assertThat(drafts.getFirst().getValue().getOrderDocument()).isEqualTo(orderDocument);
+        assertEquals("Created by Judge", drafts.getFirst().getValue().getOtherDetails().getStatus());
+        assertEquals(No, drafts.getFirst().getValue().getOtherDetails().getIsJudgeApprovalNeeded());
     }
-
 
     @Test
     void testPopulateDraftOrderForJudge() {
         when(userService.getUserDetails(Mockito.anyString()))
             .thenReturn(UserDetails.builder().roles(of(Roles.JUDGE.getValue())).build());
-        when(userRoleService.getLoggedInUserType(anyString())).thenReturn(UserRoles.JUDGE.name());
+        when(userRoleService.getLoggedInUserRole(anyString())).thenReturn(UserRoles.JUDGE);
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
         CaseData caseData = CaseData.builder()
@@ -2699,6 +2700,52 @@ class ManageOrderServiceTest {
             "draftOrderCollection"));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"tribunal-caseworker", "senior-tribunal-caseworker"})
+    void testPopulateDraftOrderForLegalAdviser(String amRole) {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            amRole);
+        when(userRoleService.getLoggedInUserRole(anyString())).thenReturn(UserRoles.LEGAL_ADVISER);
+
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+        when(roleAssignmentApi.getRoleAssignments(any(), any(), any(), any()))
+            .thenReturn(roleAssignmentServiceResponse);
+
+        Document orderDocument = Document.builder().documentUrl("test.doc").documentFileName("test order").build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("Test Case 45678")
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .doesOrderClosesCase(Yes)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
+            .fcOrders(FcOrdersEnum.warrantOfCommittal)
+            .judgeOrMagistratesLastName("test")
+            .dateOrderMade(LocalDate.now())
+            .uploadOrderDoc(orderDocument)
+            .manageOrders(ManageOrders.builder()
+                              .recitalsOrPreamble("test")
+                              .isCaseWithdrawn(Yes)
+                              .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
+                              .orderDirections("test")
+                              .furtherDirectionsIfRequired("test")
+                              .childOption(dynamicMultiSelectList)
+                              .ordersHearingDetails(of(element(HearingData.builder()
+                                                                   .hearingDateConfirmOptionEnum(
+                                                                       HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+                                                                   .build())))
+                              .build())
+            .build();
+
+        Map<String, Object> result = manageOrderService.addOrderDetailsAndReturnReverseSortedList("test", caseData, ENGLISH);
+
+        List<Element<DraftOrder>> drafts = (List<Element<DraftOrder>>) result.get("draftOrderCollection");
+        assertThat(drafts).hasSize(1);
+        assertThat(drafts.getFirst().getValue().getOrderDocument()).isEqualTo(orderDocument);
+        assertEquals("Created by Legal Adviser", drafts.getFirst().getValue().getOtherDetails().getStatus());
+        assertEquals(No, drafts.getFirst().getValue().getOtherDetails().getIsJudgeApprovalNeeded());
+    }
 
     @Test
     void testOrderStatusCreatedByAdmin() {
@@ -5103,7 +5150,7 @@ class ManageOrderServiceTest {
 
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().forename("test")
                                                                      .roles(of(Roles.COURT_ADMIN.getValue())).build());
-        when(userRoleService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(userRoleService.getLoggedInUserRole(anyString())).thenReturn(UserRoles.COURT_ADMIN);
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -7933,7 +7980,7 @@ class ManageOrderServiceTest {
             .surname("Admin")
             .roles(of(Roles.COURT_ADMIN.getValue()))
             .build());
-        when(userRoleService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(userRoleService.getLoggedInUserRole(anyString())).thenReturn(UserRoles.COURT_ADMIN);
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -7984,7 +8031,7 @@ class ManageOrderServiceTest {
             .surname("Admin")
             .roles(of(Roles.COURT_ADMIN.getValue()))
             .build());
-        when(userRoleService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(userRoleService.getLoggedInUserRole(anyString())).thenReturn(UserRoles.COURT_ADMIN);
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")

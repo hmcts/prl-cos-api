@@ -1352,16 +1352,16 @@ public class ManageOrderService {
 
     public Map<String, Object> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData, String language)
         throws DocumentGenerationException {
-        String loggedInUserType = getLoggedInUserType(authorisation);
         UserDetails userDetails = userService.getUserDetails(authorisation);
         boolean saveAsDraft = isSaveAsDraft(caseData);
 
-        if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
-            return setDraftOrderCollection(caseData, loggedInUserType, userDetails);
-        } else if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)) {
+        UserRoles loggedInUserRole = userRoleService.getLoggedInUserRole(authorisation);
+        if (UserRoles.JUDGE.equals(loggedInUserRole) || UserRoles.LEGAL_ADVISER.equals(loggedInUserRole)) {
+            return setDraftOrderCollection(caseData, loggedInUserRole.name(), userDetails);
+        } else if (UserRoles.COURT_ADMIN.equals(loggedInUserRole)) {
             if (!noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                 || saveAsDraft) {
-                return setDraftOrderCollection(caseData, loggedInUserType, userDetails);
+                return setDraftOrderCollection(caseData, loggedInUserRole.name(), userDetails);
             } else {
                 return setFinalOrderCollection(authorisation, caseData, userDetails, language);
             }
@@ -1463,6 +1463,9 @@ public class ManageOrderService {
     public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType, UserDetails userDetails) {
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
+
+        YesOrNo judgeApprovalNeeded = getJudgeApprovalNeeded(caseData, loggedInUserType);
+
         return DraftOrder.builder().orderType(caseData.getCreateSelectOrderOptions())
             .c21OrderOptions(blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())
                                  ? caseData.getManageOrders().getC21OrderOptions() : null)
@@ -1480,12 +1483,7 @@ public class ManageOrderService {
                               .orderCreatedByEmailId(userDetails.getEmail())
                               .dateCreated(dateTime.now())
                               .status(getOrderStatus(orderSelectionType, loggedInUserType, null, null))
-                              .isJudgeApprovalNeeded(noCheck.equals(
-                                  caseData.getManageOrders().getAmendOrderSelectCheckOptions())
-                                                         || AmendOrderCheckEnum.managerCheck.equals(
-                                  caseData.getManageOrders().getAmendOrderSelectCheckOptions())
-                                                         || UserRoles.JUDGE.name().equalsIgnoreCase(loggedInUserType)
-                                                         ? No : Yes)
+                              .isJudgeApprovalNeeded(judgeApprovalNeeded)
                               .reviewRequiredBy(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                               .nameOfJudgeForReview(caseData.getManageOrders().getNameOfJudgeAmendOrder())
                               .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
@@ -1647,6 +1645,8 @@ public class ManageOrderService {
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
 
+        YesOrNo judgeApprovalNeeded = getJudgeApprovalNeeded(caseData, loggedInUserType);
+
         return DraftOrder.builder()
             .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
             .orderType(CreateSelectOrderOptionsEnum.getIdFromValue(flagSelectedOrderId))
@@ -1666,12 +1666,7 @@ public class ManageOrderService {
                               .orderCreatedByEmailId(userDetails.getEmail())
                               .dateCreated(dateTime.now())
                               .status(getOrderStatus(orderSelectionType, loggedInUserType, null, null))
-                              .isJudgeApprovalNeeded(noCheck.equals(
-                                  caseData.getManageOrders().getAmendOrderSelectCheckOptions())
-                                                         || AmendOrderCheckEnum.managerCheck.equals(
-                                  caseData.getManageOrders().getAmendOrderSelectCheckOptions())
-                                                         || UserRoles.JUDGE.name().equalsIgnoreCase(loggedInUserType)
-                                                         ? No : Yes)
+                              .isJudgeApprovalNeeded(judgeApprovalNeeded)
                               .reviewRequiredBy(caseData.getManageOrders().getAmendOrderSelectCheckOptions()) //PRL-4854
                               .build())
             .dateOrderMade(caseData.getDateOrderMade())
@@ -1693,6 +1688,14 @@ public class ManageOrderService {
             .magistrateLastName(caseData.getMagistrateLastName())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .build();
+    }
+
+    private YesOrNo getJudgeApprovalNeeded(CaseData caseData, String loggedInUserType) {
+        return noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+            || AmendOrderCheckEnum.managerCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+            || UserRoles.JUDGE.name().equals(loggedInUserType)
+            || UserRoles.LEGAL_ADVISER.name().equals(loggedInUserType)
+            ? No : Yes;
     }
 
     private YesOrNo getIsUploadedFlag(ManageOrdersOptionsEnum manageOrdersOptions, String loggedInUserType) {
@@ -1740,6 +1743,8 @@ public class ManageOrderService {
         String status = "";
         if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
             status = OrderStatusEnum.createdByJudge.getDisplayedValue();
+        } else if (UserRoles.LEGAL_ADVISER.name().equals(loggedInUserType)) {
+            status = OrderStatusEnum.createdByLA.getDisplayedValue();
         } else if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)) {
             status = OrderStatusEnum.createdByCA.getDisplayedValue();
         } else if (UserRoles.SOLICITOR.name().equals(loggedInUserType)) {
