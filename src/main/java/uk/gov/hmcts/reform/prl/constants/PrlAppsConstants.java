@@ -203,7 +203,8 @@ public class PrlAppsConstants {
     public static final String SERVICE_ID = "ABA5";
     public static final String FAMILY_COURT_TYPE_ID = "18";
     public static final String[] HEARING_PAGE_NEEDED_ORDER_IDS = {"noticeOfProceedings","childArrangementsSpecificProhibitedOrder",
-        "occupation","nonMolestation","amendDischargedVaried","noticeOfProceedingsNonParties","noticeOfProceedingsParties", "blank"};
+        "occupation","nonMolestation","amendDischargedVaried","noticeOfProceedingsNonParties","noticeOfProceedingsParties", "blank",
+        "noticeOfHearingParties", "noticeOfHearing"};
     public static final String RIGHT_TO_ASK_COURT = "As the direction has been made without a hearing,"
         + " you may ask the court to reconsider this order. "
         + "You must do that within 7 days of receiving this order by writing to the court"
@@ -902,6 +903,13 @@ public class PrlAppsConstants {
         + "sgrin flaenorol ac uwchlwytho gorchymyn oherwydd bod gan yr achos hwn nifer o geiswyr neu atebwyr.";
 
     public static final String ORDER_COLLECTION = "orderCollection";
+
+    public static final String PARTIES_AND_REPRESENTATION = "partiesAndRepresentation";
+    public static final String PENAL_NOTICE_NEEDED = "penalNoticeNeeded";
+    public static final String PENAL_NOTICE_RTF = "penalNoticeRtf";
+    public static final String ORDER_DIRECTIONS_RTF = "orderDirectionsRtf";
+    public static final String RECITALS_OR_PREAMBLE_RTF = "recitalsOrPreambleRtf";
+    public static final String SCHEDULE_TO_ORDER_RTF = "scheduleToOrderRtf";
 
     public static final String WA_PERFORMING_USER = "performingUser";
     public static final String WA_PERFORMING_ACTION = "performingAction";
