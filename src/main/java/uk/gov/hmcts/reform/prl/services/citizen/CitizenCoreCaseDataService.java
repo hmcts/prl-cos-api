@@ -152,7 +152,7 @@ public class CitizenCoreCaseDataService {
             readCaseForCitizen(authorisation, cosApis2sToken, userInfo.getUid(), caseId);
             return true;
         } catch (FeignException.NotFound | FeignException.Forbidden exception) {
-            log.warn("Citizen {} does not have access to case {}", userInfo.getUid(), caseId);
+            log.error("Citizen {} does not have access to case {}", userInfo.getUid(), caseId);
             return false;
         }
     }
