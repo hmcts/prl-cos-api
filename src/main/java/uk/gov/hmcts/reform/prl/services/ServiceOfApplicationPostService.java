@@ -43,6 +43,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_WELSH_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUMENT_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUMENT_WELSH_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENG_STATIC_DOCS_PATH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME_WELSH;
@@ -173,6 +174,13 @@ public class ServiceOfApplicationPostService {
             C7_BLANK_DOCUMENT_FILENAME,
             APPLICATION_PDF_VALUE,
             DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + C7_BLANK_DOCUMENT_FILENAME)
+        ));
+
+        files.add(new InMemoryMultipartFile(
+            SOA_MULTIPART_FILE,
+            C7_BLANK_DOCUMENT_WELSH_FILENAME,
+            APPLICATION_PDF_VALUE,
+            DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + C7_BLANK_DOCUMENT_WELSH_FILENAME)
         ));
 
         attachStaticFileToTheDocuments(documentLanguage, files, SOA_C9_PERSONAL_SERVICE_FILENAME, SOA_C9_PERSONAL_SERVICE_FILENAME_WELSH);
