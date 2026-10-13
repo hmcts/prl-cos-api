@@ -4,7 +4,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import feign.FeignException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -175,7 +174,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_ORDER_APP
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_ADMIN_CREATED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_CREATED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_WHO_APPROVED_THE_ORDER;
-import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CANCEL_REQUEST_CIR_UPDATE_TASK;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CREATE_REQUEST_CIR_UPDATE_TASK;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.UPDATE_ALL_TABS;
@@ -244,6 +242,8 @@ class ManageOrderServiceTest {
 
     @Mock
     private UserService userService;
+    @Mock
+    private UserRoleService userRoleService;
 
     @Mock
     private RoleAssignmentApi roleAssignmentApi;
@@ -2624,6 +2624,7 @@ class ManageOrderServiceTest {
     void testPopulateDraftOrderForJudge(String amRole) {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
             amRole);
+        when(userRoleService.getLoggedInUserRole(anyString())).thenReturn(UserRoles.JUDGE);
 
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
         when(roleAssignmentApi.getRoleAssignments(any(), any(), any(), any()))
@@ -2661,13 +2662,15 @@ class ManageOrderServiceTest {
         List<Element<DraftOrder>> drafts = (List<Element<DraftOrder>>) result.get("draftOrderCollection");
         assertThat(drafts).hasSize(1);
         assertThat(drafts.getFirst().getValue().getOrderDocument()).isEqualTo(orderDocument);
+        assertEquals("Created by Judge", drafts.getFirst().getValue().getOtherDetails().getStatus());
+        assertEquals(No, drafts.getFirst().getValue().getOtherDetails().getIsJudgeApprovalNeeded());
     }
-
 
     @Test
     void testPopulateDraftOrderForJudge() {
         when(userService.getUserDetails(Mockito.anyString()))
             .thenReturn(UserDetails.builder().roles(of(Roles.JUDGE.getValue())).build());
+        when(userRoleService.getLoggedInUserRole(anyString())).thenReturn(UserRoles.JUDGE);
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
         CaseData caseData = CaseData.builder()
@@ -2697,6 +2700,52 @@ class ManageOrderServiceTest {
             "draftOrderCollection"));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"tribunal-caseworker", "senior-tribunal-caseworker"})
+    void testPopulateDraftOrderForLegalAdviser(String amRole) {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            amRole);
+        when(userRoleService.getLoggedInUserRole(anyString())).thenReturn(UserRoles.LEGAL_ADVISER);
+
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+        when(roleAssignmentApi.getRoleAssignments(any(), any(), any(), any()))
+            .thenReturn(roleAssignmentServiceResponse);
+
+        Document orderDocument = Document.builder().documentUrl("test.doc").documentFileName("test order").build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("Test Case 45678")
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .doesOrderClosesCase(Yes)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
+            .fcOrders(FcOrdersEnum.warrantOfCommittal)
+            .judgeOrMagistratesLastName("test")
+            .dateOrderMade(LocalDate.now())
+            .uploadOrderDoc(orderDocument)
+            .manageOrders(ManageOrders.builder()
+                              .recitalsOrPreamble("test")
+                              .isCaseWithdrawn(Yes)
+                              .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
+                              .orderDirections("test")
+                              .furtherDirectionsIfRequired("test")
+                              .childOption(dynamicMultiSelectList)
+                              .ordersHearingDetails(of(element(HearingData.builder()
+                                                                   .hearingDateConfirmOptionEnum(
+                                                                       HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+                                                                   .build())))
+                              .build())
+            .build();
+
+        Map<String, Object> result = manageOrderService.addOrderDetailsAndReturnReverseSortedList("test", caseData, ENGLISH);
+
+        List<Element<DraftOrder>> drafts = (List<Element<DraftOrder>>) result.get("draftOrderCollection");
+        assertThat(drafts).hasSize(1);
+        assertThat(drafts.getFirst().getValue().getOrderDocument()).isEqualTo(orderDocument);
+        assertEquals("Created by Legal Adviser", drafts.getFirst().getValue().getOtherDetails().getStatus());
+        assertEquals(No, drafts.getFirst().getValue().getOtherDetails().getIsJudgeApprovalNeeded());
+    }
 
     @Test
     void testOrderStatusCreatedByAdmin() {
@@ -2823,122 +2872,6 @@ class ManageOrderServiceTest {
             .build();
         assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData, ENGLISH));
 
-    }
-
-    @Test
-    void testGetLoggedInUserTypeSolicitor() {
-        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
-                                                                     .roles(of(Roles.SOLICITOR.getValue())).build());
-        assertEquals(UserRoles.SOLICITOR.name(), manageOrderService.getLoggedInUserType("test"));
-    }
-
-    @Test
-    void testGetLoggedInUserTypeCitizen() {
-        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
-                                                                     .roles(of(Roles.CITIZEN.getValue())).build());
-        assertEquals(UserRoles.CITIZEN.name(), manageOrderService.getLoggedInUserType("test"));
-    }
-
-    @Test
-    void testGetLoggedInUserTypeSystemUpdate() {
-        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
-                                                                     .roles(of(Roles.SYSTEM_UPDATE.getValue())).build());
-        assertEquals(UserRoles.SYSTEM_UPDATE.name(), manageOrderService.getLoggedInUserType("test"));
-    }
-
-
-    @Test
-    void testGetLoggedInUserTypeCourtAdminFromAmRoleAssignment() {
-        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
-            "hearing-centre-admin");
-        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
-                                                                     .id("123")
-                                                                     .roles(of(Roles.LEGAL_ADVISER.getValue())).build());
-        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
-        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
-
-        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(
-            roleAssignmentServiceResponse);
-        assertEquals(UserRoles.COURT_ADMIN.name(), manageOrderService.getLoggedInUserType("test"));
-    }
-
-    @Test
-    void testGetLoggedInUserTypeSolicitorFromIdam() {
-        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
-            "caseworker-privatelaw-solicitor");
-        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
-                                                                     .id("123")
-                                                                     .roles(of(Roles.SOLICITOR.getValue())).build());
-        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
-        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
-
-        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(
-            roleAssignmentServiceResponse);
-        assertEquals(UserRoles.SOLICITOR.name(), manageOrderService.getLoggedInUserType("test"));
-    }
-
-    @Test
-    void testGetLoggedInUserTypeJudgeFromAmRoleAssignment() {
-        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("allocated-magistrate");
-        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
-            .id("123")
-                                                                     .roles(of(Roles.LEGAL_ADVISER.getValue())).build());
-        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
-        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
-
-        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(roleAssignmentServiceResponse);
-        assertEquals(UserRoles.JUDGE.name(), manageOrderService.getLoggedInUserType("test"));
-    }
-
-    @Test
-    void testGetLoggedInUserTypeForSystemUpdateFromIdam() {
-        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
-            "caseworker-privatelaw-systemupdate");
-        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
-                                                                     .id("123")
-                                                                     .roles(of(Roles.SYSTEM_UPDATE.getValue())).build());
-        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
-        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
-
-        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(
-            roleAssignmentServiceResponse);
-        assertEquals(UserRoles.SYSTEM_UPDATE.name(), manageOrderService.getLoggedInUserType("test"));
-    }
-
-    @Test
-    void testGetLoggedInUserTypeForCitizenFromIdam() {
-        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("citizen");
-        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
-                                                                     .id("123")
-                                                                     .roles(of(Roles.CITIZEN.getValue())).build());
-        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
-        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
-
-        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(
-            roleAssignmentServiceResponse);
-        assertEquals(UserRoles.CITIZEN.name(), manageOrderService.getLoggedInUserType("test"));
-    }
-
-    @Test
-    public void shouldThrowExceptionWhenRoleAssignmentApiCallFails() {
-
-        String auth = "test-auth";
-        String authToken = "serviceAuthToken";
-        String id = "123";
-
-        when(userService.getUserDetails(anyString())).thenReturn(
-            UserDetails.builder()
-                .id(id)
-                .roles(of(Roles.SOLICITOR.getValue()))
-                .build()
-        );
-        when(authTokenGenerator.generate()).thenReturn(authToken);
-        when(launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY))
-            .thenReturn(true);
-        when(roleAssignmentApi.getRoleAssignments(auth, authToken, null, id))
-            .thenThrow(FeignException.class);
-
-        assertThrows(FeignException.class, () -> manageOrderService.getLoggedInUserType(auth));
     }
 
     @Test
@@ -4135,6 +4068,7 @@ class ManageOrderServiceTest {
         when(dateTime.now()).thenReturn(LocalDateTime.now());
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(of(Roles.JUDGE.getValue())).build());
+        when(userRoleService.getLoggedInUserType(anyString())).thenReturn(UserRoles.JUDGE.name());
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
@@ -4161,6 +4095,7 @@ class ManageOrderServiceTest {
         when(dateTime.now()).thenReturn(LocalDateTime.now());
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(of(Roles.COURT_ADMIN.getValue())).build());
+        when(userRoleService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
@@ -4188,6 +4123,7 @@ class ManageOrderServiceTest {
 
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(of(Roles.JUDGE.getValue())).build());
+        when(userRoleService.getLoggedInUserType(anyString())).thenReturn(UserRoles.JUDGE.name());
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
@@ -5214,7 +5150,7 @@ class ManageOrderServiceTest {
 
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().forename("test")
                                                                      .roles(of(Roles.COURT_ADMIN.getValue())).build());
-
+        when(userRoleService.getLoggedInUserRole(anyString())).thenReturn(UserRoles.COURT_ADMIN);
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -7119,6 +7055,7 @@ class ManageOrderServiceTest {
         when(hearingService.getHearings(anyString(), anyString())).thenReturn(hearings);
         when(userService.getUserDetails(authToken)).thenReturn(UserDetails.builder()
             .roles(of("caseworker-privatelaw-judge")).build());
+        when(userRoleService.getLoggedInUserType(anyString())).thenReturn(UserRoles.JUDGE.name());
 
         final CaseData caseData = CaseData.builder()
             .id(1234567890123456L)
@@ -8043,6 +7980,7 @@ class ManageOrderServiceTest {
             .surname("Admin")
             .roles(of(Roles.COURT_ADMIN.getValue()))
             .build());
+        when(userRoleService.getLoggedInUserRole(anyString())).thenReturn(UserRoles.COURT_ADMIN);
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -8093,6 +8031,7 @@ class ManageOrderServiceTest {
             .surname("Admin")
             .roles(of(Roles.COURT_ADMIN.getValue()))
             .build());
+        when(userRoleService.getLoggedInUserRole(anyString())).thenReturn(UserRoles.COURT_ADMIN);
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -8144,6 +8083,7 @@ class ManageOrderServiceTest {
                             .id("123")
                             .roles(of(Roles.COURT_ADMIN.getValue()))
                             .build());
+        when(userRoleService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -8349,6 +8289,7 @@ class ManageOrderServiceTest {
             .thenReturn(startAllTabsUpdateDataContent);
         when(featureToggleService.isCreateRequestCirUpdateTaskEnabled())
             .thenReturn(true);
+        when(userRoleService.getLoggedInUserType("authorisation")).thenReturn(UserRoles.COURT_ADMIN.name());
 
         manageOrderService.orchestrateCirDocumentsRequestedTask(caseData, "authorisation");
 

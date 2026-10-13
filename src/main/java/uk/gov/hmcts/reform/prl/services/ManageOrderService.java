@@ -192,7 +192,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_PERFORMING_A
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_PERFORMING_USER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_WHO_APPROVED_THE_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
-import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.enums.Event.ADMIN_EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_EDIT_AND_APPROVE_ORDER;
@@ -720,6 +719,7 @@ public class ManageOrderService {
     private static final String BOLD_END = "</span>";
 
     private final UserService userService;
+    private final UserRoleService userRoleService;
     private final HearingService hearingService;
     private final HearingDataService hearingDataService;
     private final WelshCourtEmail welshCourtEmail;
@@ -1352,16 +1352,16 @@ public class ManageOrderService {
 
     public Map<String, Object> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData, String language)
         throws DocumentGenerationException {
-        String loggedInUserType = getLoggedInUserType(authorisation);
         UserDetails userDetails = userService.getUserDetails(authorisation);
         boolean saveAsDraft = isSaveAsDraft(caseData);
 
-        if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
-            return setDraftOrderCollection(caseData, loggedInUserType, userDetails);
-        } else if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)) {
+        UserRoles loggedInUserRole = userRoleService.getLoggedInUserRole(authorisation);
+        if (UserRoles.JUDGE.equals(loggedInUserRole) || UserRoles.LEGAL_ADVISER.equals(loggedInUserRole)) {
+            return setDraftOrderCollection(caseData, loggedInUserRole.name(), userDetails);
+        } else if (UserRoles.COURT_ADMIN.equals(loggedInUserRole)) {
             if (!noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                 || saveAsDraft) {
-                return setDraftOrderCollection(caseData, loggedInUserType, userDetails);
+                return setDraftOrderCollection(caseData, loggedInUserRole.name(), userDetails);
             } else {
                 return setFinalOrderCollection(authorisation, caseData, userDetails, language);
             }
@@ -1463,6 +1463,9 @@ public class ManageOrderService {
     public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType, UserDetails userDetails) {
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
+
+        YesOrNo judgeApprovalNeeded = getJudgeApprovalNeeded(caseData, loggedInUserType);
+
         return DraftOrder.builder().orderType(caseData.getCreateSelectOrderOptions())
             .c21OrderOptions(blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())
                                  ? caseData.getManageOrders().getC21OrderOptions() : null)
@@ -1480,12 +1483,7 @@ public class ManageOrderService {
                               .orderCreatedByEmailId(userDetails.getEmail())
                               .dateCreated(dateTime.now())
                               .status(getOrderStatus(orderSelectionType, loggedInUserType, null, null))
-                              .isJudgeApprovalNeeded(noCheck.equals(
-                                  caseData.getManageOrders().getAmendOrderSelectCheckOptions())
-                                                         || AmendOrderCheckEnum.managerCheck.equals(
-                                  caseData.getManageOrders().getAmendOrderSelectCheckOptions())
-                                                         || UserRoles.JUDGE.name().equalsIgnoreCase(loggedInUserType)
-                                                         ? No : Yes)
+                              .isJudgeApprovalNeeded(judgeApprovalNeeded)
                               .reviewRequiredBy(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                               .nameOfJudgeForReview(caseData.getManageOrders().getNameOfJudgeAmendOrder())
                               .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
@@ -1647,6 +1645,8 @@ public class ManageOrderService {
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
 
+        YesOrNo judgeApprovalNeeded = getJudgeApprovalNeeded(caseData, loggedInUserType);
+
         return DraftOrder.builder()
             .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
             .orderType(CreateSelectOrderOptionsEnum.getIdFromValue(flagSelectedOrderId))
@@ -1666,12 +1666,7 @@ public class ManageOrderService {
                               .orderCreatedByEmailId(userDetails.getEmail())
                               .dateCreated(dateTime.now())
                               .status(getOrderStatus(orderSelectionType, loggedInUserType, null, null))
-                              .isJudgeApprovalNeeded(noCheck.equals(
-                                  caseData.getManageOrders().getAmendOrderSelectCheckOptions())
-                                                         || AmendOrderCheckEnum.managerCheck.equals(
-                                  caseData.getManageOrders().getAmendOrderSelectCheckOptions())
-                                                         || UserRoles.JUDGE.name().equalsIgnoreCase(loggedInUserType)
-                                                         ? No : Yes)
+                              .isJudgeApprovalNeeded(judgeApprovalNeeded)
                               .reviewRequiredBy(caseData.getManageOrders().getAmendOrderSelectCheckOptions()) //PRL-4854
                               .build())
             .dateOrderMade(caseData.getDateOrderMade())
@@ -1693,6 +1688,14 @@ public class ManageOrderService {
             .magistrateLastName(caseData.getMagistrateLastName())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .build();
+    }
+
+    private YesOrNo getJudgeApprovalNeeded(CaseData caseData, String loggedInUserType) {
+        return noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+            || AmendOrderCheckEnum.managerCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+            || UserRoles.JUDGE.name().equals(loggedInUserType)
+            || UserRoles.LEGAL_ADVISER.name().equals(loggedInUserType)
+            ? No : Yes;
     }
 
     private YesOrNo getIsUploadedFlag(ManageOrdersOptionsEnum manageOrdersOptions, String loggedInUserType) {
@@ -1740,6 +1743,8 @@ public class ManageOrderService {
         String status = "";
         if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
             status = OrderStatusEnum.createdByJudge.getDisplayedValue();
+        } else if (UserRoles.LEGAL_ADVISER.name().equals(loggedInUserType)) {
+            status = OrderStatusEnum.createdByLA.getDisplayedValue();
         } else if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)) {
             status = OrderStatusEnum.createdByCA.getDisplayedValue();
         } else if (UserRoles.SOLICITOR.name().equals(loggedInUserType)) {
@@ -2699,60 +2704,8 @@ public class ManageOrderService {
         return withdrawApproved;
     }
 
-    public String getLoggedInUserType(String authorisation) {
-        UserDetails userDetails = userService.getUserDetails(authorisation);
-        String loggedInUserType;
-        if (launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)) {
-            //This would check for roles from AM for Judge/Legal advisor/Court admin
-            //if it doesn't find then it will check for idam roles for rest of the users
-            RoleAssignmentServiceResponse roleAssignmentServiceResponse;
-            try {
-                roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
-                    authorisation,
-                    authTokenGenerator.generate(),
-                    null,
-                    userDetails.getId()
-                );
-            } catch (FeignException e) {
-                log.error("Error fetching role assignments: {}", e.getMessage());
-                throw e;
-            }
-
-            List<String> roles = roleAssignmentServiceResponse.getRoleAssignmentResponse().stream().map(
-                RoleAssignmentResponse::getRoleName).toList();
-
-            if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)
-                || roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LEGAL_ADVISER.getRoles()::contains)) {
-                loggedInUserType = UserRoles.JUDGE.name();
-            } else if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.COURT_ADMIN.getRoles()::contains)) {
-                loggedInUserType = UserRoles.COURT_ADMIN.name();
-            } else if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
-                loggedInUserType = UserRoles.SOLICITOR.name();
-            } else if (userDetails.getRoles().contains(Roles.CITIZEN.getValue())) {
-                loggedInUserType = UserRoles.CITIZEN.name();
-            } else if (userDetails.getRoles().contains(Roles.SYSTEM_UPDATE.getValue())) {
-                loggedInUserType = UserRoles.SYSTEM_UPDATE.name();
-            } else {
-                loggedInUserType = "";
-            }
-        } else {
-            if (userDetails.getRoles().contains(Roles.JUDGE.getValue()) || userDetails.getRoles().contains(Roles.LEGAL_ADVISER.getValue())) {
-                loggedInUserType = UserRoles.JUDGE.name();
-            } else if (userDetails.getRoles().contains(Roles.COURT_ADMIN.getValue())) {
-                loggedInUserType = UserRoles.COURT_ADMIN.name();
-            } else if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
-                loggedInUserType = UserRoles.SOLICITOR.name();
-            } else if (userDetails.getRoles().contains(Roles.CITIZEN.getValue())) {
-                loggedInUserType = UserRoles.CITIZEN.name();
-            } else if (userDetails.getRoles().contains(Roles.SYSTEM_UPDATE.getValue())) {
-                loggedInUserType = UserRoles.SYSTEM_UPDATE.name();
-            } else {
-                loggedInUserType = "";
-            }
-        }
-
-        log.info("getLoggedInUserType returning: '{}' for user: {}", loggedInUserType, userDetails.getId());
-        return loggedInUserType;
+    private String getLoggedInUserType(String authorisation) {
+        return userRoleService.getLoggedInUserType(authorisation);
     }
 
     /**

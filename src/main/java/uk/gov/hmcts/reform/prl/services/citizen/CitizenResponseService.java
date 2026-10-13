@@ -29,7 +29,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
-import uk.gov.hmcts.reform.prl.services.ManageOrderService;
+import uk.gov.hmcts.reform.prl.services.UserRoleService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -79,7 +79,7 @@ public class CitizenResponseService {
     private final DocumentGenService documentGenService;
     private final DocumentLanguageService documentLanguageService;
     private final CitizenPartyDetailsMapper citizenPartyDetailsMapper;
-    private final ManageOrderService manageOrderService;
+    private final UserRoleService userRoleService;
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("ddmmyyyy");
     public static final String C1A_RESPONSE = "C1Aresponse";
@@ -388,7 +388,7 @@ public class CitizenResponseService {
         if (dataMap.containsKey(IS_CONFIDENTIAL_DATA_PRESENT)) {
             int partyIndex = caseData.getRespondents().indexOf(partyDetailsElement);
             //prl-6790 - getting user-role and adding to datamap
-            dataMap.put("loggedInUserRole", manageOrderService.getLoggedInUserType(authorisation));
+            dataMap.put("loggedInUserRole", userRoleService.getLoggedInUserType(authorisation));
 
             Document c8FinalDocument = documentGenService.generateSingleDocument(
                     authorisation,

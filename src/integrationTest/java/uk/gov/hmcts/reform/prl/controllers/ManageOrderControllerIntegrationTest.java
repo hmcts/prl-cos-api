@@ -41,6 +41,7 @@ import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
+import uk.gov.hmcts.reform.prl.services.UserRoleService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassCaseDataHelper;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -128,6 +129,9 @@ public class ManageOrderControllerIntegrationTest {
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @MockBean
+    UserRoleService userRoleService;
 
     @Before
     public void setUp() {
