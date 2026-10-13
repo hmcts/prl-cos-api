@@ -106,6 +106,10 @@ public class HearingService {
                 roleAssignmentUrl,
                 caseReferenceNumber
             );
+            log.info(
+                "DIRECT_HMC_CALL_SUCCESS - new direct HMC hearing call succeeded for caseReferenceNumber={}",
+                caseReferenceNumber
+            );
             integrateVenueAndJudgeDetails(hearings);
             if (hearings != null) {
                 log.info(
