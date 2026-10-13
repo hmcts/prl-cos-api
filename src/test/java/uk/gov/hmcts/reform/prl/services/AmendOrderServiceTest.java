@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.services.validators.LegalAdviserChecker;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.io.IOException;
@@ -45,6 +46,9 @@ public class AmendOrderServiceTest {
 
     @Mock
     private AmendedOrderStamper stamper;
+
+    @Mock
+    private LegalAdviserChecker legalAdviserChecker;
 
     @Mock
     private UploadDocumentService uploadDocumentService;
