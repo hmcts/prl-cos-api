@@ -1241,8 +1241,8 @@
     "newOrdersUndertakingInPlaceDateIssued": "1967-09-01",
     "caApplicant1Policy": {
       "Organisation": {
-        "OrganisationID": "QO4A1Q8",
-        "OrganisationName": "FPRL-test-organisation"
+        "OrganisationID": "{{applicantSolicitorOrgId}}",
+        "OrganisationName": "{{applicantSolicitorOrgName}}"
       },
       "OrgPolicyReference": null,
       "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR1]"
@@ -1840,8 +1840,8 @@
           "placeOfBirth": "London",
           "previousName": null,
           "solicitorOrg": {
-            "OrganisationID": "QO4A1Q8",
-            "OrganisationName": "FPRL-test-organisation"
+            "OrganisationID": "{{applicantSolicitorOrgId}}",
+            "OrganisationName": "{{applicantSolicitorOrgName}}"
           },
           "solicitorEmail": "legal.solicitor@example.net",
           "contactPreferences": null,
@@ -1879,8 +1879,8 @@
           "placeOfBirth": "London",
           "previousName": null,
           "solicitorOrg": {
-            "OrganisationID": "QO4A1Q8",
-            "OrganisationName": "FPRL-test-organisation"
+            "OrganisationID": "{{applicantSolicitorOrgId}}",
+            "OrganisationName": "{{applicantSolicitorOrgName}}"
           },
           "solicitorEmail": "legal.solicitorjr@example.net",
           "contactPreferences": null,
@@ -1918,8 +1918,8 @@
           "placeOfBirth": "London",
           "previousName": null,
           "solicitorOrg": {
-            "OrganisationID": "QO4A1Q8",
-            "OrganisationName": "FPRL-test-organisation"
+            "OrganisationID": "{{applicantSolicitorOrgId}}",
+            "OrganisationName": "{{applicantSolicitorOrgName}}"
           },
           "solicitorEmail": "legal.solicitorsr@example.net",
           "contactPreferences": null,
@@ -2683,8 +2683,8 @@
     ],
     "caApplicant2Policy": {
       "Organisation": {
-        "OrganisationID": "QO4A1Q8",
-        "OrganisationName": "FPRL-test-organisation"
+        "OrganisationID": "{{applicantSolicitorOrgId}}",
+        "OrganisationName": "{{applicantSolicitorOrgName}}"
       },
       "OrgPolicyReference": null,
       "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR2]"
@@ -2699,10 +2699,7 @@
       "visibility": null
     },
     "applicantOrganisationPolicy": {
-      "Organisation": {
-        "OrganisationID": "LM6OZX0",
-        "OrganisationName": "Private law NOC solution"
-      },
+      "Organisation": {},
       "OrgPolicyReference": null,
       "OrgPolicyCaseAssignedRole": "[APPLICANTSOLICITOR]"
     },
@@ -3412,8 +3409,8 @@
           "placeOfBirth": "London",
           "previousName": null,
           "solicitorOrg": {
-            "OrganisationID": "QO4A1Q8",
-            "OrganisationName": "FPRL-test-organisation"
+            "OrganisationID": "{{applicantSolicitorOrgId}}",
+            "OrganisationName": "{{applicantSolicitorOrgName}}"
           },
           "partyLevelFlag": {
             "details": [
@@ -3906,8 +3903,8 @@
           "placeOfBirth": "London",
           "previousName": null,
           "solicitorOrg": {
-            "OrganisationID": "QO4A1Q8",
-            "OrganisationName": "FPRL-test-organisation"
+            "OrganisationID": "{{applicantSolicitorOrgId}}",
+            "OrganisationName": "{{applicantSolicitorOrgName}}"
           },
           "partyLevelFlag": {
             "details": [
@@ -4400,8 +4397,8 @@
           "placeOfBirth": "London",
           "previousName": null,
           "solicitorOrg": {
-            "OrganisationID": "QO4A1Q8",
-            "OrganisationName": "FPRL-test-organisation"
+            "OrganisationID": "{{applicantSolicitorOrgId}}",
+            "OrganisationName": "{{applicantSolicitorOrgName}}"
           },
           "partyLevelFlag": {
             "details": [
@@ -6144,8 +6141,8 @@
     ],
     "caApplicant3Policy": {
       "Organisation": {
-        "OrganisationID": "QO4A1Q8",
-        "OrganisationName": "FPRL-test-organisation"
+        "OrganisationID": "{{applicantSolicitorOrgId}}",
+        "OrganisationName": "{{applicantSolicitorOrgName}}"
       },
       "OrgPolicyReference": null,
       "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR3]"

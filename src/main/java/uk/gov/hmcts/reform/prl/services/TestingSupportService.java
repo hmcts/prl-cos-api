@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.mapper.courtnav.FL401ApplicationMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.StatementOfTruth;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
@@ -97,6 +99,8 @@ public class TestingSupportService {
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final CaseInitiationService caseInitiationService;
     private final TaskListService taskListService;
+    private final UserService userService;
+    private final OrganisationService organisationService;
 
     private static final String VALID_RESPONDENT_TASKLIST_INPUT_JSON = "Dummy_Respondent_Tasklist_Data.json";
 
@@ -128,6 +132,17 @@ public class TestingSupportService {
             boolean adminCreateApplication = false;
             if (TS_SOLICITOR_APPLICATION.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
                 requestBody = loadCaseDetailsInDraftStage(initialCaseData);
+                // update the correct applicant policy with the logged in user
+                // GET ORGANISATION
+                UserDetails userDetails = userService.getUserDetails(authorisation);
+                Optional<Organisations> userOrganisation = organisationService.getOrganisationByEmailDetail(userDetails.getEmail());
+                if (userOrganisation.isPresent()) {
+                    requestBody = requestBody
+                        .replace("{{applicantSolicitorOrgId}}",
+                                                         userOrganisation.get().getOrganisationIdentifier())
+                        .replace("{{applicantSolicitorOrgName}}",
+                                    userOrganisation.get().getName());
+                }
             } else if (TS_CA_URGENT_CASE.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
                 requestBody = loadUrgentCaseDetailsInDraftStage(initialCaseData);
             } else {
