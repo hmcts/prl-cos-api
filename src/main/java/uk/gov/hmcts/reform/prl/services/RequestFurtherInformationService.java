@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.RequestFurtherInformation;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -45,8 +44,7 @@ public class RequestFurtherInformationService {
         if (!featureToggleService.isAwaitingInformationEnabled()) {
             return emptyList();
         }
-        var caseDataUpdated = addToCase(callbackRequest);
-        var requestFurtherInformation = getRequestFurtherInformation(caseDataUpdated);
+        var requestFurtherInformation = getRequestFurtherInformation(callbackRequest.getCaseDetails().getData());
         var errorList = new ArrayList<String>();
         if (requestFurtherInformation.getReviewDate()
             != null && !requestFurtherInformation.getReviewDate().isAfter(LocalDate.now())) {
@@ -55,14 +53,12 @@ public class RequestFurtherInformationService {
         return errorList;
     }
 
-    public Map<String, Object> addToCase(CallbackRequest callbackRequest) {
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+    public Map<String, Object> addToCase(Map<String, Object> caseDataUpdated) {
         caseDataUpdated.put(
             CASE_STATUS, CaseStatus.builder()
                 .state(AWAITING_INFORMATION.getLabel())
                 .build()
         );
-        CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
         return caseDataUpdated;
     }
 
@@ -126,7 +122,8 @@ public class RequestFurtherInformationService {
         String caseId = valueOf(callbackRequest.getCaseDetails().getId());
         var startEventResponse =
             ccdCoreCaseDataService.startUpdate(systemAuthToken, eventRequestData, caseId, true);
-        var requestFurtherInformation = getRequestFurtherInformation(startEventResponse.getCaseDetails().getData());
+        var caseDataUpdated = addToCase(startEventResponse.getCaseDetails().getData());
+        var requestFurtherInformation = getRequestFurtherInformation(caseDataUpdated);
 
         var caseDataContent = CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())

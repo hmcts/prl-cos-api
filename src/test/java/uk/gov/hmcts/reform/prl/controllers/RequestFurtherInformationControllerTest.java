@@ -85,16 +85,13 @@ public class RequestFurtherInformationControllerTest {
     @Test
     public void shouldSubmitAwaitingInformationSuccessfully() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
-        when(requestFurtherInformationService.addToCase(callbackRequest)).thenReturn(updatedCaseData);
 
         AboutToStartOrSubmitCallbackResponse response = requestFurtherInformationController
             .submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
         assertNotNull(response);
         assertNotNull(response.getData());
-        assertTrue(response.getData().containsKey(CASE_STATUS));
         verify(authorisationService, times(1)).isAuthorized(AUTH_TOKEN, S2S_TOKEN);
-        verify(requestFurtherInformationService, times(1)).addToCase(callbackRequest);
     }
 
     @Test
@@ -129,7 +126,7 @@ public class RequestFurtherInformationControllerTest {
         updatedCaseData.put("respondentName", "Jane Doe");
 
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
-        when(requestFurtherInformationService.addToCase(callbackRequest)).thenReturn(updatedCaseData);
+        when(requestFurtherInformationService.addToCase(callbackRequest.getCaseDetails().getData())).thenReturn(updatedCaseData);
 
         AboutToStartOrSubmitCallbackResponse response = requestFurtherInformationController
             .submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
@@ -143,7 +140,7 @@ public class RequestFurtherInformationControllerTest {
     public void shouldHandleNullCaseData() {
         Map<String, Object> emptyCaseData = new HashMap<>();
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
-        when(requestFurtherInformationService.addToCase(callbackRequest)).thenReturn(emptyCaseData);
+        when(requestFurtherInformationService.addToCase(callbackRequest.getCaseDetails().getData())).thenReturn(emptyCaseData);
 
         AboutToStartOrSubmitCallbackResponse response = requestFurtherInformationController
             .submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
@@ -225,7 +222,7 @@ public class RequestFurtherInformationControllerTest {
         updatedCaseData.put("eventId", "123456");
 
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
-        when(requestFurtherInformationService.addToCase(callbackRequest)).thenReturn(updatedCaseData);
+        when(requestFurtherInformationService.addToCase(callbackRequest.getCaseDetails().getData())).thenReturn(updatedCaseData);
 
         AboutToStartOrSubmitCallbackResponse response = requestFurtherInformationController
             .submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
@@ -238,7 +235,7 @@ public class RequestFurtherInformationControllerTest {
     @Test
     public void shouldVerifyCorrectHeadersUsedInSubmit() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
-        when(requestFurtherInformationService.addToCase(callbackRequest)).thenReturn(updatedCaseData);
+        when(requestFurtherInformationService.addToCase(callbackRequest.getCaseDetails().getData())).thenReturn(updatedCaseData);
 
         requestFurtherInformationController.submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
@@ -281,7 +278,7 @@ public class RequestFurtherInformationControllerTest {
     @Test
     public void submitAwaitingInformation_WithValidTokens_Success() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
-        when(requestFurtherInformationService.addToCase(callbackRequest)).thenReturn(updatedCaseData);
+        when(requestFurtherInformationService.addToCase(callbackRequest.getCaseDetails().getData())).thenReturn(updatedCaseData);
 
         AboutToStartOrSubmitCallbackResponse response = requestFurtherInformationController
             .submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
@@ -310,7 +307,7 @@ public class RequestFurtherInformationControllerTest {
         assertThrows(RuntimeException.class, () ->
             requestFurtherInformationController.submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest));
 
-        verify(requestFurtherInformationService, times(0)).addToCase(callbackRequest);
+        verify(requestFurtherInformationService, times(0)).addToCase(callbackRequest.getCaseDetails().getData());
     }
 
     @Test
@@ -321,7 +318,7 @@ public class RequestFurtherInformationControllerTest {
         assertThrows(RuntimeException.class, () ->
             requestFurtherInformationController.submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest));
 
-        verify(requestFurtherInformationService, times(0)).addToCase(callbackRequest);
+        verify(requestFurtherInformationService, times(0)).addToCase(callbackRequest.getCaseDetails().getData());
     }
 
     @Test
@@ -341,14 +338,11 @@ public class RequestFurtherInformationControllerTest {
     @Test
     public void submitAwaitingInformation_EmptyCaseData_ReturnsResponse() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
-        Map<String, Object> emptyCaseData = new HashMap<>();
-        when(requestFurtherInformationService.addToCase(callbackRequest)).thenReturn(emptyCaseData);
 
         AboutToStartOrSubmitCallbackResponse response = requestFurtherInformationController
             .submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
         assertNotNull(response.getData());
-        assertTrue(response.getData().isEmpty());
     }
 
     @Test
