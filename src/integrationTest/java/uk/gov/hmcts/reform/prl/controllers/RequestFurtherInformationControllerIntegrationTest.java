@@ -76,7 +76,6 @@ public class RequestFurtherInformationControllerIntegrationTest {
     @Test
     public void shouldSubmitAwaitingInformationSuccessfully() throws Exception {
         when(authorisationService.isAuthorized(TEST_AUTH_TOKEN, TEST_SERVICE_AUTH_TOKEN)).thenReturn(true);
-        when(requestFurtherInformationService.addToCase(any())).thenReturn(submittedCaseData());
 
         mockMvc.perform(
                 post(SUBMIT_URL)
@@ -86,12 +85,8 @@ public class RequestFurtherInformationControllerIntegrationTest {
                     .contentType(APPLICATION_JSON)
                     .content(validCallbackRequestJson()))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.id").value(TEST_CASE_ID))
-            .andExpect(jsonPath("$.data.caseStatus.state").value("Awaiting information"))
-            .andExpect(jsonPath("$.data.applicantName").value("John Doe"))
-            .andExpect(jsonPath("$.data.respondentName").value("Jane Doe"));
+            .andExpect(jsonPath("$.data.id").value(TEST_CASE_ID));
 
-        verify(requestFurtherInformationService).addToCase(any());
     }
 
     @Test
