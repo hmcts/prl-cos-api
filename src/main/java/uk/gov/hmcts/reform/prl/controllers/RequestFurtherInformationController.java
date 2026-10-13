@@ -53,7 +53,8 @@ public class RequestFurtherInformationController {
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)
             && featureToggleService.isAwaitingInformationEnabled()) {
-            return AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build();
+            var caseDataUpdated = requestFurtherInformationService.addToCase(callbackRequest);
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         }
         throw (new RuntimeException(INVALID_CLIENT));
     }
