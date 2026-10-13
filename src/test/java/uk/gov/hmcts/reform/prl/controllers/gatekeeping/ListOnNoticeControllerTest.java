@@ -396,7 +396,7 @@ public class ListOnNoticeControllerTest {
             .isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.legalAdviser)
             .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
             .build();
-        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviserList(), refDataUserService))
+        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviser(), refDataUserService))
             .thenReturn(allocatedJudge);
 
         CaseNoteDetails caseNoteDetails = CaseNoteDetails.builder()
@@ -438,7 +438,7 @@ public class ListOnNoticeControllerTest {
             .isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.legalAdviser)
             .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
             .build();
-        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviserList(), refDataUserService))
+        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviser(), refDataUserService))
             .thenReturn(allocatedJudge);
 
         CaseNoteDetails caseNoteDetails = CaseNoteDetails.builder()
@@ -478,7 +478,7 @@ public class ListOnNoticeControllerTest {
             .isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.legalAdviser)
             .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
             .build();
-        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviserList(), refDataUserService))
+        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviser(), refDataUserService))
             .thenReturn(allocatedJudge);
 
         CaseNoteDetails caseNoteDetails = CaseNoteDetails.builder()
