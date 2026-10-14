@@ -169,19 +169,7 @@ public class ServiceOfApplicationPostService {
         //PRL-5360 - Remove mediation voucher & add new President note
         attachStaticFileToTheDocuments(documentLanguage, files, SOA_FAMILY_PRESIDENTS_NOTE, SOA_FAMILY_PRESIDENTS_NOTE_WELSH);
 
-        files.add(new InMemoryMultipartFile(
-            SOA_MULTIPART_FILE,
-            C7_BLANK_DOCUMENT_FILENAME,
-            APPLICATION_PDF_VALUE,
-            DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + C7_BLANK_DOCUMENT_FILENAME)
-        ));
-
-        files.add(new InMemoryMultipartFile(
-            SOA_MULTIPART_FILE,
-            C7_BLANK_DOCUMENT_WELSH_FILENAME,
-            APPLICATION_PDF_VALUE,
-            DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + C7_BLANK_DOCUMENT_WELSH_FILENAME)
-        ));
+        attachStaticFileToTheDocuments(documentLanguage, files, C7_BLANK_DOCUMENT_FILENAME, C7_BLANK_DOCUMENT_WELSH_FILENAME);
 
         attachStaticFileToTheDocuments(documentLanguage, files, SOA_C9_PERSONAL_SERVICE_FILENAME, SOA_C9_PERSONAL_SERVICE_FILENAME_WELSH);
         attachStaticFileToTheDocuments(documentLanguage, files, C1A_BLANK_DOCUMENT_FILENAME, C1A_BLANK_DOCUMENT_WELSH_FILENAME);
