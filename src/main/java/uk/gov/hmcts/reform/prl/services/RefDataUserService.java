@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.clients.CommonDataRefApi;
 import uk.gov.hmcts.reform.prl.clients.JudicialUserDetailsApi;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.exception.NoHearingRefDataResponseException;
 import uk.gov.hmcts.reform.prl.exception.NoStaffResponseException;
 import uk.gov.hmcts.reform.prl.mapper.staffresponse.StaffResponseToDynamicListElementFilter;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -38,6 +39,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.apache.logging.log4j.util.Strings.concat;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGCHANNEL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGTYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_HEARINGCHILDREQUIRED_N;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_HEARINGCHILDREQUIRED_Y;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGALOFFICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_ID;
 
@@ -54,6 +59,7 @@ public class RefDataUserService {
     private final JudicialUserDetailsApi judicialUserDetailsApi;
     private final IdamClient idamClient;
     private final CommonDataRefApi commonDataRefApi;
+    private final HearingRefDataService hearingRefDataService;
     private final LaunchDarklyClient launchDarklyClient;
 
     @Value("${prl.refdata.username}")
@@ -206,6 +212,10 @@ public class RefDataUserService {
         log.info("retrieveCategoryValues {}", categoryId);
         CommonDataResponse commonDataResponse = null;
         try {
+            if ((HEARINGCHANNEL.equals(categoryId) && IS_HEARINGCHILDREQUIRED_Y.equals(isHearingChildRequired))
+                || (HEARINGTYPE.equals(categoryId) && IS_HEARINGCHILDREQUIRED_N.equals(isHearingChildRequired))) {
+                return hearingRefDataService.getCategoryValues(authorization, categoryId, isHearingChildRequired);
+            }
             commonDataResponse = commonDataRefApi.getAllCategoryValuesByCategoryId(
                 authorization,
                 authTokenGenerator.generate(),
@@ -214,7 +224,7 @@ public class RefDataUserService {
                 isHearingChildRequired
             );
 
-        } catch (FeignException e) {
+        } catch (FeignException | NoHearingRefDataResponseException e) {
             log.error("Category Values look up failed", e);
         }
         return commonDataResponse;
