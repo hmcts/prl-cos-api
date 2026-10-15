@@ -552,10 +552,18 @@ tasks.register('runAndPublishConsumerPactTests', Test) {
 
   testClassesDirs = sourceSets.contractTest.output.classesDirs
   classpath = sourceSets.contractTest.runtimeClasspath
+
+  include "uk/gov/hmcts/reform/prl/clients/**"
+  systemProperty 'pact.rootDir', "pacts"
+  environment("APPINSIGHTS_INSTRUMENTATIONKEY", "test-key")
 }
 
 runAndPublishConsumerPactTests.dependsOn contract
-runAndPublishConsumerPactTests.finalizedBy pactPublish
+if (System.getenv("PACT_BROKER_FULL_URL")) {
+  runAndPublishConsumerPactTests.finalizedBy pactPublish
+} else {
+  logger.lifecycle("PACT_BROKER_FULL_URL not set - skipping pactPublish (consumer pact tests will still run).")
+}
 
 pitest {
   targetClasses = ['uk.gov.hmcts.reform.prl.*']
