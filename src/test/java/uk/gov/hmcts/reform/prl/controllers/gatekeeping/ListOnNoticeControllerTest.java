@@ -58,10 +58,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE_REASONS_SELECTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REASONS_SELECTED_FOR_LIST_ON_NOTICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SELECTED_AND_ADDITIONAL_REASONS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHOUT_NOTICE_REJECTION;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -382,7 +382,7 @@ public class ListOnNoticeControllerTest {
     }
 
     @Test
-    public void testListOnNoticeSubmissionSubjectUsesSelectedReasonWhenItAppearsInSelectedAndAdditionalReasons() {
+    public void testListOnNoticeSubmissionSubjectIsSetWhenSelectedAndAdditionalReasonIsPresent() {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String selectedAndAdditionalReasons = ListOnNoticeReasonsEnum.itsNotWithoutNoticeButItsUrgent.getDisplayedValue();
 
@@ -415,14 +415,14 @@ public class ListOnNoticeControllerTest {
         listOnNoticeController.listOnNoticeSubmission(authToken, s2sToken, callbackRequest);
 
         verify(addCaseNoteService).getCurrentCaseNoteDetails(
-            eq(selectedAndAdditionalReasons),
+            eq(LIST_ON_NOTICE),
             eq(selectedAndAdditionalReasons),
             any(UserDetails.class)
         );
     }
 
     @Test
-    public void testListOnNoticeSubmissionSubjectUsesFirstReasonWhenItAppearsFirstInSelectedAndAdditionalReasons() {
+    public void testListOnNoticeSubmissionSubjectIsSetWhenMultipleSelectedAndAdditionalReasonsArePresent() {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String reasonOne = ListOnNoticeReasonsEnum.localAuthorityInvolvedWithTheChildrenAndFamily.getDisplayedValue();
         String reasonTwo = ListOnNoticeReasonsEnum.itsNotWithoutNoticeButItsUrgent.getDisplayedValue();
@@ -457,14 +457,14 @@ public class ListOnNoticeControllerTest {
         listOnNoticeController.listOnNoticeSubmission(authToken, s2sToken, callbackRequest);
 
         verify(addCaseNoteService).getCurrentCaseNoteDetails(
-            eq(reasonOne),
+            eq(LIST_ON_NOTICE),
             eq(selectedAndAdditionalReasons),
             any(UserDetails.class)
         );
     }
 
     @Test
-    public void testListOnNoticeSubmissionSubjectFallsBackWhenNoEnumReasonIsPresent() {
+    public void testListOnNoticeSubmissionSubjectIsSetWhenNoEnumReasonIsPresent() {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String selectedAndAdditionalReasons = "Free text reason only";
 
@@ -497,7 +497,7 @@ public class ListOnNoticeControllerTest {
         listOnNoticeController.listOnNoticeSubmission(authToken, s2sToken, callbackRequest);
 
         verify(addCaseNoteService).getCurrentCaseNoteDetails(
-            eq(WITHOUT_NOTICE_REJECTION),
+            eq(LIST_ON_NOTICE),
             eq(selectedAndAdditionalReasons),
             any(UserDetails.class)
         );
