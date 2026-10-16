@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
-import uk.gov.hmcts.reform.prl.enums.gatekeeping.ListOnNoticeReasonsEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
@@ -34,16 +33,14 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE_REASONS_SELECTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SELECTED_AND_ADDITIONAL_REASONS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHOUT_NOTICE_REJECTION;
 
 @Slf4j
 @RestController
@@ -102,7 +99,7 @@ public class ListOnNoticeController {
             );
             if (!StringUtils.isEmpty(selectedAndAdditionalReasons)) {
                 CaseNoteDetails currentCaseNoteDetails = addCaseNoteService.getCurrentCaseNoteDetails(
-                    buildSubject(selectedAndAdditionalReasons),
+                    LIST_ON_NOTICE,
                     selectedAndAdditionalReasons,
                     userService.getUserDetails(authorisation)
                 );
@@ -154,21 +151,5 @@ public class ListOnNoticeController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-    }
-
-    private String buildSubject(String selectedAndAdditionalReasons) {
-        return StringUtils.defaultIfBlank(
-            getFirstMatchingReason(selectedAndAdditionalReasons),
-            WITHOUT_NOTICE_REJECTION //The subject will default to the without notice rejection reason if no matching reason is found.
-        );
-    }
-
-    private String getFirstMatchingReason(String selectedAndAdditionalReasons) {
-        List<String> reasons = Arrays.stream(ListOnNoticeReasonsEnum.values())
-            .map(ListOnNoticeReasonsEnum::getDisplayedValue)
-            .filter(selectedAndAdditionalReasons::contains)
-            .toList();
-
-        return reasons.isEmpty() ? "" : reasons.getFirst();
     }
 }
