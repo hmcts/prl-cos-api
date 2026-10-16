@@ -1081,6 +1081,7 @@ public class CafcassCaseDataHelper {
             .anyMatch(order ->
                           (matchesDocumentId(order.getOrderDocument(), uploadOrderDoc)
                               || matchesDocumentId(order.getOrderDocumentWelsh(), uploadOrderDoc))
+                              && order.getOrderType() != null
                               && NOTICE_OF_HEARING_ORDER_TYPES.contains(order.getOrderType())
             );
     }
