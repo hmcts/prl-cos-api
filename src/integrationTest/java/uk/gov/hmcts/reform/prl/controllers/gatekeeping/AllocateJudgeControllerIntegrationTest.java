@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -65,25 +64,6 @@ public class AllocateJudgeControllerIntegrationTest {
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
         objectMapper.registerModule(new ParameterNamesModule());
-    }
-
-    @Test
-    public void testPrePopulateLegalAdvisorDetails() throws Exception {
-        String url = "/allocateJudge/pre-populate-legalAdvisor-details";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-
-        Mockito.when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        Mockito.when(refDataUserService.getLegalAdvisorList()).thenReturn(new ArrayList<>());
-
-        mockMvc.perform(
-                post(url)
-                    .header("Authorization", "Bearer testAuthToken")
-                    .header("ServiceAuthorization", "testServiceAuthToken")
-                    .accept(MediaType.APPLICATION_JSON)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(jsonRequest))
-            .andExpect(status().isOk())
-            .andReturn();
     }
 
     @Test

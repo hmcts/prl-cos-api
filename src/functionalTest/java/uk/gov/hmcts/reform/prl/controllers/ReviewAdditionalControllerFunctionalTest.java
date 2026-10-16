@@ -71,7 +71,7 @@ public class ReviewAdditionalControllerFunctionalTest {
 
     @Test
     public void givenBodyWithNoMessages_whenAboutToSubmitForSendOrReply() throws Exception {
-        String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST_FOR_REPLY);
+        String requestBody = ResourceLoader.loadJson(REVIEW_ADDITIONAL_APPLICATION_REQUEST_FOR_SEND);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .body(requestBody)
@@ -85,7 +85,7 @@ public class ReviewAdditionalControllerFunctionalTest {
 
     @Test
     public void givenBodyWithNoMessages_whenSubmittedForSendOrReply() throws Exception {
-        String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST_FOR_REPLY);
+        String requestBody = ResourceLoader.loadJson(REVIEW_ADDITIONAL_APPLICATION_REQUEST_FOR_SEND);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .body(requestBody)

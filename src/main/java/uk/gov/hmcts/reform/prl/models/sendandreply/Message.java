@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.common.staff.StaffUser;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDateTime;
@@ -100,7 +101,7 @@ public class Message extends MessageMetaData {
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<Element<Document>> internalMessageAttachDocs;
-
+    private StaffUser legalAdviser;
     private DynamicList legalAdviserList;
     private String legalAdviserEmail;
     private String legalAdviserName;
