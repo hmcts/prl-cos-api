@@ -23,8 +23,7 @@ import java.util.concurrent.TimeoutException;
  */
 @FeignClient(
     name = "hmc-hearing-feign-api",
-    url = "${hearing_component.api.feign-url}",
-    configuration = TempHmcHearingFeignConfig.class
+    url = "${hearing_component.api.feign-url}"
 )
 public interface HmcHearingApiClient {
 
