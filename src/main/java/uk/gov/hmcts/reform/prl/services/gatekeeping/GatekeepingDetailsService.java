@@ -13,16 +13,12 @@ import uk.gov.hmcts.reform.prl.enums.gatekeeping.WhoToSendToGatekeeperTypeEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.common.staff.StaffUser;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
-import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
-import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
-import uk.gov.hmcts.reform.prl.services.RefDataUserService;
-import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.validators.LegalAdviserChecker;
 
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_USER;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getIdamId;
@@ -35,8 +31,6 @@ import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 public class GatekeepingDetailsService {
 
     public static final String WHO_TO_SEND_TO_GATEKEEPER = "whoToSendTheCaseToForGatekeeping";
-
-    private final LegalAdviserChecker legalAdviserChecker;
 
     public GatekeepingDetails getGatekeepingDetails(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList) {
         GatekeepingDetails.GatekeepingDetailsBuilder gatekeepingDetailsBuilder = GatekeepingDetails.builder();
@@ -58,14 +52,14 @@ public class GatekeepingDetailsService {
                 }
 
                 gatekeepingDetailsBuilder.judgePersonalCode(judgePersonalCode[0]);
-            } else if (SendToGatekeeperTypeEnum.legalAdviser.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(
-                IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING)))
+            } else if (WhoToSendToGatekeeperTypeEnum.SEND_TO_A_SPECIFIC_LEGAL_ADVISER.getId()
+                .equalsIgnoreCase(String.valueOf(caseDataUpdated.get(WHO_TO_SEND_TO_GATEKEEPER)))
                 && null != caseDataUpdated.get("legalAdviser")) {
                 gatekeepingDetailsBuilder.isSpecificGateKeeperNeeded(YesOrNo.Yes);
                 gatekeepingDetailsBuilder.isJudgeOrLegalAdviserGatekeeping((SendToGatekeeperTypeEnum.legalAdviser));
                 gatekeepingDetailsBuilder.legalAdviser(StaffUser.builder()
                                                            .idamId(getIdamId(caseDataUpdated.get(LEGAL_ADVISER_USER))[0]).build());
-            } else if (legalAdviserChecker.isLegalAdviserListPresent(legalAdviserList)) {
+            } else if (LegalAdviserChecker.isLegalAdviserListPresent(legalAdviserList)) {
                 gatekeepingDetailsBuilder.isSpecificGateKeeperNeeded(YesOrNo.Yes);
                 gatekeepingDetailsBuilder.isJudgeOrLegalAdviserGatekeeping((SendToGatekeeperTypeEnum.legalAdviser));
                 gatekeepingDetailsBuilder.legalAdviserList(legalAdviserList);
