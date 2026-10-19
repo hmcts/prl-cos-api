@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 public enum ChildArrangementOrdersEnum {
 
     @JsonProperty("standardDirectionsOrder")
-    standardDirectionsOrder("standardDirectionsOrder", "Directions on issue"),
+    standardDirectionsOrder("standardDirectionsOrder", "Directions on Issue"),
     @JsonProperty("blankOrderOrDirections")
     blankOrderOrDirections("blankOrderOrDirections", "Blank order or directions (C21)"),
     @JsonProperty("caSpecificProhibitedOrder")

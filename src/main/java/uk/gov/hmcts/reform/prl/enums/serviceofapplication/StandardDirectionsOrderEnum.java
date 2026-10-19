@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum StandardDirectionsOrderEnum {
 
-    standardDirectionsOrder("Directions on issue");
+    standardDirectionsOrder("Directions on Issue");
 
     private final String displayedValue;
 
