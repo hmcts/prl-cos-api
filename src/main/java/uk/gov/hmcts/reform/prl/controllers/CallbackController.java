@@ -489,11 +489,13 @@ public class CallbackController {
             caseDataUpdated.putAll(allTabsFields);
             if (caseDataUpdated.get(WHO_TO_SEND_TO_GATEKEEPER) != null
                 && (gatekeepingDetails.getJudgeName() != null
+                || gatekeepingDetails.getLegalAdviser() != null
                 || (gatekeepingDetails.getLegalAdviserList() != null
                 && CollectionUtils.isNotEmpty(gatekeepingDetails.getLegalAdviserList().getListItems())))) {
                 RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
                     .judicialUser(gatekeepingDetails.getJudgeName())
                     .legalAdviserList(gatekeepingDetails.getLegalAdviserList())
+                    .legalAdviser(gatekeepingDetails.getLegalAdviser())
                     .build();
 
                 roleAssignmentService.createRoleAssignment(

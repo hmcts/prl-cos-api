@@ -15,8 +15,14 @@ import uk.gov.hmcts.reform.prl.enums.gatekeeping.WhoToSendToGatekeeperTypeEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.common.staff.StaffUser;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
+import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
+import uk.gov.hmcts.reform.prl.services.validators.LegalAdviserChecker;
 
 import java.util.List;
 import java.util.Map;
@@ -38,22 +44,55 @@ public class GatekeepingDetailsServiceTest {
     ObjectMapper objectMapper;
     Object idamId;
 
+    @Mock
+    LegalAdviserChecker legalAdviserChecker;
+
     @Test
     public void testGatekeepingWhenLegalAdvisorDetailsProvided() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
+        stringObjectMap.put("whoToSendTheCaseToForGatekeeping",
+                            WhoToSendToGatekeeperTypeEnum.SEND_TO_A_SPECIFIC_LEGAL_ADVISER);
+        stringObjectMap.put("legalAdviser", StaffUser.builder().idamId("test1(test1@test.com)").build());
+
+        GatekeepingDetails expectedResponse = gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap,null,null);
+        assertEquals(SendToGatekeeperTypeEnum.legalAdviser, expectedResponse.getIsJudgeOrLegalAdviserGatekeeping());
+        assertEquals(YesOrNo.Yes, expectedResponse.getIsSpecificGateKeeperNeeded());
+        assertNotNull(expectedResponse.getLegalAdviser());
+        assertEquals("test1(test1@test.com)", expectedResponse.getLegalAdviser().getIdamId());
+    }
+
+    @Test
+    public void testGatekeepingWhenLegalAdvisorDetailsEmpty() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         stringObjectMap.put("whoToSendTheCaseToForGatekeeping",
                             WhoToSendToGatekeeperTypeEnum.SEND_TO_A_SPECIFIC_LEGAL_ADVISER);
+        stringObjectMap.put("legalAdviser", null);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        DynamicList legalAdviserList = DynamicList.builder().value(DynamicListElement.builder()
-                                                                       .code("test1(test1@test.com)")
-                                                                       .label("test1(test1@test.com)").build()).build();
-        GatekeepingDetails expectedResponse = gatekeepingDetailsService
-            .getGatekeepingDetails(stringObjectMap,legalAdviserList);
-        assertEquals(SendToGatekeeperTypeEnum.legalAdviser,expectedResponse.getIsJudgeOrLegalAdviserGatekeeping());
-        assertNotNull(expectedResponse.getLegalAdviserList());
+        GatekeepingDetails actualResponse = gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap,null,null);
+        assertNotNull(actualResponse);
+        assertNull(actualResponse.getIsJudgeOrLegalAdviserGatekeeping());
+        assertNull(actualResponse.getIsSpecificGateKeeperNeeded());
+        assertNull(actualResponse.getLegalAdviser());
+    }
+
+    @Test
+    public void testGatekeepingWhenLegalAdvisorDetailsProvidedButGatekeepingOptionWrong() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put("whoToSendTheCaseToForGatekeeping", WhoToSendToGatekeeperTypeEnum.SEND_TO_A_SPECIFIC_JUDGE);
+        stringObjectMap.put("legalAdviser", StaffUser.builder().idamId("test1(test1@test.com)").build());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        GatekeepingDetails actualResponse = gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap,null,null);
+        assertNotNull(actualResponse);
+        assertNull(actualResponse.getIsJudgeOrLegalAdviserGatekeeping());
+        assertNull(actualResponse.getIsSpecificGateKeeperNeeded());
+        assertNull(actualResponse.getLegalAdviser());
     }
 
     @Test
@@ -146,4 +185,3 @@ public class GatekeepingDetailsServiceTest {
         assertEquals(GatekeepingTaskTypeEnum.LEGAL_ADVISER, taskType);
     }
 }
-

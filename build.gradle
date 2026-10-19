@@ -19,7 +19,7 @@ plugins {
   id 'org.sonarqube' version '5.1.0.4882'
   id 'org.springframework.boot' version '3.5.15'
   id 'au.com.dius.pact' version '4.2.6'
-  id 'com.github.hmcts.rse-cft-lib' version '0.19.2342'
+  id 'com.github.hmcts.rse-cft-lib' version '0.19.2434'
   id 'uk.gov.hmcts.reform.coverage-gate' version '1.0.1'
 }
 
@@ -51,7 +51,7 @@ def versions = [
   sendLetterClient             : '5.1.1',
   serenity                     : '4.3.4',
   serenityCucumber             : '4.3.4',
-  serviceTokenGenerator        : '5.3.4',
+  serviceTokenGenerator        : '5.3.5',
   sonarPitest                  : '0.5',
   springSecurityCrypto         : '6.5.11',
   springSecurityRsa            : '1.1.5',
@@ -60,7 +60,7 @@ def versions = [
   tomcat                       : '10.1.52',
   unirest                      : '1.4.9',
   ccdCaseDocumentAmClient      : '1.59.2',
-  pdfbox                       : '2.0.36',
+  pdfbox                       : '2.0.37',
   springFramework              : '6.2.19',
 ]
 
