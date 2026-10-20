@@ -965,6 +965,11 @@ resilience4j:
           - org.springframework.web.server.ResponseStatusException
           - feign.FeignException$Unauthorized
           - feign.FeignException$BadRequest
+      generateAndStorePdfRetryConfig:
+        maxAttempts: 3
+        waitDuration: 1s
+        retryExceptions:
+          - uk.gov.hmcts.reform.prl.exception.PdfConversionException
 
 docmosis:
   url: ${DOCMOSIS_SERVICE_BASE_URL:https://docmosis.aat.platform.hmcts.net}
