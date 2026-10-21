@@ -333,7 +333,7 @@ public class ServiceOfApplicationServiceTest {
     public void testListOfOrdersCreated() {
         List<String> createdOrders = List.of(
             "Blank order (FL404B)",
-            "Directions on issue",
+            "Directions on Issue",
             "Blank order or directions (C21)",
             "Blank order or directions (C21) - to withdraw application",
             "Child arrangements, specific issue or prohibited steps order (C43)",
