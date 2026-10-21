@@ -64,6 +64,7 @@ import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -372,15 +373,19 @@ public class CaseDocumentController {
     })
     public ResponseEntity<List<DocumentResponse>> uploadCitizenMultipleDocuments(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
-                                                        @RequestParam("files") MultipartFile[] file) throws IOException {
+                                                        @RequestParam("files") MultipartFile[] files) {
 
         if (!isAuthorized(authorisation, serviceAuthorization)) {
             throw (new RuntimeException(INVALID_CLIENT));
         }
         List<DocumentResponse> docResp = new ArrayList<>();
-        for (MultipartFile multipartFile : file) {
-            docResp.add(documentGenService.uploadDocument(authorisation, multipartFile));
-        }
+        Arrays.stream(files).forEach(file -> {
+            try {
+                docResp.add(documentGenService.uploadDocument(authorisation, file));
+            } catch (IOException e) {
+                ResponseEntity.internalServerError().body("Error in uploading multiple citizen document");
+            }
+        });
         return ResponseEntity.ok(docResp);
     }
 
