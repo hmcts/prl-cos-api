@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.sealaudit.SealDetectionService.SealStatus;
@@ -569,6 +570,129 @@ class SealAuditServiceTest {
                 + "\"order \"\"quoted\"\".pdf\",15 Jan 2025,MISSING,2025-01-15T10:00:00",
             result
         );
+    }
+
+    @Test
+    void shouldNotDownloadDocumentForDocxOrders() {
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+
+        SearchResult searchResult = SearchResult.builder()
+            .cases(List.of(
+                createCaseDetailsWithServedOrder(
+                    3333333333333333L,
+                    "order.docx",
+                    "2025-01-15T10:30:00.000000"
+                )
+            ))
+            .build();
+
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(searchResult);
+
+        sealAuditService.runAudit();
+
+        // docx orders should never be downloaded or seal-checked
+        verifyNoInteractions(caseDocumentClient, sealDetectionService);
+    }
+
+    @Test
+    void shouldReportDocxOrdersInEmailAndFlagIssuesFound() throws NotificationClientException {
+        ReflectionTestUtils.setField(sealAuditService, "emailEnabled", true);
+        ReflectionTestUtils.setField(sealAuditService, "toEmailAddress", "test@example.com");
+        ReflectionTestUtils.setField(sealAuditService, "emailTemplateId", "template-id");
+
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+
+        SearchResult searchResult = SearchResult.builder()
+            .cases(List.of(
+                createCaseDetailsWithServedOrder(
+                    4444444444444444L,
+                    "order.docx",
+                    "2025-01-15T10:30:00.000000"
+                )
+            ))
+            .build();
+
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(searchResult);
+
+        sealAuditService.runAudit();
+
+        ArgumentCaptor<Map<String, Object>> templateVarsCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(notificationClient).sendEmail(anyString(), anyString(), templateVarsCaptor.capture(), anyString());
+
+        Map<String, Object> templateVars = templateVarsCaptor.getValue();
+        assertEquals("1", templateVars.get("total_orders"));
+        assertEquals("1", templateVars.get("docx_orders"));
+        assertEquals("0", templateVars.get("seals_present"));
+        assertEquals("0", templateVars.get("seals_missing"));
+        // docx orders must not be counted as errors
+        assertEquals("0", templateVars.get("errors"));
+        assertEquals("Issues found", templateVars.get("status"));
+    }
+
+    @Test
+    void shouldDetectDocxOrderRegardlessOfCaseInFilename() {
+        Map<String, Object> order = buildOrderDetails("ORDER.DOCX");
+
+        OrderDetails orderDetails = CcdObjectMapper.getObjectMapper()
+            .convertValue(order, OrderDetails.class);
+
+        boolean result = ReflectionTestUtils.invokeMethod(sealAuditService, "isDocxOrder", orderDetails);
+
+        assertTrue(result);
+    }
+
+    @Test
+    void shouldNotDetectPdfOrderAsDocx() {
+        Map<String, Object> order = buildOrderDetails("order.pdf");
+
+        OrderDetails orderDetails = CcdObjectMapper.getObjectMapper()
+            .convertValue(order, OrderDetails.class);
+
+        boolean result = ReflectionTestUtils.invokeMethod(sealAuditService, "isDocxOrder", orderDetails);
+
+        assertFalse(result);
+    }
+
+    @Test
+    void shouldReturnFalseFromIsDocxOrderWhenOrderIsNull() {
+        boolean result = ReflectionTestUtils.invokeMethod(sealAuditService, "isDocxOrder", (OrderDetails) null);
+
+        assertFalse(result);
+    }
+
+    @Test
+    void shouldReturnFalseFromIsDocxOrderWhenDocumentIsNull() {
+        OrderDetails orderDetails = OrderDetails.builder().build();
+
+        boolean result = ReflectionTestUtils.invokeMethod(sealAuditService, "isDocxOrder", orderDetails);
+
+        assertFalse(result);
+    }
+
+    @Test
+    void shouldReturnFalseFromIsDocxOrderWhenFilenameOrBinaryUrlIsNull() {
+        OrderDetails orderDetails = OrderDetails.builder()
+            .orderDocument(Document.builder().documentFileName("order.docx").build())
+            .build();
+
+        boolean result = ReflectionTestUtils.invokeMethod(sealAuditService, "isDocxOrder", orderDetails);
+
+        assertFalse(result);
+    }
+
+    private Map<String, Object> buildOrderDetails(String fileName) {
+        Map<String, Object> orderDocument = new HashMap<>();
+        orderDocument.put("document_url", "http://dm-store/documents/doc");
+        orderDocument.put("document_binary_url", "http://dm-store/documents/doc/binary");
+        orderDocument.put("document_filename", fileName);
+
+        Map<String, Object> orderValue = new HashMap<>();
+        orderValue.put("orderDocument", orderDocument);
+        return orderValue;
     }
 
     private CaseDetails createCaseDetailsWithServedOrder() {
