@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.document.pdf;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
@@ -18,6 +19,7 @@ public class PdfGenerationService {
     private final DocmosisClient docmosisClient;
     private final UploadDocumentService uploadDocumentService;
 
+    @Retry(name = "generateAndStorePdfRetryConfig")
     public Document generateAndStore(PdfGenerationRequest pdfGenerationRequest) {
         try {
             String outputFilename = FilenameUtils.getBaseName(pdfGenerationRequest.getSourceFilename()) + ".pdf";
