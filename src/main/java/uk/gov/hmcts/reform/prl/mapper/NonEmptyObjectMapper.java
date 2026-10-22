@@ -14,22 +14,21 @@ public class NonEmptyObjectMapper {
         throw new IllegalStateException("Utility class");
     }
 
-    private static ObjectMapper om = null;
+    private static final ObjectMapper OBJECT_MAPPER = createObjectMapper();
 
     public static ObjectMapper getObjectMapper() {
-        if (om == null) {
-            om = new ObjectMapper();
-            om.registerModule(new JavaTimeModule());
-        }
-        om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        om.enable(SerializationFeature.WRITE_ENUM_KEYS_USING_INDEX);
-        om.disable(JsonGenerator.Feature.AUTO_CLOSE_JSON_CONTENT);
+        return OBJECT_MAPPER;
+    }
 
-        om.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        om.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-        om.registerModule(new ParameterNamesModule());
-        om.enable(SerializationFeature.INDENT_OUTPUT);
-
-        return om;
+    private static ObjectMapper createObjectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.registerModule(new ParameterNamesModule());
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.enable(SerializationFeature.WRITE_ENUM_KEYS_USING_INDEX);
+        mapper.disable(JsonGenerator.Feature.AUTO_CLOSE_JSON_CONTENT);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        return mapper;
     }
 }
