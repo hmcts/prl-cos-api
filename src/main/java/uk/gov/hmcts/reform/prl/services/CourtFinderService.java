@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.court.ServiceArea;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.factv2.FactV2CourtDetailsService;
 
 import java.util.Collections;
 import java.util.List;
@@ -45,24 +46,19 @@ public class CourtFinderService {
     public static final String C_100_APPLICATIONS = "C100 applications";
     public static final String CHILD = "child";
     private final CourtFinderApi courtFinderApi;
+    private final FactV2CourtDetailsService factV2CourtDetailsService;
     private final OsCourtFinderService osCourtFinderService;
     private final FeatureToggleService featureToggleService;
 
     public Court getNearestFamilyCourt(CaseData caseData) throws NotFoundException {
-        ServiceArea serviceArea = null;
         log.info("Finding nearest family court for case type : {}", caseData.getCaseTypeOfApplication());
         try {
             if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                log.info("Starting FaCt lookup");
-                serviceArea = courtFinderApi
-                  .findClosestDomesticAbuseCourtByPostCode(
-                      getPostcodeFromWrappedParty(caseData.getApplicantsFL401()));
-                if (serviceArea != null && !serviceArea.getCourts().isEmpty()) {
-                    return getCourtDetails(serviceArea.getCourts()
-                                               .get(0)
-                                               .getCourtSlug());
-                }
+                log.info("Starting FaCt FL401 lookup");
+                String postcode = getPostcodeFromWrappedParty(caseData.getApplicantsFL401());
+                return factV2CourtDetailsService.getNearestDomesticAbuseCourt(postcode);
             } else {
+                log.info("Starting FaCt C100 lookup");
                 return getC100NearestFamilyCourt(getPostcode(caseData));
 
             }
@@ -101,7 +97,11 @@ public class CourtFinderService {
     }
 
     public Court getCourtDetails(String courtSlug) {
-        return courtFinderApi.getCourtDetails(courtSlug);
+        return factV2CourtDetailsService.getCourtDetails(courtSlug);
+    }
+
+    public Court getCourtDetailsFromFactUrl(String factUrl) {
+        return factV2CourtDetailsService.getCourtDetailsFromFactUrl(factUrl);
     }
 
     public String getCorrectPartyPostcodeV2(CaseData caseData) throws NotFoundException {
@@ -247,6 +247,11 @@ public class CourtFinderService {
                 emailAddress = findEmailWithChildOnlyKey(nearestDomesticAbuseCourt);
             }
         }
+        emailAddress.ifPresent(selectedEmail -> log.info(
+            "Selected court email {} for court {}",
+            selectedEmail.getAddress(),
+            nearestDomesticAbuseCourt.getCourtName()
+        ));
         return emailAddress;
     }
 

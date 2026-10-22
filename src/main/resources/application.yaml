@@ -528,6 +528,20 @@ courtfinder:
   api:
     url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
 
+fact:
+  v2:
+    enabled: ${FACT_V2_ENABLED:true}
+    api:
+      url: ${FACT_V2_API_URL:https://cft-api-mgmt.aat.platform.hmcts.net/fact}
+    service-area:
+      fl401: ${FACT_V2_FL401_SERVICE_AREA:Domestic abuse}
+    oauth:
+      token-url: ${FACT_V2_TOKEN_URL:}
+      tenant-id: ${FACT_V2_TENANT_ID:}
+      client-id: ${FACT_V2_CLIENT_ID:}
+      client-secret: ${FACT_V2_CLIENT_SECRET:}
+      scope: ${FACT_V2_SCOPE:}
+
 locationfinder:
   api:
     url: ${LOCATION_REF_API:http://rd-location-ref-api-aat.service.core-compute-aat.internal}
