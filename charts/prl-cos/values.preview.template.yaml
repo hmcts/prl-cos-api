@@ -6,6 +6,15 @@ java:
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
   keyVaults:
+    central-app-reg-kv:
+      excludeEnvironmentSuffix: true
+      secrets:
+        - name: tenant-id
+          alias: FACT_V2_TENANT_ID
+        - name: prl-cos-api-non-prod-app-id
+          alias: FACT_V2_CLIENT_ID
+        - name: prl-cos-api-non-prod-secret
+          alias: FACT_V2_CLIENT_SECRET
     prl:
       secrets:
         - name: prl-cos-idam-client-secret
@@ -99,6 +108,7 @@ java:
     FACT_API: http://fact-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     FACT_V2_ENABLED: true
     FACT_V2_API_URL: https://cft-api-mgmt.aat.platform.hmcts.net/fact
+    FACT_V2_SCOPE: api://6e2a7c9e-0634-4846-8a8e-0af598d905b0/.default
     LOCATION_REF_API: http://rd-location-ref-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RD_PROFESSIONAL_API: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     CITIZEN_URL: https://privatelaw.{{ .Values.global.environment }}.platform.hmcts.net
