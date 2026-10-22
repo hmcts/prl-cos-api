@@ -31,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestPropertySource(
     properties = {"bundle.api.url=","idam.api.url=","commonData.api.url=",
         "fis_hearing.api.url=",
+        "hearing_component.api.feign-url=",
         "refdata.api.url=",
         "courtfinder.api.url=",
         "fees-register.api.url=",
