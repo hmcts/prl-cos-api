@@ -17,6 +17,7 @@
           "Content-Type": "application/json"
         },
         "body": {
+          "ccdServiceName": null,
           "personal_code": [
             "49933940",
             null
