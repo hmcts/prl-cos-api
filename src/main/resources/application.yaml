@@ -127,6 +127,8 @@ feature:
     awaitingInformationEnabled: ${AWAITING_INFORMATION_ENABLED:false}
     exitAwaitingInformationEnabled: ${EXIT_AWAITING_INFORMATION_ENABLED:false}
     createRequestCirUpdateTaskEnabled: ${CREATE_REQUEST_CIR_UPDATE_TASK_ENABLED:false}
+    caseNameWithPrefixReleaseDate: ${CASE_NAME_WITH_PREFIX_RELEASE_DATE:2026-10-23}
+
 
 xui:
   url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
