@@ -142,6 +142,7 @@ public class C100IssueCaseService {
         }
         caseDataUpdated.put("issueDate", caseData.getIssueDate());
         caseDataUpdated.put("caseNameHmctsInternal", "WV26P10" + caseData.getCaseNameHmctsInternal());
+        caseDataUpdated.put("applicantCaseName", "WV26P11" + caseData.getCaseNameHmctsInternal());
 
         return caseDataUpdated;
     }
