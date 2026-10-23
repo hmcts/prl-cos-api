@@ -147,10 +147,10 @@ public class C100IssueCaseService {
     public String getFactCourtId(CourtVenue courtVenue) {
         String courtId = "";
         String factUrl = courtVenue.getFactUrl();
-        if (factUrl != null && factUrl.split("/").length > 4) {
+        if (factUrl != null && !factUrl.isBlank()) {
             Court court = null;
             try {
-                court = courtFinderService.getCourtDetails(factUrl.split("/")[4]);
+                court = courtFinderService.getCourtDetailsFromFactUrl(factUrl);
             } catch (Exception ex) {
                 log.error("Error fetching court details from Fact ", ex);
             }

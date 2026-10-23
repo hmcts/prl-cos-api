@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.services.LocalAuthorityCourtDataLoader;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.OsCourtFinderService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.factv2.FactV2CourtDetailsService;
 
 import java.util.List;
 
@@ -34,14 +35,14 @@ public class OsCourtFinderApiClientIntegrationTest {
     @MockBean
     private LocationRefDataService locationRefDataService;
     @MockBean
-    private CourtFinderApi courtFinderApi;
+    private FactV2CourtDetailsService factV2CourtDetailsService;
 
     private OsCourtFinderService osCourtFinderService;
 
     @BeforeEach
     public void setUp() throws Exception {
         osCourtFinderService = new OsCourtFinderService(systemUserService, osCourtFinderApi, localAuthorityCourtDataLoader,
-                                                        locationRefDataService, courtFinderApi);
+                                                        locationRefDataService, factV2CourtDetailsService);
     }
 
     @Test

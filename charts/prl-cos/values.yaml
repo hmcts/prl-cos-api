@@ -29,6 +29,9 @@ java:
     FEE_REGISTER_API_URL: http://fees-register-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PRL_S2S_AUTHORISED_SERVICES: api_gw,prl_citizen_frontend,fis_hmc_api,payment_app,ccd_data
     FACT_API: http://fact-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    FACT_V2_ENABLED: true
+    FACT_V2_API_URL: https://cft-api-mgmt.platform.hmcts.net/fact
+    FACT_V2_SCOPE: api://75c09e4c-face-4704-9a08-d46a29b4c720/.default
     LOCATION_REF_API: http://rd-location-ref-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RD_PROFESSIONAL_API: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     ACA_SERVICE_API_BASEURL: http://aac-manage-case-assignment-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
@@ -46,6 +49,15 @@ java:
 
 
   keyVaults:
+    central-app-reg-kv:
+      excludeEnvironmentSuffix: true
+      secrets:
+        - name: tenant-id
+          alias: FACT_V2_TENANT_ID
+        - name: prl-cos-api-prod-app-id
+          alias: FACT_V2_CLIENT_ID
+        - name: prl-cos-api-prod-secret
+          alias: FACT_V2_CLIENT_SECRET
     prl:
       resourceGroup: prl
       secrets:

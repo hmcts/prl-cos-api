@@ -8,13 +8,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
 import uk.gov.hmcts.reform.prl.clients.os.OsCourtFinderApi;
 import uk.gov.hmcts.reform.prl.models.LocalAuthorityCourt;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.ordnancesurvey.OsPlacesResponse;
 import uk.gov.hmcts.reform.prl.models.ordnancesurvey.Result;
+import uk.gov.hmcts.reform.prl.services.factv2.FactV2CourtDetailsService;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +30,7 @@ public class OsCourtFinderService {
     private final OsCourtFinderApi osCourtFinderApi;
     private final LocalAuthorityCourtDataLoader localAuthorityCourtDataLoader;
     private final LocationRefDataService locationRefDataService;
-    private final CourtFinderApi courtFinderApi;
+    private final FactV2CourtDetailsService factV2CourtDetailsService;
 
     public ImmutablePair<CourtVenue, Court> getC100NearestFamilyCourtAndVenue(String postcode) throws NotFoundException {
         if (postcode == null || postcode.isEmpty()) {
@@ -94,9 +94,9 @@ public class OsCourtFinderService {
     private Court getFactCourtDetails(CourtVenue courtVenue) {
         Court court = null;
         String factUrl = courtVenue.getFactUrl();
-        if (factUrl != null && factUrl.split("/").length > 4) {
+        if (factUrl != null && !factUrl.isBlank()) {
             try {
-                court = courtFinderApi.getCourtDetails(factUrl.split("/")[4]);
+                court = factV2CourtDetailsService.getCourtDetailsFromFactUrl(factUrl);
             } catch (Exception ex) {
                 log.error("Error fetching court details from Fact ", ex);
             }
