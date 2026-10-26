@@ -20,7 +20,8 @@ public class SealDetectionService {
     public enum SealStatus {
         PRESENT,
         MISSING,
-        ERROR
+        ERROR,
+        DOCX
     }
 
     public SealStatus detectSeal(InputStream pdfStream) {
