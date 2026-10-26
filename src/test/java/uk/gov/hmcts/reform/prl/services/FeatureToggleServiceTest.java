@@ -19,7 +19,8 @@ class FeatureToggleServiceTest {
     @SpringBootTest(properties = {
         "feature.toggle.barristerFeatureEnabled=true",
         "feature.toggle.cafcassDateTimeFeatureEnabled=true",
-        "feature.toggle.osCourtLookupEnabled=true"
+        "feature.toggle.osCourtLookupEnabled=true",
+        "feature.toggle.caseNameWithPrefixReleaseDate=2026-01-31"
     })
     class FeatureFlagSwitchOn {
 
@@ -39,6 +40,11 @@ class FeatureToggleServiceTest {
         @Test
         void isOsCourtLookupFeatureEnabledReturnTrue() {
             assertThat(featureToggleService.isOsCourtLookupFeatureEnabled(), is(true));
+        }
+
+        @Test
+        void isFullCaseNameEnabledReturnTrue() {
+            assertThat(featureToggleService.isFullCaseNameEnabled(), is(true));
         }
     }
 }

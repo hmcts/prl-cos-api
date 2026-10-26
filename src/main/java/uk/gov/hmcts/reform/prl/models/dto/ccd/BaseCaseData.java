@@ -209,4 +209,6 @@ public class BaseCaseData {
     private List<Element<ResponseDocuments>> otherPartyC8DocumentsArchived;
     private YesOrNo miamForOrder;
     private DynamicList customOrderHearingsType;
+    private YesOrNo isIssuedAfterCaseNameRelease;
+    private String formattedTitleDisplay;
 }
