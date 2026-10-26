@@ -55,6 +55,7 @@ public class FactV2TokenProvider {
     }
 
     private String requestToken() {
+        log.info("Attempting to acquire FaCT V2 access token from {}", resolveTokenUrl());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
@@ -69,7 +70,7 @@ public class FactV2TokenProvider {
         }
         long expiresIn = response.getExpiresIn() == null ? 300 : response.getExpiresIn();
         tokenExpiresAt = Instant.now().plusSeconds(Math.max(1, expiresIn - TOKEN_EXPIRY_SECONDS));
-        log.debug("Acquired FaCT V2 access token, expires at {}", tokenExpiresAt);
+        log.info("Acquired FaCT V2 access token, expires at {}", tokenExpiresAt);
         return response.getAccessToken();
     }
 
