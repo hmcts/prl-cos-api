@@ -63,11 +63,12 @@ public class CcdDataStoreService {
     public FindUserCaseRolesResponse findUserCaseRoles(String caseId, String authorisation) {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         String userId = userDetails.getId();
+        FindUserCaseRolesRequest request = buildFindUserCaseRolesRequest(caseId, userId);
 
         return caseRoleClient.findUserCaseRoles(
             authorisation,
             authTokenGenerator.generate(),
-            buildFindUserCaseRolesRequest(caseId, userId)
+            request
         );
     }
 
