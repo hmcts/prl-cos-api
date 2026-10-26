@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +34,15 @@ public class CafcassDateTimeService {
 
     @Value("#{'${cafcaas.excludedEvents}'.split(',')}")
     private List<String> excludedEventList;
+
+    public Map<String, Object> updateAndGetCafcassDatetime(CallbackRequest callbackRequest) {
+        Map<String, Object> cafcassUpdateDateTime = new HashMap<>();
+        Map<String, Object> mapToTake = updateCafcassDateTime(callbackRequest);
+        if (mapToTake.containsKey(CAFCASS_DATE_TIME)) {
+            cafcassUpdateDateTime.put(CAFCASS_DATE_TIME, mapToTake.get(CAFCASS_DATE_TIME));
+        }
+        return cafcassUpdateDateTime;
+    }
 
     public Map<String, Object> updateCafcassDateTime(CallbackRequest callbackRequest) {
         return updateCafcassDateTime(callbackRequest, callbackRequest.getEventId());
