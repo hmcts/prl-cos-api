@@ -53,10 +53,12 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE_REASONS_SELECTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REASONS_SELECTED_FOR_LIST_ON_NOTICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SELECTED_AND_ADDITIONAL_REASONS;
@@ -131,6 +133,7 @@ public class ListOnNoticeControllerTest {
             "field4", "value4",
             "field5", "value5"
         );
+        when(caseSummaryTabService.updateTab(any(CaseData.class))).thenReturn(summaryTabFields);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
     }
 
@@ -378,4 +381,125 @@ public class ListOnNoticeControllerTest {
         verify(listOnNoticeService,times(1)).cleanUpListOnNoticeFields(Mockito.any());
     }
 
+    @Test
+    public void testListOnNoticeSubmissionSubjectIsSetWhenSelectedAndAdditionalReasonIsPresent() {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        String selectedAndAdditionalReasons = ListOnNoticeReasonsEnum.itsNotWithoutNoticeButItsUrgent.getDisplayedValue();
+
+        caseDataUpdated.put(SELECTED_AND_ADDITIONAL_REASONS, selectedAndAdditionalReasons);
+
+        DynamicList legalAdviserList = DynamicList.builder().value(DynamicListElement.builder()
+                                                                       .code("test1(test1@test.com)").label("test1(test1@test.com)").build()).build();
+        AllocatedJudge allocatedJudge = AllocatedJudge.builder()
+            .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
+            .legalAdviserList(legalAdviserList)
+            .isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.legalAdviser)
+            .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
+            .build();
+        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviser(), refDataUserService))
+            .thenReturn(allocatedJudge);
+
+        CaseNoteDetails caseNoteDetails = CaseNoteDetails.builder()
+            .subject("subject")
+            .caseNote(selectedAndAdditionalReasons)
+            .dateAdded(LocalDate.now().toString())
+            .dateCreated(LocalDateTime.now())
+            .build();
+
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().forename("PRL").surname("Judge").build());
+        when(addCaseNoteService.getCurrentCaseNoteDetails(anyString(), anyString(), any(UserDetails.class)))
+            .thenReturn(caseNoteDetails);
+        when(addCaseNoteService.getCaseNoteDetails(any(CaseData.class), any(CaseNoteDetails.class)))
+            .thenReturn(ElementUtils.wrapElements(List.of(caseNoteDetails)));
+
+        listOnNoticeController.listOnNoticeSubmission(authToken, s2sToken, callbackRequest);
+
+        verify(addCaseNoteService).getCurrentCaseNoteDetails(
+            eq(LIST_ON_NOTICE),
+            eq(selectedAndAdditionalReasons),
+            any(UserDetails.class)
+        );
+    }
+
+    @Test
+    public void testListOnNoticeSubmissionSubjectIsSetWhenMultipleSelectedAndAdditionalReasonsArePresent() {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        String reasonOne = ListOnNoticeReasonsEnum.localAuthorityInvolvedWithTheChildrenAndFamily.getDisplayedValue();
+        String reasonTwo = ListOnNoticeReasonsEnum.itsNotWithoutNoticeButItsUrgent.getDisplayedValue();
+        String selectedAndAdditionalReasons = reasonOne + "\n" + reasonTwo + "\n";
+
+        caseDataUpdated.put(SELECTED_AND_ADDITIONAL_REASONS, selectedAndAdditionalReasons);
+
+        DynamicList legalAdviserList = DynamicList.builder().value(DynamicListElement.builder()
+            .code("test1(test1@test.com)").label("test1(test1@test.com)").build()).build();
+        AllocatedJudge allocatedJudge = AllocatedJudge.builder()
+            .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
+            .legalAdviserList(legalAdviserList)
+            .isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.legalAdviser)
+            .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
+            .build();
+        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviser(), refDataUserService))
+            .thenReturn(allocatedJudge);
+
+        CaseNoteDetails caseNoteDetails = CaseNoteDetails.builder()
+            .subject("subject")
+            .caseNote(selectedAndAdditionalReasons)
+            .dateAdded(LocalDate.now().toString())
+            .dateCreated(LocalDateTime.now())
+            .build();
+
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().forename("PRL").surname("Judge").build());
+        when(addCaseNoteService.getCurrentCaseNoteDetails(anyString(), anyString(), any(UserDetails.class)))
+            .thenReturn(caseNoteDetails);
+        when(addCaseNoteService.getCaseNoteDetails(any(CaseData.class), any(CaseNoteDetails.class)))
+            .thenReturn(ElementUtils.wrapElements(List.of(caseNoteDetails)));
+
+        listOnNoticeController.listOnNoticeSubmission(authToken, s2sToken, callbackRequest);
+
+        verify(addCaseNoteService).getCurrentCaseNoteDetails(
+            eq(LIST_ON_NOTICE),
+            eq(selectedAndAdditionalReasons),
+            any(UserDetails.class)
+        );
+    }
+
+    @Test
+    public void testListOnNoticeSubmissionSubjectIsSetWhenNoEnumReasonIsPresent() {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        String selectedAndAdditionalReasons = "Free text reason only";
+
+        caseDataUpdated.put(SELECTED_AND_ADDITIONAL_REASONS, selectedAndAdditionalReasons);
+
+        DynamicList legalAdviserList = DynamicList.builder().value(DynamicListElement.builder()
+            .code("test1(test1@test.com)").label("test1(test1@test.com)").build()).build();
+        AllocatedJudge allocatedJudge = AllocatedJudge.builder()
+            .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
+            .legalAdviserList(legalAdviserList)
+            .isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.legalAdviser)
+            .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
+            .build();
+        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviser(), refDataUserService))
+            .thenReturn(allocatedJudge);
+
+        CaseNoteDetails caseNoteDetails = CaseNoteDetails.builder()
+            .subject("subject")
+            .caseNote(selectedAndAdditionalReasons)
+            .dateAdded(LocalDate.now().toString())
+            .dateCreated(LocalDateTime.now())
+            .build();
+
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().forename("PRL").surname("Judge").build());
+        when(addCaseNoteService.getCurrentCaseNoteDetails(anyString(), anyString(), any(UserDetails.class)))
+            .thenReturn(caseNoteDetails);
+        when(addCaseNoteService.getCaseNoteDetails(any(CaseData.class), any(CaseNoteDetails.class)))
+            .thenReturn(ElementUtils.wrapElements(List.of(caseNoteDetails)));
+
+        listOnNoticeController.listOnNoticeSubmission(authToken, s2sToken, callbackRequest);
+
+        verify(addCaseNoteService).getCurrentCaseNoteDetails(
+            eq(LIST_ON_NOTICE),
+            eq(selectedAndAdditionalReasons),
+            any(UserDetails.class)
+        );
+    }
 }

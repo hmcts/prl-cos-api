@@ -1,10 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.cafcass;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -16,7 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
-import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.mapper.NonEmptyObjectMapper;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
@@ -612,11 +609,7 @@ public class CafcassCaseDataHelper {
             return null;
         }
 
-        ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-        objectMapper.registerModule(new ParameterNamesModule());
-        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        ObjectMapper objectMapper = NonEmptyObjectMapper.getObjectMapper();
 
         CafCassCaseDetail cafCassCaseDetail = objectMapper.convertValue(caseData, CafCassCaseDetail.class);
         CafCassCaseData cafCassCaseData = caseData.getData() == null
