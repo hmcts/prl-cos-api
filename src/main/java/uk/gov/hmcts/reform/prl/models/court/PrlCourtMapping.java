@@ -9,9 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class DfjAreaCourtMapping {
+public class PrlCourtMapping {
     private String courtCode;
     private String courtName;
     private String courtField;
     private String dfjArea;
+    private boolean pathFinderEnabled;
 }
