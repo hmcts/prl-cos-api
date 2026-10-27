@@ -85,8 +85,7 @@ public class C100IssueCaseService {
                 caseDataUpdated.put(COURT_CODE_FROM_FACT, courtId);
                 caseDataUpdated.keySet().removeAll(prlCourtConfigService.getAllCourtFields());
                 caseDataUpdated.putAll(prlCourtConfigService.getDfjAreaFieldsByCourtId(baseLocationId));
-                Optional<Boolean> pathFinderMapping = prlCourtConfigService.isPathfinderCourt(baseLocationId);
-                if (pathFinderMapping.isPresent() && pathFinderMapping.get()) {
+                if (prlCourtConfigService.isPathfinderCourt(baseLocationId)) {
                     caseDataUpdated.put("isPathfinderCase", Yes);
                 } else {
                     caseDataUpdated.put("isPathfinderCase", No);

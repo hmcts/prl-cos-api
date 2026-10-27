@@ -45,9 +45,11 @@ public class PrlCourtConfigService {
         }
     }
 
-    public Optional<Boolean> isPathfinderCourt(String baseLocationId) {
+    public boolean isPathfinderCourt(String baseLocationId) {
         return getPrlCourtById(baseLocationId)
-            .map(mapping -> true);
+            .map(PrlCourtMapping::getDfjArea)
+            .map(DfjArea::isPathFinderEnabled)
+            .orElse(false);
     }
 
     private Optional<PrlCourtMapping> getPrlCourtById(String baseLocationId) {

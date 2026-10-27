@@ -11,7 +11,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.utils.csv.CsvReader;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -32,11 +31,18 @@ public class PrlCourtConfigServiceTest {
     class PathfinderConfig {
         @Test
         void shouldReturnTrueIfPathfinderCourt() {
-            Optional<Boolean> result = prlCourtConfigService.isPathfinderCourt("234946");
+            boolean result = prlCourtConfigService.isPathfinderCourt("234946");
 
-            assertThat(result.isPresent(), is(true));
-            assertThat(result.get(), is(true));
+            assertThat(result, is(true));
         }
+        @Test
+        void shouldReturnFalseIfNotPathfinderCourt() {
+            // Chelmsford is not currently a pathfinder court - if this changes the test will need to change
+            boolean result = prlCourtConfigService.isPathfinderCourt("816875");
+
+            assertThat(result, is(false));
+        }
+
     }
 
     @Nested
