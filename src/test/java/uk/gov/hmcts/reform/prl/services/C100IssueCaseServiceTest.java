@@ -735,8 +735,7 @@ public class C100IssueCaseServiceTest {
                                    .id(123L).data(stringObjectMap).build())
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(prlCourtConfigService.getPathFinderMappingByCourtField("234946")).thenReturn(Optional.of(
-            PrlCourtMapping.builder().pathFinderEnabled(true).build()));
+        when(prlCourtConfigService.isPathfinderCourt("234946")).thenReturn(Optional.of(Boolean.TRUE));
 
         Map<String, Object> updates = c100IssueCaseService.issueAndSendToLocalCourt(authToken, callbackRequest);
 

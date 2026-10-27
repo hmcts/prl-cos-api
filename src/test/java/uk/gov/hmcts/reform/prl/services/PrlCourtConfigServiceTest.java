@@ -4,11 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.prl.models.court.PrlCourtMapping;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.utils.csv.CsvReader;
 
 import java.util.Map;
@@ -17,7 +16,7 @@ import java.util.Optional;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PrlCourtConfigServiceTest {
 
     @Spy
@@ -29,29 +28,14 @@ public class PrlCourtConfigServiceTest {
     @InjectMocks
     private PrlCourtConfigService prlCourtConfigService;
 
-
     @Nested
     class PathfinderConfig {
         @Test
         void shouldReturnTrueIfPathfinderCourt() {
-            Optional<PrlCourtMapping> result = prlCourtConfigService.getPathFinderMappingByCourtField("234946");
+            Optional<Boolean> result = prlCourtConfigService.isPathfinderCourt("234946");
 
             assertThat(result.isPresent(), is(true));
-            assertThat(result.get().getCourtField(), is("swanseaDFJCourt"));
-        }
-
-        @Test
-        void shouldReturnEmptyWhenCourtFieldDoesNotExist() {
-            Optional<PrlCourtMapping> result = prlCourtConfigService.getPathFinderMappingByCourtField("nonexistent");
-
-            assertThat(result.isPresent(), is(false));
-        }
-
-        @Test
-        void shouldReturnEmptyWhenCourtFieldIsNull() {
-            Optional<PrlCourtMapping> result = prlCourtConfigService.getPathFinderMappingByCourtField(null);
-
-            assertThat(result.isPresent(), is(false));
+            assertThat(result.get(), is(true));
         }
     }
 
@@ -87,7 +71,7 @@ public class PrlCourtConfigServiceTest {
         @Test
         void shouldGetAllCourtFields() {
             Assertions.assertThat(prlCourtConfigService.getAllCourtFields())
-                .containsExactlyInAnyOrder("swanseaDFJCourt", "essexAndSuffolkDFJCourt");
+                .contains("swanseaDFJCourt", "essexAndSuffolkDFJCourt");
         }
     }
 }

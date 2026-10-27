@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.prl.enums.DfjArea;
 
 @Data
 @Builder(toBuilder = true)
@@ -12,7 +13,5 @@ import lombok.NoArgsConstructor;
 public class PrlCourtMapping {
     private String courtCode;
     private String courtName;
-    private String courtField;
-    private String dfjArea;
-    private boolean pathFinderEnabled;
+    private DfjArea dfjArea;
 }

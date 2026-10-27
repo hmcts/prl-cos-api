@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
-import uk.gov.hmcts.reform.prl.models.court.PrlCourtMapping;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -86,8 +85,8 @@ public class C100IssueCaseService {
                 caseDataUpdated.put(COURT_CODE_FROM_FACT, courtId);
                 caseDataUpdated.keySet().removeAll(prlCourtConfigService.getAllCourtFields());
                 caseDataUpdated.putAll(prlCourtConfigService.getDfjAreaFieldsByCourtId(baseLocationId));
-                Optional<PrlCourtMapping> pathFinderMapping = prlCourtConfigService.getPathFinderMappingByCourtField(baseLocationId);
-                if (pathFinderMapping.isPresent() && pathFinderMapping.get().isPathFinderEnabled()) {
+                Optional<Boolean> pathFinderMapping = prlCourtConfigService.isPathfinderCourt(baseLocationId);
+                if (pathFinderMapping.isPresent() && pathFinderMapping.get()) {
                     caseDataUpdated.put("isPathfinderCase", Yes);
                 } else {
                     caseDataUpdated.put("isPathfinderCase", No);
