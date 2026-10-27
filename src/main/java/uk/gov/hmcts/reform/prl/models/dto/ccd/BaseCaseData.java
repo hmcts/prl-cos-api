@@ -210,5 +210,4 @@ public class BaseCaseData {
     private YesOrNo miamForOrder;
     private DynamicList customOrderHearingsType;
     private YesOrNo isIssuedAfterCaseNameRelease;
-    private String formattedTitleDisplay;
 }

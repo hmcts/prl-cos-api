@@ -51,7 +51,6 @@ import uk.gov.hmcts.reform.prl.services.C8ArchiveService;
 import uk.gov.hmcts.reform.prl.services.CaseNameService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
-import uk.gov.hmcts.reform.prl.services.FormattedTitleDisplayService;
 import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -79,7 +78,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIEL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FORMATTED_TITLE_DISPLAY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HISTORICAL_REFUGE_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REFUGE_DOCUMENTS;
@@ -130,7 +128,6 @@ public class CitizenPartyDetailsMapper {
     private final DocumentGenService documentGenService;
     private final C8ArchiveService c8ArchiveService;
     private final CaseNameService caseNameService;
-    private final FormattedTitleDisplayService formattedTitleDisplayService;
 
     public CitizenUpdatePartyDataContent mapUpdatedPartyDetails(CaseData dbCaseData,
                                                                 CitizenUpdatedCaseData citizenUpdatedCaseData,
@@ -938,9 +935,6 @@ public class CitizenPartyDetailsMapper {
             String caseName = buildApplicantAndRespondentForCaseName(citizenUpdatedCaseData.getC100RebuildData());
             caseDataMapToBeUpdated.put(APPLICANT_CASE_NAME, caseName);
             caseDataMapToBeUpdated.put(CASE_NAME_HMCTS_INTERNAL, caseName);
-            caseDataMapToBeUpdated.put(FORMATTED_TITLE_DISPLAY, formattedTitleDisplayService
-                .getFormattedTitleDisplay(caseName, caseName, citizenUpdatedCaseData.getFamilymanCaseNumber(),
-                                         String.valueOf(citizenUpdatedCaseData.getId()), citizenUpdatedCaseData.getIssueDate()));
             caseDataMapToBeUpdated.put(
                 "miamDocumentsCopy",
                 getMiamDocuments(citizenUpdatedCaseData.getC100RebuildData().getC100RebuildMaim()));

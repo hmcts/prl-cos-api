@@ -145,8 +145,6 @@ public class TestingSupportServiceTest {
     private TestingSupportFixtureLoader fixtureLoader;
     @Mock
     private FeatureToggleService featureToggleService;
-    @Mock
-    private FormattedTitleDisplayService formattedTitleDisplayService;
 
     private CourtNavFl401 courtNavFl401;
 
