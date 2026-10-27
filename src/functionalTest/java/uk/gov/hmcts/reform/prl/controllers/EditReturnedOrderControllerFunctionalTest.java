@@ -132,7 +132,7 @@ public class EditReturnedOrderControllerFunctionalTest {
 
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_RETURNED_ORDER);
         String requestBodyRevised = requestBody
-            .replaceAll("1706607610239516", caseDetails.getId().toString());
+            .replaceAll("1788966916353004", caseDetails.getId().toString());
         Response response = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())

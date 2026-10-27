@@ -48,3 +48,4 @@ target/
 .aat-env*
 .devcontainer/
 /.run-coverage-on-commit
+bin/definitionsToBeImported/ccd-config-PRL-local.xlsx

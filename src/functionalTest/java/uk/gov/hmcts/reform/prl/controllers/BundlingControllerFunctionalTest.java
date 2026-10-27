@@ -18,7 +18,7 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
 
-@TestPropertySource(properties = {"feature.toggle.bundleByCategoryEnabled=false"})
+@TestPropertySource(properties = {"feature.toggle.bundleByCategoryEnabled=false","hearing_component.api.feign-url="})
 public class BundlingControllerFunctionalTest {
 
     @Autowired
