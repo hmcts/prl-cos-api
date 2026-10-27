@@ -35,6 +35,7 @@ public class PrlCourtConfigServiceTest {
 
             assertThat(result, is(true));
         }
+
         @Test
         void shouldReturnFalseIfNotPathfinderCourt() {
             // Chelmsford is not currently a pathfinder court - if this changes the test will need to change
