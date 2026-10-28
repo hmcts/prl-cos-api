@@ -10,7 +10,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class ExtendedCaseDetailsService {
-    private FormattedTitleDisplayService formattedTitleDisplayService;
+    private final FormattedTitleDisplayService formattedTitleDisplayService;
 
     public void setExtendedDetails(CaseData caseData, Map<String, Object> caseDataUpdated) {
         String extendedCaseDetailsTitle = formattedTitleDisplayService.getFormattedTitleDisplay(
