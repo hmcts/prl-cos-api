@@ -8,7 +8,7 @@ import java.time.LocalDate;
 @Service
 @RequiredArgsConstructor
 public class FormattedTitleDisplayService {
-    private FeatureToggleService featureToggleService;
+    private final FeatureToggleService featureToggleService;
 
     public static final String FORMATTED_TITLE_DISPLAY_BEFORE_RELEASE =
         "## %s\n ## FamilyMan ID: %s\n ## Casenumber: %s";
