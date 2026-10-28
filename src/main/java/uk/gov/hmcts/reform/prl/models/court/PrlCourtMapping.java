@@ -13,5 +13,6 @@ import uk.gov.hmcts.reform.prl.enums.DfjArea;
 public class PrlCourtMapping {
     private String courtCode;
     private String courtName;
+    private String shortName;
     private DfjArea dfjArea;
 }
