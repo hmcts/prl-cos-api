@@ -46,8 +46,8 @@ import uk.gov.hmcts.reform.prl.services.CustomOrderService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
-import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
+import uk.gov.hmcts.reform.prl.services.UserRoleService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
@@ -128,8 +128,8 @@ public class ManageOrdersController {
     private final CustomOrderService customOrderService;
     private final ManageOrderEmailService manageOrderEmailService;
     private final AmendOrderService amendOrderService;
-    private final RefDataUserService refDataUserService;
     private final UserService userService;
+    private final UserRoleService userRoleService;
     private final HearingDataService hearingDataService;
     private final AuthorisationService authorisationService;
     private final AllTabServiceImpl allTabService;
@@ -155,7 +155,7 @@ public class ManageOrdersController {
             // Custom order flow - skip preview rendering here, it will be done on Page 19 with hearing data
             if (caseData.getManageOrdersOptions() != null && caseData.getManageOrdersOptions().equals(createCustomOrder)) {
                 // Set loggedInUserType for field show conditions
-                String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+                String loggedInUserType = userRoleService.getLoggedInUserType(authorisation);
                 caseDataUpdated.put(LOGGED_IN_USER_TYPE, loggedInUserType);
                 // Copy custom order sub-selections to pre-existing fields and set createSelectOrderOptions
                 manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
@@ -372,7 +372,7 @@ public class ManageOrdersController {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = new HashMap<>();
             caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
-            caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
+            caseDataUpdated.put("loggedInUserType", userRoleService.getLoggedInUserType(authorisation));
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 caseDataUpdated.put(
                     "isInHearingState",
@@ -496,7 +496,7 @@ public class ManageOrdersController {
                     caseDataUpdated);
             boolean finalOrder = false;
             boolean saveAsDraft = manageOrderService.isSaveAsDraft(caseData);
-            String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+            String loggedInUserType = userRoleService.getLoggedInUserType(authorisation);
             if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)) {
                 if (!(!noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()) || saveAsDraft)) {
                     finalOrder = true;
@@ -566,7 +566,7 @@ public class ManageOrdersController {
             Boolean currentOrderADraftOrder = (Boolean) caseDataUpdated.get(CURRENT_ORDER_A_DRAFT_ORDER);
             boolean finalOrder = nonNull(currentOrderADraftOrder) && !currentOrderADraftOrder;
             UUID newDraftOrderCollectionId;
-            String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+            String loggedInUserType = userRoleService.getLoggedInUserType(authorisation);
             if (finalOrder) {
                 newDraftOrderCollectionId = getOrderId(caseDataUpdated);
             } else {
@@ -752,7 +752,7 @@ public class ManageOrdersController {
                 caseDataUpdated.putAll(manageOrderService.getOrderToAmendDownloadLink(caseData));
             }
 
-            caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
+            caseDataUpdated.put("loggedInUserType", userRoleService.getLoggedInUserType(authorisation));
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new InvalidClientException(INVALID_CLIENT));
@@ -941,7 +941,7 @@ public class ManageOrdersController {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             List<String> errorList = new ArrayList<>();
-            String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+            String loggedInUserType = userRoleService.getLoggedInUserType(authorisation);
 
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
                 //SDO - hearing screen validations
@@ -1178,7 +1178,7 @@ public class ManageOrdersController {
 
     private void processCustomOrder(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
         // Determine if this is a draft order based on user type and settings
-        String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+        String loggedInUserType = userRoleService.getLoggedInUserType(authorisation);
         Object amendCheckObj = caseDataUpdated.get(AMEND_ORDER_SELECT_CHECK_OPTIONS);
         AmendOrderCheckEnum amendCheck;
         if (amendCheckObj != null) {
