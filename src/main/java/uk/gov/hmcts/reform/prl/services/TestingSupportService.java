@@ -72,6 +72,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_ISSUED_AFTER
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TESTING_SUPPORT_LD_FLAG_ENABLED;
 import static uk.gov.hmcts.reform.prl.enums.Event.TS_CA_URGENT_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.TS_SOLICITOR_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -236,7 +238,8 @@ public class TestingSupportService {
             caseDataUpdated.put(APPLICANT_CASE_NAME, initialCaseData.getApplicantCaseName());
             caseDataUpdated.put(CASE_NAME_HMCTS_INTERNAL, initialCaseData.getApplicantCaseName());
             caseDataUpdated.put(IS_ISSUED_AFTER_CASENAME_RELEASE,
-                          featureToggleService.isCaseIssuedAfterReleaseDate(LocalDate.now()));
+                          featureToggleService.isCaseIssuedAfterReleaseDate(LocalDate.now()) ?
+                              Yes.getDisplayedValue() : No.getDisplayedValue());
             caseDataUpdated.put(CASE_ACCESS_CATEGORY,initialCaseData.getCaseTypeOfApplication());
             if (FL401_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
                 caseDataUpdated.put(APPLICANT_OR_RESPONDENT_CASE_NAME, initialCaseData.getApplicantCaseName());
