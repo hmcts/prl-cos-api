@@ -40,16 +40,10 @@ public class PrlCourtConfigService {
         try {
             List<Map<String, String>> rows = csvReader.read(PRL_COURT_CONFIG);
             prlCourtMapping = objectMapper.convertValue(rows, new TypeReference<>(){});
+            log.info("Loaded {} court mappings from {}.", prlCourtMapping.size(), PRL_COURT_CONFIG);
         } catch (Exception e) {
             log.error("Unable to parse prlCourtConfig.csv file.", e);
         }
-    }
-
-    public boolean isPathfinderCourt(String baseLocationId) {
-        return getPrlCourtById(baseLocationId)
-            .map(PrlCourtMapping::getDfjArea)
-            .map(DfjArea::isPathFinderEnabled)
-            .orElse(false);
     }
 
     private Optional<PrlCourtMapping> getPrlCourtById(String baseLocationId) {
@@ -58,32 +52,37 @@ public class PrlCourtConfigService {
             .findFirst();
     }
 
-    private Optional<PrlCourtMapping> getPrlCourtMappingFromName(String courtName) {
+    private Optional<PrlCourtMapping> getPrlCourtByName(String courtName) {
         return prlCourtMapping.stream()
             .filter(prlCourtDetails -> prlCourtDetails.getCourtName().equalsIgnoreCase(courtName))
-            .findAny();
+            .findFirst();
+    }
+
+    private Map<String, String> getDfjFields(Optional<PrlCourtMapping> prlCourtMapping) {
+        Map<String, String> dfjAreaFields = new HashMap<>();
+        if (prlCourtMapping.isPresent()) {
+            DfjArea dfjArea = prlCourtMapping.get().getDfjArea();
+            dfjAreaFields.put("dfjArea", dfjArea.getName());
+            dfjAreaFields.put(dfjArea.getCourtField(), prlCourtMapping.get().getCourtCode());
+        }
+        return dfjAreaFields;
+    }
+
+    public boolean isPathfinderCourt(String courtCode) {
+        return getPrlCourtById(courtCode)
+            .map(PrlCourtMapping::getDfjArea)
+            .map(DfjArea::isPathFinderEnabled)
+            .orElse(false);
     }
 
     public Map<String, String> getDfjAreaFieldsByCourtId(String courtCode) {
         Optional<PrlCourtMapping> prlCourt = getPrlCourtById(courtCode);
-        Map<String, String> dfjAreaFields = new HashMap<>();
-        if (prlCourt.isPresent()) {
-            DfjArea dfjArea = prlCourt.get().getDfjArea();
-            dfjAreaFields.put("dfjArea", dfjArea.getName());
-            dfjAreaFields.put(dfjArea.getCourtField(), courtCode);
-        }
-        return dfjAreaFields;
+        return getDfjFields(prlCourt);
     }
 
     public Map<String, String> getDfjAreaFieldsByCourtName(String name) {
-        Optional<PrlCourtMapping> prlCourt = getPrlCourtMappingFromName(name);
-        Map<String, String> dfjAreaFields = new HashMap<>();
-        if (prlCourt.isPresent()) {
-            DfjArea dfjArea = prlCourt.get().getDfjArea();
-            dfjAreaFields.put("dfjArea", dfjArea.getName());
-            dfjAreaFields.put(dfjArea.getCourtField(), prlCourt.get().getCourtCode());
-        }
-        return dfjAreaFields;
+        Optional<PrlCourtMapping> prlCourt = getPrlCourtByName(name);
+        return getDfjFields(prlCourt);
     }
 
     public Set<String> getAllCourtFields() {
