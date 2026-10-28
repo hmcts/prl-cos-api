@@ -69,12 +69,18 @@ class UserRoleServiceTest {
             .map(roleName -> Arguments.of(roleName, Roles.LEGAL_ADVISER, UserRoles.JUDGE));
         Stream<Arguments> courtAdmin = InternalCaseworkerAmRolesEnum.COURT_ADMIN.getRoles().stream()
             .map(roleName -> Arguments.of(roleName, Roles.COURT_ADMIN, UserRoles.COURT_ADMIN));
-        Stream<Arguments> citizenRoles = Stream.of(Arguments.of(Roles.CITIZEN.getValue(), Roles.CITIZEN,
-                                                                UserRoles.CITIZEN));
-        Stream<Arguments> solicitorRoles = Stream.of(Arguments.of(Roles.CITIZEN.getValue(), Roles.SOLICITOR,
-                                                                  UserRoles.SOLICITOR));
-        Stream<Arguments> systemUpdateRoles = Stream.of(Arguments.of(Roles.SYSTEM_UPDATE.getValue(), Roles.SYSTEM_UPDATE,
-                                                                     UserRoles.SYSTEM_UPDATE));
+        Stream<Arguments> citizenRoles = Stream.of(Arguments.of(
+            Roles.CITIZEN.getValue(), Roles.CITIZEN,
+            UserRoles.CITIZEN
+        ));
+        Stream<Arguments> solicitorRoles = Stream.of(Arguments.of(
+            Roles.CITIZEN.getValue(), Roles.SOLICITOR,
+            UserRoles.SOLICITOR
+        ));
+        Stream<Arguments> systemUpdateRoles = Stream.of(Arguments.of(
+            Roles.SYSTEM_UPDATE.getValue(), Roles.SYSTEM_UPDATE,
+            UserRoles.SYSTEM_UPDATE
+        ));
 
         return Stream.of(judgeRoles, legalAdviserRoles, courtAdmin, citizenRoles, solicitorRoles, systemUpdateRoles)
             .flatMap(java.util.function.Function.identity());
@@ -161,27 +167,31 @@ class UserRoleServiceTest {
 
     @Test
     void testGetLoggedInUserTypeJudgeFromAmRoleAssignment() {
-        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("allocated-magistrate");
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "allocated-magistrate");
         when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                     .id("123")
                                                                     .roles(List.of(Roles.JUDGE.getValue())).build());
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
 
-        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(roleAssignmentServiceResponse);
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(
+            roleAssignmentServiceResponse);
         assertEquals(UserRoles.JUDGE.name(), userRoleService.getLoggedInUserType("test"));
     }
 
     @Test
     void testGetLoggedInUserTypeLegalAdviserFromAmRoleAssignment() {
-        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("tribunal-caseworker");
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "tribunal-caseworker");
         when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                     .id("123")
                                                                     .roles(List.of(Roles.LEGAL_ADVISER.getValue())).build());
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
 
-        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(roleAssignmentServiceResponse);
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(
+            roleAssignmentServiceResponse);
         assertEquals(UserRoles.JUDGE.name(), userRoleService.getLoggedInUserType("test"));
     }
 
@@ -194,7 +204,8 @@ class UserRoleServiceTest {
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
 
-        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(roleAssignmentServiceResponse);
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(
+            roleAssignmentServiceResponse);
         assertEquals("", userRoleService.getLoggedInUserType("test"));
     }
 
