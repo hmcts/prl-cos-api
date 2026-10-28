@@ -4,15 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Service
 @RequiredArgsConstructor
 public class ExtendedCaseDetailsService {
     private final FormattedTitleDisplayService formattedTitleDisplayService;
 
-    public void setExtendedDetails(CaseData caseData, Map<String, Object> caseDataUpdated) {
+    public String getExtendedDetails(CaseData caseData) {
         String extendedCaseDetailsTitle = formattedTitleDisplayService.getFormattedTitleDisplay(
             caseData.getApplicantCaseName(),
             caseData.getCaseNameHmctsInternal(),
@@ -20,8 +17,6 @@ public class ExtendedCaseDetailsService {
             caseData.getId(),
             caseData.getIssueDate()
         );
-        HashMap injectedData = new HashMap();
-        injectedData.put("extendedCaseDetailsTitle", extendedCaseDetailsTitle);
-        caseDataUpdated.put("INJECTED_DATA", injectedData);
+        return extendedCaseDetailsTitle;
     }
 }

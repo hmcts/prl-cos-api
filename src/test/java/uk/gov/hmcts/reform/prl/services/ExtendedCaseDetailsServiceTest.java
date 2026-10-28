@@ -8,7 +8,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -22,7 +21,6 @@ class ExtendedCaseDetailsServiceTest {
 
     @Test
     void shouldSetExtendedDetails() {
-        HashMap caseDataUpdated = new HashMap();
         String appCaseName = "appCaseName";
         String caseNameHmctsInternal = "caseNameHmctsInternal";
         String familymanCaseNumber = "familymanCaseNumber";
@@ -44,11 +42,8 @@ class ExtendedCaseDetailsServiceTest {
             issueDate
         )).thenReturn(expectedTitle);
 
-        extendedCaseDetailsService.setExtendedDetails(caseData, caseDataUpdated);
-        assertThat(caseDataUpdated.get("INJECTED_DATA")).isNotNull();
-        assertThat(((HashMap) caseDataUpdated.get("INJECTED_DATA")).get("extendedCaseDetailsTitle")).isEqualTo(
+        String extendedCaseDetails = extendedCaseDetailsService.getExtendedDetails(caseData);
+        assertThat(extendedCaseDetails).isEqualTo(
             expectedTitle);
-
-
     }
 }

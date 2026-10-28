@@ -1123,4 +1123,5 @@ public class PrlAppsConstants {
 
     public static final String TASK_ASSIGNEE_IDAM_ID = "taskAssigneeIdamId";
     public static final String NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS = "newTaskRequiredForUploadedDocs";
+    public static final String EXTENDED_CASE_DETAILS_TITLE = "extendedCaseDetailsTitle";
 }
