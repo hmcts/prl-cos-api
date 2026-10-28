@@ -1,45 +1,45 @@
-﻿courtCode,courtName,dfjArea
-827534,Aberystwyth Justice Centre,SWANSEA
-101959,Carmarthen County Court and Family Court,SWANSEA
-700596,Haverfordwest County Court and Family Court,SWANSEA
-390932,Llanelli Justice Centre,SWANSEA
-846055,Port Talbot Justice Centre,SWANSEA
-234946,Swansea Civil Justice Centre,SWANSEA
-478126,Great Grimsby Combined Court Centre,HUMBERSIDE
-195520,Kingston-upon-Hull Combined Court Centre,HUMBERSIDE
-816875,Chelmsford Justice Centre,ESSEX_AND_SUFFOLK
-471349,Ipswich County Court and Family Hearing Centre,ESSEX_AND_SUFFOLK
-257431,Bury St Edmunds County Court and Family Court,ESSEX_AND_SUFFOLK
-781139,Southend Combined - Crown, Mags, County and Family Courts,ESSEX_AND_SUFFOLK
-41047,Wolverhampton Combined Court Centre,WOLVERHAMPTON
-177463,Walsall County and Family Court,WOLVERHAMPTON
-758998,Dudley Magistrates Court,WOLVERHAMPTON
-292771,Telford Magistrates Court,WOLVERHAMPTON
-234850,Cardiff Civil And Family Justice Centre,CARDIFF
-232298,Pontypridd County Court and Family Court,CARDIFF
-448345,Merthyr Tydfil Combined Court Centre,CARDIFF
-217250,Newport (South Wales) County Court and Family Court,CARDIFF
-304576,Blackwood Civil and Family Court,CARDIFF
-366572,Caernarfon,NORTH_WALES
-379656,Prestatyn,NORTH_WALES
-637145,Wrexham,NORTH_WALES
-373584,West London Family Court,WEST_LONDON
-20262,Royal Courts of Justice,WEST_LONDON
-229786,Barnet Family Court,WEST_LONDON
-369145,Medway,KENT
-194172,Dartford County,KENT
-259679,Canterbury County,KENT
-465872,Maidstone County,KENT
-457273,Basingstoke,PORTSMOUTH
-450049,Aldershot,PORTSMOUTH
-886493,Winchester,PORTSMOUTH
-460592,Portsmouth Combined,PORTSMOUTH
-416742,Isle of Wight,PORTSMOUTH
-43104,Southampton Combined,PORTSMOUTH
-101633,Bournemouth,BOURNEMOUTH
-624161,Weymouth,BOURNEMOUTH
-778638,Sheffield,SHEFFIELD
-45900,Doncaster,SHEFFIELD
-574546,Barnsley,SHEFFIELD
-424213,Nottingham County Court,NOTTINGHAM
-652852,Chesterfield Justice Centre,DERBY
+﻿courtCode,courtName,shortName,dfjArea
+827534,Aberystwyth Justice Centre,Aberystwyth,SWANSEA
+101959,Carmarthen County Court and Family Court,Carmarthen,SWANSEA
+700596,Haverfordwest County Court and Family Court,Haverfordwest,SWANSEA
+390932,Llanelli Justice Centre,Llanelli,SWANSEA
+846055,Port Talbot Justice Centre,Port Talbot,SWANSEA
+234946,Swansea Civil Justice Centre,Swansea,SWANSEA
+478126,Great Grimsby Combined Court Centre,Great Grimsby,HUMBERSIDE
+195520,Kingston-upon-Hull Combined Court Centre,Kingston-upon-Hull,HUMBERSIDE
+816875,Chelmsford Justice Centre,Chelmsford,ESSEX_AND_SUFFOLK
+471349,Ipswich County Court and Family Hearing Centre,Ipswich,ESSEX_AND_SUFFOLK
+257431,Bury St Edmunds County Court and Family Court,Bury St Edmunds,ESSEX_AND_SUFFOLK
+781139,"Southend Combined - Crown, Mags, County and Family Courts",Southend,ESSEX_AND_SUFFOLK
+41047,Wolverhampton Combined Court Centre,Wolverhampton,WOLVERHAMPTON
+177463,Walsall County and Family Court,Walsall,WOLVERHAMPTON
+758998,Dudley Magistrates Court,Dudley,WOLVERHAMPTON
+292771,Telford Magistrates Court,Telford,WOLVERHAMPTON
+234850,Cardiff Civil And Family Justice Centre,Cardiff,CARDIFF
+232298,Pontypridd County Court and Family Court,Pontypridd,CARDIFF
+448345,Merthyr Tydfil Combined Court Centre,Merthyr Tydfil,CARDIFF
+217250,Newport (South Wales) County Court and Family Court,Newport,CARDIFF
+304576,Blackwood Civil and Family Court,Blackwood,CARDIFF
+366572,Caernarfon,Caernarfon,NORTH_WALES
+379656,Prestatyn,Prestatyn,NORTH_WALES
+637145,Wrexham,Wrexham,NORTH_WALES
+373584,West London Family Court,West London,WEST_LONDON
+20262,Royal Courts of Justice,Royal Courts of Justice,WEST_LONDON
+229786,Barnet Family Court,Barnet,WEST_LONDON
+369145,Medway,Medway,KENT
+194172,Dartford County,Dartford,KENT
+259679,Canterbury County,Canterbury,KENT
+465872,Maidstone County,Maidstone,KENT
+457273,Basingstoke,Basingstoke,PORTSMOUTH
+450049,Aldershot,Aldershot,PORTSMOUTH
+886493,Winchester,Winchester,PORTSMOUTH
+460592,Portsmouth Combined,Portsmouth,PORTSMOUTH
+416742,Isle of Wight,Isle of Wight,PORTSMOUTH
+43104,Southampton Combined,Southampton,PORTSMOUTH
+101633,Bournemouth,Bournemouth,BOURNEMOUTH
+624161,Weymouth,Weymouth,BOURNEMOUTH
+778638,Sheffield,Sheffield,SHEFFIELD
+45900,Doncaster,Doncaster,SHEFFIELD
+574546,Barnsley,Barnsley,SHEFFIELD
+424213,Nottingham County Court,Nottingham,NOTTINGHAM
+652852,Chesterfield Justice Centre,Chesterfield,DERBY

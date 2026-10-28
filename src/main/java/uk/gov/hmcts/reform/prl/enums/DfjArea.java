@@ -14,7 +14,6 @@ public enum DfjArea {
     // Tranche 1
     CARDIFF("CARDIFF", "cardiffDFJCourt", true),
     NORTH_WALES("NORTH_WALES", "northWalesDFJCourt", true),
-    WEST_MIDLANDS("WEST_MIDLANDS", "westMidlandsDFJCourt", true),
     WEST_LONDON("WEST_LONDON", "westLondonDFJCourt", false),
     KENT("KENT", "kentDFJCourt", false),
     PORTSMOUTH("PORTSMOUTH", "portsmouthDFJCourt", true),

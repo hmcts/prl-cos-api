@@ -1,3 +1,3 @@
-courtCode,courtName,dfjArea
-234946,Swansea Civil Justice Centre,SWANSEA
-816875,Chelmsford Justice Centre,ESSEX_AND_SUFFOLK
+courtCode,courtName,shortName,dfjArea
+234946,Swansea Civil Justice Centre,Swansea,SWANSEA
+816875,Chelmsford Justice Centre,Chelmsford,ESSEX_AND_SUFFOLK
