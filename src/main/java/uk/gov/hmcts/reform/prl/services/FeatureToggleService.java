@@ -6,11 +6,14 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.Features;
+import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.prl.models.Features.CASE_NAME_WITH_PREFIX_RELEASE_DATE;
 import static uk.gov.hmcts.reform.prl.models.Features.IS_BARRISTER_FEATURE_ENABLED;
 import static uk.gov.hmcts.reform.prl.models.Features.IS_CAFCASS_DATE_TIME_FEATURE_ENABLED;
 import static uk.gov.hmcts.reform.prl.models.Features.IS_CREATE_REQUEST_CIR_UPDATE_TASK_ENABLED;
@@ -67,5 +70,17 @@ public class FeatureToggleService {
 
     public boolean isExitAwaitingInformationEnabled() {
         return isFeatureEnabled(Features.IS_EXIT_AWAITING_INFORMATION_ENABLED);
+    }
+
+    public boolean isFullCaseNameEnabled() {
+        return !LocalDate.now().isBefore(getCaseNameWithPrefixReleaseDate());
+    }
+
+    public LocalDate getCaseNameWithPrefixReleaseDate() {
+        return CommonUtils.parseDate(toggle.get(CASE_NAME_WITH_PREFIX_RELEASE_DATE.getName())).orElseThrow();
+    }
+
+    public boolean isCaseIssuedAfterReleaseDate(LocalDate issueDate) {
+        return issueDate != null && !issueDate.isBefore(getCaseNameWithPrefixReleaseDate());
     }
 }

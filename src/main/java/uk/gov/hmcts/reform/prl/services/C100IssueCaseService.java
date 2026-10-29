@@ -39,6 +39,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_ISSUED_AFTER_CASENAME_RELEASE;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.PATH_FINDER_DECISION;
 import static uk.gov.hmcts.reform.prl.enums.State.PROCEEDS_IN_HERITAGE_SYSTEM;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -64,6 +65,7 @@ public class C100IssueCaseService {
     private final CcdCoreCaseDataService ccdCoreCaseDataService;
     private final SystemUserService systemUserService;
     private final UpdatePartyDetailsService updatePartyDetailsService;
+    private final FeatureToggleService featureToggleService;
 
     public Map<String, Object> issueAndSendToLocalCourt(String authorisation, CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -141,6 +143,10 @@ public class C100IssueCaseService {
                 .build());
         }
         caseDataUpdated.put("issueDate", caseData.getIssueDate());
+
+        caseDataUpdated.put(IS_ISSUED_AFTER_CASENAME_RELEASE,
+            featureToggleService.isFullCaseNameEnabled() ? Yes.getDisplayedValue() : No.getDisplayedValue());
+
         return caseDataUpdated;
     }
 

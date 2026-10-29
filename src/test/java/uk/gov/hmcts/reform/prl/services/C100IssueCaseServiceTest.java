@@ -162,6 +162,10 @@ public class C100IssueCaseServiceTest {
     @Mock
     private SystemUserService systemUserService;
 
+    @Mock
+    private FeatureToggleService featureToggleService;
+
+
     public static final String authToken = "Bearer TestAuthToken";
 
     private static final Map<String, Object> c100DraftMap = new HashMap<>();
@@ -332,6 +336,7 @@ public class C100IssueCaseServiceTest {
                 "finalWelshDocument", "document"
             ));
 
+        when(featureToggleService.isFullCaseNameEnabled()).thenReturn(true);
         Map<String, Object> objectMap = c100IssueCaseService.issueAndSendToLocalCourt(
             authToken,
             callbackRequest
@@ -340,6 +345,7 @@ public class C100IssueCaseServiceTest {
         Assertions.assertNotNull(objectMap.get("c1ADocument"));
         Assertions.assertNotNull(objectMap.get("c1AWelshDocument"));
         Assertions.assertNotNull(objectMap.get("finalWelshDocument"));
+        Assertions.assertEquals("Yes", objectMap.get("isIssuedAfterCaseNameRelease"));
     }
 
     @Test
@@ -367,6 +373,8 @@ public class C100IssueCaseServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(courtFinderService.getCourtDetails(anyString())).thenReturn(Court.builder().countyLocationCode(123L)
                                                                                      .build());
+        when(featureToggleService.isFullCaseNameEnabled()).thenReturn(false);
+
         Map<String, Object> objectMap = c100IssueCaseService.issueAndSendToLocalCourt(
             authToken,
             callbackRequest
@@ -376,6 +384,7 @@ public class C100IssueCaseServiceTest {
         Assertions.assertNull(objectMap.get("c8WelshDocument"));
         Assertions.assertNull(objectMap.get("c1AWelshDocument"));
         Assertions.assertNull(objectMap.get("finalWelshDocument"));
+        Assertions.assertEquals("No", objectMap.get("isIssuedAfterCaseNameRelease"));
         verifyNoMoreInteractions(organisationService);
     }
 
