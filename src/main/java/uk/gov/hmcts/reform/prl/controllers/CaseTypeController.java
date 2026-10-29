@@ -64,6 +64,7 @@ public class CaseTypeController extends AbstractCallbackController {
             CaseViewField caseViewField = new CaseViewField();
             caseViewField.setId(EXTENDED_CASE_DETAILS_TITLE);
             caseViewField.setFormattedValue(extendedCaseDetails);
+            caseViewField.setValue(extendedCaseDetails);
             metaDataFields.add(caseViewField);
             getCaseCallbackResponse.setMetadataFields(metaDataFields);
             return getCaseCallbackResponse;

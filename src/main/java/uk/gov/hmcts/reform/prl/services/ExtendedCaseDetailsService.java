@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 @RequiredArgsConstructor
 public class ExtendedCaseDetailsService {
     private final FormattedTitleDisplayService formattedTitleDisplayService;
+    private final String PREFIX_INJECTED_DATA = "INJECTED_DATA.";
 
     public String getExtendedDetails(CaseData caseData) {
         String extendedCaseDetailsTitle = formattedTitleDisplayService.getFormattedTitleDisplay(
@@ -17,6 +18,6 @@ public class ExtendedCaseDetailsService {
             caseData.getId(),
             caseData.getIssueDate()
         );
-        return extendedCaseDetailsTitle;
+        return PREFIX_INJECTED_DATA + extendedCaseDetailsTitle;
     }
 }
