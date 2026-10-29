@@ -44,6 +44,6 @@ class ExtendedCaseDetailsServiceTest {
 
         String extendedCaseDetails = extendedCaseDetailsService.getExtendedDetails(caseData);
         assertThat(extendedCaseDetails).isEqualTo(
-            "INJECTED_DATA."+expectedTitle);
+            "INJECTED_DATA." + expectedTitle);
     }
 }
