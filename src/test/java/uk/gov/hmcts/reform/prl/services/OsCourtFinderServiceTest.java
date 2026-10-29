@@ -7,7 +7,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
 import uk.gov.hmcts.reform.prl.clients.os.OsCourtFinderApi;
 import uk.gov.hmcts.reform.prl.models.LocalAuthorityCourt;
 import uk.gov.hmcts.reform.prl.models.court.Court;
@@ -15,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.ordnancesurvey.Dpa;
 import uk.gov.hmcts.reform.prl.models.ordnancesurvey.OsPlacesResponse;
 import uk.gov.hmcts.reform.prl.models.ordnancesurvey.Result;
+import uk.gov.hmcts.reform.prl.services.factv2.FactV2CourtDetailsService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +46,7 @@ class OsCourtFinderServiceTest {
     @Mock
     private LocationRefDataService locationRefDataService;
     @Mock
-    private CourtFinderApi courtFinderApi;
+    private FactV2CourtDetailsService factV2CourtDetailsService;
 
     @InjectMocks
     private OsCourtFinderService osCourtFinderService;
@@ -82,7 +82,8 @@ class OsCourtFinderServiceTest {
         when(locationRefDataService.getCourtDetailsFromEpimmsId(epimmsId, USER_TOKEN))
             .thenReturn(Optional.of(courtVenue));
 
-        when(courtFinderApi.getCourtDetails(COURT_SLUG)).thenReturn(Court.builder().courtSlug(COURT_SLUG).build());
+        when(factV2CourtDetailsService.getCourtDetailsFromFactUrl(FACT_URL + COURT_SLUG))
+            .thenReturn(Court.builder().courtSlug(COURT_SLUG).build());
 
         ImmutablePair<CourtVenue, Court> courtPair = osCourtFinderService.getC100NearestFamilyCourtAndVenue(postcode);
 
@@ -114,7 +115,8 @@ class OsCourtFinderServiceTest {
         when(locationRefDataService.getCourtDetailsFromEpimmsId(epimmsId, USER_TOKEN))
             .thenReturn(Optional.of(courtVenue));
 
-        when(courtFinderApi.getCourtDetails(COURT_SLUG)).thenReturn(Court.builder().courtSlug(COURT_SLUG).build());
+        when(factV2CourtDetailsService.getCourtDetailsFromFactUrl(FACT_URL + COURT_SLUG))
+            .thenReturn(Court.builder().courtSlug(COURT_SLUG).build());
 
         ImmutablePair<CourtVenue, Court> courtPair = osCourtFinderService.getC100NearestFamilyCourtAndVenue("N111JD");
 
@@ -142,7 +144,43 @@ class OsCourtFinderServiceTest {
 
         assertNull(court);
         verifyNoInteractions(locationRefDataService);
-        verifyNoInteractions(courtFinderApi);
+        verifyNoInteractions(factV2CourtDetailsService);
+    }
+
+    @Test
+    void shouldReturnVenueWithoutFactCourtWhenFactUrlIsNull() throws NotFoundException {
+        CourtVenue venue = CourtVenue.builder().factUrl(null).build();
+        stubSpecificPostcodeVenue(venue);
+
+        var result = osCourtFinderService.getC100NearestFamilyCourtAndVenue("N111JD");
+
+        assertNotNull(result);
+        assertEquals(venue, result.getLeft());
+        assertNull(result.getRight());
+        verifyNoInteractions(factV2CourtDetailsService);
+    }
+
+    @Test
+    void shouldReturnVenueWithoutFactCourtWhenFactUrlIsBlank() throws NotFoundException {
+        CourtVenue venue = CourtVenue.builder().factUrl(" ").build();
+        stubSpecificPostcodeVenue(venue);
+
+        var result = osCourtFinderService.getC100NearestFamilyCourtAndVenue("N111JD");
+
+        assertNotNull(result);
+        assertEquals(venue, result.getLeft());
+        assertNull(result.getRight());
+        verifyNoInteractions(factV2CourtDetailsService);
+    }
+
+    private void stubSpecificPostcodeVenue(CourtVenue venue) {
+        LocalAuthorityCourt localAuthorityCourt = LocalAuthorityCourt.builder()
+            .specificPostCodes(List.of("N1"))
+            .epimmsId("venue-id")
+            .build();
+        when(localAuthorityCourtDataLoader.getLocalAuthorityCourtList()).thenReturn(List.of(localAuthorityCourt));
+        when(systemUserService.getSysUserToken()).thenReturn(USER_TOKEN);
+        when(locationRefDataService.getCourtDetailsFromEpimmsId("venue-id", USER_TOKEN)).thenReturn(Optional.of(venue));
     }
 
     @Test
@@ -167,7 +205,7 @@ class OsCourtFinderServiceTest {
 
         assertNull(court);
         verifyNoInteractions(locationRefDataService);
-        verifyNoInteractions(courtFinderApi);
+        verifyNoInteractions(factV2CourtDetailsService);
     }
 
     @Test
