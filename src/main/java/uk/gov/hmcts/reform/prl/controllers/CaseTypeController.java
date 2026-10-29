@@ -57,7 +57,7 @@ public class CaseTypeController extends AbstractCallbackController {
         if (authorisationService.isAuthorized(authorization, serviceAuthorization)) {
             CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
             String extendedCaseDetails = extendedCaseDetailsService.getExtendedDetails(caseData);
-            log.info("extendedCaseDetails", extendedCaseDetails);
+            log.info("extendedCaseDetails:{}", extendedCaseDetails);
 
             GetCaseCallbackResponse getCaseCallbackResponse = new GetCaseCallbackResponse();
             List<CaseViewField> metaDataFields = new ArrayList();
