@@ -4,14 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.prl.enums.DfjArea;
 
 @Data
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class DfjAreaCourtMapping {
+public class PrlCourtMapping {
     private String courtCode;
     private String courtName;
-    private String courtField;
-    private String dfjArea;
+    private String shortName;
+    private DfjArea dfjArea;
 }

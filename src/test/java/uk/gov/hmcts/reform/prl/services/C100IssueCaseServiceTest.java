@@ -33,7 +33,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConf
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
-import uk.gov.hmcts.reform.prl.models.court.PathFinderMapping;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -82,7 +81,7 @@ public class C100IssueCaseServiceTest {
     private ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
 
     @Mock
-    private DfjLookupService dfjLookupService;
+    private PrlCourtConfigService prlCourtConfigService;
 
     @Mock
     private ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
@@ -110,9 +109,6 @@ public class C100IssueCaseServiceTest {
 
     @Mock
     private SolicitorEmailService solicitorEmailService;
-
-    @Mock
-    private PathFinderLookupService pathFinderLookupService;
 
     @Mock
     private UserDetails userDetails;
@@ -217,7 +213,7 @@ public class C100IssueCaseServiceTest {
                                                                          .label("Swansea")
                                                                          .build());
         when(locationRefDataService.getFilteredCourtLocations(authToken)).thenReturn(workAllocationEnabledList);
-        when(dfjLookupService.getDfjAreaFieldsByCourtId("234946")).thenReturn(Map.of(
+        when(prlCourtConfigService.getDfjAreaFieldsByCourtId("234946")).thenReturn(Map.of(
             "dfjArea", "SWANSEA",
             "swanseaDFJCourt", "234946"
         ));
@@ -738,8 +734,7 @@ public class C100IssueCaseServiceTest {
                                    .id(123L).data(stringObjectMap).build())
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(pathFinderLookupService.getPathFinderMappingByCourtField("234946")).thenReturn(Optional.of(
-            PathFinderMapping.builder().pathFinderEnabled(true).build()));
+        when(prlCourtConfigService.isPathfinderCourt("234946")).thenReturn(true);
 
         Map<String, Object> updates = c100IssueCaseService.issueAndSendToLocalCourt(authToken, callbackRequest);
 

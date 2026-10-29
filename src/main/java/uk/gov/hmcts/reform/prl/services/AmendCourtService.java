@@ -40,7 +40,7 @@ public class AmendCourtService {
     private final CourtSealFinderService courtSealFinderService;
     private final ObjectMapper objectMapper;
     private final CaseSummaryTabService caseSummaryTab;
-    private final DfjLookupService dfjLookupService;
+    private final PrlCourtConfigService prlCourtConfigService;
 
     public Map<String, Object> handleAmendCourtSubmission(String authorisation, CallbackRequest callbackRequest,
                                                           Map<String, Object> caseDataUpdated) {
@@ -66,8 +66,8 @@ public class AmendCourtService {
             if (courtVenue.isPresent()) {
                 String courtSeal = courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId());
                 caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
-                caseDataUpdated.keySet().removeAll(dfjLookupService.getAllCourtFields());
-                caseDataUpdated.putAll(dfjLookupService.getDfjAreaFieldsByCourtId(baseLocationId));
+                caseDataUpdated.keySet().removeAll(prlCourtConfigService.getAllCourtFields());
+                caseDataUpdated.putAll(prlCourtConfigService.getDfjAreaFieldsByCourtId(baseLocationId));
             }
             caseDataUpdated.put(STATE_FIELD, caseData.getState());
         }
