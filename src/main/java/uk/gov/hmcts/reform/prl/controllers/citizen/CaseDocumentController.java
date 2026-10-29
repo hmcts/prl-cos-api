@@ -64,6 +64,7 @@ import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -358,6 +359,33 @@ public class CaseDocumentController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
         DocumentResponse docResp = documentGenService.uploadDocument(authorisation, file);
+        return ResponseEntity.ok(docResp);
+    }
+
+    @PostMapping(path = "/upload-citizen-multiple-documents", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces =
+        APPLICATION_JSON)
+    @Operation(description = "Call CDAM to upload multiple document")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Uploaded Successfully"),
+        @ApiResponse(responseCode = "400", description = "Bad Request while uploading the document"),
+        @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
+    public ResponseEntity<List<DocumentResponse>> uploadCitizenMultipleDocuments(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                                        @RequestHeader("ServiceAuthorization") String serviceAuthorization,
+                                                        @RequestParam("files") MultipartFile[] files) {
+
+        if (!isAuthorized(authorisation, serviceAuthorization)) {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+        List<DocumentResponse> docResp = new ArrayList<>();
+        Arrays.stream(files).forEach(file -> {
+            try {
+                docResp.add(documentGenService.uploadDocument(authorisation, file));
+            } catch (IOException e) {
+                ResponseEntity.internalServerError().body("Error in uploading multiple citizen document");
+            }
+        });
         return ResponseEntity.ok(docResp);
     }
 
