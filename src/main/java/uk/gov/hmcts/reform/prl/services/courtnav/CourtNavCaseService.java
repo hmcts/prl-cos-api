@@ -51,6 +51,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_TRIGGERED_BY;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
 
 @Slf4j
@@ -117,8 +118,15 @@ public class CourtNavCaseService {
             }
             CaseData tempCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
             // check if the document is already on the case (by documentId), if so, return without uploading again
-            if (courtNavDocumentAlreadyPresentOnCase(tempCaseData, documentId)) {
+            if (isNotEmpty(documentId) && courtNavDocumentIdAlreadyPresentOnCase(tempCaseData, documentId)) {
                 log.info("Document with documentId {} is already present on the case {}", documentId, caseId);
+                return;
+            } else if (isEmpty(documentId) && isNotEmpty(document.getOriginalFilename())
+                && courtNavDocumentNameAlreadyPresentOnCase(tempCaseData, document.getOriginalFilename())) {
+                // validate if the non-document ID document name is on the case
+                // (cover sheets & witness statement, filename is standardized, [CASEID]_Exhibit_ST[N]_cover_sheet.pdf)
+                log.info("Document with documentName {} is already present on the case {}",
+                         document.getOriginalFilename(), caseId);
                 return;
             }
             int alreadyUploadedCourtNavDocSize = getAlreadyUploadedCourtNavDocsSize(tempCaseData);
@@ -194,7 +202,7 @@ public class CourtNavCaseService {
      * @param documentId the courtnav-provided ID of the document to check for.
      * @return true if a document with that ID has already been saved on the case.
      */
-    private boolean courtNavDocumentAlreadyPresentOnCase(CaseData caseData, String documentId) {
+    private boolean courtNavDocumentIdAlreadyPresentOnCase(CaseData caseData, String documentId) {
         if (isEmpty(caseData.getDocumentManagementDetails()) || documentId == null) {
             return false;
         }
@@ -202,6 +210,25 @@ public class CourtNavCaseService {
             .stream()
             .filter(doc -> !isEmpty(doc.getValue().getCourtNavDocumentId()))
             .anyMatch(doc -> doc.getValue().getCourtNavDocumentId().equals(documentId));
+    }
+
+    /**
+     * Check if the document with the given documentId is already present on the case, ignoring nulls.
+     * @param caseData current version of the case data prior to this request.
+     * @param documentName the original filename to check against.
+     * @return true if a document with that ID has already been saved on the case.
+     */
+    private boolean courtNavDocumentNameAlreadyPresentOnCase(CaseData caseData, String documentName) {
+        log.info("checking if document with name {} is already present on the case", documentName);
+        if (isEmpty(caseData.getDocumentManagementDetails())
+            || isEmpty(caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList())
+            || isEmpty(documentName)) {
+            return false;
+        }
+        return nullSafeList(caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList())
+            .stream()
+            .anyMatch(doc -> doc.getValue().getCourtNavQuarantineDocument()
+                .getDocumentFileName().equals(documentName));
     }
 
     private static int getAlreadyUploadedCourtNavDocsSize(CaseData tempCaseData) {
