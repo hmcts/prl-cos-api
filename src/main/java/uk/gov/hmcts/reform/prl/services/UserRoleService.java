@@ -28,6 +28,12 @@ public class UserRoleService {
     private final AuthTokenGenerator authTokenGenerator;
     private final IdamClient idamClient;
 
+    /**
+     * Gets the user type for a user's authorisation token. If the user is a legal adviser, it will return judge instead.
+     *
+     * @param authorisation authorisation token
+     * @return user type
+     */
     public String getLoggedInUserType(String authorisation) {
         UserRoles loggedInUserRole = getLoggedInUserRole(authorisation);
 
@@ -38,6 +44,13 @@ public class UserRoleService {
         return loggedInUserRole != null ? loggedInUserRole.name() : "";
     }
 
+    /**
+     * Gets the users role from the role assignment service if the feature flag is enabled,
+     * otherwise it gets the role from idam.
+     *
+     * @param authorisation authorisation token
+     * @return user's role
+     */
     public UserRoles getLoggedInUserRole(String authorisation) {
         UserDetails userDetails = getUserDetails(authorisation);
         if (launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)) {
