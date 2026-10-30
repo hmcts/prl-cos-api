@@ -186,4 +186,3 @@ This method also allows for individual functional tests to be run as long as boo
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
-
