@@ -80,6 +80,8 @@ public class RefDataUserServiceTest {
     @Mock
     CommonDataRefApi commonDataRefApi;
 
+    HearingRefDataService hearingRefDataService;
+
     @Mock
     LaunchDarklyClient launchDarklyClient;
 
@@ -94,6 +96,10 @@ public class RefDataUserServiceTest {
 
     @Before
     public void setUp() {
+        hearingRefDataService = new HearingRefDataService(
+            commonDataRefApi, authTokenGenerator, idamClient,
+            new ConcurrentMapCacheManager(HearingRefDataService.HEARING_REF_DATA_CACHE)
+        );
         staffRefDataService = new StaffRefDataService(
             authTokenGenerator,
             staffResponseDetailsApi,
@@ -106,6 +112,7 @@ public class RefDataUserServiceTest {
             judicialUserDetailsApi,
             idamClient,
             commonDataRefApi,
+            hearingRefDataService,
             launchDarklyClient
         );
     }
@@ -129,7 +136,7 @@ public class RefDataUserServiceTest {
         staffRefDataService = mock(StaffRefDataService.class);
         refDataUserService = new RefDataUserService(
             authTokenGenerator, staffRefDataService, judicialUserDetailsApi,
-            idamClient, commonDataRefApi, launchDarklyClient
+            idamClient, commonDataRefApi, hearingRefDataService, launchDarklyClient
         );
         when(staffRefDataService.getAllStaffDetails()).thenThrow(new NoStaffResponseException("failed"));
         List<DynamicListElement> legalAdvisor = refDataUserService.getLegalAdvisorList();
@@ -141,7 +148,7 @@ public class RefDataUserServiceTest {
         staffRefDataService = mock(StaffRefDataService.class);
         refDataUserService = new RefDataUserService(
             authTokenGenerator, staffRefDataService, judicialUserDetailsApi,
-            idamClient, commonDataRefApi, launchDarklyClient
+            idamClient, commonDataRefApi, hearingRefDataService, launchDarklyClient
         );
         when(staffRefDataService.getAllStaffDetails()).thenThrow(new RuntimeException("Unexpected error"));
         List<DynamicListElement> legalAdvisorList = refDataUserService.getLegalAdvisorList();
@@ -397,7 +404,7 @@ public class RefDataUserServiceTest {
             HEARINGTYPE,
             IS_HEARINGCHILDREQUIRED_N
         );
-        assertEquals(0,commonResponse.getCategoryValues().size());
+        assertEquals(0, commonResponse.getCategoryValues().size());
     }
 
     @Test
