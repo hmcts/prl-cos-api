@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.GetCaseCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.metadatafields.CaseViewField;
+import uk.gov.hmcts.reform.ccd.client.model.metadatafields.definition.FieldTypeDefinition;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
@@ -62,10 +63,17 @@ public class CaseTypeController extends AbstractCallbackController {
             GetCaseCallbackResponse getCaseCallbackResponse = new GetCaseCallbackResponse();
             List<CaseViewField> metaDataFields = new ArrayList();
             CaseViewField caseViewField = new CaseViewField();
-            caseViewField.setId(EXTENDED_CASE_DETAILS_TITLE);
-            caseViewField.setFormattedValue(extendedCaseDetails);
-            caseViewField.setValue(extendedCaseDetails);
             metaDataFields.add(caseViewField);
+
+            FieldTypeDefinition fieldTypeDefinition = new FieldTypeDefinition();
+            caseViewField.setId(EXTENDED_CASE_DETAILS_TITLE);
+            caseViewField.setValue(extendedCaseDetails);
+            caseViewField.setMetadata(true);
+            fieldTypeDefinition.setId(extendedCaseDetails);
+            fieldTypeDefinition.setType("Label");
+
+            caseViewField.setFieldTypeDefinition(fieldTypeDefinition);
+
             getCaseCallbackResponse.setMetadataFields(metaDataFields);
             return getCaseCallbackResponse;
         } else {
