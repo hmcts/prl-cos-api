@@ -645,6 +645,47 @@ class CafcassCaseDataServiceTest {
     }
 
     @Test
+    void testFilterPastHearingsBeforeNow_multiDayHearingWithFutureDayShouldRemain() {
+        ZoneId londonZoneId = ZoneId.of("Europe/London");
+        LocalDateTime nowInLondon = LocalDateTime.now(londonZoneId);
+
+        final CaseHearing multiDayHearing = CaseHearing.caseHearingWith()
+            .hearingID(Long.valueOf("3000000001"))
+            .hmcStatus("LISTED")
+            .hearingType("ABA5-FFH")
+            .hearingDaySchedule(List.of(
+                // Day 1: entirely in the past
+                HearingDaySchedule.hearingDayScheduleWith()
+                    .hearingVenueName("ROYAL COURTS OF JUSTICE - QUEENS BUILDING (AND WEST GREEN BUILDING)")
+                    .hearingStartDateTime(nowInLondon.minusDays(1).withHour(9).withMinute(0).withSecond(0).withNano(0))
+                    .hearingEndDateTime(nowInLondon.minusDays(1).withHour(16).withMinute(0).withSecond(0).withNano(0))
+                    .build(),
+                // Day 2: in the future
+                HearingDaySchedule.hearingDayScheduleWith()
+                    .hearingVenueName("ROYAL COURTS OF JUSTICE - QUEENS BUILDING (AND WEST GREEN BUILDING)")
+                    .hearingStartDateTime(nowInLondon.plusDays(1).withHour(9).withMinute(0).withSecond(0).withNano(0))
+                    .hearingEndDateTime(nowInLondon.plusDays(1).withHour(16).withMinute(0).withSecond(0).withNano(0))
+                    .build()
+            ))
+            .build();
+
+        Hearings hearings = new Hearings();
+        hearings.setCaseRef("1673970714366224");
+        hearings.setCaseHearings(new ArrayList<>(List.of(multiDayHearing)));
+
+        List<Hearings> listOfHearings = new ArrayList<>();
+        listOfHearings.add(hearings);
+
+        cafcassCaseDataService.filterPastHearingsEndingBeforeNow(listOfHearings);
+
+        List<CaseHearing> filteredHearings = listOfHearings.get(0).getCaseHearings();
+
+        // Multi-day hearing should remain because at least one hearing day ends in the future.
+        assertEquals(1, filteredHearings.size());
+        assertEquals(Long.valueOf("3000000001"), filteredHearings.get(0).getHearingID());
+    }
+
+    @Test
     void testCheckIfDocumentsNeedToExcludeScenario1() {
         List<String> excludedDocumentList = List.of(
             "Draft_C100_application",

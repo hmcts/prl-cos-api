@@ -70,16 +70,24 @@ final class CafcassUpdateHelperUtils {
     }
 
     private static boolean isPastHearingEndingBeforeNow(CaseHearing caseHearing) {
-        if (CollectionUtils.isNotEmpty(caseHearing.getHearingDaySchedule())) {
-            for (HearingDaySchedule hearingDaySchedule : caseHearing.getHearingDaySchedule()) {
-                if (hearingDaySchedule.getHearingEndDateTime() != null
-                    && hearingDaySchedule.getHearingEndDateTime().isBefore(
-                    java.time.LocalDateTime.now(java.time.ZoneId.of("Europe/London")))) {
-                    return true;
-                }
-            }
+        if (caseHearing == null || CollectionUtils.isEmpty(caseHearing.getHearingDaySchedule())) {
+            return false;
         }
-        return false;
+
+        java.time.LocalDateTime nowInLondon = java.time.LocalDateTime.now(java.time.ZoneId.of("Europe/London"));
+
+        List<HearingDaySchedule> schedulesWithEndTime = caseHearing.getHearingDaySchedule().stream()
+            .filter(schedule -> schedule.getHearingEndDateTime() != null)
+            .toList();
+
+        // If no usable end times, do not treat as a past hearing.
+        if (CollectionUtils.isEmpty(schedulesWithEndTime)) {
+            return false;
+        }
+
+        // Past only when every hearing day has ended.
+        return schedulesWithEndTime.stream()
+            .allMatch(schedule -> schedule.getHearingEndDateTime().isBefore(nowInLondon));
     }
 
     static void updateCaseWithHearingData(CafCassCaseDetail cafCassCaseDetail, Hearings filteredHearing) {
