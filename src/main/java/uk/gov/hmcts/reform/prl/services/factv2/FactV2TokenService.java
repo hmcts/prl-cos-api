@@ -4,6 +4,8 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -13,14 +15,18 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
+import java.util.Objects;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class FactV2TokenProvider {
-    private static final long TOKEN_EXPIRY_SECONDS = 60;
+public class FactV2TokenService {
+    public static final String FACT_V2_TOKEN_CACHE = "factV2TokenCache";
+    private static final String FACT_V2_ACCESS_TOKEN_CACHE_KEY = "accessToken";
+    private static final long TOKEN_REFRESH_BUFFER_SECONDS = 60;
 
     private final RestTemplate restTemplate;
+    private final CacheManager cacheManager;
 
     @Value("${fact.v2.oauth.token-url:}")
     private String tokenUrl;
@@ -37,24 +43,32 @@ public class FactV2TokenProvider {
     @Value("${fact.v2.oauth.scope:}")
     private String scope;
 
-    private volatile String accessToken;
-    private volatile Instant tokenExpiresAt = Instant.EPOCH;
+    public synchronized String getAccessToken() {
+        Cache tokenCache = Objects.requireNonNull(cacheManager.getCache(FACT_V2_TOKEN_CACHE),
+                                                  "FaCT V2 token cache is not configured");
+        CachedToken cachedToken = getCachedToken(tokenCache);
+        if (cachedToken != null && cachedToken.isUsable()) {
+            log.info("Using cached FaCT V2 access token; refreshAt={}", cachedToken.getRefreshAt());
+            return cachedToken.getAccessToken();
+        }
 
-    public String getAccessToken() {
-        if (tokenIsUsable()) {
-            return accessToken;
+        if (cachedToken != null) {
+            tokenCache.evict(FACT_V2_ACCESS_TOKEN_CACHE_KEY);
         }
-        synchronized (this) {
-            if (tokenIsUsable()) {
-                return accessToken;
-            }
-            validateConfiguration();
-            accessToken = requestToken();
-            return accessToken;
-        }
+
+        validateConfiguration();
+        CachedToken newToken = requestToken();
+        tokenCache.put(FACT_V2_ACCESS_TOKEN_CACHE_KEY, newToken);
+
+        return newToken.getAccessToken();
     }
 
-    private String requestToken() {
+    private CachedToken getCachedToken(Cache tokenCache) {
+        Cache.ValueWrapper cachedValue = tokenCache.get(FACT_V2_ACCESS_TOKEN_CACHE_KEY);
+        return cachedValue == null ? null : (CachedToken) cachedValue.get();
+    }
+
+    private CachedToken requestToken() {
         log.info("Attempting to acquire FaCT V2 access token from {}", resolveTokenUrl());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -64,14 +78,15 @@ public class FactV2TokenProvider {
         form.add("grant_type", "client_credentials");
         form.add("scope", scope);
 
-        TokenResponse response = restTemplate.postForObject(resolveTokenUrl(), new HttpEntity<>(form, headers), TokenResponse.class);
+        TokenResponse response = restTemplate.postForObject(
+            resolveTokenUrl(), new HttpEntity<>(form, headers), TokenResponse.class);
         if (response == null || response.getAccessToken() == null || response.getAccessToken().isBlank()) {
             throw new IllegalStateException("FaCT V2 token endpoint returned no access token");
         }
         long expiresIn = response.getExpiresIn() == null ? 300 : response.getExpiresIn();
-        tokenExpiresAt = Instant.now().plusSeconds(Math.max(1, expiresIn - TOKEN_EXPIRY_SECONDS));
-        log.info("Acquired FaCT V2 access token, expires at {}", tokenExpiresAt);
-        return response.getAccessToken();
+        Instant refreshAt = Instant.now().plusSeconds(Math.max(1, expiresIn - TOKEN_REFRESH_BUFFER_SECONDS));
+        log.info("Acquired FaCT V2 access token; cached token will be refreshed at {}", refreshAt);
+        return new CachedToken(response.getAccessToken(), refreshAt);
     }
 
     private void validateConfiguration() {
@@ -86,8 +101,14 @@ public class FactV2TokenProvider {
             : tokenUrl;
     }
 
-    private boolean tokenIsUsable() {
-        return accessToken != null && Instant.now().isBefore(tokenExpiresAt);
+    @Data
+    private static class CachedToken {
+        private final String accessToken;
+        private final Instant refreshAt;
+
+        private boolean isUsable() {
+            return accessToken != null && Instant.now().isBefore(refreshAt);
+        }
     }
 
     @Data

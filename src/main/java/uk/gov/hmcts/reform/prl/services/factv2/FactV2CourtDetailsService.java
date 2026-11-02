@@ -28,7 +28,7 @@ public class FactV2CourtDetailsService {
     private static final int DEFAULT_SEARCH_LIMIT = 10;
 
     private final FactV2Api factV2Api;
-    private final FactV2TokenProvider tokenProvider;
+    private final FactV2TokenService tokenService;
     private final SystemUserService systemUserService;
     private final CourtFinderApi currentCourtFinderApi;
 
@@ -43,7 +43,7 @@ public class FactV2CourtDetailsService {
             return currentCourtFinderApi.getCourtDetails(courtSlug);
         }
 
-        String token = tokenProvider.getAccessToken();
+        String token = tokenService.getAccessToken();
         String userId = systemUserService.getUserId(systemUserService.getSysUserToken());
         FactV2CourtDetails details = factV2Api.getCourtDetailsBySlug(courtSlug, "Bearer " + token, userId);
         Court court = toCurrentCourt(details);
@@ -72,7 +72,7 @@ public class FactV2CourtDetailsService {
             return getCourtDetails(slug);
         }
 
-        String token = tokenProvider.getAccessToken();
+        String token = tokenService.getAccessToken();
         String userId = systemUserService.getUserId(systemUserService.getSysUserToken());
         log.info("Calling FaCT V2 postcode search for FL401: postcode={}, serviceArea={}, action={}, limit={}",
             postcode, fl401ServiceArea, NEAREST_ACTION, DEFAULT_SEARCH_LIMIT);
@@ -169,6 +169,8 @@ public class FactV2CourtDetailsService {
         }
         return contacts.stream()
             .filter(Objects::nonNull)
+            .filter(contact -> contact.getEmail() != null
+                && !contact.getEmail().isBlank())
             .map(contact -> CourtEmailAddress.builder()
                 .address(contact.getEmail())
                 .description(contact.getCourtContactDescription() == null

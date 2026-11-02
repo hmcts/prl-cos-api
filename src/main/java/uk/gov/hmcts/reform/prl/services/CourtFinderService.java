@@ -70,7 +70,10 @@ public class CourtFinderService {
 
     public Court getC100NearestFamilyCourt(String postcode) throws NotFoundException {
         Court court = null;
-        if (featureToggleService.isOsCourtLookupFeatureEnabled()) {
+        boolean osCourtLookupEnabled = featureToggleService.isOsCourtLookupFeatureEnabled();
+        log.info("C100 nearest-court route selected: osCourtLookupEnabled={}, postcode={}",
+            osCourtLookupEnabled, postcode);
+        if (osCourtLookupEnabled) {
             court = osCourtFinderService.getC100NearestFamilyCourt(postcode);
         } else {
             ServiceArea serviceArea = courtFinderApi
