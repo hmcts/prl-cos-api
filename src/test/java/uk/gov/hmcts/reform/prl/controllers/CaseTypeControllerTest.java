@@ -57,7 +57,7 @@ public class CaseTypeControllerTest {
 
         GetCaseCallbackResponse response = caseTypeController.populateExtendedCaseDetails(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
-        assertThat(response.getMetadataFields().getFirst().getId()).isEqualTo("extendedCaseDetailsTitle");
-        assertThat(response.getMetadataFields().getFirst().getFormattedValue()).isEqualTo("some extended Details");
+        assertThat(response.getMetadataFields().getFirst().getFieldTypeDefinition().getId()).isEqualTo("extendedCaseDetailsTitle");
+        assertThat(response.getMetadataFields().getFirst().getValue()).isEqualTo("some extended Details");
     }
 }
