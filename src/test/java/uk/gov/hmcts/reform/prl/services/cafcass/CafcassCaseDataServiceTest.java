@@ -678,11 +678,11 @@ class CafcassCaseDataServiceTest {
 
         cafcassCaseDataService.filterPastHearingsEndingBeforeNow(listOfHearings);
 
-        List<CaseHearing> filteredHearings = listOfHearings.get(0).getCaseHearings();
+        List<CaseHearing> filteredHearings = listOfHearings.getFirst().getCaseHearings();
 
         // Multi-day hearing should remain because at least one hearing day ends in the future.
         assertEquals(1, filteredHearings.size());
-        assertEquals(Long.valueOf("3000000001"), filteredHearings.get(0).getHearingID());
+        assertEquals(Long.valueOf("3000000001"), filteredHearings.getFirst().getHearingID());
     }
 
     @Test

@@ -22,6 +22,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
@@ -74,7 +76,7 @@ final class CafcassUpdateHelperUtils {
             return false;
         }
 
-        java.time.LocalDateTime nowInLondon = java.time.LocalDateTime.now(java.time.ZoneId.of("Europe/London"));
+        LocalDateTime nowInLondon = LocalDateTime.now(ZoneId.of("Europe/London"));
 
         List<HearingDaySchedule> schedulesWithEndTime = caseHearing.getHearingDaySchedule().stream()
             .filter(schedule -> schedule.getHearingEndDateTime() != null)
