@@ -976,6 +976,7 @@ public class PrlAppsConstants {
     public static final String FL401_LIST_ON_NOTICE_HEARING_INSTRUCTION = "fl401listOnNoticeHearingInstruction";
 
     public static final String LIST_ON_NOTICE_HEARING_INSTRUCTIONS = "List on notice - hearing instructions";
+    public static final String LIST_ON_NOTICE = "List On Notice";
 
     public static final String REJECT_WITHOUT_NOTICE_REASONS = "Reject without notice - reasons";
 

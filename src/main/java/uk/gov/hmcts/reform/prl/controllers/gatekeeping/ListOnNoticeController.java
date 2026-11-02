@@ -38,9 +38,9 @@ import java.util.Map;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE_REASONS_SELECTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SELECTED_AND_ADDITIONAL_REASONS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHOUT_NOTICE_REJECTION;
 
 @Slf4j
 @RestController
@@ -99,7 +99,7 @@ public class ListOnNoticeController {
             );
             if (!StringUtils.isEmpty(selectedAndAdditionalReasons)) {
                 CaseNoteDetails currentCaseNoteDetails = addCaseNoteService.getCurrentCaseNoteDetails(
-                    WITHOUT_NOTICE_REJECTION,
+                    LIST_ON_NOTICE,
                     selectedAndAdditionalReasons,
                     userService.getUserDetails(authorisation)
                 );
