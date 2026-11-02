@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.GetCaseCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.metadatafields.CaseViewField;
+import uk.gov.hmcts.reform.ccd.client.model.metadatafields.definition.FieldTypeDefinition;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
@@ -56,20 +57,29 @@ public class CaseTypeController extends AbstractCallbackController {
             @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorization, serviceAuthorization)) {
             CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-            String extendedCaseDetails = extendedCaseDetailsService.getExtendedDetails(caseData);
-            log.info("extendedCaseDetails:{}", extendedCaseDetails);
-
-            GetCaseCallbackResponse getCaseCallbackResponse = new GetCaseCallbackResponse();
-            List<CaseViewField> metaDataFields = new ArrayList();
-            CaseViewField caseViewField = new CaseViewField();
-            caseViewField.setId(EXTENDED_CASE_DETAILS_TITLE);
-            caseViewField.setFormattedValue(extendedCaseDetails);
-            caseViewField.setValue(extendedCaseDetails);
-            metaDataFields.add(caseViewField);
-            getCaseCallbackResponse.setMetadataFields(metaDataFields);
-            return getCaseCallbackResponse;
+            return getMetaData(caseData);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    public GetCaseCallbackResponse getMetaData(CaseData caseData) {
+        String extendedCaseDetails = extendedCaseDetailsService.getExtendedDetails(caseData);
+        log.info("extendedCaseDetails:{}", extendedCaseDetails);
+        CaseViewField caseViewField = new CaseViewField();
+        FieldTypeDefinition fieldTypeDefinition = new FieldTypeDefinition();
+        caseViewField.setId(EXTENDED_CASE_DETAILS_TITLE);
+        caseViewField.setFormattedValue(extendedCaseDetails);
+        caseViewField.setValue(extendedCaseDetails);
+        caseViewField.setMetadata(true);
+        fieldTypeDefinition.setId("Text");
+        fieldTypeDefinition.setType("Text");
+        caseViewField.setFieldTypeDefinition(fieldTypeDefinition);
+        List<CaseViewField> caseViewFields = new ArrayList<>();
+        caseViewFields.add(caseViewField);
+        GetCaseCallbackResponse getCaseCallbackResponse
+            = new GetCaseCallbackResponse();
+        getCaseCallbackResponse.setMetadataFields(caseViewFields);
+        return getCaseCallbackResponse;
     }
 }
