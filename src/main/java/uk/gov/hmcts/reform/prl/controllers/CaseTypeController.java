@@ -65,13 +65,15 @@ public class CaseTypeController extends AbstractCallbackController {
             CaseViewField caseViewField = new CaseViewField();
             metaDataFields.add(caseViewField);
 
+            String fieldType = "Text";
             FieldTypeDefinition fieldTypeDefinition = new FieldTypeDefinition();
-            caseViewField.setId(EXTENDED_CASE_DETAILS_TITLE);
-            caseViewField.setValue(extendedCaseDetails);
-            caseViewField.setMetadata(true);
             fieldTypeDefinition.setId(EXTENDED_CASE_DETAILS_TITLE);
-            fieldTypeDefinition.setType("Label");
+            fieldTypeDefinition.setType(fieldType);
 
+            caseViewField.setId(fieldType);
+            caseViewField.setValue(extendedCaseDetails);
+            caseViewField.setFormattedValue(extendedCaseDetails);
+            caseViewField.setMetadata(true);
             caseViewField.setFieldTypeDefinition(fieldTypeDefinition);
 
             getCaseCallbackResponse.setMetadataFields(metaDataFields);
