@@ -58,6 +58,30 @@ final class CafcassUpdateHelperUtils {
         }
     }
 
+    static void filterPastHearingsEndingBeforeNow(List<Hearings> listOfHearingDetails) {
+        if (CollectionUtils.isNotEmpty(listOfHearingDetails)) {
+            for (Hearings hearings : listOfHearingDetails) {
+                hearings.setCaseHearings(hearings.getCaseHearings()
+                                             .stream()
+                                             .filter(caseHearing -> !isPastHearingEndingBeforeNow(caseHearing))
+                                             .toList());
+            }
+        }
+    }
+
+    private static boolean isPastHearingEndingBeforeNow(CaseHearing caseHearing) {
+        if (CollectionUtils.isNotEmpty(caseHearing.getHearingDaySchedule())) {
+            for (HearingDaySchedule hearingDaySchedule : caseHearing.getHearingDaySchedule()) {
+                if (hearingDaySchedule.getHearingEndDateTime() != null
+                    && hearingDaySchedule.getHearingEndDateTime().isBefore(
+                    java.time.LocalDateTime.now(java.time.ZoneId.of("Europe/London")))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     static void updateCaseWithHearingData(CafCassCaseDetail cafCassCaseDetail, Hearings filteredHearing) {
         cafCassCaseDetail.getCaseData().setHearingData(filteredHearing);
         cafCassCaseDetail.getCaseData().setCourtName(filteredHearing.getCourtName());

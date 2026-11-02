@@ -600,6 +600,10 @@ public class CafcassCaseDataHelper {
         CafcassUpdateHelperUtils.filterCancelledHearingsBeforeListing(listOfHearingDetails);
     }
 
+    public void filterPastHearingsEndingBeforeNow(List<Hearings> listOfHearingDetails) {
+        CafcassUpdateHelperUtils.filterPastHearingsEndingBeforeNow(listOfHearingDetails);
+    }
+
     public boolean checkIfDocumentsNeedToExclude(List<String> excludedDocumentList, String documentFilename) {
         return shouldExcludeDocument(excludedDocumentList, documentFilename);
     }

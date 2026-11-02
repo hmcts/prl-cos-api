@@ -64,6 +64,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -564,6 +565,83 @@ class CafcassCaseDataServiceTest {
 
         assertEquals(2, listOfHearings.get(0).getCaseHearings().size());
 
+    }
+
+    @Test
+    void testFilterPastHearingsBeforeNow() {
+
+        ZoneId londonZoneId = ZoneId.of("Europe/London");
+        LocalDateTime nowInLondon = LocalDateTime.now(londonZoneId);
+
+        final List<CaseHearing> caseHearings = new ArrayList<>();
+
+        // Should be filtered out: ended in the past
+        final CaseHearing pastHearing = CaseHearing.caseHearingWith()
+            .hearingID(Long.valueOf("2000004660"))
+            .hmcStatus("LISTED")
+            .hearingType("ABA5-FFH")
+            .hearingDaySchedule(
+                List.of(
+                    HearingDaySchedule.hearingDayScheduleWith()
+                        .hearingVenueName("ROYAL COURTS OF JUSTICE - QUEENS BUILDING (AND WEST GREEN BUILDING)")
+                        .hearingStartDateTime(nowInLondon.minusHours(3))
+                        .hearingEndDateTime(nowInLondon.minusHours(1))
+                        .build()
+                )
+            )
+            .build();
+
+        // Should remain: ends in the future
+        final CaseHearing futureHearing = CaseHearing.caseHearingWith()
+            .hearingID(Long.valueOf("2000004659"))
+            .hmcStatus("LISTED")
+            .hearingType("ABA5-FFH")
+            .hearingDaySchedule(
+                List.of(
+                    HearingDaySchedule.hearingDayScheduleWith()
+                        .hearingVenueName("ROYAL COURTS OF JUSTICE - QUEENS BUILDING (AND WEST GREEN BUILDING)")
+                        .hearingStartDateTime(nowInLondon.plusHours(1))
+                        .hearingEndDateTime(nowInLondon.plusHours(2))
+                        .build()
+                )
+            )
+            .build();
+
+        // Optional edge case: no schedule/end time, keep behavior explicit
+        final CaseHearing cancelledNoScheduleHearing = CaseHearing.caseHearingWith()
+            .hearingID(Long.valueOf("2000004661"))
+            .hmcStatus("CANCELLED")
+            .hearingType("ABA5-FFH")
+            .hearingDaySchedule(
+                List.of(
+                    HearingDaySchedule.hearingDayScheduleWith()
+                        .hearingVenueName("ROYAL COURTS OF JUSTICE - QUEENS BUILDING (AND WEST GREEN BUILDING)")
+                        .build()
+                )
+            )
+            .build();
+
+        caseHearings.add(pastHearing);
+        caseHearings.add(futureHearing);
+        caseHearings.add(cancelledNoScheduleHearing);
+
+        Hearings hearings = new Hearings();
+        hearings.setCaseRef("1673970714366224");
+        hearings.setCaseHearings(caseHearings);
+
+        List<Hearings> listOfHearings = new ArrayList<>();
+        listOfHearings.add(hearings);
+
+        cafcassCaseDataService.filterPastHearingsEndingBeforeNow(listOfHearings);
+
+        List<CaseHearing> filteredHearings = listOfHearings.getFirst().getCaseHearings();
+
+        // Past hearing removed; future hearing retained
+        assertEquals(2, filteredHearings.size());
+        assertTrue(filteredHearings.stream().anyMatch(h ->
+                                                          Long.valueOf("2000004659").equals(h.getHearingID())));
+        assertFalse(filteredHearings.stream().anyMatch(h ->
+                                                           Long.valueOf("2000004660").equals(h.getHearingID())));
     }
 
     @Test
