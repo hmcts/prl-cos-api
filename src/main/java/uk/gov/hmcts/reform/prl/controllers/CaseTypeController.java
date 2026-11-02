@@ -60,7 +60,6 @@ public class CaseTypeController extends AbstractCallbackController {
             String extendedCaseDetails = extendedCaseDetailsService.getExtendedDetails(caseData);
             log.info("extendedCaseDetails:{}", extendedCaseDetails);
 
-            GetCaseCallbackResponse getCaseCallbackResponse = new GetCaseCallbackResponse();
             List<CaseViewField> metaDataFields = new ArrayList();
             CaseViewField caseViewField = new CaseViewField();
             metaDataFields.add(caseViewField);
@@ -76,6 +75,7 @@ public class CaseTypeController extends AbstractCallbackController {
             caseViewField.setMetadata(true);
             caseViewField.setFieldTypeDefinition(fieldTypeDefinition);
 
+            GetCaseCallbackResponse getCaseCallbackResponse = new GetCaseCallbackResponse();
             getCaseCallbackResponse.setMetadataFields(metaDataFields);
             return getCaseCallbackResponse;
         } else {
