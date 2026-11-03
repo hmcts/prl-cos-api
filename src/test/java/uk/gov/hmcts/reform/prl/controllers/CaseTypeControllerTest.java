@@ -58,7 +58,7 @@ public class CaseTypeControllerTest {
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(injectedCaseDataResponseService.getInjectedCallbackResponse(caseData)).thenReturn(getCaseCallbackResponse);
 
-        GetCaseCallbackResponse response = caseTypeController.populateExtendedCaseDetails(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+        GetCaseCallbackResponse response = caseTypeController.injectCaseMetadata(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
         assertThat(response).isNotNull();
     }
