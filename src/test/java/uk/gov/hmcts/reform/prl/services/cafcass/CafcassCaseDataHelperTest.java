@@ -1454,6 +1454,79 @@ class CafcassCaseDataHelperTest {
         assertEquals(Long.valueOf("3000000001"), filteredHearings.getFirst().getHearingID());
     }
 
+    @Test
+    void testFilterFullyEndedHearings_multiDayAllPastShouldBeDropped() {
+        ZoneId londonZoneId = ZoneId.of("Europe/London");
+        LocalDateTime nowInLondon = LocalDateTime.now(londonZoneId);
+
+        final CaseHearing allPastMultiDayHearing = CaseHearing.caseHearingWith()
+            .hearingID(Long.valueOf("3000000002"))
+            .hmcStatus("LISTED")
+            .hearingType("ABA5-FFH")
+            .hearingDaySchedule(List.of(
+                HearingDaySchedule.hearingDayScheduleWith()
+                    .hearingVenueName("ROYAL COURTS OF JUSTICE - QUEENS BUILDING (AND WEST GREEN BUILDING)")
+                    .hearingStartDateTime(nowInLondon.minusDays(2).withHour(9).withMinute(0).withSecond(0).withNano(0))
+                    .hearingEndDateTime(nowInLondon.minusDays(2).withHour(16).withMinute(0).withSecond(0).withNano(0))
+                    .build(),
+                HearingDaySchedule.hearingDayScheduleWith()
+                    .hearingVenueName("ROYAL COURTS OF JUSTICE - QUEENS BUILDING (AND WEST GREEN BUILDING)")
+                    .hearingStartDateTime(nowInLondon.minusDays(1).withHour(9).withMinute(0).withSecond(0).withNano(0))
+                    .hearingEndDateTime(nowInLondon.minusDays(1).withHour(16).withMinute(0).withSecond(0).withNano(0))
+                    .build()
+            ))
+            .build();
+
+        Hearings hearings = new Hearings();
+        hearings.setCaseRef("1673970714366224");
+        hearings.setCaseHearings(new ArrayList<>(List.of(allPastMultiDayHearing)));
+
+        List<Hearings> listOfHearings = new ArrayList<>();
+        listOfHearings.add(hearings);
+
+        cafcassCaseDataHelper.filterFullyEndedHearings(listOfHearings);
+
+        assertTrue(listOfHearings.getFirst().getCaseHearings().isEmpty());
+    }
+
+    @Test
+    void testFilterFullyEndedHearings_multiDayWithMissingEndTimeShouldRemain() {
+        ZoneId londonZoneId = ZoneId.of("Europe/London");
+        LocalDateTime nowInLondon = LocalDateTime.now(londonZoneId);
+
+        final CaseHearing partiallyKnownMultiDayHearing = CaseHearing.caseHearingWith()
+            .hearingID(Long.valueOf("3000000003"))
+            .hmcStatus("LISTED")
+            .hearingType("ABA5-FFH")
+            .hearingDaySchedule(List.of(
+                // Past day with known end
+                HearingDaySchedule.hearingDayScheduleWith()
+                    .hearingVenueName("ROYAL COURTS OF JUSTICE - QUEENS BUILDING (AND WEST GREEN BUILDING)")
+                    .hearingStartDateTime(nowInLondon.minusDays(1).withHour(9).withMinute(0).withSecond(0).withNano(0))
+                    .hearingEndDateTime(nowInLondon.minusDays(1).withHour(16).withMinute(0).withSecond(0).withNano(0))
+                    .build(),
+                // Day with unknown end time
+                HearingDaySchedule.hearingDayScheduleWith()
+                    .hearingVenueName("ROYAL COURTS OF JUSTICE - QUEENS BUILDING (AND WEST GREEN BUILDING)")
+                    .hearingStartDateTime(nowInLondon.plusDays(1).withHour(9).withMinute(0).withSecond(0).withNano(0))
+                    .build()
+            ))
+            .build();
+
+        Hearings hearings = new Hearings();
+        hearings.setCaseRef("1673970714366224");
+        hearings.setCaseHearings(new ArrayList<>(List.of(partiallyKnownMultiDayHearing)));
+
+        List<Hearings> listOfHearings = new ArrayList<>();
+        listOfHearings.add(hearings);
+
+        cafcassCaseDataHelper.filterFullyEndedHearings(listOfHearings);
+
+        List<CaseHearing> filteredHearings = listOfHearings.getFirst().getCaseHearings();
+        assertEquals(1, filteredHearings.size());
+        assertEquals(Long.valueOf("3000000003"), filteredHearings.getFirst().getHearingID());
+    }
+
     private Map<String, Object> caseManagementLocation() {
         Map<String, Object> caseManagementLocation = new HashMap<>();
         caseManagementLocation.put("regionId", "1");
