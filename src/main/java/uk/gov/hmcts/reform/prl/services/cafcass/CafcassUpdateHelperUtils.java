@@ -60,18 +60,18 @@ final class CafcassUpdateHelperUtils {
         }
     }
 
-    static void filterPastHearingsEndingBeforeNow(List<Hearings> listOfHearingDetails) {
+    static void filterFullyEndedHearings(List<Hearings> listOfHearingDetails) {
         if (CollectionUtils.isNotEmpty(listOfHearingDetails)) {
             for (Hearings hearings : listOfHearingDetails) {
                 hearings.setCaseHearings(hearings.getCaseHearings()
                                              .stream()
-                                             .filter(caseHearing -> !isPastHearingEndingBeforeNow(caseHearing))
+                                             .filter(caseHearing -> !hasHearingFullyEndedBeforeNow(caseHearing))
                                              .toList());
             }
         }
     }
 
-    private static boolean isPastHearingEndingBeforeNow(CaseHearing caseHearing) {
+    private static boolean hasHearingFullyEndedBeforeNow(CaseHearing caseHearing) {
         if (caseHearing == null || CollectionUtils.isEmpty(caseHearing.getHearingDaySchedule())) {
             return false;
         }

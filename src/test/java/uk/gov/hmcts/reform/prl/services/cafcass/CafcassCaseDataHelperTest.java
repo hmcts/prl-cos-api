@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -1332,6 +1334,124 @@ class CafcassCaseDataHelperTest {
             caseDetails(caseData),
             caseDetails(caseDataBefore)
         ));
+    }
+
+    @Test
+    void testFilterFullyEndedHearings() {
+
+        ZoneId londonZoneId = ZoneId.of("Europe/London");
+        LocalDateTime nowInLondon = LocalDateTime.now(londonZoneId);
+
+        final List<CaseHearing> caseHearings = new ArrayList<>();
+
+        // Should be filtered out: ended in the past
+        final CaseHearing pastHearing = CaseHearing.caseHearingWith()
+            .hearingID(Long.valueOf("2000004660"))
+            .hmcStatus("LISTED")
+            .hearingType("ABA5-FFH")
+            .hearingDaySchedule(
+                List.of(
+                    HearingDaySchedule.hearingDayScheduleWith()
+                        .hearingVenueName("ROYAL COURTS OF JUSTICE - QUEENS BUILDING (AND WEST GREEN BUILDING)")
+                        .hearingStartDateTime(nowInLondon.minusHours(3))
+                        .hearingEndDateTime(nowInLondon.minusHours(1))
+                        .build()
+                )
+            )
+            .build();
+
+        // Should remain: ends in the future
+        final CaseHearing futureHearing = CaseHearing.caseHearingWith()
+            .hearingID(Long.valueOf("2000004659"))
+            .hmcStatus("LISTED")
+            .hearingType("ABA5-FFH")
+            .hearingDaySchedule(
+                List.of(
+                    HearingDaySchedule.hearingDayScheduleWith()
+                        .hearingVenueName("ROYAL COURTS OF JUSTICE - QUEENS BUILDING (AND WEST GREEN BUILDING)")
+                        .hearingStartDateTime(nowInLondon.plusHours(1))
+                        .hearingEndDateTime(nowInLondon.plusHours(2))
+                        .build()
+                )
+            )
+            .build();
+
+        // Optional edge case: no schedule/end time, keep behavior explicit
+        final CaseHearing cancelledNoScheduleHearing = CaseHearing.caseHearingWith()
+            .hearingID(Long.valueOf("2000004661"))
+            .hmcStatus("CANCELLED")
+            .hearingType("ABA5-FFH")
+            .hearingDaySchedule(
+                List.of(
+                    HearingDaySchedule.hearingDayScheduleWith()
+                        .hearingVenueName("ROYAL COURTS OF JUSTICE - QUEENS BUILDING (AND WEST GREEN BUILDING)")
+                        .build()
+                )
+            )
+            .build();
+
+        caseHearings.add(pastHearing);
+        caseHearings.add(futureHearing);
+        caseHearings.add(cancelledNoScheduleHearing);
+
+        Hearings hearings = new Hearings();
+        hearings.setCaseRef("1673970714366224");
+        hearings.setCaseHearings(caseHearings);
+
+        List<Hearings> listOfHearings = new ArrayList<>();
+        listOfHearings.add(hearings);
+
+        cafcassCaseDataHelper.filterFullyEndedHearings(listOfHearings);
+
+        List<CaseHearing> filteredHearings = listOfHearings.getFirst().getCaseHearings();
+
+        // Past hearing removed; future hearing retained
+        assertEquals(2, filteredHearings.size());
+        assertTrue(filteredHearings.stream().anyMatch(h ->
+                                                          Long.valueOf("2000004659").equals(h.getHearingID())));
+        assertFalse(filteredHearings.stream().anyMatch(h ->
+                                                           Long.valueOf("2000004660").equals(h.getHearingID())));
+    }
+
+    @Test
+    void testFilterFullyEndedHearings_multiDayHearingWithFutureDayShouldRemain() {
+        ZoneId londonZoneId = ZoneId.of("Europe/London");
+        LocalDateTime nowInLondon = LocalDateTime.now(londonZoneId);
+
+        final CaseHearing multiDayHearing = CaseHearing.caseHearingWith()
+            .hearingID(Long.valueOf("3000000001"))
+            .hmcStatus("LISTED")
+            .hearingType("ABA5-FFH")
+            .hearingDaySchedule(List.of(
+                // Day 1: entirely in the past
+                HearingDaySchedule.hearingDayScheduleWith()
+                    .hearingVenueName("ROYAL COURTS OF JUSTICE - QUEENS BUILDING (AND WEST GREEN BUILDING)")
+                    .hearingStartDateTime(nowInLondon.minusDays(1).withHour(9).withMinute(0).withSecond(0).withNano(0))
+                    .hearingEndDateTime(nowInLondon.minusDays(1).withHour(16).withMinute(0).withSecond(0).withNano(0))
+                    .build(),
+                // Day 2: in the future
+                HearingDaySchedule.hearingDayScheduleWith()
+                    .hearingVenueName("ROYAL COURTS OF JUSTICE - QUEENS BUILDING (AND WEST GREEN BUILDING)")
+                    .hearingStartDateTime(nowInLondon.plusDays(1).withHour(9).withMinute(0).withSecond(0).withNano(0))
+                    .hearingEndDateTime(nowInLondon.plusDays(1).withHour(16).withMinute(0).withSecond(0).withNano(0))
+                    .build()
+            ))
+            .build();
+
+        Hearings hearings = new Hearings();
+        hearings.setCaseRef("1673970714366224");
+        hearings.setCaseHearings(new ArrayList<>(List.of(multiDayHearing)));
+
+        List<Hearings> listOfHearings = new ArrayList<>();
+        listOfHearings.add(hearings);
+
+        cafcassCaseDataHelper.filterFullyEndedHearings(listOfHearings);
+
+        List<CaseHearing> filteredHearings = listOfHearings.getFirst().getCaseHearings();
+
+        // Multi-day hearing should remain because at least one hearing day ends in the future.
+        assertEquals(1, filteredHearings.size());
+        assertEquals(Long.valueOf("3000000001"), filteredHearings.getFirst().getHearingID());
     }
 
     private Map<String, Object> caseManagementLocation() {
