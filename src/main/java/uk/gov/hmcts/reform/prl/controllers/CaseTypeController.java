@@ -19,22 +19,18 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.ccd.client.model.GetCaseCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.metadatafields.CaseViewField;
-import uk.gov.hmcts.reform.ccd.client.model.metadatafields.definition.FieldTypeDefinition;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.EventService;
-import uk.gov.hmcts.reform.prl.services.ExtendedCaseDetailsService;
+import uk.gov.hmcts.reform.prl.services.InjectedCaseDataResponseService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import uk.gov.hmcts.reform.prl.services.InjectedCaseDataResponseService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -50,28 +46,20 @@ import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
 @RequestMapping("/case-type")
 public class CaseTypeController extends AbstractCallbackController {
     private final AuthorisationService authorisationService;
-    private final ExtendedCaseDetailsService extendedCaseDetailsService;
+    private final InjectedCaseDataResponseService injectedCaseDataResponseService;
     private final CaseEventService caseEventService;
     private final CaseSummaryTabService caseSummaryTab;
 
     protected CaseTypeController(ObjectMapper objectMapper, EventService eventPublisher,
                                  AuthorisationService authorisationService,
-                                 ExtendedCaseDetailsService extendedCaseDetailsService,
+                                 InjectedCaseDataResponseService injectedCaseDataResponseService,
                                  CaseEventService caseEventService,
                                  CaseSummaryTabService caseSummaryTab) {
         super(objectMapper, eventPublisher);
         this.authorisationService = authorisationService;
-        this.extendedCaseDetailsService = extendedCaseDetailsService;
+        this.injectedCaseDataResponseService = injectedCaseDataResponseService;
         this.caseEventService = caseEventService;
         this.caseSummaryTab = caseSummaryTab;
-    private final InjectedCaseDataResponseService injectedCaseDataResponseService;
-
-    protected CaseTypeController(ObjectMapper objectMapper, EventService eventPublisher,
-                                 AuthorisationService authorisationService,
-                                 InjectedCaseDataResponseService injectedCaseDataResponseService) {
-        super(objectMapper, eventPublisher);
-        this.authorisationService = authorisationService;
-        this.injectedCaseDataResponseService = injectedCaseDataResponseService;
     }
 
     @PostMapping(path = "/populate-extended-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -92,27 +80,6 @@ public class CaseTypeController extends AbstractCallbackController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
-
-    public GetCaseCallbackResponse getMetaData(CaseData caseData) {
-        String extendedCaseDetails = extendedCaseDetailsService.getExtendedDetails(caseData);
-        log.info("extendedCaseDetails:{}", extendedCaseDetails);
-        CaseViewField caseViewField = new CaseViewField();
-        FieldTypeDefinition fieldTypeDefinition = new FieldTypeDefinition();
-        caseViewField.setId(EXTENDED_CASE_DETAILS_TITLE);
-        caseViewField.setFormattedValue(extendedCaseDetails);
-        caseViewField.setValue(extendedCaseDetails);
-        caseViewField.setMetadata(true);
-        fieldTypeDefinition.setId("Text");
-        fieldTypeDefinition.setType("Text");
-        caseViewField.setFieldTypeDefinition(fieldTypeDefinition);
-        List<CaseViewField> caseViewFields = new ArrayList<>();
-        caseViewFields.add(caseViewField);
-        GetCaseCallbackResponse getCaseCallbackResponse
-            = new GetCaseCallbackResponse();
-        getCaseCallbackResponse.setMetadataFields(caseViewFields);
-        return getCaseCallbackResponse;
-    }
-
 
     @PostMapping(path = "/fl401-add-case-numberWithPrefix", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for adding case number and Prefix")
@@ -138,12 +105,12 @@ public class CaseTypeController extends AbstractCallbackController {
             if (previousStateOpt.isPresent()) {
                 String previousState = previousStateOpt.get();
                 if (AWAITING_INFORMATION.getValue().equalsIgnoreCase(previousState)) {
-                    // extendedCaseDetailsService.setExtendedDetails(caseData, caseDataUpdated);
+                    injectedCaseDataResponseService.getInjectedCallbackResponse(caseData);
                     caseData = caseData.toBuilder().state(CASE_ISSUED).build();
                     caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
                     caseDataUpdated.put(STATE_FIELD, CASE_ISSUED.getValue());
                 } else if (SUBMITTED_PAID.getValue().equalsIgnoreCase(previousState)) {
-                    // extendedCaseDetailsService.setExtendedDetails(caseData, caseDataUpdated);
+                    injectedCaseDataResponseService.getInjectedCallbackResponse(caseData);
                 }
             }
 
