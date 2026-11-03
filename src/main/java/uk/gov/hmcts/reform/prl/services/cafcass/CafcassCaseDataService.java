@@ -220,10 +220,6 @@ public class CafcassCaseDataService {
         cafcassCaseDataHelper.filterCancelledHearingsBeforeListing(listOfHearingDetails);
     }
 
-    public void filterPastHearingsEndingBeforeNow(List<Hearings> listOfHearingDetails) {
-        cafcassCaseDataHelper.filterPastHearingsEndingBeforeNow(listOfHearingDetails);
-    }
-
     private void updateHearingResponse(String authorisation, String s2sToken, CafCassResponse cafCassResponse) {
 
         Map<String, String> refDataCategoryValueMap = null;
