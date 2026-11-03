@@ -393,7 +393,8 @@ public class ManageOrdersController {
         }
     }
 
-    @PostMapping(path = "/case-order-email-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/"
+        + "case-order-email-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Send Email Notification on Case order")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.", content = @Content(mediaType = "application/json",
@@ -459,6 +460,7 @@ public class ManageOrdersController {
             //SNI-4330 fix
             //update caseSummaryTab with latest state
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
+            caseDataUpdated.putAll(cafcassDateTimeService.updateAndGetCafcassDatetime(callbackRequest));
 
             manageOrderService.removeLocalAuthorityFromCase(caseData, caseDataUpdated);
 
@@ -585,17 +587,11 @@ public class ManageOrdersController {
 
             cleanUpSelectedManageOrderOptions(caseDataUpdated);
 
-            cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
-
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new InvalidClientException(INVALID_CLIENT));
         }
     }
-
-
-
-
 
     /**
      *  setHearingData is a misnomer this does setHearingData but then goes on to other action based on selection
