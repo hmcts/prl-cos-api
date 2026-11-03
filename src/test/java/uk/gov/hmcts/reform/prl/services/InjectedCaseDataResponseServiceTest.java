@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.ccd.client.model.GetCaseCallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDate;
@@ -13,9 +14,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ExtendedCaseDetailsServiceTest {
+class InjectedCaseDataResponseServiceTest {
     @InjectMocks
-    ExtendedCaseDetailsService extendedCaseDetailsService;
+    InjectedCaseDataResponseService injectedCaseDataResponseService;
     @Mock
     FormattedTitleDisplayService formattedTitleDisplayService;
 
@@ -42,8 +43,8 @@ class ExtendedCaseDetailsServiceTest {
             issueDate
         )).thenReturn(expectedTitle);
 
-        String extendedCaseDetails = extendedCaseDetailsService.getExtendedDetails(caseData);
-        assertThat(extendedCaseDetails).isEqualTo(
+        GetCaseCallbackResponse getCaseCallbackResponse = injectedCaseDataResponseService.getInjectedCallbackResponse(caseData);
+        assertThat(getCaseCallbackResponse.getMetadataFields().getFirst().getValue()).isEqualTo(
             expectedTitle);
     }
 }

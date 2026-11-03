@@ -14,18 +14,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.GetCaseCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.metadatafields.CaseViewField;
-import uk.gov.hmcts.reform.ccd.client.model.metadatafields.definition.FieldTypeDefinition;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
-import uk.gov.hmcts.reform.prl.services.ExtendedCaseDetailsService;
-
-import java.util.ArrayList;
-import java.util.List;
+import uk.gov.hmcts.reform.prl.services.InjectedCaseDataResponseService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EXTENDED_CASE_DETAILS_TITLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Slf4j
@@ -34,14 +28,14 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @RequestMapping("/case-type")
 public class CaseTypeController extends AbstractCallbackController {
     private final AuthorisationService authorisationService;
-    private final ExtendedCaseDetailsService extendedCaseDetailsService;
+    private final InjectedCaseDataResponseService injectedCaseDataResponseService;
 
     protected CaseTypeController(ObjectMapper objectMapper, EventService eventPublisher,
                                  AuthorisationService authorisationService,
-                                 ExtendedCaseDetailsService extendedCaseDetailsService) {
+                                 InjectedCaseDataResponseService injectedCaseDataResponseService) {
         super(objectMapper, eventPublisher);
         this.authorisationService = authorisationService;
-        this.extendedCaseDetailsService = extendedCaseDetailsService;
+        this.injectedCaseDataResponseService = injectedCaseDataResponseService;
     }
 
     @PostMapping(path = "/populate-extended-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -57,29 +51,10 @@ public class CaseTypeController extends AbstractCallbackController {
             @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorization, serviceAuthorization)) {
             CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-            return getMetaData(caseData);
+            return injectedCaseDataResponseService.getInjectedCallbackResponse(caseData);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
 
-    public GetCaseCallbackResponse getMetaData(CaseData caseData) {
-        String extendedCaseDetails = extendedCaseDetailsService.getExtendedDetails(caseData);
-        log.info("extendedCaseDetails:{}", extendedCaseDetails);
-        CaseViewField caseViewField = new CaseViewField();
-        FieldTypeDefinition fieldTypeDefinition = new FieldTypeDefinition();
-        caseViewField.setId(EXTENDED_CASE_DETAILS_TITLE);
-        caseViewField.setFormattedValue(extendedCaseDetails);
-        caseViewField.setValue(extendedCaseDetails);
-        caseViewField.setMetadata(true);
-        fieldTypeDefinition.setId("Text");
-        fieldTypeDefinition.setType("Text");
-        caseViewField.setFieldTypeDefinition(fieldTypeDefinition);
-        List<CaseViewField> caseViewFields = new ArrayList<>();
-        caseViewFields.add(caseViewField);
-        GetCaseCallbackResponse getCaseCallbackResponse
-            = new GetCaseCallbackResponse();
-        getCaseCallbackResponse.setMetadataFields(caseViewFields);
-        return getCaseCallbackResponse;
-    }
 }

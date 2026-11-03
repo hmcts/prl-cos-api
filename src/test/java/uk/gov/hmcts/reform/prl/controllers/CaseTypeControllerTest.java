@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.GetCaseCallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.ExtendedCaseDetailsService;
+import uk.gov.hmcts.reform.prl.services.InjectedCaseDataResponseService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,9 +27,12 @@ public class CaseTypeControllerTest {
     @Mock
     private AuthorisationService authorisationService;
     @Mock
-    private ExtendedCaseDetailsService extendedCaseDetailsService;
+    private InjectedCaseDataResponseService injectedCaseDataResponseService;
     @Mock
     private ObjectMapper objectMapper;
+
+    @Mock
+    GetCaseCallbackResponse getCaseCallbackResponse;
 
     @InjectMocks
     private CaseTypeController caseTypeController;
@@ -53,12 +56,10 @@ public class CaseTypeControllerTest {
 
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(extendedCaseDetailsService.getExtendedDetails(caseData)).thenReturn("some extended Details");
+        when(injectedCaseDataResponseService.getInjectedCallbackResponse(caseData)).thenReturn(getCaseCallbackResponse);
 
         GetCaseCallbackResponse response = caseTypeController.populateExtendedCaseDetails(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
-        assertThat(response.getMetadataFields().getFirst().getFieldTypeDefinition().getId()).isEqualTo("Text");
-        assertThat(response.getMetadataFields().getFirst().getId()).isEqualTo("extendedCaseDetailsTitle");
-        assertThat(response.getMetadataFields().getFirst().getValue()).isEqualTo("some extended Details");
+        assertThat(response).isNotNull();
     }
 }
