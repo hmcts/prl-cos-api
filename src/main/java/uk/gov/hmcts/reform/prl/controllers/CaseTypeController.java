@@ -34,9 +34,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import uk.gov.hmcts.reform.prl.services.InjectedCaseDataResponseService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EXTENDED_CASE_DETAILS_TITLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
@@ -64,6 +64,14 @@ public class CaseTypeController extends AbstractCallbackController {
         this.extendedCaseDetailsService = extendedCaseDetailsService;
         this.caseEventService = caseEventService;
         this.caseSummaryTab = caseSummaryTab;
+    private final InjectedCaseDataResponseService injectedCaseDataResponseService;
+
+    protected CaseTypeController(ObjectMapper objectMapper, EventService eventPublisher,
+                                 AuthorisationService authorisationService,
+                                 InjectedCaseDataResponseService injectedCaseDataResponseService) {
+        super(objectMapper, eventPublisher);
+        this.authorisationService = authorisationService;
+        this.injectedCaseDataResponseService = injectedCaseDataResponseService;
     }
 
     @PostMapping(path = "/populate-extended-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -79,7 +87,7 @@ public class CaseTypeController extends AbstractCallbackController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorization, serviceAuthorization)) {
             CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-            return getMetaData(caseData);
+            return injectedCaseDataResponseService.getInjectedCallbackResponse(caseData);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
