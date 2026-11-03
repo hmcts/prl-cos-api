@@ -81,7 +81,7 @@ public class C100JsonMapper {
             .add("internationalElement", internationalElementMapper.map(caseData))
             .add("litigationCapacity", litigationCapacityMapper.map(caseData))
             .add("feeAmount", caseData.getFeeAmount())
-            .add("familyManNumber", caseData.getFamilymanCaseNumber())
+            .add("familyManNumber", "")
             .add("others", getOthers(caseData.getDateSubmitted()))
             .add("events", getEvents())
             .build();
