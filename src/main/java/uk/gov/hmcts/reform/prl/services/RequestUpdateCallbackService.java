@@ -17,7 +17,7 @@ import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ApplicationStat
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.PaymentStatus;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
-import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPayment;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPaymentServiceRequestUpdate;
@@ -210,7 +210,7 @@ public class RequestUpdateCallbackService {
     public CaseData getCaseDataWithStateAndDateSubmitted(ServiceRequestUpdateDto serviceRequestUpdateDto,
                                                          CaseData caseData) {
         try {
-            Court closestChildArrangementsCourt = courtFinderService.getNearestFamilyCourt(caseData);
+            CourtVenue closestChildArrangementsCourt = courtFinderService.getNearestFamilyCourt(caseData);
             if (serviceRequestUpdateDto.getServiceRequestStatus().equalsIgnoreCase(PAID)) {
                 ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
                 caseData = caseData.toBuilder()
@@ -223,10 +223,12 @@ public class RequestUpdateCallbackService {
                     .state(shouldUpdateCaseState(caseData) ? State.SUBMITTED_NOT_PAID : caseData.getState())
                     .build();
             }
-            if (closestChildArrangementsCourt != null) {
-                caseData = caseData.toBuilder().courtName(closestChildArrangementsCourt.getCourtName()).courtId(String.valueOf(
-                    closestChildArrangementsCourt.getCountyLocationCode())).build();
-                caseData.setCourtCodeFromFact(String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()));
+            if (closestChildArrangementsCourt != null
+                && !StringUtils.isBlank(closestChildArrangementsCourt.getCourtDisplayName())) {
+                caseData = caseData.toBuilder()
+                    .courtName(closestChildArrangementsCourt.getCourtDisplayName())
+                    .courtId(closestChildArrangementsCourt.getCourtEpimmsId())
+                    .build();
             }
         } catch (Exception e) {
             log.error("Error while populating case date in payment request call {}", caseData.getId(), e);

@@ -36,7 +36,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import javax.json.JsonObject;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ATTACHMENT_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NUMBER;
@@ -48,16 +47,12 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBJECT;
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SendgridService {
-    public static final String PRL_RPA_NOTIFICATION = "Private Reform Law CCD Notification ";
     public static final String MAIL_SEND = "mail/send";
     public static final String CASE_NAME = "caseName";
     public static final String NOTIFICATION_TO_PARTY_SENT_SUCCESSFULLY = "Notification to party sent successfully";
     public static final String CASE_REFERENCE = "caseReference";
 
-    @Value("${send-grid.rpa.email.to}")
-    private String toEmail;
-
-    @Value("${send-grid.rpa.email.from}")
+    @Value("${send-grid.email.from}")
     private String fromEmail;
 
     private final SendGrid sendGrid;
@@ -65,30 +60,6 @@ public class SendgridService {
     private final AuthTokenGenerator authTokenGenerator;
     private final LaunchDarklyClient launchDarklyClient;
     private final SendgridEmailTemplatesConfig sendgridEmailTemplatesConfig;
-
-    public void sendEmail(JsonObject caseData) throws IOException {
-        String subject = PRL_RPA_NOTIFICATION + caseData.get("id") + ".json";
-        Content content = new Content("text/plain", " ");
-        Attachments attachments = new Attachments();
-        String data = Base64.getEncoder().encodeToString(caseData.toString().getBytes());
-        attachments.setContent(data);
-        attachments.setFilename(subject);
-        attachments.setType("application/json");
-        attachments.setDisposition("attachment");
-        Mail mail = new Mail(new Email(fromEmail), subject, new Email(toEmail), content);
-        mail.addAttachments(attachments);
-        Request request = new Request();
-        try {
-            request.setMethod(Method.POST);
-            request.setEndpoint(MAIL_SEND);
-            request.setBody(mail.build());
-            log.info("Initiating email through sendgrid");
-            sendGrid.api(request);
-            log.info("Notification to RPA sent successfully");
-        } catch (IOException ex) {
-            throw new IOException(ex.getMessage());
-        }
-    }
 
     public boolean sendEmailUsingTemplateWithAttachments(SendgridEmailTemplateNames sendgridEmailTemplateNames,
                                                       String authorization, SendgridEmailConfig sendgridEmailConfig) {

@@ -73,7 +73,6 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
-import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.AmendCourtService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.C100IssueCaseService;
@@ -119,7 +118,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import javax.json.JsonValue;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -132,7 +130,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -251,8 +248,6 @@ public class CallbackControllerTest {
     @Mock
     private AuthorisationService authorisationService;
 
-    @Mock
-    C100JsonMapper c100JsonMapper;
 
     @Mock
     private CaseEventService caseEventService;
@@ -365,7 +360,6 @@ public class CallbackControllerTest {
         fl401DocsMap.put(DOCUMENT_FIELD_FINAL_WELSH, "test");
         when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(),Mockito.anyString()))
             .thenReturn(Optional.of(courtVenue));
-        when(c100IssueCaseService.getFactCourtId(courtVenue)).thenReturn("123");
         when(dfjLookupService.getDfjAreaFieldsByCourtName("Swansea Civil Justice Centre")).thenReturn(
             Map.of("dfjArea", "SWANSEA", "swanseaDFJCourt", "123")
         );
@@ -922,29 +916,6 @@ public class CallbackControllerTest {
                                                        .data(stringObjectMap).build()).build();
         assertNotNull(callbackRequest);
 
-    }
-
-    @Test
-    public void resendNotificationtoRpaTest() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .id(1234L)
-            .build();
-        Map<String, Object> json = new HashMap<>();
-        json.put("id", 1234L);
-
-        when(objectMapper.convertValue(json, CaseData.class)).thenReturn(caseData);
-        when(c100JsonMapper.map(caseData)).thenReturn(JsonValue.EMPTY_JSON_OBJECT);
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd
-            .client.model.CallbackRequest
-            .builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(1234L)
-                             .data(json)
-                             .build())
-            .build();
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        callbackController.resendNotificationToRpa(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
-        verify(sendgridService, times(1)).sendEmail(JsonValue.EMPTY_JSON_OBJECT);
     }
 
     @Test
@@ -2888,24 +2859,6 @@ public class CallbackControllerTest {
         Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         assertExpectedException(() -> {
             callbackController.sendToGatekeeper(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
-    }
-
-    @Test
-    public void testExceptionForResendNotificationToRpa() throws Exception {
-
-        CaseData caseData = CaseData.builder().build();
-        Map<String, Object> stringObjectMap = new HashMap<>();
-        when(amendCourtService.handleAmendCourtSubmission(Mockito.anyString(), Mockito.any(), Mockito.any()))
-            .thenReturn(new HashMap<>());
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                                                       .data(stringObjectMap).build()).build();
-
-        assertExpectedException(() -> {
-            callbackController.resendNotificationToRpa(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 

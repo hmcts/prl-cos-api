@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
-import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -98,7 +98,7 @@ public class PrePopulateFeeAndSolicitorNameControllerIntegrationTest {
                                                                      .email("solicitor@example.com")
                                                                      .forename("Solicitor Name")
                                                                      .build());
-        when(courtLocatorService.getNearestFamilyCourt(any(CaseData.class))).thenReturn(Court.builder()
+        when(courtLocatorService.getNearestFamilyCourt(any(CaseData.class))).thenReturn(CourtVenue.builder()
                                                                                             .courtName("Court Name")
                                                                                             .build());
         when(organisationService.getApplicantOrganisationDetails(any(CaseData.class))).thenReturn(CaseData.builder().build());

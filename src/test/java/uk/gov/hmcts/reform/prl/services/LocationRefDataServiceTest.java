@@ -179,7 +179,6 @@ public class LocationRefDataServiceTest {
 
     @Test
     public void testGetCourtDisplayEntryFromEpimmsIdForFeatureEnabled() {
-        when(featureToggleService.isOsCourtLookupFeatureEnabled()).thenReturn(true);
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenReturn(CourtDetails.builder()
                             .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").courtName("1")
@@ -193,23 +192,8 @@ public class LocationRefDataServiceTest {
 
     @Test
     public void testGetCourtDisplayEntryFromEpimmsIdForFeatureEnabledAndNoCourtFound() {
-        when(featureToggleService.isOsCourtLookupFeatureEnabled()).thenReturn(true);
         when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
             .thenReturn(null);
-        DynamicListElement dynamicListElement = locationRefDataService.getDisplayEntryFromEpimmsId("2", "test");
-        assertEquals(DynamicListElement.EMPTY.getCode(), dynamicListElement.getCode());
-    }
-
-    @Test
-    public void testGetCourtDisplayEntryFromEpimmsIdForFeatureDisabled() {
-        when(featureToggleService.isOsCourtLookupFeatureEnabled()).thenReturn(false);
-        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
-            .thenReturn(CourtDetails.builder()
-                            .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").courtName("1")
-                                                     .region("test").siteName("test").postcode("123")
-                                                     .courtEpimmsId("2")
-                                                     .courtTypeId(FAMILY_COURT_TYPE_ID).build()))
-                            .build());
         DynamicListElement dynamicListElement = locationRefDataService.getDisplayEntryFromEpimmsId("2", "test");
         assertEquals(DynamicListElement.EMPTY.getCode(), dynamicListElement.getCode());
     }

@@ -26,7 +26,7 @@ import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
-import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.UiCitizenCaseData;
@@ -44,6 +44,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
@@ -286,8 +287,8 @@ public class CaseController {
                                      @PathVariable("postcode") String postcode) throws Exception {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             try {
-                Court court = courtFinderService.getC100NearestFamilyCourt(postcode);
-                return court == null ? "No Court Fetched" : court.getCourtName();
+                CourtVenue court = courtFinderService.getC100NearestFamilyCourt(postcode);
+                return court == null || isBlank(court.getCourtDisplayName()) ? "No Court Fetched" : court.getCourtDisplayName();
             } catch (Exception e) {
                 return null;
             }

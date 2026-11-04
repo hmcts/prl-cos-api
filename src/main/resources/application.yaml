@@ -122,7 +122,6 @@ feature:
   toggle:
     barristerFeatureEnabled: ${BARRISTER_FEATURE_ENABLED:false}
     cafcassDateTimeFeatureEnabled: ${CAFCASS_DATE_TIME_FEATURE_ENABLED:false}
-    osCourtLookupEnabled: ${OS_COURT_LOOKUP_ENABLED:false}
     bundleByCategoryEnabled: ${BUNDLE_BY_CATEGORY_ENABLED:false}
     awaitingInformationEnabled: ${AWAITING_INFORMATION_ENABLED:false}
     exitAwaitingInformationEnabled: ${EXIT_AWAITING_INFORMATION_ENABLED:false}
@@ -339,10 +338,8 @@ send-grid:
           SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP: ${SEND_GRID_SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP:d-7a5eb527c4d4487d9ce7fc09e00d83df}
           SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP: ${SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP:d-985fad2d0eb7452e9372dce27ddefbd7}
           SEND_EMAIL_TO_EXTERNAL_PARTY: ${SEND_GRID_EMAIL_TO_EXTERNAL_PARTY:d-d6f807d095b046458517924e6c48e5ea}
-  rpa:
-    email:
-      to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
-      from: ${RPA_NOTIFY_FROM_EMAIL:xxxxxxxx}
+  email:
+    from: ${SEND_GRID_FROM_EMAIL:xxxxxxxx}
 
 bankHolidays:
   api:
@@ -523,10 +520,6 @@ send-letter:
 
 case_document_am:
   url: ${CCD_CASE_DOCS_AM_API:http://ccd-case-document-am-api-aat.service.core-compute-aat.internal}
-
-courtfinder:
-  api:
-    url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
 
 locationfinder:
   api:

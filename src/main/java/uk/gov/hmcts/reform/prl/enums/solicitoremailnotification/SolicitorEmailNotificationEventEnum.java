@@ -15,8 +15,6 @@ public enum SolicitorEmailNotificationEventEnum {
     awaitingPayment("awaitingPayment", "awaiting payment"),
     @JsonProperty("fl401SendEmailNotification")
     fl401SendEmailNotification("fl401SendEmailNotification", "fl401 notification"),
-    @JsonProperty("notifyRpa")
-    notifyRpa("notifyRpa", "RPA notification"),
     @JsonProperty("withdrawC100")
     withdrawC100("withdrawC100", "C100 case withdraw"),
     @JsonProperty("withdrawFL401")

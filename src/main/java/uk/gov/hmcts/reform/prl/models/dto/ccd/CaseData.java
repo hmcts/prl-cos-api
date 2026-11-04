@@ -750,7 +750,6 @@ public class CaseData extends BaseCaseData implements MappableObject {
 
     private DynamicMultiSelectList removeLegalRepAndPartiesList;
 
-    private String courtCodeFromFact;
 
     private String tsPaymentServiceRequestReferenceNumber;
     private String tsPaymentStatus;

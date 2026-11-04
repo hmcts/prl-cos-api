@@ -33,15 +33,13 @@ public class OsCourtFinderApiClientIntegrationTest {
     private LocalAuthorityCourtDataLoader localAuthorityCourtDataLoader;
     @MockBean
     private LocationRefDataService locationRefDataService;
-    @MockBean
-    private CourtFinderApi courtFinderApi;
 
     private OsCourtFinderService osCourtFinderService;
 
     @BeforeEach
     public void setUp() throws Exception {
         osCourtFinderService = new OsCourtFinderService(systemUserService, osCourtFinderApi, localAuthorityCourtDataLoader,
-                                                        locationRefDataService, courtFinderApi);
+                                                        locationRefDataService);
     }
 
     @Test

@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
@@ -29,8 +28,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
-import uk.gov.hmcts.reform.prl.models.court.Court;
-import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -47,7 +44,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -122,10 +118,7 @@ public class TransferCourtControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
-        when(featureToggleService.isOsCourtLookupFeatureEnabled()).thenReturn(false);
-        when(courtLocatorService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(Court.builder().build());
-        when(courtLocatorService.getEmailAddress(Mockito.any(Court.class))).thenReturn(
-            Optional.of(CourtEmailAddress.builder().address("123@gamil.com").build()));
+        when(courtLocatorService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(CourtVenue.builder().courtEpimmsId(courtId).build());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         DynamicListElement dle = DynamicListElement.builder()
             .code(courtId).label("courtLabel").build();
@@ -135,27 +128,21 @@ public class TransferCourtControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  transferCourtController
             .prePopulateCourtDetails(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
-        Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("localCourtAdmin"));
+        Assertions.assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("localCourtAdmin"));
         Assertions.assertEquals("1234", ((DynamicList)aboutToStartOrSubmitCallbackResponse.getData().get("courtList"))
             .getValue().getCode());
     }
 
     @Test
-    public void testPrePopulateCourtDetailsSelectedWhenOsCourtLookupIsEnabled() throws NotFoundException {
+    public void testPrePopulateCourtDetailsSelectedUsingRefData() throws NotFoundException {
         String courtId = "1234";
         CaseData caseData = CaseData.builder().courtId(courtId).build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
-        ImmutablePair<CourtVenue, Court> courtCourtVenueMap = new ImmutablePair<>(
-            CourtVenue.builder().courtEpimmsId(courtId).build(),
-            Court.builder().build()
-        );
-        when(featureToggleService.isOsCourtLookupFeatureEnabled()).thenReturn(true);
-        when(courtLocatorService.getC100NearestFamilyCourtAndVenue(Mockito.any(CaseData.class))).thenReturn(courtCourtVenueMap);
-        when(courtLocatorService.getEmailAddress(Mockito.any(Court.class))).thenReturn(
-            Optional.of(CourtEmailAddress.builder().address("123@gamil.com").build()));
+        CourtVenue courtVenue = CourtVenue.builder().courtEpimmsId(courtId).build();
+        when(courtLocatorService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(courtVenue);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         DynamicListElement dle = DynamicListElement.builder()
             .code(courtId).label("courtLabel").build();
@@ -165,28 +152,22 @@ public class TransferCourtControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  transferCourtController
             .prePopulateCourtDetails(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
-        Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("localCourtAdmin"));
+        Assertions.assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("localCourtAdmin"));
         Assertions.assertEquals("1234", ((DynamicList)aboutToStartOrSubmitCallbackResponse.getData().get("courtList"))
             .getValue().getCode());
         assertEquals(courtId, stringObjectMap.get(COURT_ID_FIELD));
     }
 
     @Test
-    public void testPrePopulateCourtDetailsNotSelectedWhenOsCourtLookupIsEnabled() throws NotFoundException {
+    public void testPrePopulateCourtDetailsNotSelectedUsingRefData() throws NotFoundException {
         String courtId = "1234";
         CaseData caseData = CaseData.builder().courtId(courtId).build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
-        ImmutablePair<CourtVenue, Court> courtCourtVenueMap = new ImmutablePair<>(
-            CourtVenue.builder().courtEpimmsId(courtId).build(),
-            Court.builder().build()
-        );
-        when(featureToggleService.isOsCourtLookupFeatureEnabled()).thenReturn(true);
-        when(courtLocatorService.getC100NearestFamilyCourtAndVenue(Mockito.any(CaseData.class))).thenReturn(courtCourtVenueMap);
-        when(courtLocatorService.getEmailAddress(Mockito.any(Court.class))).thenReturn(
-            Optional.of(CourtEmailAddress.builder().address("123@gamil.com").build()));
+        CourtVenue courtVenue = CourtVenue.builder().courtEpimmsId(courtId).build();
+        when(courtLocatorService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(courtVenue);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         DynamicListElement dle = DynamicListElement.builder()
             .code(courtId).label("courtLabel").build();
@@ -198,7 +179,7 @@ public class TransferCourtControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  transferCourtController
             .prePopulateCourtDetails(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
-        Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("localCourtAdmin"));
+        Assertions.assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("localCourtAdmin"));
         Assertions.assertEquals(DynamicListElement.EMPTY, ((DynamicList)aboutToStartOrSubmitCallbackResponse.getData()
             .get("courtList")).getValue());
         assertEquals(courtId, stringObjectMap.get(COURT_ID_FIELD));
@@ -211,9 +192,7 @@ public class TransferCourtControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
-        when(featureToggleService.isOsCourtLookupFeatureEnabled()).thenReturn(false);
-        when(courtLocatorService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(Court.builder().build());
-        when(courtLocatorService.getEmailAddress(Mockito.any(Court.class))).thenReturn(Optional.empty());
+        when(courtLocatorService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(CourtVenue.builder().build());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(locationRefDataService.getCourtLocations(Mockito.anyString())).thenReturn(List.of(DynamicListElement.EMPTY));
@@ -223,19 +202,14 @@ public class TransferCourtControllerTest {
     }
 
     @Test
-    public void testPrePopulateCourtDetailsNotFoundWhenOsCourtLookupIsEnabled() throws NotFoundException {
+    public void testPrePopulateCourtDetailsNotFoundUsingRefData() throws NotFoundException {
         CaseData caseData = CaseData.builder().build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
-        ImmutablePair<CourtVenue, Court> courtCourtVenueMap = new ImmutablePair<>(
-            null,
-            Court.builder().build()
-        );
-        when(featureToggleService.isOsCourtLookupFeatureEnabled()).thenReturn(true);
-        when(courtLocatorService.getC100NearestFamilyCourtAndVenue(Mockito.any(CaseData.class))).thenReturn(courtCourtVenueMap);
-        when(courtLocatorService.getEmailAddress(Mockito.any(Court.class))).thenReturn(Optional.empty());
+        CourtVenue courtVenue = null;
+        when(courtLocatorService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(courtVenue);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(locationRefDataService.getCourtLocations(Mockito.anyString())).thenReturn(List.of(DynamicListElement.EMPTY));
@@ -444,7 +418,6 @@ public class TransferCourtControllerTest {
         CaseData caseData = CaseData.builder()
             .courtList(DynamicList.builder().value(DynamicListElement.builder().code("test-test-test-test-test-test")
                                                        .build()).build())
-            .courtCodeFromFact("123")
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         callbackRequest = CallbackRequest.builder().caseDetails(CaseDetails.builder().id(123L)

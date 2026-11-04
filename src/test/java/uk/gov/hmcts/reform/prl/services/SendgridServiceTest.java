@@ -22,14 +22,12 @@ import uk.gov.hmcts.reform.prl.exception.SendGridNotificationException;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
-import uk.gov.hmcts.reform.prl.rpa.mappers.json.NullAwareJsonObjectBuilder;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.json.JsonObject;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -58,20 +56,6 @@ class SendgridServiceTest {
     private static final String TEST_AUTH = "test auth";
     private static final String S2S_TOKEN = "s2s token";
     private static final String CASE_REFERENCE = "1234123412341234";
-
-    @Test
-    void testSendEmailInvokingSendGridApi() throws IOException {
-        Response response = new Response();
-        response.setStatusCode(200);
-        JsonObject jsonObject = new NullAwareJsonObjectBuilder()
-            .add("applicantCaseName","hello")
-            .build();
-        Request request = new Request();
-        request.setMethod(Method.POST);
-        request.setEndpoint("mail/send");
-        sendgridService.sendEmail(jsonObject);
-        verify(sendGrid).api(any(Request.class));
-    }
 
     @Test
     void testSendEmailUsingTemplatesWithAttachments() throws Exception {

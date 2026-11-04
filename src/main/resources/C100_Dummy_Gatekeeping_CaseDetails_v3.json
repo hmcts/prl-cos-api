@@ -3160,7 +3160,6 @@
     "legalAdviserList": null,
     "applicantCaseName": "John Doe Vs Mary Richards v3",
     "caseSolicitorName": "AAT Solicitor",
-    "courtCodeFromFact": "344",
     "jurisdictionIssue": "Yes",
     "ordersApplyingFor": [
       "childArrangementsOrder",

@@ -14,7 +14,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
@@ -44,8 +43,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.ServeOrgDetails;
-import uk.gov.hmcts.reform.prl.models.court.Court;
-import uk.gov.hmcts.reform.prl.models.court.ServiceArea;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -107,14 +105,10 @@ public class ManageOrderEmailServiceTest {
     @InjectMocks
     private ManageOrderEmailService manageOrderEmailService;
 
-    @Mock
-    private CourtFinderApi courtFinderApi;
 
     @Mock
-    private Court court;
+    private CourtVenue court;
 
-    @Mock
-    private ServiceArea serviceArea;
 
     @Mock
     private DocumentLanguageService documentLanguageService;
@@ -223,7 +217,7 @@ public class ManageOrderEmailServiceTest {
             .orderCollection(List.of(element(uuid,orderDetails)))
             .build();
 
-        court = Court.builder()
+        court = CourtVenue.builder()
             .courtName("testcourt")
             .build();
 
@@ -4452,7 +4446,7 @@ public class ManageOrderEmailServiceTest {
         assertEquals("coverLetter.pdf", capturedDocs.get(0).getDocumentFileName());
         assertEquals(coverLetterDoc.getDocumentFileName(), capturedDocs.get(1).getDocumentFileName());
     }
-  
+
     private void verifySendGridConfigContainsCaseReference(SendgridEmailConfig sendgridEmailConfig, long caseReference) {
         assertEquals(String.valueOf(caseReference), sendgridEmailConfig.getCaseReference());
     }

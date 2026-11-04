@@ -5,13 +5,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
 import uk.gov.hmcts.reform.prl.clients.os.OsCourtFinderApi;
 import uk.gov.hmcts.reform.prl.models.LocalAuthorityCourt;
-import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.ordnancesurvey.OsPlacesResponse;
 import uk.gov.hmcts.reform.prl.models.ordnancesurvey.Result;
@@ -30,9 +27,8 @@ public class OsCourtFinderService {
     private final OsCourtFinderApi osCourtFinderApi;
     private final LocalAuthorityCourtDataLoader localAuthorityCourtDataLoader;
     private final LocationRefDataService locationRefDataService;
-    private final CourtFinderApi courtFinderApi;
 
-    public ImmutablePair<CourtVenue, Court> getC100NearestFamilyCourtAndVenue(String postcode) throws NotFoundException {
+    public CourtVenue getC100NearestFamilyCourt(String postcode) throws NotFoundException {
         if (postcode == null || postcode.isEmpty()) {
             throw new IllegalArgumentException("postcode is null or empty");
         }
@@ -57,19 +53,12 @@ public class OsCourtFinderService {
                 systemUserService.getSysUserToken()
             );
             if (courtVenue.isPresent()) {
-                log.info("Found court venue epimmsId {} for postcode {}", courtVenue.get().getCourtEpimmsId(), postcode);
-                return ImmutablePair.of(courtVenue.get(), getFactCourtDetails(courtVenue.get()));
+                log.info("Resolved court from OS and RefData: epimmsId={}, siteName={}, courtName={}",
+                         courtVenue.get().getCourtEpimmsId(), courtVenue.get().getSiteName(), courtVenue.get().getCourtName());
+                return courtVenue.get();
             }
         }
 
-        return null;
-    }
-
-    public Court getC100NearestFamilyCourt(String postcode) throws NotFoundException {
-        ImmutablePair<CourtVenue, Court> courtCourtVenueMap = getC100NearestFamilyCourtAndVenue(postcode);
-        if (courtCourtVenueMap != null) {
-            return courtCourtVenueMap.getRight();
-        }
         return null;
     }
 
@@ -89,19 +78,6 @@ public class OsCourtFinderService {
             }
         }
         return null;
-    }
-
-    private Court getFactCourtDetails(CourtVenue courtVenue) {
-        Court court = null;
-        String factUrl = courtVenue.getFactUrl();
-        if (factUrl != null && factUrl.split("/").length > 4) {
-            try {
-                court = courtFinderApi.getCourtDetails(factUrl.split("/")[4]);
-            } catch (Exception ex) {
-                log.error("Error fetching court details from Fact ", ex);
-            }
-        }
-        return court;
     }
 
 }
