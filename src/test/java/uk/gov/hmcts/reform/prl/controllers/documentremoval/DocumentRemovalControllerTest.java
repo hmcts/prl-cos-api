@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.documentremoval.DocumentRemovalService;
 
 import java.io.IOException;
@@ -30,6 +31,8 @@ class DocumentRemovalControllerTest {
     private AuthorisationService authorisationService;
     @Mock
     private DocumentRemovalService documentRemovalService;
+    @Mock
+    private CafcassDateTimeService cafcassDateTimeService;
 
     @InjectMocks
     private DocumentRemovalController controller;
