@@ -66,7 +66,7 @@ public class CaseNameService {
         updatedCaseData.put(CASE_NAME_HMCTS_INTERNAL, internalCaseName);
     }
 
-    private String getInternalCaseNameForIssueDate(String caseName, LocalDate issueDate, boolean isCAorDA) {
+    public String getInternalCaseNameForIssueDate(String caseName, LocalDate issueDate, boolean isCAorDA) {
         String internalCaseName = caseName;
         if (featureToggleService.isCaseIssuedAfterReleaseDate(issueDate)) {
             String courtLocation = "WV";
