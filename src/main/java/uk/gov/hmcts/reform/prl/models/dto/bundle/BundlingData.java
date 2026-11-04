@@ -16,6 +16,9 @@ public class BundlingData {
     @JsonProperty("applicantCaseName")
     private final String applicantCaseName;
 
+    @JsonProperty("caseNameHcmtsInternal")
+    private final String caseNameHcmtsInternal;
+
     @JsonProperty("caseNumber")
     private final String caseNumber;
 

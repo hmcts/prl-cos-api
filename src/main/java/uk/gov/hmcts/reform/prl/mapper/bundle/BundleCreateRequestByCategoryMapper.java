@@ -123,6 +123,7 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
         return BundlingCaseData.builder().id(String.valueOf(caseData.getId())).bundleConfiguration(
                 bundleConfigFileName)
             .data(BundlingData.builder().caseNumber(String.valueOf(caseData.getId())).applicantCaseName(caseData.getApplicantCaseName())
+                      .caseNameHcmtsInternal(caseData.getCaseNameHmctsInternal())
                       .hearingDetails(hearingDetailsMapperUtil.mapHearingDetails(hearingDetails))
                       .applications(applicationDocumentFromCategory)
                       .orders(ordersFromCategory)
