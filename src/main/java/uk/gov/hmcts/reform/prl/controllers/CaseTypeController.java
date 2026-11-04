@@ -62,17 +62,15 @@ public class CaseTypeController extends AbstractCallbackController {
         this.caseSummaryTab = caseSummaryTab;
     }
 
-    @PostMapping(path = "/populate-extended-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Populate extended case details ")
+    @PostMapping(path = "/inject-case-metadata", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Inject case metadata ")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Case details extended"),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
-
-    public GetCaseCallbackResponse populateExtendedCaseDetails(
-        @RequestHeader("Authorization") @Parameter(hidden = true) String authorization,
-        @RequestHeader("ServiceAuthorization") @Parameter(hidden = true)
-        String serviceAuthorization,
-        @RequestBody CallbackRequest callbackRequest) {
+    public GetCaseCallbackResponse injectCaseMetadata(
+            @RequestHeader("Authorization") @Parameter(hidden = true) String authorization,
+            @RequestHeader("ServiceAuthorization") @Parameter(hidden = true) String serviceAuthorization,
+            @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorization, serviceAuthorization)) {
             CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
             return injectedCaseDataResponseService.getInjectedCallbackResponse(caseData);
