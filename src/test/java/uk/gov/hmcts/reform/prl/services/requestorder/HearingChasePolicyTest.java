@@ -35,6 +35,7 @@ class HearingChasePolicyTest {
 
     private static final String HEARING_ID = "1";
     private static final LocalDate CRON_DATE = LocalDate.of(2026, 4, 24);//Friday
+    private static final LocalDate RELEASE_DATE = LocalDate.of(2026, 1, 1);
     private static final LocalDate FUTURE_HEARING_DATE = LocalDate.now();
 
     @Mock WorkingDayIndicator workingDayIndicator;
@@ -43,11 +44,11 @@ class HearingChasePolicyTest {
 
     @BeforeEach
     void setUp() {
-        policy = new HearingChasePolicy(workingDayIndicator);
-        ReflectionTestUtils.setField(policy, "c100CadenceWorkingDays", 3);
-        ReflectionTestUtils.setField(policy, "fl401CadenceWorkingDays", 1);
-        ReflectionTestUtils.setField(policy, "hearingStatusesToFilter",
-            List.of("COMPLETED", "AWAITING_ACTUALS"));
+        policy = new HearingChasePolicy(workingDayIndicator,
+                                        3,
+                                        1,
+                                        List.of("COMPLETED", "AWAITING_ACTUALS"),
+                                        "2026-01-01");
     }
 
     @Test
@@ -83,6 +84,16 @@ class HearingChasePolicyTest {
 
         assertThat(decision.shouldFire()).isFalse();
         assertThat(decision.description()).isEqualTo("skipped - status=LISTED not in filter");
+    }
+
+    @Test
+    void decideSkipsWhenHearingDateInPastThanReleaseDate() {
+        CaseHearing hearing = hearing("COMPLETED", CRON_DATE.plusDays(1));
+        ReflectionTestUtils.setField(policy, "releaseDate", RELEASE_DATE.plusMonths(5));
+        ChaseDecision decision = policy.decide(hearing, c100Case().build(), emptyLedger(), CRON_DATE);
+
+        assertThat(decision.shouldFire()).isFalse();
+        assertThat(decision.description()).isEqualTo("skipped - hearing date 2026-04-25 is before release date 2026-06-01 for hearingId 1");
     }
 
     @Test

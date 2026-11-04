@@ -6,3 +6,6 @@ idam:
 prl:
   request-body-logger:
     enabled: {PRL_REQUEST_BODY_LOGGER_ENABLED:false}
+feature:
+  toggle:
+    cafcassDateTimeFeatureEnabled: ${CAFCASS_DATE_TIME_FEATURE_ENABLED:true}

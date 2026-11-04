@@ -13,9 +13,12 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 public class HearingDataFromTabToDocmosis {
 
     private String hearingType;
+    private String hearingTypeInWelsh;
     private String hearingDate;
     private String hearingTime;
     private String hearingLocation;
     private String hearingEstimatedDuration;
+    private String hearingEstimatedDurationInWelsh;
     private DynamicList hearingArrangementsFromHmc;
+    private DynamicList hearingArrangementsFromHmcInWelsh;
 }

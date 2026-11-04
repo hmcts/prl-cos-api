@@ -34,8 +34,6 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
 import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
@@ -176,6 +174,8 @@ public class ManageOrdersController {
                 ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
                 return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
             }
+
+            manageOrderService.updatePrefilledOrderFields(caseData, caseDataUpdated);
 
             String language = CaseUtils.getLanguage(clientContext);
             List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData, CaseUtils.getLanguage(clientContext));
@@ -393,7 +393,8 @@ public class ManageOrdersController {
         }
     }
 
-    @PostMapping(path = "/case-order-email-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/"
+        + "case-order-email-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Send Email Notification on Case order")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.", content = @Content(mediaType = "application/json",
@@ -459,6 +460,7 @@ public class ManageOrdersController {
             //SNI-4330 fix
             //update caseSummaryTab with latest state
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
+            caseDataUpdated.putAll(cafcassDateTimeService.updateAndGetCafcassDatetime(callbackRequest));
 
             manageOrderService.removeLocalAuthorityFromCase(caseData, caseDataUpdated);
 
@@ -585,25 +587,19 @@ public class ManageOrdersController {
 
             cleanUpSelectedManageOrderOptions(caseDataUpdated);
 
-            cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
-
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new InvalidClientException(INVALID_CLIENT));
         }
     }
 
-
-
-
-
-    /*
+    /**
      *  setHearingData is a misnomer this does setHearingData but then goes on to other action based on selection
-     *  including serving an order
+     *  including serving an order.
      * @param caseData original
      * @param caseDataUpdated updated
      * @param authorisation need auth for changes
-     */
+     **/
     private void setHearingData(CaseData caseData, Map<String, Object> caseDataUpdated, String authorisation) {
         try {
             doSetHearingData(caseData, caseDataUpdated, authorisation);
@@ -672,6 +668,9 @@ public class ManageOrdersController {
                 .legalAdviserList(JudgeOrLegalAdvisorCheckEnum.legalAdvisor
                                       .equals(caseData.getManageOrders().getAmendOrderSelectJudgeOrLa())
                                       ? caseData.getManageOrders().getNameOfLaToReviewOrder() : null)
+                .legalAdviser(JudgeOrLegalAdvisorCheckEnum.legalAdvisor
+                                      .equals(caseData.getManageOrders().getAmendOrderSelectJudgeOrLa())
+                                      ? caseData.getManageOrders().getLegalAdviserToReviewOrder() : null)
                 .build();
 
             roleAssignmentService.createRoleAssignment(
@@ -894,18 +893,11 @@ public class ManageOrdersController {
         @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
-            caseDataUpdated.put(
-                "nameOfLaToReviewOrder",
-                DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
-                    .build()
-            );
 
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             ResponseEntity.BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.OK);
             if (objectMapper.convertValue(
-                    caseDataUpdated.get(IS_INVOKED_FROM_TASK),
+                callbackRequest.getCaseDetails().getData().get(IS_INVOKED_FROM_TASK),
                     new TypeReference<YesOrNo>() {
                     }
                 )
@@ -928,7 +920,7 @@ public class ManageOrdersController {
                     .orElseGet(ResponseEntity::ok);
             }
             return responseBuilder.body(AboutToStartOrSubmitCallbackResponse.builder()
-                                            .data(caseDataUpdated)
+                                            .data(callbackRequest.getCaseDetails().getData())
                                             .build());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

@@ -529,6 +529,7 @@ public class UpdatePartyDetailsService {
             organisationNotExists = true;
         }
         if (organisationNotExists) {
+            log.info("Updating the applicantOrganisationPolicy organisation to {}", partyDetails.getSolicitorOrg());
             applicantOrganisationPolicy.setOrganisation(partyDetails.getSolicitorOrg());
         }
         if (roleNotExists) {

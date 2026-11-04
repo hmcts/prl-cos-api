@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.HtmlUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -2162,13 +2163,30 @@ public class SendAndReplyService {
         return dynamicData;
     }
 
+    /**
+     * Formats the message content for email by escaping HTML characters and replacing line breaks with <br> tags.
+     *
+     * @param messageContent The original message content.
+     * @return The formatted message content suitable for email.
+     */
+    private String formatMessageContentForEmail(String messageContent) {
+        if (messageContent == null) {
+            return null;
+        }
+
+        return HtmlUtils.htmlEscape(messageContent)
+            .replace("\r\n", "\n")
+            .replace("\r", "\n")
+            .replace("\n", "<br>");
+    }
+
     private void setMessageDataForEmail(CaseData caseData, Message message, List<Document> allSelectedDocuments, Map<String, Object> dynamicData) {
         int documentSize = 0;
         if (CollectionUtils.isNotEmpty(allSelectedDocuments)) {
             documentSize = allSelectedDocuments.size();
         }
         dynamicData.put("subject", message.getMessageSubject());
-        dynamicData.put("messageContent", message.getMessageContent());
+        dynamicData.put("messageContent", formatMessageContentForEmail(message.getMessageContent()));
         dynamicData.put("attachmentType", "pdf");
         dynamicData.put("disposition", "attachment");
         dynamicData.put("documentSize", documentSize);
@@ -2223,27 +2241,28 @@ public class SendAndReplyService {
 
     public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmitted(CallbackRequest callbackRequest, String authorisation) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        return sendAndReplySubmittedForChoice(caseData, caseData.getChooseSendOrReply().name(), authorisation);
+        SendOrReply chooseAndReply = caseData.getChooseSendOrReply();
+        return sendAndReplySubmittedForChoice(caseData, chooseAndReply, authorisation);
 
     }
 
     public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedTask(CallbackRequest callbackRequest,
                                                                                String authorisation) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        return sendAndReplySubmittedForChoice(caseData, REPLY.name(), authorisation);
+        return sendAndReplySubmittedForChoice(caseData, REPLY, authorisation);
     }
 
-    private ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedForChoice(CaseData caseData,
-            String sendOrReplyChoice, String authorisation) {
+    public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedForChoice(CaseData caseData,
+            SendOrReply sendOrReplyChoice, String authorisation) {
         log.info("sendOrReplyChoice={} for case={}", sendOrReplyChoice, caseData.getId());
-        if (REPLY.name().equals(sendOrReplyChoice)
+        if (REPLY.equals(sendOrReplyChoice)
             && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
             return ok(SubmittedCallbackResponse.builder().confirmationBody(
                 REPLY_AND_CLOSE_MESSAGE
             ).build());
         }
 
-        if (SEND.name().equals(sendOrReplyChoice)) {
+        if (SEND.equals(sendOrReplyChoice)) {
             sendNotificationToExternalParties(
                 caseData,
                 authorisation

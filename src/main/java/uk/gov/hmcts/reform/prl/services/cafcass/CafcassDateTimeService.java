@@ -2,14 +2,17 @@ package uk.gov.hmcts.reform.prl.services.cafcass;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +24,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_DATE_TI
 public class CafcassDateTimeService {
 
     private final FeatureToggleService featureToggleService;
+    private final CafcassCaseDataHelper cafcassCaseDataHelper;
 
     @Value("#{'${cafcaas.caseState}'.split(',')}")
     private List<String> caseStateList;
@@ -31,17 +35,34 @@ public class CafcassDateTimeService {
     @Value("#{'${cafcaas.excludedEvents}'.split(',')}")
     private List<String> excludedEventList;
 
-    public Map<String, Object> updateCafcassDateTime(CallbackRequest callbackRequest) {
-
-        return updateCafcassDateTime(callbackRequest.getCaseDetails().getData(),
-                                     callbackRequest.getCaseDetails().getState(),
-                                     callbackRequest.getEventId());
+    public Map<String, Object> updateAndGetCafcassDatetime(CallbackRequest callbackRequest) {
+        Map<String, Object> mapToTake = updateCafcassDateTime(callbackRequest);
+        return mapToTake.containsKey(CAFCASS_DATE_TIME)
+            ? Collections.singletonMap(CAFCASS_DATE_TIME, mapToTake.get(CAFCASS_DATE_TIME))
+            : Collections.emptyMap();
     }
 
-    private Map<String, Object> updateCafcassDateTime(Map<String, Object> caseDataMap, String state, String eventId) {
+    public Map<String, Object> updateCafcassDateTime(CallbackRequest callbackRequest) {
+        return updateCafcassDateTime(callbackRequest, callbackRequest.getEventId());
+    }
+
+    public Map<String, Object> updateCafcassDateTime(CallbackRequest callbackRequest, String fallbackEventId) {
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+
+        return updateCafcassDateTime(caseDetails,
+                                     caseDetailsBefore,
+                                     StringUtils.defaultIfBlank(callbackRequest.getEventId(), fallbackEventId));
+    }
+
+    private Map<String, Object> updateCafcassDateTime(CaseDetails caseDetails,
+                                                      CaseDetails caseDetailsBefore,
+                                                      String eventId) {
+        Map<String, Object> caseDataMap = caseDetails.getData();
         if (featureToggleService.isCafcassDateTimeFeatureEnabled()
             && !excludedEventList.contains(eventId)
-            && caseStateList.contains(state)) {
+            && caseStateList.contains(caseDetails.getState())
+            && cafcassCaseDataHelper.hasCafcassCaseDataChanged(caseDetails, caseDetailsBefore, eventId)) {
             caseDataMap.put(CAFCASS_DATE_TIME, ZonedDateTime.now(ZoneId.of("UTC")).toLocalDateTime());
         }
 

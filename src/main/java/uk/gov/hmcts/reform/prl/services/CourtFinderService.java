@@ -50,8 +50,10 @@ public class CourtFinderService {
 
     public Court getNearestFamilyCourt(CaseData caseData) throws NotFoundException {
         ServiceArea serviceArea = null;
+        log.info("Finding nearest family court for case type : {}", caseData.getCaseTypeOfApplication());
         try {
             if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                log.info("Starting FaCt lookup");
                 serviceArea = courtFinderApi
                   .findClosestDomesticAbuseCourtByPostCode(
                       getPostcodeFromWrappedParty(caseData.getApplicantsFL401()));

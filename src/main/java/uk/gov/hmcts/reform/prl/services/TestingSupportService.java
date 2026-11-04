@@ -101,6 +101,7 @@ public class TestingSupportService {
     private final TaskListService taskListService;
     private final UserService userService;
     private final OrganisationService organisationService;
+    private final TestingSupportFixtureLoader fixtureLoader;
 
     private static final String VALID_RESPONDENT_TASKLIST_INPUT_JSON = "Dummy_Respondent_Tasklist_Data.json";
 
@@ -285,12 +286,12 @@ public class TestingSupportService {
         return caseDataUpdated;
     }
 
-    private static String loadCaseDetailsInGateKeepingStage(CaseData initialCaseData) throws Exception {
+    private String loadCaseDetailsInGateKeepingStage(CaseData initialCaseData) throws Exception {
         String requestBody;
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
-            requestBody = ResourceLoader.loadJson(VALID_C100_GATEKEEPING_V4_INPUT_JSON);
+            requestBody = fixtureLoader.loadJson(VALID_C100_GATEKEEPING_V4_INPUT_JSON);
         } else {
-            requestBody = ResourceLoader.loadJson(VALID_FL401_GATEKEEPING_V2_INPUT_JSON);
+            requestBody = fixtureLoader.loadJson(VALID_FL401_GATEKEEPING_V2_INPUT_JSON);
         }
         return requestBody;
     }
@@ -298,9 +299,9 @@ public class TestingSupportService {
     private String loadCaseDetailsInDraftStage(CaseData initialCaseData) throws Exception {
         String requestBody;
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
-            requestBody = ResourceLoader.loadJson(VALID_C100_DRAFT_V3_INPUT_JSON);
+            requestBody = fixtureLoader.loadJson(VALID_C100_DRAFT_V3_INPUT_JSON);
         } else {
-            requestBody = ResourceLoader.loadJson(VALID_FL401_DRAFT_INPUT_JSON);
+            requestBody = fixtureLoader.loadJson(VALID_FL401_DRAFT_INPUT_JSON);
         }
         return requestBody;
     }
@@ -309,12 +310,12 @@ public class TestingSupportService {
         return loadCaseDetailsInDraftStageForUrgentCases(initialCaseData);
     }
 
-    private static String loadCaseDetailsInDraftStageForUrgentCases(CaseData initialCaseData) throws Exception {
+    private String loadCaseDetailsInDraftStageForUrgentCases(CaseData initialCaseData) throws Exception {
         String requestBody;
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
-            requestBody = ResourceLoader.loadJson(VALID_C100_DRAFT_V3_INPUT_COURT_ADMIN_JSON);
+            requestBody = fixtureLoader.loadJson(VALID_C100_DRAFT_V3_INPUT_COURT_ADMIN_JSON);
         } else {
-            requestBody = ResourceLoader.loadJson(VALID_FL401_DRAFT_COURT_ADMIN_INPUT_JSON);
+            requestBody = fixtureLoader.loadJson(VALID_FL401_DRAFT_COURT_ADMIN_INPUT_JSON);
         }
         return requestBody;
     }

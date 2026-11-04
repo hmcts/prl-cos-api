@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.PenalNoticeOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForCourtAdminOrderEnum;
@@ -33,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.common.staff.StaffUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404b;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
@@ -66,6 +68,18 @@ public class ManageOrders implements MappableObject {
     private final String recitalsOrPreamble;
     @JsonProperty("orderDirections")
     private final String orderDirections;
+    @JsonProperty("partiesAndRepresentation")
+    private final String partiesAndRepresentation;
+    @JsonProperty("penalNoticeNeeded")
+    private final List<PenalNoticeOptionEnum> penalNoticeNeeded;
+    @JsonProperty("penalNoticeRtf")
+    private final String penalNoticeRtf;
+    @JsonProperty("recitalsOrPreambleRtf")
+    private final String recitalsOrPreambleRtf;
+    @JsonProperty("orderDirectionsRtf")
+    private final String orderDirectionsRtf;
+    @JsonProperty("scheduleToOrderRtf")
+    private final String scheduleToOrderRtf;
     @JsonProperty("furtherDirectionsIfRequired")
     private final String furtherDirectionsIfRequired;
     @JsonProperty("furtherInformationIfRequired")
@@ -237,7 +251,8 @@ public class ManageOrders implements MappableObject {
     private final JudicialUser nameOfJudgeToReviewOrder;
     @JsonProperty("nameOfLaToReviewOrder")
     private final DynamicList nameOfLaToReviewOrder;
-
+    @JsonProperty("legalAdviserToReviewOrder")
+    private final StaffUser legalAdviserToReviewOrder;
     @JsonProperty("previewUploadedOrder")
     private Document previewUploadedOrder;
     @JsonProperty("orderUploadedAsDraftFlag")

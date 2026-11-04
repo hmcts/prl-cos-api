@@ -203,7 +203,8 @@ public class PrlAppsConstants {
     public static final String SERVICE_ID = "ABA5";
     public static final String FAMILY_COURT_TYPE_ID = "18";
     public static final String[] HEARING_PAGE_NEEDED_ORDER_IDS = {"noticeOfProceedings","childArrangementsSpecificProhibitedOrder",
-        "occupation","nonMolestation","amendDischargedVaried","noticeOfProceedingsNonParties","noticeOfProceedingsParties", "blank"};
+        "occupation","nonMolestation","amendDischargedVaried","noticeOfProceedingsNonParties","noticeOfProceedingsParties", "blank",
+        "noticeOfHearingParties", "noticeOfHearing"};
     public static final String RIGHT_TO_ASK_COURT = "As the direction has been made without a hearing,"
         + " you may ask the court to reconsider this order. "
         + "You must do that within 7 days of receiving this order by writing to the court"
@@ -598,6 +599,7 @@ public class PrlAppsConstants {
 
     public static final String IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING =  "isJudgeOrLegalAdviserGatekeeping";
     public static final String JUDGE_NAME = "judgeName";
+    public static final String LEGAL_ADVISER_USER = "legalAdviser";
 
     public static final String JUDGE = "Judge";
     public static final String CASEWORKER = "CaseWorker";
@@ -798,6 +800,7 @@ public class PrlAppsConstants {
     public static final String C1A_DOCUMENT_WELSH_FILENAME = "C1A_Document_Welsh.pdf";
     public static final String C1A_BLANK_DOCUMENT_WELSH_FILENAME = "C1A_Blank_Welsh.pdf";
     public static final String C7_BLANK_DOCUMENT_FILENAME = "Blank_C7.pdf";
+    public static final String C7_BLANK_DOCUMENT_WELSH_FILENAME = "Blank_C7_Welsh.pdf";
     public static final String SOA_C6A_OTHER_PARTIES_ORDER = "Notice_Of_Proceeding_Order_C6a.pdf";
     public static final String SOA_C6A_OTHER_PARTIES_ORDER_WELSH = "Welsh_Notice_Of_Proceeding_Order_C6a.pdf";
 
@@ -903,6 +906,13 @@ public class PrlAppsConstants {
 
     public static final String ORDER_COLLECTION = "orderCollection";
 
+    public static final String PARTIES_AND_REPRESENTATION = "partiesAndRepresentation";
+    public static final String PENAL_NOTICE_NEEDED = "penalNoticeNeeded";
+    public static final String PENAL_NOTICE_RTF = "penalNoticeRtf";
+    public static final String ORDER_DIRECTIONS_RTF = "orderDirectionsRtf";
+    public static final String RECITALS_OR_PREAMBLE_RTF = "recitalsOrPreambleRtf";
+    public static final String SCHEDULE_TO_ORDER_RTF = "scheduleToOrderRtf";
+
     public static final String WA_PERFORMING_USER = "performingUser";
     public static final String WA_PERFORMING_ACTION = "performingAction";
     public static final String WA_JUDGE_LA_REVIEW_REQUIRED = "judgeLaReviewRequired";
@@ -966,6 +976,7 @@ public class PrlAppsConstants {
     public static final String FL401_LIST_ON_NOTICE_HEARING_INSTRUCTION = "fl401listOnNoticeHearingInstruction";
 
     public static final String LIST_ON_NOTICE_HEARING_INSTRUCTIONS = "List on notice - hearing instructions";
+    public static final String LIST_ON_NOTICE = "List On Notice";
 
     public static final String REJECT_WITHOUT_NOTICE_REASONS = "Reject without notice - reasons";
 

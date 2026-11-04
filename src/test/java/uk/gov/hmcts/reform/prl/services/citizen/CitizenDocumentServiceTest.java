@@ -1,13 +1,14 @@
 package uk.gov.hmcts.reform.prl.services.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -35,7 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doCallRealMethod;
@@ -45,19 +46,24 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZON
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
-public class CitizenDocumentServiceTest {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class CitizenDocumentServiceTest {
 
     public static final String AUTH_TOKEN = "Bearer TestAuthToken";
 
-    @InjectMocks
     private CitizenDocumentService citizenDocumentService;
 
     @Mock
     private ObjectMapper objectMapper;
 
     @Mock
-    AllTabServiceImpl allTabService;
+    private AllTabServiceImpl allTabService;
+
+    @Mock
+    private CitizenCoreCaseDataService citizenCoreCaseDataService;
+
+    private CitizenUserCaseUpdateService citizenUserCaseUpdateService;
 
     @Mock
     private UserService userService;
@@ -72,8 +78,19 @@ public class CitizenDocumentServiceTest {
     private Document caseDoc;
     private QuarantineLegalDoc quarantineCaseDoc;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
+
+        citizenUserCaseUpdateService = new CitizenUserCaseUpdateService(
+            allTabService,
+            citizenCoreCaseDataService
+        );
+        citizenDocumentService = new CitizenDocumentService(
+            objectMapper,
+            citizenUserCaseUpdateService,
+            userService,
+            manageDocumentsService
+        );
 
         ReflectionTestUtils.setField(manageDocumentsService, "objectMapper", objectMapper);
         ReflectionTestUtils.setField(manageDocumentsService, "notificationService", notificationService);
@@ -116,7 +133,7 @@ public class CitizenDocumentServiceTest {
     }
 
     @Test
-    public void testCitizenUploadDocumentsAndMoveToQuarantine() throws Exception {
+    void testCitizenUploadDocumentsAndMoveToQuarantine() throws Exception {
         //Given
         documentRequest = documentRequest.toBuilder()
             .isConfidential(Yes)
@@ -145,14 +162,18 @@ public class CitizenDocumentServiceTest {
             null
         );
 
-        when(allTabService.getStartUpdateForSpecificEvent("123", CaseEvent.CITIZEN_CASE_UPDATE.getValue())).thenReturn(
-            startAllTabsUpdateDataContents);
+        when(allTabService.getStartUpdateForSpecificUserEvent(
+            "123",
+            CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
+            AUTH_TOKEN
+        )).thenReturn(startAllTabsUpdateDataContents);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(QuarantineLegalDoc.class))).thenReturn(
             quarantineCaseDoc);
         when((userService.getUserDetails(any()))).thenReturn(UserDetails.builder()
                                                                  .roles(List.of(Roles.CITIZEN.getValue())).build());
-        when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), any())).thenReturn(caseDetails);
+        when(allTabService.submitUpdateForSpecificUserEvent(anyString(), anyString(), any(), any(), any(), any()))
+            .thenReturn(caseDetails);
 
         //Action
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetailsUpdated = citizenDocumentService.citizenSubmitDocuments(
@@ -166,7 +187,7 @@ public class CitizenDocumentServiceTest {
     }
 
     @Test
-    public void testCitizenUploadDocumentsAndMoveRespectiveCategory() throws Exception {
+    void testCitizenUploadDocumentsAndMoveRespectiveCategory() throws Exception {
         //Given
         documentRequest = documentRequest.toBuilder()
             .categoryId("FM5_STATEMENTS")
@@ -215,10 +236,13 @@ public class CitizenDocumentServiceTest {
             caseData,
             null
         );
-        when(allTabService.getStartUpdateForSpecificEvent("123", CaseEvent.CITIZEN_CASE_UPDATE.getValue())).thenReturn(
-            startAllTabsUpdateDataContents);
-
-        when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), any())).thenReturn(caseDetails);
+        when(allTabService.getStartUpdateForSpecificUserEvent(
+            "123",
+            CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
+            AUTH_TOKEN
+        )).thenReturn(startAllTabsUpdateDataContents);
+        when(allTabService.submitUpdateForSpecificUserEvent(anyString(), anyString(), any(), any(), any(), any()))
+            .thenReturn(caseDetails);
 
         //Action
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetailsUpdated = citizenDocumentService.citizenSubmitDocuments(

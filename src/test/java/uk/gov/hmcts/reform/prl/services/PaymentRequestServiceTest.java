@@ -9,6 +9,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
@@ -32,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestReferenceStatusResponse;
+import uk.gov.hmcts.reform.prl.services.citizen.CitizenUserCaseUpdateService;
 import uk.gov.hmcts.reform.prl.services.payment.FeeService;
 import uk.gov.hmcts.reform.prl.services.payment.PaymentRequestService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -41,6 +44,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -49,10 +53,13 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.FeesAndPaymentCitizenControllerTest.PAYMENT_REFERENCE;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.FeesAndPaymentCitizenControllerTest.REDIRECT_URL;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.FeesAndPaymentCitizenControllerTest.authToken;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 import static uk.gov.hmcts.reform.prl.services.payment.PaymentRequestService.ENG_LANGUAGE;
 import static uk.gov.hmcts.reform.prl.services.payment.PaymentRequestService.GBP_CURRENCY;
 
@@ -89,6 +96,9 @@ public class PaymentRequestServiceTest {
 
     @Mock
     private AllTabServiceImpl allTabService;
+
+    @Mock
+    private CitizenUserCaseUpdateService citizenUserCaseUpdateService;
 
     private CallbackRequest callbackRequest;
     private CreatePaymentRequest createPaymentRequest;
@@ -170,6 +180,19 @@ public class PaymentRequestServiceTest {
                                                                                                         StartEventResponse.builder().build(),
                                                                                                         caseDetails, caseData, null);
         when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
+        when(citizenUserCaseUpdateService.updateCaseUsingCitizenUserAuthAndReturn(
+            anyString(),
+            anyString(),
+            any(),
+            any()
+        )).thenAnswer(invocation -> {
+            Function<StartAllTabsUpdateDataContent, PaymentResponse> updater = invocation.getArgument(3);
+            StartAllTabsUpdateDataContent updateData = allTabService.getStartUpdateForSpecificEvent(
+                invocation.getArgument(1),
+                CITIZEN_CASE_UPDATE.getValue()
+            );
+            return updater.apply(updateData);
+        });
     }
 
     @Test
@@ -334,7 +357,6 @@ public class PaymentRequestServiceTest {
 
         assertNotNull(paymentResponse);
         assertNotNull(paymentResponse.getPaymentReference());
-
     }
 
     @Test
@@ -381,6 +403,12 @@ public class PaymentRequestServiceTest {
         );
         assertNotNull(paymentResponse);
         assertNotNull(paymentResponse.getPaymentReference());
+        verify(citizenUserCaseUpdateService).updateCaseUsingCitizenUserAuthAndReturn(
+            Mockito.eq(authToken),
+            Mockito.eq(TEST_CASE_ID),
+            Mockito.eq(CITIZEN_CASE_UPDATE),
+            any()
+        );
 
     }
 
@@ -959,6 +987,20 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
+    public void shouldNotCreatePaymentWhenCitizenCannotAccessCase() throws Exception {
+        Mockito.doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND))
+            .when(citizenUserCaseUpdateService)
+            .validateCitizenCaseAccess(authToken, TEST_CASE_ID);
+
+        assertThrows(
+            ResponseStatusException.class,
+            () -> paymentRequestService.createPayment(authToken, createPaymentRequest)
+        );
+
+        verifyNoInteractions(paymentApi);
+    }
+
+    @Test
     public void testCreatePaymentWithNonAwpFeeResponse() throws Exception {
         when(feeService.fetchFeeDetails(Mockito.any())).thenReturn(feeResponse);
         when(paymentApi.createPaymentRequest(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
@@ -1001,4 +1043,3 @@ public class PaymentRequestServiceTest {
         assertEquals("response", paymentResponse1.getServiceRequestReference());
     }
 }
-
