@@ -591,6 +591,7 @@ public class CafcassCaseDataHelper {
             caseIdWithRegionIdMap
         );
         filterCancelledHearingsBeforeListing(listOfHearingDetails);
+        filterFullyEndedHearings(listOfHearingDetails);
         updateHearingDataCafcass(filteredCafcassResponse, listOfHearingDetails);
 
         return filteredCafcassResponse;
