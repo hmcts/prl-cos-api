@@ -42,6 +42,7 @@ import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassCaseDataHelper;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -125,6 +126,9 @@ public class ManageOrderControllerIntegrationTest {
 
     @MockBean
     CafcassCaseDataHelper cafcassCaseDataHelper;
+
+    @MockBean
+    CafcassDateTimeService cafcassDateTimeService;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -252,14 +256,30 @@ public class ManageOrderControllerIntegrationTest {
     }
 
     @Test
-    public void testManageOrdersAboutToSubmitUpdatesCafcassDateTimeWhenCafcassDataChanged() throws Exception {
+    public void testManageOrdersSubmittedUpdatesCafcassDateTimeWhenCafcassDataChanged() throws Exception {
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
         when(featureToggleService.isCafcassDateTimeFeatureEnabled()).thenReturn(true);
         when(cafcassCaseDataHelper.hasCafcassCaseDataChanged(any(), any(), anyString())).thenReturn(true);
+        when(cafcassDateTimeService.updateAndGetCafcassDatetime(any())).thenReturn(
+            Map.of("cafcassDateTime", "2026-10-27T10:00:00"));
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(manageOrderCaseData());
 
+        CaseData caseData = manageOrderCaseData();
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            "authToken",
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseDataMap,
+            caseData,
+            null
+        );
+
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+
         mockMvc.perform(
-                post(manageOrdersEndpoint)
+                post(caseOrderEmailNotificationEndpoint)
                     .header(AUTHORISATION_HEADER, "testAuthToken")
                     .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
                     .accept(APPLICATION_JSON)
