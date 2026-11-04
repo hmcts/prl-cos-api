@@ -165,6 +165,9 @@ public class C100IssueCaseServiceTest {
     @Mock
     private FeatureToggleService featureToggleService;
 
+    @Mock
+    private CaseNameService caseNameService;
+
 
     public static final String authToken = "Bearer TestAuthToken";
 
