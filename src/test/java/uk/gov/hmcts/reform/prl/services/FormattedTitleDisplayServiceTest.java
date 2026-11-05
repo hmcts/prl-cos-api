@@ -28,6 +28,14 @@ class FormattedTitleDisplayServiceTest {
     }
 
     @Test
+    void shouldFormatTitleBeforeReleaseNullFamilyManId() {
+        when(featureToggleService.isCaseIssuedAfterReleaseDate(any())).thenReturn(false);
+        assertEquals("## appName\n ## FamilyMan ID: \n ## Casenumber: 1234567890123456",
+                     formattedTitleDisplayService.getFormattedTitleDisplay("appName", "internalName",null,
+                                                                           1234567890123456L, LocalDate.now()));
+    }
+
+    @Test
     void shouldFormatTitleAfterRelease() {
         when(featureToggleService.isCaseIssuedAfterReleaseDate(any())).thenReturn(true);
         assertEquals("## internalName\n ## Casenumber: 1234567890123456", formattedTitleDisplayService
