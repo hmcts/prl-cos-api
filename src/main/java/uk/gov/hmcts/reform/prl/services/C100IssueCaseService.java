@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
-import uk.gov.hmcts.reform.prl.models.court.PathFinderMapping;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -58,9 +57,8 @@ public class C100IssueCaseService {
     private final CourtFinderService courtFinderService;
     private final ObjectMapper objectMapper;
     private final EventService eventPublisher;
-    private final DfjLookupService dfjLookupService;
+    private final PrlCourtConfigService prlCourtConfigService;
     private final C8Service c8Service;
-    private final PathFinderLookupService pathFinderLookupService;
     private final CcdCoreCaseDataService ccdCoreCaseDataService;
     private final SystemUserService systemUserService;
     private final UpdatePartyDetailsService updatePartyDetailsService;
@@ -85,10 +83,9 @@ public class C100IssueCaseService {
                     .courtCodeFromFact(courtId).build();
                 caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
                 caseDataUpdated.put(COURT_CODE_FROM_FACT, courtId);
-                caseDataUpdated.keySet().removeAll(dfjLookupService.getAllCourtFields());
-                caseDataUpdated.putAll(dfjLookupService.getDfjAreaFieldsByCourtId(baseLocationId));
-                Optional<PathFinderMapping> pathFinderMapping = pathFinderLookupService.getPathFinderMappingByCourtField(baseLocationId);
-                if (pathFinderMapping.isPresent() && pathFinderMapping.get().isPathFinderEnabled()) {
+                caseDataUpdated.keySet().removeAll(prlCourtConfigService.getAllCourtFields());
+                caseDataUpdated.putAll(prlCourtConfigService.getDfjAreaFieldsByCourtId(baseLocationId));
+                if (prlCourtConfigService.isPathfinderCourt(baseLocationId)) {
                     caseDataUpdated.put("isPathfinderCase", Yes);
                 } else {
                     caseDataUpdated.put("isPathfinderCase", No);

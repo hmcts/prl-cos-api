@@ -43,7 +43,7 @@ public class AmendCourtServiceTest {
     private EmailService emailService;
 
     @Mock
-    private DfjLookupService dfjLookupService;
+    private PrlCourtConfigService prlCourtConfigService;
 
     @InjectMocks
     private AmendCourtService amendCourtService;
@@ -92,7 +92,7 @@ public class AmendCourtServiceTest {
             .thenReturn(Optional.of(courtVenue));
         when(c100IssueCaseService.getFactCourtId(courtVenue)).thenReturn("");
         when(courtSealFinderService.getCourtSeal(Mockito.anyString())).thenReturn("");
-        when(dfjLookupService.getDfjAreaFieldsByCourtId("234946"))
+        when(prlCourtConfigService.getDfjAreaFieldsByCourtId("234946"))
             .thenReturn(Map.of("dfjArea", "SWANSEA", "swanseaDFJCourt", "234946"));
     }
 
