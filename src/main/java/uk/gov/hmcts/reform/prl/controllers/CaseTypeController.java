@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
+import uk.gov.hmcts.reform.prl.services.CaseNameService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.InjectedCaseDataResponseService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
@@ -49,17 +50,19 @@ public class CaseTypeController extends AbstractCallbackController {
     private final InjectedCaseDataResponseService injectedCaseDataResponseService;
     private final CaseEventService caseEventService;
     private final CaseSummaryTabService caseSummaryTab;
+    private final CaseNameService caseNameService;
 
     protected CaseTypeController(ObjectMapper objectMapper, EventService eventPublisher,
                                  AuthorisationService authorisationService,
                                  InjectedCaseDataResponseService injectedCaseDataResponseService,
                                  CaseEventService caseEventService,
-                                 CaseSummaryTabService caseSummaryTab) {
+                                 CaseSummaryTabService caseSummaryTab, CaseNameService caseNameService) {
         super(objectMapper, eventPublisher);
         this.authorisationService = authorisationService;
         this.injectedCaseDataResponseService = injectedCaseDataResponseService;
         this.caseEventService = caseEventService;
         this.caseSummaryTab = caseSummaryTab;
+        this.caseNameService = caseNameService;
     }
 
     @PostMapping(path = "/inject-case-metadata", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -103,12 +106,12 @@ public class CaseTypeController extends AbstractCallbackController {
             if (previousStateOpt.isPresent()) {
                 String previousState = previousStateOpt.get();
                 if (AWAITING_INFORMATION.getValue().equalsIgnoreCase(previousState)) {
-                    injectedCaseDataResponseService.getInjectedCallbackResponse(caseData);
+                    caseNameService.setFinalCaseName(caseDataUpdated,caseData);
                     caseData = caseData.toBuilder().state(CASE_ISSUED).build();
                     caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
                     caseDataUpdated.put(STATE_FIELD, CASE_ISSUED.getValue());
                 } else if (SUBMITTED_PAID.getValue().equalsIgnoreCase(previousState)) {
-                    injectedCaseDataResponseService.getInjectedCallbackResponse(caseData);
+                    caseNameService.setFinalCaseName(caseDataUpdated,caseData);
                 }
             }
 
