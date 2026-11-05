@@ -58,6 +58,7 @@ import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.C8Service;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
+import uk.gov.hmcts.reform.prl.services.CaseNameService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.DfjLookupService;
@@ -173,6 +174,7 @@ public class CallbackController {
     private final DfjLookupService dfjLookupService;
     private final CafcassDateTimeService cafcassDateTimeService;
     private final C8Service c8Service;
+    private final CaseNameService caseNameService;
 
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -707,7 +709,7 @@ public class CallbackController {
     }
 
     @PostMapping(path = "/fl401-add-case-number", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback for add case number submit event")
+    @Operation(description = "Callback for add case number submit event (legacy cases)")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
@@ -718,33 +720,74 @@ public class CallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(callbackRequest.getCaseDetails().getId()));
+        return handleAddCaseNumber(authorisation, s2sToken, callbackRequest, false);
+    }
 
-            Optional<String> previousStateOpt = eventsForCase.stream()
-                .map(CaseEventDetail::getStateId)
-                .findFirst();
+    @PostMapping(path = "/fl401-add-case-numberWithPrefix", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback for DA issue case: adds case number and sets case name with prefix")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse addCaseNumberWithPrefixSubmitted(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        return handleAddCaseNumber(authorisation, s2sToken, callbackRequest, true);
+    }
 
-            if (previousStateOpt.isPresent()) {
-                String previousState = previousStateOpt.get();
-                if (AWAITING_INFORMATION.getValue().equalsIgnoreCase(previousState)) {
-                    caseDataUpdated.put(VERIFY_CASE_NUMBER_ADDED, Yes.getDisplayedValue());
-                    caseData = caseData.toBuilder().state(CASE_ISSUED).build();
-                    caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
-                    caseDataUpdated.put(STATE_FIELD, CASE_ISSUED.getValue());
-                } else if (SUBMITTED_PAID.getValue().equalsIgnoreCase(previousState)) {
-                    caseDataUpdated.put(VERIFY_CASE_NUMBER_ADDED, Yes.getDisplayedValue());
-                }
-            }
-
-            caseDataUpdated.put(ISSUE_DATE_FIELD, LocalDate.now());
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDataUpdated)
-                .build();
-        } else {
+    private AboutToStartOrSubmitCallbackResponse handleAddCaseNumber(String authorisation,
+                                                                    String s2sToken,
+                                                                    CallbackRequest callbackRequest,
+                                                                    boolean applyCaseNamePrefix) {
+        if (!authorisationService.isAuthorized(authorisation, s2sToken)) {
             throw (new RuntimeException(INVALID_CLIENT));
+        }
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        LocalDate issueDate = LocalDate.now();
+        if (applyCaseNamePrefix) {
+            if (caseData.getIssueDate() != null) {
+                issueDate = caseData.getIssueDate();
+            }
+            caseData = caseData.toBuilder().issueDate(issueDate).build();
+        }
+
+        List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(callbackRequest.getCaseDetails().getId()));
+        Optional<String> previousStateOpt = eventsForCase.stream()
+            .map(CaseEventDetail::getStateId)
+            .findFirst();
+
+        if (previousStateOpt.isPresent()) {
+            String previousState = previousStateOpt.get();
+            boolean isAwaitingInformation = AWAITING_INFORMATION.getValue().equalsIgnoreCase(previousState);
+            boolean isSubmittedPaid = SUBMITTED_PAID.getValue().equalsIgnoreCase(previousState);
+
+            if (isAwaitingInformation) {
+                caseData = caseData.toBuilder().state(CASE_ISSUED).build();
+                caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
+                caseDataUpdated.put(STATE_FIELD, CASE_ISSUED.getValue());
+                applyCaseNumber(caseDataUpdated, caseData, applyCaseNamePrefix);
+            }
+            if (isSubmittedPaid) {
+                applyCaseNumber(caseDataUpdated, caseData, applyCaseNamePrefix);
+            }
+        }
+
+        caseDataUpdated.put(ISSUE_DATE_FIELD, issueDate);
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDataUpdated)
+            .build();
+    }
+
+    private void applyCaseNumber(Map<String, Object> caseDataUpdated, CaseData caseData, boolean applyCaseNamePrefix) {
+        if (applyCaseNamePrefix) {
+            caseNameService.setFinalCaseName(caseDataUpdated, caseData);
+        } else {
+            caseDataUpdated.put(VERIFY_CASE_NUMBER_ADDED, Yes.getDisplayedValue());
         }
     }
 
