@@ -133,6 +133,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -1141,6 +1142,7 @@ public class CallbackControllerTest {
             .addCaseNumberSubmitted(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("issueDate"));
         assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("isAddCaseNumberAdded"));
+        verify(caseNameService, never()).setFinalCaseName(anyMap(), any(CaseData.class));
     }
 
     @Test
@@ -1165,6 +1167,8 @@ public class CallbackControllerTest {
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
                 .addCaseNumberSubmitted(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("issueDate"));
+        assertEquals(Yes.getDisplayedValue(), aboutToStartOrSubmitCallbackResponse.getData().get("isAddCaseNumberAdded"));
+        verify(caseNameService, never()).setFinalCaseName(anyMap(), any(CaseData.class));
     }
 
     @Test
@@ -1191,9 +1195,51 @@ public class CallbackControllerTest {
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .addCaseNumberSubmitted(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("issueDate"));
+        assertEquals(Yes.getDisplayedValue(), aboutToStartOrSubmitCallbackResponse.getData().get("isAddCaseNumberAdded"));
         assertEquals(CASE_ISSUED.getValue(), aboutToStartOrSubmitCallbackResponse.getData().get(STATE_FIELD));
         verify(caseSummaryTab).updateTab(caseData.toBuilder().state(CASE_ISSUED).build());
+        verify(caseNameService, never()).setFinalCaseName(anyMap(), any(CaseData.class));
     }
+
+    private CallbackRequest addCaseNumberWithPrefixRequest(CaseData caseData, String previousState) {
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(caseEventService.findEventsForCase("1"))
+            .thenReturn(List.of(CaseEventDetail.builder().stateId(previousState).build()));
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        return CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .data(stringObjectMap).build()).build();
+    }
+
+    @Test
+    public void testAddCaseNumberWithPrefixAwaitingInformationIssuesCase() {
+        CaseData caseData = CaseData.builder().build();
+        CallbackRequest callbackRequest = addCaseNumberWithPrefixRequest(caseData, AWAITING_INFORMATION.getValue());
+        CaseData expectedTabData = caseData.toBuilder().issueDate(LocalDate.now()).state(CASE_ISSUED).build();
+        when(caseSummaryTab.updateTab(expectedTabData)).thenReturn(Map.of());
+
+        AboutToStartOrSubmitCallbackResponse response = callbackController
+            .addCaseNumberWithPrefixSubmitted(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+
+        verify(caseNameService).setFinalCaseName(anyMap(), any(CaseData.class));
+        verify(caseSummaryTab).updateTab(expectedTabData);
+        assertEquals(CASE_ISSUED.getValue(), response.getData().get(STATE_FIELD));
+        assertNull(response.getData().get("isAddCaseNumberAdded"));
+    }
+
+    @Test
+    public void testAddCaseNumberWithPrefixOtherStateDoesNotSetCaseName() {
+        CallbackRequest callbackRequest = addCaseNumberWithPrefixRequest(CaseData.builder().build(), ISSUED_STATE);
+
+        AboutToStartOrSubmitCallbackResponse response = callbackController
+            .addCaseNumberWithPrefixSubmitted(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+
+        verify(caseNameService, never()).setFinalCaseName(anyMap(), any(CaseData.class));
+        assertNotNull(response.getData().get("issueDate"));
+    }
+
 
     @Test
     public void aboutToSubmitCaseCreationToC100ForNullCaseNameWithException() {
