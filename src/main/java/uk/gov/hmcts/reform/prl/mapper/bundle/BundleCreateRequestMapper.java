@@ -107,7 +107,7 @@ public class BundleCreateRequestMapper implements IBundleCreateRequestMapper {
         return BundlingCaseData.builder().id(String.valueOf(caseData.getId())).bundleConfiguration(
                 bundleConfigFileName)
             .data(BundlingData.builder().caseNumber(String.valueOf(caseData.getId())).applicantCaseName(caseData.getApplicantCaseName())
-                      .caseNameHcmtsInternal(caseData.getCaseNameHmctsInternal())
+                      .caseNameHmctsInternal(caseData.getCaseNameHmctsInternal())
                       .hearingDetails(hearingDetailsMapperUtil.mapHearingDetails(hearingDetails))
                       .applications(mapApplicationsFromCaseData(caseData))
                       .orders(mapOrdersFromCaseData(caseData.getOrderCollection()))
