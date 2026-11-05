@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
+import uk.gov.hmcts.reform.prl.services.UserRoleService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.Map;
@@ -59,6 +60,9 @@ public class EditAndApproveDraftOrderControllerIntegrationTest {
 
     @MockBean
     ManageOrderService manageOrderService;
+
+    @MockBean
+    UserRoleService userRoleService;
 
     @MockBean
     ManageOrderEmailService manageOrderEmailService;
