@@ -24,10 +24,14 @@ public class FormattedTitleDisplayService {
         } else {
             return String.format(
                 FORMATTED_TITLE_DISPLAY_BEFORE_RELEASE,
-                applicantCaseName,
-                familymanCaseNumber,
+                emptyForNull(applicantCaseName),
+                emptyForNull(familymanCaseNumber),
                 caseRef
             );
         }
+    }
+
+    private String emptyForNull(String value) {
+        return value == null ? "" : value;
     }
 }
