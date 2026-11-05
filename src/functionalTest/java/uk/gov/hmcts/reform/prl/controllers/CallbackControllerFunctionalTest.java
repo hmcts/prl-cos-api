@@ -190,7 +190,7 @@ public class CallbackControllerFunctionalTest {
             .body(requestBodyB.replaceAll("1730736698088469", caseDetails.getId().toString()))
             .when()
             .contentType("application/json")
-            .post("/fl401-add-case-number")
+            .post("/fl401-add-case-numberWithPrefix")
             .then()
             .assertThat().statusCode(200)
             .body("data.issueDate", notNullValue(),

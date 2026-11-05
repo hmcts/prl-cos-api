@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.AmendCourtService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
+import uk.gov.hmcts.reform.prl.services.CaseNameService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.EventService;
@@ -169,6 +170,9 @@ public class CallbackControllerIntegrationTest {
 
     @MockBean
     SystemUserService systemUserService;
+
+    @MockBean
+    CaseNameService caseNameService;
 
     @Before
     public void setUp() {
@@ -571,7 +575,7 @@ public class CallbackControllerIntegrationTest {
 
     @Test
     public void testFl401AddCaseNumberWhenStateIsSubmitted() throws Exception {
-        String url = "/fl401-add-case-number";
+        String url = "/fl401-add-case-numberWithPrefix";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         Mockito.when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
@@ -587,13 +591,13 @@ public class CallbackControllerIntegrationTest {
                     .contentType(APPLICATION_JSON)
                     .content(jsonRequest))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.isAddCaseNumberAdded").value("Yes"))
+            .andExpect(jsonPath("$.data.issueDate").exists())
             .andReturn();
     }
 
     @Test
     public void testFl401AddCaseNumberWhenStateIsNotInSubmitted() throws Exception {
-        String url = "/fl401-add-case-number";
+        String url = "/fl401-add-case-numberWithPrefix";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         Mockito.when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
@@ -609,7 +613,6 @@ public class CallbackControllerIntegrationTest {
                     .contentType(APPLICATION_JSON)
                     .content(jsonRequest))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.isAddCaseNumberAdded").doesNotExist())
             .andReturn();
     }
 

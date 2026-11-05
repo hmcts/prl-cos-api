@@ -728,6 +728,9 @@ public class CallbackController {
                 .map(CaseEventDetail::getStateId)
                 .findFirst();
 
+            LocalDate issueDate = caseData.getIssueDate() != null ? caseData.getIssueDate() : LocalDate.now();
+            caseData.toBuilder().issueDate(issueDate).build();
+
             if (previousStateOpt.isPresent()) {
                 String previousState = previousStateOpt.get();
                 if (AWAITING_INFORMATION.getValue().equalsIgnoreCase(previousState)) {
