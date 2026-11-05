@@ -58,6 +58,7 @@ import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.C8Service;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
+import uk.gov.hmcts.reform.prl.services.CaseNameService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.DfjLookupService;
@@ -119,7 +120,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VERIFY_CASE_NUMBER_ADDED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.CREATE_URGENT_CASES_FLAG;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
@@ -173,6 +173,7 @@ public class CallbackController {
     private final DfjLookupService dfjLookupService;
     private final CafcassDateTimeService cafcassDateTimeService;
     private final C8Service c8Service;
+    private final CaseNameService caseNameService;
 
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -706,7 +707,7 @@ public class CallbackController {
         }
     }
 
-    @PostMapping(path = "/fl401-add-case-number", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/fl401-add-case-numberWithPrefix", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for add case number submit event")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
@@ -727,15 +728,18 @@ public class CallbackController {
                 .map(CaseEventDetail::getStateId)
                 .findFirst();
 
+            LocalDate issueDate = caseData.getIssueDate() != null ? caseData.getIssueDate() : LocalDate.now();
+            caseData.toBuilder().issueDate(issueDate).build();
+
             if (previousStateOpt.isPresent()) {
                 String previousState = previousStateOpt.get();
                 if (AWAITING_INFORMATION.getValue().equalsIgnoreCase(previousState)) {
-                    caseDataUpdated.put(VERIFY_CASE_NUMBER_ADDED, Yes.getDisplayedValue());
+                    caseNameService.setFinalCaseName(caseDataUpdated,caseData);
                     caseData = caseData.toBuilder().state(CASE_ISSUED).build();
                     caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
                     caseDataUpdated.put(STATE_FIELD, CASE_ISSUED.getValue());
                 } else if (SUBMITTED_PAID.getValue().equalsIgnoreCase(previousState)) {
-                    caseDataUpdated.put(VERIFY_CASE_NUMBER_ADDED, Yes.getDisplayedValue());
+                    caseNameService.setFinalCaseName(caseDataUpdated,caseData);
                 }
             }
 

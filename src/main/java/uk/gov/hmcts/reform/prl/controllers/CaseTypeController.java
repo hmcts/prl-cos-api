@@ -44,9 +44,9 @@ public class CaseTypeController extends AbstractCallbackController {
         @ApiResponse(responseCode = "200", description = "Case details extended"),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     public GetCaseCallbackResponse injectCaseMetadata(
-            @RequestHeader("Authorization") @Parameter(hidden = true) String authorization,
-            @RequestHeader("ServiceAuthorization") @Parameter(hidden = true) String serviceAuthorization,
-            @RequestBody CallbackRequest callbackRequest) {
+        @RequestHeader("Authorization") @Parameter(hidden = true) String authorization,
+        @RequestHeader("ServiceAuthorization") @Parameter(hidden = true) String serviceAuthorization,
+        @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorization, serviceAuthorization)) {
             CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
             return injectedCaseDataResponseService.getInjectedCallbackResponse(caseData);
