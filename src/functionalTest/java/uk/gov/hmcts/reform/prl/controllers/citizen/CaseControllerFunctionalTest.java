@@ -41,7 +41,8 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
     properties = {
         "idam.client.secret=${CITIZEN_IDAM_CLIENT_SECRET}",
         "idam.client.id=prl-citizen-frontend",
-        "idam.s2s-auth.microservice=prl_citizen_frontend"
+        "idam.s2s-auth.microservice=prl_citizen_frontend",
+        "hearing_component.api.feign-url="
     }
 )
 public class CaseControllerFunctionalTest {

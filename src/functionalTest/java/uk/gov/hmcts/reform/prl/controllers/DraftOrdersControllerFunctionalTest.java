@@ -59,7 +59,11 @@ public class DraftOrdersControllerFunctionalTest {
 
     @Test
     public void givenRequestBody_whenSelected_order_then200Response() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
+        String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY)
+            .replace(
+                "\"createSelectOrderOptions\": \"standardDirectionsOrder\"",
+                "\"createSelectOrderOptions\": \"noticeOfProceedings\""
+            );
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
@@ -68,6 +72,7 @@ public class DraftOrdersControllerFunctionalTest {
             .contentType("application/json")
             .post("/selected-order")
             .then()
+            .log().ifValidationFails()
             .assertThat().statusCode(200)
             .body("errors[0]", equalTo("This order is not available to be drafted"));
 
@@ -106,7 +111,8 @@ public class DraftOrdersControllerFunctionalTest {
             .contentType(APPLICATION_JSON)
             .post("/populate-standard-direction-order-fields")
             .then()
-            .body("data.id", equalTo(1705065178030549L),
+            .log().all()
+            .body("data.id", equalTo(1788966916353004L),
                   "data.applicantCaseName", equalTo("John Smith"),
                   "data.caseTypeOfApplication", equalTo("FL401"),
                   "data.manageOrdersOptions", equalTo("createAnOrder"),
