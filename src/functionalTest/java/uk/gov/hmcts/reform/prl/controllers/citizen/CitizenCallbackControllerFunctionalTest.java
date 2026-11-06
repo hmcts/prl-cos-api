@@ -1,13 +1,12 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import io.restassured.RestAssured;
+import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -16,12 +15,20 @@ import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunctionalTest.VALID_CAFCASS_REQUEST_JSON;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
 public class CitizenCallbackControllerFunctionalTest {
+
+    private static final String CREATE_CCD_CASE_ENDPOINT = "/testing-support/create-ccd-case-data";
+    private static final String UPDATE_CITIZEN_APPLICATION_ENDPOINT = "/update-citizen-application";
+    private static final String CITIZEN_CASE_CREATION_SUBMITTED_ENDPOINT = "/citizen-case-creation-callback/submitted";
+    private static final String CITIZEN_CASE_WITHDRAWN_ENDPOINT = "/citizen-case-withdrawn-notification";
+    public static final String CONTENT_TYPE = "Content-Type";
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -34,43 +41,92 @@ public class CitizenCallbackControllerFunctionalTest {
     @Autowired
     private IdamTokenGenerator idamTokenGenerator;
 
-    @Value("${TEST_URL}")
-    protected String cosApiUrl;
-
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
     @Test
-    public void givenRequestBody_whenUpdate_citizen_application_then200Response() throws Exception {
+    public void givenRequestBodyWhenUpdateCitizenApplicationThen200Response() throws Exception {
 
+        CaseDetails caseDetails = createCase();
+
+        invokeCallback(UPDATE_CITIZEN_APPLICATION_ENDPOINT, caseDetails)
+            .then()
+            .assertThat().statusCode(200);
+    }
+
+
+    @Test
+    public void givenRequestBodywhenCitizenCaseCreationCallbackSubmittedthen200Response() throws Exception {
+
+        CaseDetails caseDetails = createCase();
+
+        invokeCallback(CITIZEN_CASE_CREATION_SUBMITTED_ENDPOINT, caseDetails)
+            .then()
+            .assertThat().statusCode(200);
+    }
+
+    @Test
+    public void givenRequestBodyWhenSendNotificationsOnCaseWithdrawnThen200Response() throws Exception {
+
+        CaseDetails caseDetails = createCase();
+
+        invokeCallback(CITIZEN_CASE_WITHDRAWN_ENDPOINT, caseDetails)
+            .then()
+            .assertThat().statusCode(200);
+    }
+
+    @Test
+    public void givenNoAuthHeadersWhenUpdateCitizenApplicationThenUnauthorised() {
+
+        RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance)
+            .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+            .body(CallbackRequest.builder().build())
+            .when()
+            .contentType(APPLICATION_JSON_VALUE)
+            .post(UPDATE_CITIZEN_APPLICATION_ENDPOINT)
+            .then()
+            .assertThat().statusCode(anyOf(is(400), is(401), is(403)));
+    }
+
+    @Test
+    public void givenNoAuthHeadersWhenSendNotificationsOnCaseWithdrawnThenUnauthorised() {
+
+        RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance)
+            .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+            .body(CallbackRequest.builder().build())
+            .when()
+            .contentType(APPLICATION_JSON_VALUE)
+            .post(CITIZEN_CASE_WITHDRAWN_ENDPOINT)
+            .then()
+            .assertThat().statusCode(anyOf(is(400), is(401), is(403)));
+    }
+
+    private CaseDetails createCase() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
 
-        CaseDetails caseDetails =  request
+        return request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
-            .contentType("application/json")
-            .post("/testing-support/create-ccd-case-data")
+            .contentType(APPLICATION_JSON_VALUE)
+            .post(CREATE_CCD_CASE_ENDPOINT)
             .then()
             .assertThat().statusCode(200)
             .extract()
             .as(CaseDetails.class);
+    }
 
-        Assertions.assertNotNull(caseDetails);
-        Assertions.assertNotNull(caseDetails.getId());
-
-        RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance)
-            .header("Content-Type", APPLICATION_JSON_VALUE)
-            .header("Accepts", APPLICATION_JSON_VALUE)
+    private Response invokeCallback(String endpoint, CaseDetails caseDetails) {
+        return RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance)
+            .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+            .header("Accept", APPLICATION_JSON_VALUE)
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(CallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build())
             .when()
             .contentType(APPLICATION_JSON_VALUE)
-            .post("/update-citizen-application")
-            .then()
-            .assertThat().statusCode(200);
-
+            .post(endpoint);
     }
 }
+

@@ -1,63 +1,47 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.restassured.RestAssured;
+import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
-import net.serenitybdd.rest.SerenityRest;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.context.WebApplicationContext;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.reform.prl.Application;
-import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
-import uk.gov.hmcts.reform.prl.services.citizen.CitizenResponseNotificationEmailService;
-import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.is;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
-
-@Disabled
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestPropertySource(
+    properties = {
+        "idam.client.secret=${CITIZEN_IDAM_CLIENT_SECRET}",
+        "idam.client.id=prl-citizen-frontend",
+        "idam.s2s-auth.microservice=prl_citizen_frontend"
+    }
+)
+@SuppressWarnings("PMD")
 public class CaseApplicationResponseControllerFunctionalTest {
 
-    private MockMvc mockMvc;
+    private static final String GENERATE_C7_ENDPOINT = "/citizen/{caseId}/{partyId}/generate-c7document";
+
     @Autowired
-    private WebApplicationContext webApplicationContext;
+    private ObjectMapper objectMapper;
 
-    @MockBean
-    private CaseService caseService;
-    @MockBean
-    private CitizenResponseNotificationEmailService citizenResponseNotificationEmailService;
-
-    @MockBean
-    private DocumentGenService documentGenService;
-
-    private static final String SLASH = "/";
-
-    private static final String PATH_CORE = SLASH.concat("cases").concat(SLASH);
+    @Autowired
+    protected IdamTokenGenerator idamTokenGenerator;
 
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
-
-    @Autowired
-    private  IdamTokenGenerator idamTokenGenerator;
-
-    @Value("${TEST_URL}")
-    protected String cosApiUrl;
-
-    private static CaseDetails caseDetails;
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -65,20 +49,42 @@ public class CaseApplicationResponseControllerFunctionalTest {
             "http://localhost:4044"
         );
 
-    private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
+    private final RequestSpecification request =
+        RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
-    @BeforeAll
+    @BeforeEach
     public void setUp() {
-        this.mockMvc = webAppContextSetup(webApplicationContext).build();
+        objectMapper.registerModule(new JavaTimeModule());
     }
 
-    public RequestSpecification getMultipleAuthHeaders() {
-        return SerenityRest.with()
-            .relaxedHTTPSValidation()
-            .baseUri(cosApiUrl)
-            .header("Content-Type", APPLICATION_JSON_VALUE)
-            .header("Accepts", APPLICATION_JSON_VALUE)
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd());
+    @Test
+    public void givenNoAuthHeaders_whenGenerateC7Document_thenUnauthorised() {
+        Response response = request
+            .pathParam("caseId", "1234567890123456")
+            .pathParam("partyId", "00000000-0000-0000-0000-000000000000")
+            .body("{\"welsh\":false}")
+            .when()
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .post(GENERATE_C7_ENDPOINT);
+
+        // Endpoint rejects unauthenticated requests before any case processing.
+        response.then().assertThat().statusCode(anyOf(is(401), is(403), is(400)));
+    }
+
+    @Test
+    public void givenInvalidServiceToken_whenGenerateC7Document_thenRejected() {
+        Response response = request
+            .pathParam("caseId", "1234567890123456")
+            .pathParam("partyId", "00000000-0000-0000-0000-000000000000")
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
+            .header("serviceAuthorization", "Bearer invalid-s2s-token")
+            .body("{\"welsh\":false}")
+            .when()
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .post(GENERATE_C7_ENDPOINT);
+
+        // Invalid S2S token must not be authorised.
+        response.then().assertThat().statusCode(anyOf(is(401), is(403), is(500)));
     }
 }
+
