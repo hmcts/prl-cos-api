@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 
 @ExtendWith(MockitoExtension.class)
 class CaseNameServiceTest {
@@ -31,6 +33,10 @@ class CaseNameServiceTest {
 
     @Mock
     FeatureToggleService featureToggleService;
+    @Mock
+    CourtPrefixDataLoader courtPrefixDataLoader;
+    @Mock
+    ObjectMapper objectMapper;
 
     @Mock
     CaseData caseData;
@@ -128,6 +134,7 @@ class CaseNameServiceTest {
     @Test
     void shouldUpdateFinalCaseNameC100After() {
         updatedCaseData.put("applicantCaseName", "CaseNameBefore");
+        updatedCaseData.put(COURT_ID_FIELD, "234946");
         when(applicant.getLastName()).thenReturn("AppLN");
         when(respondent.getLastName()).thenReturn("RespLN");
 
@@ -137,6 +144,7 @@ class CaseNameServiceTest {
         when(caseData.getRespondents()).thenReturn(respondentsList);
         when(caseData.getCaseTypeOfApplication()).thenReturn("C100");
         when(caseData.getIssueDate()).thenReturn(ISSUED_DATE_AFTER);
+        when(courtPrefixDataLoader.getPrefixForGivenEpimmsId(any())).thenReturn("WV");
         when(featureToggleService.isCaseIssuedAfterReleaseDate(any())).thenReturn(true);
 
         caseNameService.setFinalCaseName(updatedCaseData, caseData);
@@ -168,6 +176,7 @@ class CaseNameServiceTest {
     @Test
     void shouldUpdateFinalCaseNameFL401After() {
         updatedCaseData.put("applicantCaseName", "CaseNameBefore");
+        updatedCaseData.put(COURT_ID_FIELD, "234946");
         when(applicant.getFirstName()).thenReturn("AppFN");
         when(applicant.getLastName()).thenReturn("AppLN");
         when(respondent.getFirstName()).thenReturn("RespFN");
@@ -176,7 +185,7 @@ class CaseNameServiceTest {
         when(caseData.getApplicantsFL401()).thenReturn(applicant);
         when(caseData.getRespondentsFL401()).thenReturn(respondent);
         when(caseData.getCaseTypeOfApplication()).thenReturn("FL401");
-
+        when(courtPrefixDataLoader.getPrefixForGivenEpimmsId(any())).thenReturn("WV");
         when(caseData.getIssueDate()).thenReturn(ISSUED_DATE_AFTER);
         when(featureToggleService.isCaseIssuedAfterReleaseDate(any())).thenReturn(true);
 
