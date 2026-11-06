@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.prl.services.RefDataUserService.JUDICIAL_USER_CACHE;
 import static uk.gov.hmcts.reform.prl.services.RefDataUserService.STAFF_REF_DATA_CACHE;
 import static uk.gov.hmcts.reform.prl.services.SystemUserService.SYS_USER_CACHE;
+import static uk.gov.hmcts.reform.prl.services.factv2.FactV2TokenService.FACT_V2_TOKEN_CACHE;
 
 class CacheConfigTest {
 
@@ -29,6 +30,6 @@ class CacheConfigTest {
         CacheManager cacheManager = cacheConfig.cacheManager();
 
         assertThat(cacheManager.getCacheNames())
-            .containsExactlyInAnyOrder(SYS_USER_CACHE, JUDICIAL_USER_CACHE, STAFF_REF_DATA_CACHE);
+            .containsExactlyInAnyOrder(SYS_USER_CACHE, JUDICIAL_USER_CACHE, STAFF_REF_DATA_CACHE, FACT_V2_TOKEN_CACHE);
     }
 }

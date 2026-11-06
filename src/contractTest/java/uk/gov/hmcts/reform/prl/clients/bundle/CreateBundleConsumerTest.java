@@ -51,6 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
         "locationfinder.api.url=",
         "rd_professional.api.url=",
         "payments.api.url=",
+        "fact.v2.api.url=http://localhost:5000",
         "pba.validation.service.api.baseurl=",
         "staffDetails.api.url=",
         "amRoleAssignment.api.url=",

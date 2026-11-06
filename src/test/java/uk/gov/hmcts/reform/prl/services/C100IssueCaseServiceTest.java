@@ -60,6 +60,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
@@ -89,6 +90,27 @@ public class C100IssueCaseServiceTest {
 
     @InjectMocks
     private C100IssueCaseService c100IssueCaseService;
+
+    @Test
+    public void getFactCourtIdResolvesCourtUsingCompleteFactUrl() {
+        Court court = Court.builder().countyLocationCode(344).build();
+        CourtVenue venue = CourtVenue.builder()
+            .factUrl("https://www.find-court-tribunal.service.gov.uk/courts/swansea-civil-justice-centre")
+            .build();
+        when(courtFinderService.getCourtDetailsFromFactUrl(venue.getFactUrl())).thenReturn(court);
+
+        Assertions.assertEquals("344", c100IssueCaseService.getFactCourtId(venue));
+
+        verify(courtFinderService).getCourtDetailsFromFactUrl(venue.getFactUrl());
+    }
+
+    @Test
+    public void getFactCourtIdSkipsNullOrBlankFactUrl() {
+        Assertions.assertEquals("", c100IssueCaseService.getFactCourtId(CourtVenue.builder().factUrl(null).build()));
+        Assertions.assertEquals("", c100IssueCaseService.getFactCourtId(CourtVenue.builder().factUrl(" ").build()));
+
+        verifyNoInteractions(courtFinderService);
+    }
 
     @Mock
     private UserService userService;
