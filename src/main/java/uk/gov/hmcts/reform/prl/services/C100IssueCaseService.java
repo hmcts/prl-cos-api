@@ -34,6 +34,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.lang.String.valueOf;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NAME_HMCTS_INTERNAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_STATUS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
@@ -66,6 +67,7 @@ public class C100IssueCaseService {
     private final SystemUserService systemUserService;
     private final UpdatePartyDetailsService updatePartyDetailsService;
     private final FeatureToggleService featureToggleService;
+    private final CaseNameService caseNameService;
 
     public Map<String, Object> issueAndSendToLocalCourt(String authorisation, CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -143,6 +145,8 @@ public class C100IssueCaseService {
                 .build());
         }
         caseDataUpdated.put("issueDate", caseData.getIssueDate());
+        caseDataUpdated.put(CASE_NAME_HMCTS_INTERNAL, caseNameService.getInternalCaseNameForIssueDate(
+            caseData.getApplicantCaseName(), caseData.getIssueDate(), true));
 
         caseDataUpdated.put(IS_ISSUED_AFTER_CASENAME_RELEASE,
             featureToggleService.isFullCaseNameEnabled() ? Yes.getDisplayedValue() : No.getDisplayedValue());
