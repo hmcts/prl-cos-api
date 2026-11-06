@@ -123,6 +123,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -1116,6 +1117,21 @@ public class ApplicationsTabServiceTest {
             .getOtherProceedingsDetailsTable(emptyCaseData));
     }
 
+    @Test
+    public void testOtherProceedingsDetailsTableMapperHandlesNullsSafely() {
+        UUID otherProceedingId = UUID.randomUUID();
+        CaseData caseDataWithExistingProceedingsNulls = CaseData.builder()
+            .existingProceedings(List.of(element(otherProceedingId, ProceedingDetails.builder()
+                .previousOrOngoingProceedings(null)
+                .build())))
+            .build();
+
+        List<Element<OtherProceedingsDetails>> otherProceedingsDetails =
+            applicationsTabService.getOtherProceedingsDetailsTable(caseDataWithExistingProceedingsNulls);
+
+        assertThat(otherProceedingsDetails).hasSize(1);
+        assertThat(otherProceedingsDetails.getFirst().getValue().getPreviousOrOngoingProceedings()).isNull();
+    }
 
     @Test
     public void testInternationalElementTableMapper() {
