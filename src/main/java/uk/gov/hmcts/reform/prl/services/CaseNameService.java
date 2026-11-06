@@ -71,7 +71,7 @@ public class CaseNameService {
         updatedCaseData.put(CASE_NAME_HMCTS_INTERNAL, internalCaseName);
     }
 
-    private String getInternalCaseNameForIssueDate(String epimmsId, String caseName, LocalDate issueDate, boolean isCAorDA) {
+    public String getInternalCaseNameForIssueDate(String epimmsId, String caseName, LocalDate issueDate, boolean isCAorDA) {
         String internalCaseName = caseName;
         if (featureToggleService.isCaseIssuedAfterReleaseDate(issueDate)) {
             String courtLocation = courtPrefixDataLoader.getPrefixForGivenEpimmsId(epimmsId);
