@@ -709,6 +709,45 @@ class CafcassCaseDataServiceTest {
     }
 
     @Test
+    void shouldNotPopulateCafcassUploadDocListDocTabWhenAddingSpecificDocumentsFromCaseFileViewBasedOnCategories()
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Document cafcassDocument = Document.builder()
+            .documentUrl("http://dm-store/documents/11111111-1111-1111-1111-111111111111")
+            .documentFileName("cafcass-section7.pdf")
+            .build();
+
+        QuarantineLegalDoc cafcassUploadDoc = QuarantineLegalDoc.builder()
+            .categoryId("section7Report")
+            .section7ReportDocument(cafcassDocument)
+            .build();
+
+        CafCassCaseData cafCassCaseData = CafCassCaseData.builder()
+            .cafcassUploadDocListDocTab(List.of(element(cafcassUploadDoc)))
+            .build();
+
+        CafCassCaseDetail cafCassCaseDetail = CafCassCaseDetail.builder()
+            .caseData(cafCassCaseData)
+            .build();
+
+        CafCassResponse cafCassResponse = CafCassResponse.builder()
+            .cases(List.of(cafCassCaseDetail))
+            .build();
+
+        Method privateMethod = CafcassCaseDataService.class.getDeclaredMethod(
+            "addSpecificDocumentsFromCaseFileViewBasedOnCategories",
+            CafCassResponse.class
+        );
+        privateMethod.setAccessible(true);
+        privateMethod.invoke(cafcassCaseDataService, cafCassResponse);
+
+        CafCassCaseData updatedCaseData = cafCassResponse.getCases().get(0).getCaseData();
+        assertNull(updatedCaseData.getCafcassUploadDocListDocTab());
+        assertNotNull(updatedCaseData.getOtherDocuments());
+        assertTrue(updatedCaseData.getOtherDocuments().isEmpty());
+        Mockito.verifyNoInteractions(objMapper);
+    }
+
+    @Test
     void testRedactedDocumentsOnAddInOtherDocuments() throws NoSuchMethodException,
         InvocationTargetException, IllegalAccessException {
         String category = "MIAMCertificate";
