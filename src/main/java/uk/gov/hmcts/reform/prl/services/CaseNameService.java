@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
@@ -18,6 +20,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 public class CaseNameService {
     public static final String CA_CASE_NAME_FORMAT = "%s V %s";
     public static final String DA_CASE_NAME_FORMAT = "%s %s & %s %s";
+
+    private final FeatureToggleService featureToggleService;
 
     public String getCaseNameForCA(String applicantLastName, String respondentLastName) {
         return String.format(CA_CASE_NAME_FORMAT, applicantLastName, respondentLastName);
@@ -42,7 +46,7 @@ public class CaseNameService {
             PartyDetails applicant = caseData.getApplicants().stream().findFirst().orElseThrow().getValue();
             PartyDetails respondent = caseData.getRespondents().stream().findFirst().orElseThrow().getValue();
             String caseName = getCaseNameForCA(applicant.getLastName(), respondent.getLastName());
-            updateCaseName(updatedCaseData, caseName);
+            updateCaseName(caseData.getIssueDate(), true, updatedCaseData, caseName);
         }
     }
 
@@ -52,12 +56,27 @@ public class CaseNameService {
         if (applicant != null && respondent != null) {
             String caseName = getCaseNameForDA(applicant.getFirstName(), applicant.getLastName(),
                                             respondent.getFirstName(), respondent.getLastName());
-            updateCaseName(updatedCaseData, caseName);
+            updateCaseName(caseData.getIssueDate(), false, updatedCaseData, caseName);
         }
     }
 
-    private void updateCaseName(Map<String, Object> updatedCaseData, String caseName) {
+    private void updateCaseName(LocalDate issueDate, boolean isCAorDA, Map<String, Object> updatedCaseData, String caseName) {
         updatedCaseData.put(APPLICANT_CASE_NAME, caseName);
-        updatedCaseData.put(CASE_NAME_HMCTS_INTERNAL, caseName);
+        String internalCaseName = getInternalCaseNameForIssueDate(caseName, issueDate, isCAorDA);
+        updatedCaseData.put(CASE_NAME_HMCTS_INTERNAL, internalCaseName);
+    }
+
+    public String getInternalCaseNameForIssueDate(String caseName, LocalDate issueDate, boolean isCAorDA) {
+        String internalCaseName = caseName;
+        if (featureToggleService.isCaseIssuedAfterReleaseDate(issueDate)) {
+            String courtLocation = "WV";
+            String yearIssued = String.valueOf(issueDate.getYear());
+            String caseType = isCAorDA ? "P" : "D";
+            String monthIssued = StringUtils.leftPad(String.valueOf(issueDate.getMonthValue()), 2).replaceAll(" ", "0");
+            String prefix =  courtLocation + yearIssued + caseType + monthIssued;
+
+            internalCaseName = prefix + " - " + internalCaseName;
+        }
+        return  internalCaseName;
     }
 }
