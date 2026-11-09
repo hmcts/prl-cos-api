@@ -1626,7 +1626,7 @@ public class ManageOrderService {
             }
         }
 
-        caseDataUpdated.put("fl404CustomFields.fl404bRespondentNotToThreatText", THREAT_TEXT);
+        //caseDataUpdated.put("fl404CustomFields.fl404bRespondentNotToThreatText", THREAT_TEXT);
     }
 
     public DynamicMultiSelectList getChildOption(CaseData caseData) {
