@@ -56,7 +56,7 @@ public class FL404 {
     private final List<String> fl404bRespondentNotToEnterSchool;
     private final String fl404bAddMoreDetailsPhoneChild;
     private final String fl404bAddMoreDetailsTelephone;
-    private final String fl404bAddMoreDetailsProperty;
+    private final String fl404bAddMoreDetailsProperty = THREAT_TEXT;
     private final String fl404bAddSchool;
     private final String fl404bAddMoreDetailsSchool;
     private final String fl404bCourtName1;
