@@ -1521,8 +1521,6 @@ public class DraftAnOrderService {
                     applicant1.getFirstName(),
                     applicant1.getLastName()
                 ))
-                .fl404bRespondentNotToThreatText(List.of("EDITABLE use or threaten violence against the applicant, "
-                    + "and must not instruct, encourage or in any way suggest that any other person should do so"))
                 .fl404bApplicantReference(applicant1.getSolicitorReference() != null
                                               ? applicant1.getSolicitorReference() : "")
                 .fl404bCourtName(caseData.getCourtName())

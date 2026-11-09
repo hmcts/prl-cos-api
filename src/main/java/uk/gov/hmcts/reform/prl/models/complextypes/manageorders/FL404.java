@@ -17,6 +17,9 @@ import java.util.List;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class FL404 {
+    private static final String THREAT_TEXT = "EDITABLE use or threaten violence against the applicant, "
+        + "and must not instruct, encourage or in any way suggest that any other person"
+        + " should do so";
 
     private final String fl404bCourtName;
     private final Address fl404bCourtAddress;
@@ -41,7 +44,7 @@ public class FL404 {
     private final String fl404bMentionedProperty;
     private final String fl404bAddressOfProperty;
     private final List<String> fl404bRespondentNotToThreat;
-    private final List<String> fl404bRespondentNotToThreatText;
+    private final List<String> fl404bRespondentNotToThreatText = List.of(THREAT_TEXT);
     private final List<String> fl404bRespondentNotIntimidate;
     private final List<String> fl404bRespondentNotToTelephone;
     private final List<String> fl404bRespondentNotToDamageOrThreat;
