@@ -216,6 +216,7 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum.factFindingHearing;
+import static uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404.THREAT_TEXT;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getDynamicMultiSelectedValueLabels;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getWaMapper;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -1625,7 +1626,9 @@ public class ManageOrderService {
             }
         }
 
-        //caseDataUpdated.put("fl404CustomFields.fl404bRespondentNotToThreatText", THREAT_TEXT);
+        HashMap  fl404bRespondentNotToThreatText = new HashMap();
+        fl404bRespondentNotToThreatText.put("fl404bRespondentNotToThreatText", THREAT_TEXT);
+        caseDataUpdated.put("fl404CustomFields", fl404bRespondentNotToThreatText);
     }
 
     public DynamicMultiSelectList getChildOption(CaseData caseData) {
