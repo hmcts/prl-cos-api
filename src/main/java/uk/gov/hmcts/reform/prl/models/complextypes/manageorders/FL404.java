@@ -17,7 +17,7 @@ import java.util.List;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class FL404 {
-    private static final String THREAT_TEXT = "EDITABLE use or threaten violence against the applicant, "
+    public static final String THREAT_TEXT = "EDITABLE use or threaten violence against the applicant, "
         + "and must not instruct, encourage or in any way suggest that any other person"
         + " should do so";
 
