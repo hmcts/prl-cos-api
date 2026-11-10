@@ -24,6 +24,8 @@ import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
@@ -34,10 +36,6 @@ public class CitizenCaseUpdateControllerFunctionalTest {
 
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
-
-    public static final String AUTHORIZATION = "Authorization";
-
-    public static final String SERVICE_AUTHORIZATION = "ServiceAuthorization";
 
     public static final String CASE_ID = "caseId";
 
@@ -59,14 +57,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
 
     private static final String DUMMY_CASE_ID = "1712061560509233";
 
-    private final String targetInstance =
-        StringUtils.stripEnd(
-            StringUtils.defaultIfBlank(
-                System.getenv("TEST_URL"),
-                "http://localhost:4044"
-            ),
-            "/"
-        );
+    private final String targetInstance = StringUtils.stripEnd(
+        StringUtils.defaultIfBlank(System.getenv("TEST_URL"), "http://localhost:4044"), "/");
 
     private static final String CREATE_CASE_WITH_ACCESS_CODE_REQUEST_BODY = "requests/update-case-event-citizen-request.json";
 
@@ -95,8 +87,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
     private CaseDetails createCcdTestCase() throws Exception {
         String requestBody = ResourceLoader.loadJson(CREATE_CASE_WITH_ACCESS_CODE_REQUEST_BODY);
         CaseDetails caseDetails = newRequest()
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION_HEADER, idamTokenGenerator.generateIdamTokenForSystem())
+            .header(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType(APPLICATION_JSON_VALUE)
@@ -117,8 +109,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
 
         newRequest()
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION_HEADER, idamTokenGenerator.generateIdamTokenForSystem())
+            .header(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType(APPLICATION_JSON_VALUE)
@@ -139,8 +131,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
 
         newRequest()
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION_HEADER, idamTokenGenerator.generateIdamTokenForSystem())
+            .header(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType(APPLICATION_JSON_VALUE)
@@ -160,8 +152,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
 
         newRequest()
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION_HEADER, idamTokenGenerator.generateIdamTokenForSystem())
+            .header(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType(APPLICATION_JSON_VALUE)
@@ -182,8 +174,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
 
         newRequest()
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION_HEADER, idamTokenGenerator.generateIdamTokenForSystem())
+            .header(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType(APPLICATION_JSON_VALUE)
@@ -203,8 +195,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
 
         newRequest()
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION_HEADER, idamTokenGenerator.generateIdamTokenForSystem())
+            .header(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType(APPLICATION_JSON_VALUE)
@@ -222,8 +214,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
 
         newRequest()
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION_HEADER, idamTokenGenerator.generateIdamTokenForSystem())
+            .header(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType(APPLICATION_JSON_VALUE)
@@ -242,8 +234,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
         String intlElements = "caseData.applicants[0].value.response.citizenInternationalElements";
 
         newRequest()
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION_HEADER, idamTokenGenerator.generateIdamTokenForSystem())
+            .header(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType(APPLICATION_JSON_VALUE)
@@ -264,8 +256,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
 
         newRequest()
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION_HEADER, idamTokenGenerator.generateIdamTokenForSystem())
+            .header(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType(APPLICATION_JSON_VALUE)
@@ -284,8 +276,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
         String supportYouNeed = "caseData.applicants[0].value.response.supportYouNeed";
 
         newRequest()
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION_HEADER, idamTokenGenerator.generateIdamTokenForSystem())
+            .header(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType(APPLICATION_JSON_VALUE)
@@ -307,8 +299,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
 
         newRequest()
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION_HEADER, idamTokenGenerator.generateIdamTokenForSystem())
+            .header(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType(APPLICATION_JSON_VALUE)
@@ -328,8 +320,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
         String citizenFlags = "caseData.applicants[0].value.response.citizenFlags";
 
         newRequest()
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION_HEADER, idamTokenGenerator.generateIdamTokenForSystem())
+            .header(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType(APPLICATION_JSON_VALUE)
@@ -350,8 +342,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
         String proceedings = "caseData.applicants[0].value.response.currentOrPreviousProceedings";
 
         newRequest()
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION_HEADER, idamTokenGenerator.generateIdamTokenForSystem())
+            .header(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType(APPLICATION_JSON_VALUE)
@@ -368,8 +360,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
     public void givenRequestBody_saveDraftCitizenApplication_then200Response() throws Exception {
 
         CaseData createNewCase = newRequest()
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForCitizen())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION_HEADER, idamTokenGenerator.generateIdamTokenForCitizen())
+            .header(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd())
             .when()
             .contentType(APPLICATION_JSON_VALUE)
             .post(CREATE_DUMMY_CITIZEN_CASE)
@@ -387,8 +379,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
         String requestBodyRevised = saveBody.toString();
 
         CaseData saveedCaseData = newRequest()
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION_HEADER, idamTokenGenerator.generateIdamTokenForSystem())
+            .header(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBodyRevised)
             .when()
             .contentType(APPLICATION_JSON_VALUE)
@@ -419,8 +411,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
     public void givenRequestBody_deleteApplicationCitizen_then200Response() throws Exception {
 
         CaseData createNewCase = newRequest()
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForCitizen())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION_HEADER, idamTokenGenerator.generateIdamTokenForCitizen())
+            .header(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd())
             .when()
             .contentType(APPLICATION_JSON_VALUE)
             .post(CREATE_DUMMY_CITIZEN_CASE)
@@ -435,8 +427,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
         String requestBodyRevised = requestBody.replace(DUMMY_CASE_ID, String.valueOf(createNewCase.getId()));
 
         CaseData deletedApplicationCaseData = newRequest()
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION_HEADER, idamTokenGenerator.generateIdamTokenForSystem())
+            .header(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBodyRevised)
             .when()
             .contentType(APPLICATION_JSON_VALUE)
@@ -456,8 +448,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
 
         String requestBody = ResourceLoader.loadJson(SUBMITTED_READY_FOR_WITHDRAW_REQUEST_BODY);
         CaseDetails caseDetails = newRequest()
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION_HEADER, idamTokenGenerator.generateIdamTokenForSystem())
+            .header(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType(APPLICATION_JSON_VALUE)
@@ -473,8 +465,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
         String requestBody1 = ResourceLoader.loadJson(WITHDRAW_APPLICATION_CITIZEN_REQUEST_BODY);
 
         CaseData withDrawCase = newRequest()
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION_HEADER, idamTokenGenerator.generateIdamTokenForSystem())
+            .header(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody1)
             .when()
             .contentType(APPLICATION_JSON_VALUE)
@@ -493,8 +485,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
     public void givenRequestBody_submitC100Application_then200Response() throws Exception {
 
         CaseData createNewCase = newRequest()
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForCitizen())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION_HEADER, idamTokenGenerator.generateIdamTokenForCitizen())
+            .header(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd())
             .when()
             .contentType(APPLICATION_JSON_VALUE)
             .post(CREATE_DUMMY_CITIZEN_CASE)
@@ -517,8 +509,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
 
         // Use the citizen token (the user who created the case), as the real citizen frontend does.
         CaseData submittedCaseData = newRequest()
-            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForCitizen())
-            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION_HEADER, idamTokenGenerator.generateIdamTokenForCitizen())
+            .header(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBodyRevised)
             .when()
             .contentType(APPLICATION_JSON_VALUE)

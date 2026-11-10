@@ -20,6 +20,9 @@ import static org.hamcrest.Matchers.is;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunctionalTest.VALID_CAFCASS_REQUEST_JSON;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER;
+
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
 public class CitizenCallbackControllerFunctionalTest {
@@ -46,7 +49,6 @@ public class CitizenCallbackControllerFunctionalTest {
 
     @Test
     public void givenRequestBodyWhenUpdateCitizenApplicationThen200Response() throws Exception {
-
         CaseDetails caseDetails = createCase();
 
         invokeCallback(UPDATE_CITIZEN_APPLICATION_ENDPOINT, caseDetails)
@@ -57,7 +59,6 @@ public class CitizenCallbackControllerFunctionalTest {
 
     @Test
     public void givenRequestBodywhenCitizenCaseCreationCallbackSubmittedthen200Response() throws Exception {
-
         CaseDetails caseDetails = createCase();
 
         invokeCallback(CITIZEN_CASE_CREATION_SUBMITTED_ENDPOINT, caseDetails)
@@ -67,7 +68,6 @@ public class CitizenCallbackControllerFunctionalTest {
 
     @Test
     public void givenRequestBodyWhenSendNotificationsOnCaseWithdrawnThen200Response() throws Exception {
-
         CaseDetails caseDetails = createCase();
 
         invokeCallback(CITIZEN_CASE_WITHDRAWN_ENDPOINT, caseDetails)
@@ -77,7 +77,6 @@ public class CitizenCallbackControllerFunctionalTest {
 
     @Test
     public void givenNoAuthHeadersWhenUpdateCitizenApplicationThenUnauthorised() {
-
         RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance)
             .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
             .body(CallbackRequest.builder().build())
@@ -90,7 +89,6 @@ public class CitizenCallbackControllerFunctionalTest {
 
     @Test
     public void givenNoAuthHeadersWhenSendNotificationsOnCaseWithdrawnThenUnauthorised() {
-
         RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance)
             .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
             .body(CallbackRequest.builder().build())
@@ -105,8 +103,8 @@ public class CitizenCallbackControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
 
         return request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION_HEADER, idamTokenGenerator.generateIdamTokenForSystem())
+            .header(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType(APPLICATION_JSON_VALUE)
