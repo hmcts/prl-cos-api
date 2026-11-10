@@ -216,7 +216,6 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum.factFindingHearing;
-import static uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404.THREAT_TEXT;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getDynamicMultiSelectedValueLabels;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getWaMapper;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
