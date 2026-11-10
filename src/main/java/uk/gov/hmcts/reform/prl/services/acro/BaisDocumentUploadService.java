@@ -71,9 +71,9 @@ public class BaisDocumentUploadService {
 
             printFileContentsToLog(csvFile);
 
-//            log.info("All FL404a documents and manifest files prepared. Creating zip archive...");
-//            String archivePath = acroZipService.zip();
-//            sftpService.uploadFile(new File(archivePath));
+            log.info("All FL404a documents and manifest files prepared. Creating zip archive...");
+            String archivePath = acroZipService.zip();
+            sftpService.uploadFile(new File(archivePath));
             log.info(
                 "*** Total time taken to run Bais Document upload task - {}s ***",
                 TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime)
