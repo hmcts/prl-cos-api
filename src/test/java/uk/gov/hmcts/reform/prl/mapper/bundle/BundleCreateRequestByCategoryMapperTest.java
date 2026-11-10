@@ -616,7 +616,8 @@ class BundleCreateRequestByCategoryMapperTest {
                 Hearings.hearingsWith().caseHearings(new ArrayList<>()).build(), "sample.yaml");
 
         assertNotNull(bundleCreateRequest);
-        assertEquals("Prefix - ApplicantFirstNameAndLastName", bundleCreateRequest.getCaseDetails().getCaseData().getData().getCaseNameHmctsInternal());
+        assertEquals("Prefix - ApplicantFirstNameAndLastName",
+                     bundleCreateRequest.getCaseDetails().getCaseData().getData().getCaseNameHmctsInternal());
     }
 
 }
