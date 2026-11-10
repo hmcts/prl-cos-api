@@ -1351,4 +1351,15 @@ public class BundleCreateRequestMapperTest {
         assertEquals(BundlingDocGroupEnum.parentalOrderReporterReport, result.get(0).getValue().getDocumentGroup());
     }
 
+    @Test
+    public void testHmctsCaseNameInternalAddedDuringMapping() {
+        CaseData caseData = CaseData.builder()
+            .caseNameHmctsInternal("somePrefix - someCaseName")
+            .build();
+
+        BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(caseData, "eventI", null, "sample.yaml");
+        assertNotNull(bundleCreateRequest);
+        assertEquals("somePrefix - someCaseName", bundleCreateRequest.getCaseDetails().getCaseData().getData().getCaseNameHmctsInternal());
+    }
+
 }
