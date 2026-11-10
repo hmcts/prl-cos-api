@@ -1633,6 +1633,7 @@ public class ManageOrderService {
         if (fl404CustomFields == null) {
             fl404CustomFields = FL404.builder().build();
         }
+        fl404CustomFields.setFl404bRespondentNotToThreatText(List.of(THREAT_TEXT));
         fl404CustomFields.setFl404bAddMoreDetailsProperty(THREAT_TEXT);
         caseData.getManageOrders().toBuilder().fl404CustomFields(
             fl404CustomFields).build();
