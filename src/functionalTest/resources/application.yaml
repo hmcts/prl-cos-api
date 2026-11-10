@@ -334,6 +334,11 @@ courtfinder:
   api:
     url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
 
+fact:
+  v2:
+    api:
+      url: ${FACT_V2_API_URL:https://cft-api-mgmt.aat.platform.hmcts.net/fact}
+
 locationfinder:
   api:
     url: ${LOCATION_REF_API:http://rd-location-ref-api-aat.service.core-compute-aat.internal}

@@ -29,9 +29,9 @@ import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtAddress;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
-import uk.gov.hmcts.reform.prl.models.court.ServiceArea;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
+import uk.gov.hmcts.reform.prl.services.factv2.FactV2CourtDetailsService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -64,6 +64,9 @@ public class CourtFinderServiceTest {
 
     @Mock
     CourtFinderApi courtFinderApi;
+
+    @Mock
+    FactV2CourtDetailsService factV2CourtDetailsService;
 
     @Mock
     OsCourtFinderService osCourtFinderService;
@@ -192,16 +195,11 @@ public class CourtFinderServiceTest {
             .address(Collections.singletonList(CourtAddress.builder().build()))
             .build();
 
-        when(courtFinderApi.getCourtDetails("horsham-county-court-and-family-court"))
-            .thenReturn(horshamCourt);
-
-        when(courtFinderApi.getCourtDetails("central-family-court"))
+        when(factV2CourtDetailsService.getCourtDetails("central-family-court"))
             .thenReturn(londonCourt);
 
-        when(courtFinderApi.findClosestDomesticAbuseCourtByPostCode("AB12 3AL"))
-            .thenReturn(ServiceArea.builder()
-                            .courts(Collections.singletonList(horshamCourt))
-                            .build());
+        when(factV2CourtDetailsService.getNearestDomesticAbuseCourt("AB12 3AL"))
+            .thenReturn(horshamCourt);
 
     }
 
@@ -432,8 +430,18 @@ public class CourtFinderServiceTest {
             .accessScheme(true)
             .address(Collections.singletonList(CourtAddress.builder().build()))
             .build();
-        when(courtFinderApi.getCourtDetails(courtSlug)).thenReturn(completeCourt);
+        when(factV2CourtDetailsService.getCourtDetails(courtSlug)).thenReturn(completeCourt);
         assertThat(courtFinderService.getCourtDetails(courtSlug), is(completeCourt));
+    }
+
+    @Test
+    public void givenFactUrl_thenDelegatesCourtDetailsLookup() {
+        String factUrl = "https://www.find-court-tribunal.service.gov.uk/courts/central-family-court";
+        when(factV2CourtDetailsService.getCourtDetailsFromFactUrl(factUrl)).thenReturn(londonCourt);
+
+        assertThat(courtFinderService.getCourtDetailsFromFactUrl(factUrl), is(londonCourt));
+
+        verify(factV2CourtDetailsService).getCourtDetailsFromFactUrl(factUrl);
     }
 
     @Test
@@ -1040,6 +1048,7 @@ public class CourtFinderServiceTest {
     @Test
     public void shouldCallGetCorrectPartyPostcodeV2WhenTaskListVersionIsV2() throws Exception {
         CourtFinderService spyService = spy(new CourtFinderService(courtFinderApi,
+                                                                   factV2CourtDetailsService,
                                                                    osCourtFinderService, featureToggleService));
         CaseData caseData = CaseData.builder()
             .taskListVersion("v3")
