@@ -278,6 +278,10 @@ public class ManageOrderService {
 
     public static final String CIR_DOCUMENTS_REQUESTED = "cirDocumentsRequested";
 
+    public static final String THREAT_TEXT = "EDITABLE use or threaten violence against the applicant, "
+        + "and must not instruct, encourage or in any way suggest that any other person"
+        + " should do so";
+
 
     @Value("${document.templates.common.prl_sdo_draft_template}")
     protected String sdoDraftTemplate;
@@ -1624,6 +1628,14 @@ public class ManageOrderService {
                 caseDataUpdated.put(PENAL_NOTICE_RTF, ManageOrderService.STATIC_PENAL_NOTICE_RTF);
             }
         }
+
+        FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
+        if (fl404CustomFields == null) {
+            fl404CustomFields = FL404.builder().build();
+        }
+        fl404CustomFields.setFl404bAddMoreDetailsProperty(THREAT_TEXT);
+        caseData.getManageOrders().toBuilder().fl404CustomFields(
+            fl404CustomFields).build();
     }
 
     public DynamicMultiSelectList getChildOption(CaseData caseData) {
