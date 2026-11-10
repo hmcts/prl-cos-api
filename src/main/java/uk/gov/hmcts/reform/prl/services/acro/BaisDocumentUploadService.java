@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -89,12 +88,12 @@ public class BaisDocumentUploadService {
      */
     private void printFileContentsToLog(File file) {
         try {
-                // Reads the entire file into memory (Safe for small to medium text files)
-                String content = Files.readString(file.toPath());
+            // Reads the entire file into memory (Safe for small to medium text files)
+            String content = Files.readString(file.toPath());
 
-                log.info("========== DEBUG: FILE CONTENTS START ==========");
-                log.info("\n{}", content);
-                log.info("========== DEBUG: FILE CONTENTS END ==========");
+            log.info("========== DEBUG: FILE CONTENTS START ==========");
+            log.info("\n{}", content);
+            log.info("========== DEBUG: FILE CONTENTS END ==========");
 
         } catch (Exception e) {
             log.error("DEBUG: An exception occurred while trying to read the file", e);
