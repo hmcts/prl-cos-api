@@ -1636,6 +1636,7 @@ public class ManageOrderService {
         fl404CustomFields.setFl404bAddMoreDetailsProperty(THREAT_TEXT);
         caseData.getManageOrders().toBuilder().fl404CustomFields(
             fl404CustomFields).build();
+        caseDataUpdated.put("fl404CustomFields", fl404CustomFields);
     }
 
     public DynamicMultiSelectList getChildOption(CaseData caseData) {
