@@ -1625,10 +1625,6 @@ public class ManageOrderService {
                 caseDataUpdated.put(PENAL_NOTICE_RTF, ManageOrderService.STATIC_PENAL_NOTICE_RTF);
             }
         }
-
-        HashMap  fl404bRespondentNotToThreatText = new HashMap();
-        fl404bRespondentNotToThreatText.put("fl404bRespondentNotToThreatText", THREAT_TEXT);
-        caseDataUpdated.put("fl404CustomFields", fl404bRespondentNotToThreatText);
     }
 
     public DynamicMultiSelectList getChildOption(CaseData caseData) {
