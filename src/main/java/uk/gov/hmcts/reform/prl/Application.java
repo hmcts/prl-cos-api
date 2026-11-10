@@ -66,6 +66,7 @@ public class Application implements CommandLineRunner {
 
     @PostConstruct
     public void initApp() {
+        log.info("========== DEBUG: starting with updated cos ==========");
         if (runsLocally) {
             log.info("Application running locally, turning off SSL verification so that tests accessing"
                          + " HTTPS resources can run on machines with ZScaler proxy");
