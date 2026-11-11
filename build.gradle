@@ -41,7 +41,7 @@ def versions = [
   jackson                      : '2.17.2',
   jacksonDatatypeJsr           : '2.20.1',
   jsonAssert                   : '1.5.3',
-  jodaTime                     : '2.13.1',
+  jodaTime                     : '2.15.1',
   junit                        : '6.1.3',
   lombok                       : '1.18.48',
   pact                         : '4.1.11',
