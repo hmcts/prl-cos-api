@@ -18,7 +18,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AUTHORIZATION_H
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
-public class TestingSupportControllerFunctionalTest {
+class TestingSupportControllerFunctionalTest {
 
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;

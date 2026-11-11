@@ -3,11 +3,12 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.Application;
@@ -15,22 +16,18 @@ import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
-import static org.hamcrest.Matchers.anyOf;
-import static org.hamcrest.Matchers.is;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunctionalTest.VALID_CAFCASS_REQUEST_JSON;
 
-@Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
-public class CitizenCallbackControllerFunctionalTest {
+class CitizenCallbackControllerFunctionalTest {
 
     private static final String CREATE_CCD_CASE_ENDPOINT = "/testing-support/create-ccd-case-data";
     private static final String UPDATE_CITIZEN_APPLICATION_ENDPOINT = "/update-citizen-application";
     private static final String CITIZEN_CASE_CREATION_SUBMITTED_ENDPOINT = "/citizen-case-creation-callback/submitted";
     private static final String CITIZEN_CASE_WITHDRAWN_ENDPOINT = "/citizen-case-withdrawn-notification";
-    public static final String CONTENT_TYPE = "Content-Type";
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -47,7 +44,7 @@ public class CitizenCallbackControllerFunctionalTest {
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
     @Test
-    public void givenRequestBodyWhenUpdateCitizenApplicationThen200Response() throws Exception {
+    void givenRequestBodyWhenUpdateCitizenApplicationThen200Response() throws Exception {
         CaseDetails caseDetails = createCase();
 
         invokeCallback(UPDATE_CITIZEN_APPLICATION_ENDPOINT, caseDetails)
@@ -56,7 +53,7 @@ public class CitizenCallbackControllerFunctionalTest {
     }
 
     @Test
-    public void givenRequestBodywhenCitizenCaseCreationCallbackSubmittedthen200Response() throws Exception {
+    void givenRequestBodywhenCitizenCaseCreationCallbackSubmittedthen200Response() throws Exception {
         CaseDetails caseDetails = createCase();
 
         invokeCallback(CITIZEN_CASE_CREATION_SUBMITTED_ENDPOINT, caseDetails)
@@ -65,7 +62,7 @@ public class CitizenCallbackControllerFunctionalTest {
     }
 
     @Test
-    public void givenRequestBodyWhenSendNotificationsOnCaseWithdrawnThen200Response() throws Exception {
+    void givenRequestBodyWhenSendNotificationsOnCaseWithdrawnThen200Response() throws Exception {
         CaseDetails caseDetails = createCase();
 
         invokeCallback(CITIZEN_CASE_WITHDRAWN_ENDPOINT, caseDetails)
@@ -74,27 +71,27 @@ public class CitizenCallbackControllerFunctionalTest {
     }
 
     @Test
-    public void givenNoAuthHeadersWhenUpdateCitizenApplicationThenUnauthorised() {
+    void givenNoAuthHeadersWhenUpdateCitizenApplicationThenBadRequest() {
         RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance)
-            .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+            .header(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
             .body(CallbackRequest.builder().build())
             .when()
             .contentType(APPLICATION_JSON_VALUE)
             .post(UPDATE_CITIZEN_APPLICATION_ENDPOINT)
             .then()
-            .assertThat().statusCode(anyOf(is(400), is(401), is(403)));
+            .assertThat().statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
-    public void givenNoAuthHeadersWhenSendNotificationsOnCaseWithdrawnThenUnauthorised() {
+    void givenNoAuthHeadersWhenSendNotificationsOnCaseWithdrawnThenBadRequest() {
         RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance)
-            .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+            .header(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
             .body(CallbackRequest.builder().build())
             .when()
             .contentType(APPLICATION_JSON_VALUE)
             .post(CITIZEN_CASE_WITHDRAWN_ENDPOINT)
             .then()
-            .assertThat().statusCode(anyOf(is(400), is(401), is(403)));
+            .assertThat().statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
     private CaseDetails createCase() throws Exception {
@@ -115,14 +112,13 @@ public class CitizenCallbackControllerFunctionalTest {
 
     private Response invokeCallback(String endpoint, CaseDetails caseDetails) {
         return RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance)
-            .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-            .header("Accept", APPLICATION_JSON_VALUE)
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+            .header(HttpHeaders.ACCEPT, APPLICATION_JSON_VALUE)
+            .header(AUTHORIZATION_HEADER, idamTokenGenerator.generateIdamTokenForSystem())
+            .header(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(CallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build())
             .when()
             .contentType(APPLICATION_JSON_VALUE)
             .post(endpoint);
     }
 }
-
