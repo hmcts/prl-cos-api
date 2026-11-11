@@ -835,7 +835,7 @@ public class ReviewDocumentService {
                 // new document, do check if we need to delete
                 String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(
                     currentConfidentialDoc.getValue().getCategoryId(),
-                    null
+                    currentConfidentialDoc.getValue().getUploaderRole()
                 );
                 Document currentDocument = objectMapper.convertValue(
                     objectMapper.convertValue(currentConfidentialDoc.getValue(), Map.class).get(attributeName),
@@ -843,6 +843,8 @@ public class ReviewDocumentService {
                 );
                 String originalDocumentId = currentConfidentialDoc.getValue().getOriginalDocumentId();
                 if (originalDocumentId != null
+                    && currentDocument != null
+                    && isNotBlank(currentDocument.getDocumentUrl())
                     && !DocumentUtils.getDocumentId(currentDocument.getDocumentUrl()).equals(originalDocumentId)) {
                     deleteDocumentById(originalDocumentId);
                 }
