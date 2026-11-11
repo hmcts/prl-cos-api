@@ -18,9 +18,9 @@ public enum DfjArea {
     KENT("KENT", "kentDFJCourt", false),
     PORTSMOUTH("PORTSMOUTH", "portsmouthDFJCourt", true),
     BOURNEMOUTH("BOURNEMOUTH", "bournemouthDFJCourt", true),
-    SHEFFIELD("SHEFFIELD", "sheffieldDFJCourt", true),
-    NOTTINGHAM("NOTTINGHAM", "nottinghamDFJCourt", true),
-    DERBY("DERBY", "derbyDFJCourt", true);
+    SHEFFIELD("SHEFFIELD", "sheffieldDFJCourt", false),
+    NOTTINGHAM("NOTTINGHAM", "nottinghamDFJCourt", false),
+    DERBY("DERBY", "derbyDFJCourt", false);
 
     private final String name;
     private final String courtField;
