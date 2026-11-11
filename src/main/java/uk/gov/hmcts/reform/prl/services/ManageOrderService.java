@@ -278,9 +278,10 @@ public class ManageOrderService {
 
     public static final String CIR_DOCUMENTS_REQUESTED = "cirDocumentsRequested";
 
-    public static final String THREAT_TEXT = "EDITABLE use or threaten violence against the applicant, "
-        + "and must not instruct, encourage or in any way suggest that any other person"
-        + " should do so";
+    public static final String NOT_TO_CONTACT = "[The respondent must not] contact or try to contact or communicate with the applicant"
+        + " in any way or by any means except that (i) you can contact the applicant through solicitors and/or through an agreed third party"
+        + " to make child contact arrangements (ii) you can contact the applicant directly by [means of communication] to make arrangements"
+        + " about the child/ren. (delete whichever of (i) and (ii) do not apply)";
 
 
     @Value("${document.templates.common.prl_sdo_draft_template}")
@@ -1634,8 +1635,7 @@ public class ManageOrderService {
             fl404CustomFields = FL404.builder().build();
         }
 
-        fl404CustomFields.setFl404bRespondentNotToThreatText(THREAT_TEXT);
-        fl404CustomFields.setFl404bAddMoreDetailsProperty(THREAT_TEXT);
+        fl404CustomFields.setFl404bRespondentNotToContactApplicantText(NOT_TO_CONTACT);
         caseData.getManageOrders().toBuilder().fl404CustomFields(
             fl404CustomFields).build();
         caseDataUpdated.put("fl404CustomFields", fl404CustomFields);
