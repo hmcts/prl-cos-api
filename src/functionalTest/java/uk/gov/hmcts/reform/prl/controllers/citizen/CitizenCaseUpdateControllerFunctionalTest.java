@@ -5,10 +5,10 @@ import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
@@ -19,9 +19,7 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import java.util.Objects;
 
-import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER;
@@ -277,7 +275,6 @@ class CitizenCaseUpdateControllerFunctionalTest {
     }
 
     @Test
-    @Disabled
     void givenRequestBody_updateCitizenParty_Event_citizenContactPreference_then200Response() throws Exception {
         CaseDetails caseDetails1 = createCcdTestCase();
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
@@ -294,29 +291,6 @@ class CitizenCaseUpdateControllerFunctionalTest {
             .then()
             .assertThat().statusCode(200)
             .body("caseData.applicants[0].value.contactPreferences", equalTo("email"));
-    }
-
-    @Test
-    @Disabled
-    void givenRequestBody_updateCitizenParty_Event_citizenInternalFlagUpdates_then200Response() throws Exception {
-        CaseDetails caseDetails1 = createCcdTestCase();
-        String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
-        String citizenFlags = "caseData.applicants[0].value.response.citizenFlags";
-
-        newRequest()
-            .header(AUTHORIZATION_HEADER, idamTokenGenerator.generateIdamTokenForSystem())
-            .header(SERVICE_AUTHORIZATION_HEADER, serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType(APPLICATION_JSON_VALUE)
-            .pathParam(CASE_ID, caseDetails1.getId().toString())
-            .pathParam(EVENT_ID, "citizenInternalFlagUpdates")
-            .post(UPDATE_PARTY_DETAILS_ENDPOINT)
-            .then()
-            .assertThat().statusCode(200)
-            .body(citizenFlags + ".isApplicationViewed", equalTo("Yes"),
-                  citizenFlags + ".isAllegationOfHarmViewed", equalTo("No"),
-                  citizenFlags + ".isAllDocumentsViewed", equalTo("Yes"));
     }
 
     @Test
@@ -507,7 +481,7 @@ class CitizenCaseUpdateControllerFunctionalTest {
     }
 
     @Test
-    void givenNoAuthHeaders_submitC100Application_thenUnauthorised() throws Exception {
+    void givenNoAuthHeaders_submitC100Application_thenBadRequest() throws Exception {
         String requestBody = ResourceLoader.loadJson(SAVE_C100_DRAFT_CITIZEN_REQUEST_BODY);
 
         newRequest()
@@ -518,6 +492,6 @@ class CitizenCaseUpdateControllerFunctionalTest {
             .pathParam(EVENT_ID, "citizen-case-submit")
             .post(SUBMIT_C100_APPLICATION_ENDPOINT)
             .then()
-            .assertThat().statusCode(anyOf(is(400), is(401), is(403)));
+            .assertThat().statusCode(HttpStatus.BAD_REQUEST.value());
     }
 }
