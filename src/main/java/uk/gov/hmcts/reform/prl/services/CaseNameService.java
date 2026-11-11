@@ -70,7 +70,7 @@ public class CaseNameService {
         String internalCaseName = caseName;
         if (featureToggleService.isCaseIssuedAfterReleaseDate(issueDate)) {
             String courtLocation = "WV";
-            String yearIssued = String.valueOf(issueDate.getYear());
+            String yearIssued = String.valueOf(issueDate.getYear()).substring(2);
             String caseType = isCAorDA ? "P" : "D";
             String monthIssued = StringUtils.leftPad(String.valueOf(issueDate.getMonthValue()), 2).replaceAll(" ", "0");
             String prefix =  courtLocation + yearIssued + caseType + monthIssued;
