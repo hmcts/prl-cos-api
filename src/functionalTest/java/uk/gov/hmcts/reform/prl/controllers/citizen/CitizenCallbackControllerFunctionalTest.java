@@ -55,7 +55,6 @@ public class CitizenCallbackControllerFunctionalTest {
             .assertThat().statusCode(200);
     }
 
-
     @Test
     public void givenRequestBodywhenCitizenCaseCreationCallbackSubmittedthen200Response() throws Exception {
         CaseDetails caseDetails = createCase();
