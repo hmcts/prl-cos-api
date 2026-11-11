@@ -68,8 +68,6 @@ public class BaisDocumentUploadService {
                 createCsvRowsForFl404aOrders(csvFile, acroResponse, sysUserToken);
             }
 
-            printFileContentsToLog(csvFile);
-
             log.info("All FL404a documents and manifest files prepared. Creating zip archive...");
             String archivePath = acroZipService.zip();
             sftpService.uploadFile(new File(archivePath));
@@ -80,23 +78,6 @@ public class BaisDocumentUploadService {
         } catch (Exception e) {
             throw new BaisDocumentUploadRuntimeException("Document upload to Bais has failed for the run at "
                                                              + LocalDateTime.now(), e);
-        }
-    }
-
-    /**
-     * Helper method to safely read and print file contents to the Spring Boot logs.
-     */
-    private void printFileContentsToLog(File file) {
-        try {
-            // Reads the entire file into memory (Safe for small to medium text files)
-            String content = Files.readString(file.toPath());
-
-            log.info("========== DEBUG: FILE CONTENTS START ==========");
-            log.info("\n{}", content);
-            log.info("========== DEBUG: FILE CONTENTS END ==========");
-
-        } catch (Exception e) {
-            log.error("DEBUG: An exception occurred while trying to read the file", e);
         }
     }
 
