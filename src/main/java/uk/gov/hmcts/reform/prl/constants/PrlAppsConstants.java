@@ -634,6 +634,7 @@ public class PrlAppsConstants {
 
     public static final String CASE_NAME_HMCTS_INTERNAL = "caseNameHmctsInternal";
     public static final String IS_ISSUED_AFTER_CASENAME_RELEASE = "isIssuedAfterCaseNameRelease";
+    public static final String IS_CASE_BEFORE_PREFIX = "isCaseBeforePrefix";
 
     //C100 default court details
 
