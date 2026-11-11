@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
-import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
@@ -188,12 +187,12 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_JUDGE_LA_REV
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_MULTIPLE_OPTIONS_SELECTED_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_COLLECTION_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_ADMIN_CREATED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_APPROVED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_CREATED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_PERFORMING_ACTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_PERFORMING_USER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_WHO_APPROVED_THE_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
-import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.enums.Event.ADMIN_EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_EDIT_AND_APPROVE_ORDER;
@@ -721,12 +720,12 @@ public class ManageOrderService {
     private static final String BOLD_END = "</span>";
 
     private final UserService userService;
+    private final UserRoleService userRoleService;
     private final HearingService hearingService;
     private final HearingDataService hearingDataService;
     private final WelshCourtEmail welshCourtEmail;
     private final RoleAssignmentApi roleAssignmentApi;
     private final AuthTokenGenerator authTokenGenerator;
-    private final LaunchDarklyClient launchDarklyClient;
     private final DocumentSealingService documentSealingService;
     private final FinalisationDetailsService finalisationDetailsService;
     private final CustomOrderService customOrderService;
@@ -1176,9 +1175,10 @@ public class ManageOrderService {
                                                         String flagSelectedOrderId,
                                                         UserDetails userDetails) {
         ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
-        String loggedInUserType = getLoggedInUserType(authorisation);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
+        UserRoles userRole = userRoleService.getLoggedInUserRole(authorisation);
+        String orderStatus = getOrderStatus(orderSelectionType, userRole, null, null);
         List<Element<OrderDetails>> newOrderDetails = new ArrayList<>();
         newOrderDetails.add(element(OrderDetails.builder().orderType(flagSelectedOrderId)
                                    .orderTypeId(flagSelectedOrder)
@@ -1207,12 +1207,7 @@ public class ManageOrderService {
                                                      .orderRecipients(caseData.getManageOrdersOptions().equals(
                                                          ManageOrdersOptionsEnum.createAnOrder) ? getAllRecipients(
                                                          caseData) : null)
-                                                     .status(getOrderStatus(
-                                                         orderSelectionType,
-                                                         loggedInUserType,
-                                                         null,
-                                                         null
-                                                     ))
+                                                     .status(orderStatus)
                                                      .build())
                                    .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
                                                     ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : dateTime.now())
@@ -1354,16 +1349,16 @@ public class ManageOrderService {
 
     public Map<String, Object> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData, String language)
         throws DocumentGenerationException {
-        String loggedInUserType = getLoggedInUserType(authorisation);
+        String loggedInUserType = userRoleService.getLoggedInUserType(authorisation);
         UserDetails userDetails = userService.getUserDetails(authorisation);
         boolean saveAsDraft = isSaveAsDraft(caseData);
 
         if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
-            return setDraftOrderCollection(caseData, loggedInUserType, userDetails);
+            return setDraftOrderCollection(caseData, loggedInUserType, userDetails, authorisation);
         } else if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)) {
             if (!noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                 || saveAsDraft) {
-                return setDraftOrderCollection(caseData, loggedInUserType, userDetails);
+                return setDraftOrderCollection(caseData, loggedInUserType, userDetails, authorisation);
             } else {
                 return setFinalOrderCollection(authorisation, caseData, userDetails, language);
             }
@@ -1428,16 +1423,16 @@ public class ManageOrderService {
         }
     }
 
-    public Map<String, Object> setDraftOrderCollection(CaseData caseData, String loggedInUserType, UserDetails userDetails) {
+    public Map<String, Object> setDraftOrderCollection(CaseData caseData, String loggedInUserType, UserDetails userDetails, String authorisation) {
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> draftOrderElement;
         if (caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
-            draftOrderElement = element(getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, userDetails));
+            draftOrderElement = element(getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, userDetails, authorisation));
         } else {
             if (caseData.getManageOrdersOptions().equals(createCustomOrder)) {
-                draftOrderElement = element(getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, userDetails));
+                draftOrderElement = element(getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, userDetails, authorisation));
             } else {
-                draftOrderElement = element(getCurrentCreateDraftOrderDetails(caseData, loggedInUserType, userDetails));
+                draftOrderElement = element(getCurrentCreateDraftOrderDetails(caseData, loggedInUserType, userDetails, authorisation));
             }
             //AHR - Admin creating an order (applies to createAnOrder and createCustomOrder)
             if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
@@ -1462,9 +1457,12 @@ public class ManageOrderService {
             caseData.getDraftOrderCollection(), CURRENT_ORDER_A_DRAFT_ORDER, true);
     }
 
-    public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType, UserDetails userDetails) {
+    public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType, UserDetails userDetails, String authorisation) {
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
+        UserRoles userRole = userRoleService.getLoggedInUserRole(authorisation);
+        String orderStatus = getOrderStatus(orderSelectionType, userRole, null, null);
+
         Optional<String> legalAdviserName = legalAdviserChecker.validateLegalAdviserName(
             caseData.getManageOrders().getNameOfLaToReviewOrder(),
             caseData.getManageOrders().getLegalAdviserToReviewOrder()
@@ -1485,7 +1483,7 @@ public class ManageOrderService {
                               .orderCreatedBy(userDetails.getFullName())
                               .orderCreatedByEmailId(userDetails.getEmail())
                               .dateCreated(dateTime.now())
-                              .status(getOrderStatus(orderSelectionType, loggedInUserType, null, null))
+                              .status(orderStatus)
                               .isJudgeApprovalNeeded(noCheck.equals(
                                   caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                                                          || AmendOrderCheckEnum.managerCheck.equals(
@@ -1647,11 +1645,13 @@ public class ManageOrderService {
         return null;
     }
 
-    public DraftOrder getCurrentUploadDraftOrderDetails(CaseData caseData, String loggedInUserType, UserDetails userDetails) {
+    public DraftOrder getCurrentUploadDraftOrderDetails(CaseData caseData, String loggedInUserType, UserDetails userDetails, String authorisation) {
         String flagSelectedOrder = getSelectedOrderInfoForUpload(caseData);
         String flagSelectedOrderId = getSelectedOrderIdForUpload(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
+        UserRoles userRole = userRoleService.getLoggedInUserRole(authorisation);
+        String orderStatus = getOrderStatus(orderSelectionType, userRole, null, null);
 
         return DraftOrder.builder()
             .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
@@ -1671,7 +1671,7 @@ public class ManageOrderService {
                               .orderCreatedBy(userDetails.getFullName())
                               .orderCreatedByEmailId(userDetails.getEmail())
                               .dateCreated(dateTime.now())
-                              .status(getOrderStatus(orderSelectionType, loggedInUserType, null, null))
+                              .status(orderStatus)
                               .isJudgeApprovalNeeded(noCheck.equals(
                                   caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                                                          || AmendOrderCheckEnum.managerCheck.equals(
@@ -1711,14 +1711,16 @@ public class ManageOrderService {
         return isUploaded;
     }
 
-    public String getOrderStatus(String orderSelectionType, String loggedInUserType, String eventId, String previousOrderStatus) {
+    public String getOrderStatus(String orderSelectionType, UserRoles userRole, String eventId, String previousOrderStatus) {
         String currentOrderStatus;
         if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equals(eventId)
             || Event.HEARING_EDIT_AND_APPROVE_ORDER.getId().equals(eventId)) {
             currentOrderStatus = OrderStatusEnum.reviewedByCA.getDisplayedValue();
         } else if (EDIT_AND_APPROVE_ORDER.getId().equals(eventId)) {
-            if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
+            if (UserRoles.JUDGE.equals(userRole)) {
                 currentOrderStatus = OrderStatusEnum.reviewedByJudge.getDisplayedValue();
+            } else if (UserRoles.LEGAL_ADVISER.equals(userRole)) {
+                currentOrderStatus = OrderStatusEnum.reviewedByLegalAdviser.getDisplayedValue();
             } else {
                 currentOrderStatus = OrderStatusEnum.reviewedByManager.getDisplayedValue();
             }
@@ -1728,7 +1730,7 @@ public class ManageOrderService {
             orderSelectionType) || createCustomOrder.toString().equals(orderSelectionType)
             || amendOrderUnderSlipRule.toString().equals(orderSelectionType)
             || draftAnOrder.toString().equals(orderSelectionType)) {
-            currentOrderStatus = orderStatusForCreateUploadAmend(loggedInUserType);
+            currentOrderStatus = orderStatusForCreateUploadAmend(userRole);
         } else {
             currentOrderStatus = "";
         }
@@ -1742,16 +1744,14 @@ public class ManageOrderService {
         return currentOrderStatus;
     }
 
-    private static String orderStatusForCreateUploadAmend(String loggedInUserType) {
-        String status = "";
-        if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
-            status = OrderStatusEnum.createdByJudge.getDisplayedValue();
-        } else if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)) {
-            status = OrderStatusEnum.createdByCA.getDisplayedValue();
-        } else if (UserRoles.SOLICITOR.name().equals(loggedInUserType)) {
-            status = OrderStatusEnum.draftedByLR.getDisplayedValue();
-        }
-        return status;
+    private String orderStatusForCreateUploadAmend(UserRoles userRole) {
+        return switch(userRole) {
+            case JUDGE -> OrderStatusEnum.createdByJudge.getDisplayedValue();
+            case LEGAL_ADVISER -> OrderStatusEnum.createdByLegalAdviser.getDisplayedValue();
+            case COURT_ADMIN -> OrderStatusEnum.createdByCA.getDisplayedValue();
+            case SOLICITOR -> OrderStatusEnum.draftedByLR.getDisplayedValue();
+            default -> "";
+        };
     }
 
     public List<Element<OrderDetails>> serveOrder(CaseData caseData, List<Element<OrderDetails>> orders) {
@@ -2589,8 +2589,9 @@ public class ManageOrderService {
             }
         }
 
-
         UserDetails userDetails = userService.getUserDetails(authorisation);
+        UserRoles userRole = userRoleService.getLoggedInUserRole(authorisation);
+        String orderStatus = getOrderStatus(CaseUtils.getOrderSelectionType(caseData), userRole, null, null);
 
         return element(orderDetails.toBuilder()
                            .otherDetails(OtherOrderDetails.builder()
@@ -2615,9 +2616,7 @@ public class ManageOrderService {
                                                      Locale.ENGLISH
                                                  )) : null)
                                              .orderRecipients(getAllRecipients(caseData))
-                                             .status(getOrderStatus(CaseUtils.getOrderSelectionType(caseData),
-                                                                    getLoggedInUserType(authorisation), null, null
-                                             ))
+                                             .status(orderStatus)
                                              .additionalRequirementsForHearingReq(getAdditionalRequirementsForHearingReq(
                                                      caseData.getManageOrders().getOrdersHearingDetails(),
                                                      false,
@@ -2703,62 +2702,6 @@ public class ManageOrderService {
         }
 
         return withdrawApproved;
-    }
-
-    public String getLoggedInUserType(String authorisation) {
-        UserDetails userDetails = userService.getUserDetails(authorisation);
-        String loggedInUserType;
-        if (launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)) {
-            //This would check for roles from AM for Judge/Legal advisor/Court admin
-            //if it doesn't find then it will check for idam roles for rest of the users
-            RoleAssignmentServiceResponse roleAssignmentServiceResponse;
-            try {
-                roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
-                    authorisation,
-                    authTokenGenerator.generate(),
-                    null,
-                    userDetails.getId()
-                );
-            } catch (FeignException e) {
-                log.error("Error fetching role assignments: {}", e.getMessage());
-                throw e;
-            }
-
-            List<String> roles = roleAssignmentServiceResponse.getRoleAssignmentResponse().stream().map(
-                RoleAssignmentResponse::getRoleName).toList();
-
-            if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)
-                || roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LEGAL_ADVISER.getRoles()::contains)) {
-                loggedInUserType = UserRoles.JUDGE.name();
-            } else if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.COURT_ADMIN.getRoles()::contains)) {
-                loggedInUserType = UserRoles.COURT_ADMIN.name();
-            } else if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
-                loggedInUserType = UserRoles.SOLICITOR.name();
-            } else if (userDetails.getRoles().contains(Roles.CITIZEN.getValue())) {
-                loggedInUserType = UserRoles.CITIZEN.name();
-            } else if (userDetails.getRoles().contains(Roles.SYSTEM_UPDATE.getValue())) {
-                loggedInUserType = UserRoles.SYSTEM_UPDATE.name();
-            } else {
-                loggedInUserType = "";
-            }
-        } else {
-            if (userDetails.getRoles().contains(Roles.JUDGE.getValue()) || userDetails.getRoles().contains(Roles.LEGAL_ADVISER.getValue())) {
-                loggedInUserType = UserRoles.JUDGE.name();
-            } else if (userDetails.getRoles().contains(Roles.COURT_ADMIN.getValue())) {
-                loggedInUserType = UserRoles.COURT_ADMIN.name();
-            } else if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
-                loggedInUserType = UserRoles.SOLICITOR.name();
-            } else if (userDetails.getRoles().contains(Roles.CITIZEN.getValue())) {
-                loggedInUserType = UserRoles.CITIZEN.name();
-            } else if (userDetails.getRoles().contains(Roles.SYSTEM_UPDATE.getValue())) {
-                loggedInUserType = UserRoles.SYSTEM_UPDATE.name();
-            } else {
-                loggedInUserType = "";
-            }
-        }
-
-        log.info("getLoggedInUserType returning: '{}' for user: {}", loggedInUserType, userDetails.getId());
-        return loggedInUserType;
     }
 
     /**
@@ -3093,7 +3036,7 @@ public class ManageOrderService {
         log.info("Attempting to populate fields from selected hearing: {}", selectedHearingLabel);
 
         // Check if logged-in user is a judge (preserve their name if so)
-        String loggedInUserType = getLoggedInUserType(authorisation);
+        String loggedInUserType = userRoleService.getLoggedInUserType(authorisation);
         boolean isJudge = UserRoles.JUDGE.name().equals(loggedInUserType);
 
         try {
@@ -3993,7 +3936,7 @@ public class ManageOrderService {
         caseDataUpdated.put(DA_ORDER_FOR_CA_CASE,
                             ManageOrdersUtils.isDaOrderSelectedForCaCase(String.valueOf(caseData.getCreateSelectOrderOptions()),
                                                                          caseData) ? Yes : No);
-        caseDataUpdated.put("loggedInUserType", getLoggedInUserType(authorisation));
+        caseDataUpdated.put("loggedInUserType", userRoleService.getLoggedInUserType(authorisation));
 
         //PRL-3254 - Populate hearing details dropdown for create order
         log.info("About to call populateHearingsDropdown for case {}", caseData.getId());
@@ -4087,8 +4030,8 @@ public class ManageOrderService {
         Map<String, Object> waFieldsMap = new HashMap<>();
         waFieldsMap.put(WA_ORDER_COLLECTION_ID, newDraftOrderCollectionId);
         ManageOrdersOptionsEnum manageOrdersOption = caseData.getManageOrdersOptions();
-        log.info("setFieldsForWaTask: manageOrdersOptions={}, createSelectOrderOptions={}, eventId={}",
-            manageOrdersOption, caseData.getCreateSelectOrderOptions(), eventId);
+        log.info("setFieldsForWaTask: manageOrdersOptions={}, createSelectOrderOptions={}, eventId={}, draftOrderCollectionId={}",
+            manageOrdersOption, caseData.getCreateSelectOrderOptions(), eventId, newDraftOrderCollectionId);
 
         if (manageOrdersOption == ManageOrdersOptionsEnum.createAnOrder
             || manageOrdersOption == ManageOrdersOptionsEnum.uploadAnOrder
@@ -4106,7 +4049,7 @@ public class ManageOrderService {
                 default -> null;
             };
 
-            performingUser = getLoggedInUserType(authorisation);
+            performingUser = userRoleService.getLoggedInUserType(authorisation);
             performingAction = manageOrdersOption.getDisplayedValue();
 
             if (manageOrdersOption == ManageOrdersOptionsEnum.createAnOrder
@@ -4131,6 +4074,7 @@ public class ManageOrderService {
             } else if (null != performingUser && performingUser.equalsIgnoreCase(UserRoles.JUDGE.toString())) {
                 log.info("setFieldsForWaTask: setting WA_ORDER_NAME_JUDGE_CREATED={}", orderNameForWA);
                 waFieldsMap.put(WA_ORDER_NAME_JUDGE_CREATED, orderNameForWA);
+                waFieldsMap.put(WA_ORDER_NAME_JUDGE_APPROVED, orderNameForWA);
                 waFieldsMap.put(WA_ORDER_COLLECTION_ID, newDraftOrderCollectionId);
             }
             log.info("setFieldsForWaTask: performingUser={}, orderNameForWA={}", performingUser, orderNameForWA);
@@ -4168,7 +4112,7 @@ public class ManageOrderService {
         LocalDate cafcassReportFiledByDate = caseData.getServeOrderData().getWhenReportsMustBeFiled();
         if (featureToggleService.isCreateRequestCirUpdateTaskEnabled()) {
             Map<String, Object> waFieldsMap = new HashMap<>();
-            waFieldsMap.put(WA_PERFORMING_USER, getLoggedInUserType(authorisation));
+            waFieldsMap.put(WA_PERFORMING_USER, userRoleService.getLoggedInUserType(authorisation));
             if (nonNull(draftOrderCollectionId)) {
                 waFieldsMap.put(WA_ORDER_COLLECTION_ID, draftOrderCollectionId);
             }
