@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamPolicyUpgradeDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenCaseSubmissionEmail;
@@ -42,7 +41,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -53,7 +51,6 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_1;
-
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CitizenCallbackControllerTest {
@@ -91,21 +88,12 @@ public class CitizenCallbackControllerTest {
     @Mock
     private EventService eventService;
 
-    @Mock
-    private GeneratedDocumentInfo generatedDocumentInfo;
-    CaseData caseData;
+    private CaseData caseData;
 
-    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
-
+    private static final String AUTH_TOKEN = "Bearer TestAuthToken";
 
     @Before
     public void setup() {
-        generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
-            .binaryUrl("binaryUrl")
-            .hashToken("testHashToken")
-            .build();
-
         Address address = Address.builder()
             .addressLine1("address")
             .postTown("London")
@@ -165,8 +153,8 @@ public class CitizenCallbackControllerTest {
         when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(any(), any())).thenReturn(caseData);
         citizenCallbackController.updateCitizenApplication(AUTH_TOKEN, callbackRequest);
 
-        verify(allTabsService, times(1)).updateAllTabsIncludingConfTab(anyString());
-        verify(citizenEmailService, times(1)).sendCitizenCaseSubmissionEmail(eq(AUTH_TOKEN), any());
+        verify(allTabsService).updateAllTabsIncludingConfTab(anyString());
+        verify(citizenEmailService).sendCitizenCaseSubmissionEmail(eq(AUTH_TOKEN), any());
         verify(miamPolicyUpgradeFileUploadService).deleteOldMiamPolicyUpgradeDocuments(caseData, caseData, "sysToken");
     }
 
@@ -188,8 +176,8 @@ public class CitizenCallbackControllerTest {
 
         citizenCallbackController.updateCitizenApplication(AUTH_TOKEN, callbackRequest);
 
-        verify(allTabsService, times(1)).updateAllTabsIncludingConfTab(anyString());
-        verify(citizenEmailService, times(1)).sendCitizenCaseSubmissionEmail(eq(AUTH_TOKEN), any());
+        verify(allTabsService).updateAllTabsIncludingConfTab(anyString());
+        verify(citizenEmailService).sendCitizenCaseSubmissionEmail(eq(AUTH_TOKEN), any());
         verify(miamPolicyUpgradeFileUploadService, never())
             .deleteOldMiamPolicyUpgradeDocuments(any(), any(), anyString());
     }
@@ -208,8 +196,7 @@ public class CitizenCallbackControllerTest {
 
         citizenCallbackController.handleSubmitted(AUTH_TOKEN, callbackRequest);
 
-        verify(coreCaseDataApi, times(1))
-            .submitSupplementaryData(eq("sysToken"), eq("s2sToken"), anyString(), any());
+        verify(coreCaseDataApi).submitSupplementaryData(eq("sysToken"), eq("s2sToken"), anyString(), any());
     }
 
     @Test
@@ -232,7 +219,7 @@ public class CitizenCallbackControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         doNothing().when(citizenEmailService).sendCitizenCaseSubmissionEmail(AUTH_TOKEN, caseData);
         citizenCallbackController.sendNotificationsOnCaseWithdrawn(AUTH_TOKEN, callbackRequest);
-        verify(allTabsService, times(0)).updateAllTabsIncludingConfTab(anyString());
-        verify(citizenEmailService, times(1)).sendCitizenCaseWithdrawalEmail(eq(AUTH_TOKEN), any());
+        verify(allTabsService, never()).updateAllTabsIncludingConfTab(anyString());
+        verify(citizenEmailService).sendCitizenCaseWithdrawalEmail(eq(AUTH_TOKEN), any());
     }
 }
