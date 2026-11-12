@@ -194,7 +194,7 @@ class BaisDocumentUploadServiceTest {
                     .id(1L)
                     .caseData(AcroCaseData.builder()
                         .fl404Orders(List.of(createOrderDetails()))
-                        .familymanCaseNumber("familymanCaseNumber")
+                        .caseNameHmctsInternal("caseNameHmctsInternal")
                         .applicant(PartyDetails.builder().build())
                         .respondent(PartyDetails.builder().build())
                         .build())
@@ -203,7 +203,7 @@ class BaisDocumentUploadServiceTest {
                     .id(2L)
                     .caseData(AcroCaseData.builder()
                         .fl404Orders(null)
-                        .familymanCaseNumber("familymanCaseNumber")
+                        .caseNameHmctsInternal("caseNameHmctsInternal")
                         .applicant(PartyDetails.builder().build())
                         .respondent(PartyDetails.builder().build())
                         .build())
@@ -211,7 +211,7 @@ class BaisDocumentUploadServiceTest {
                 AcroCaseDetail.builder()
                     .id(3L)
                     .caseData(AcroCaseData.builder()
-                        .familymanCaseNumber("familymanCaseNumber")
+                        .caseNameHmctsInternal("caseNameHmctsInternal")
                         .fl404Orders(Collections.emptyList())
                         .applicant(PartyDetails.builder().isEmailAddressConfidential(null)
                                      .isPhoneNumberConfidential(null)
@@ -350,7 +350,7 @@ class BaisDocumentUploadServiceTest {
 
         AcroCaseData caseData = AcroCaseData.builder()
             .id(98765L)
-            .familymanCaseNumber("familymanCaseNumber")
+            .caseNameHmctsInternal("caseNameHmctsInternal")
             .caseTypeOfApplication("FL402")
             .applicant(applicant)
             .respondent(respondent)
@@ -380,8 +380,8 @@ class BaisDocumentUploadServiceTest {
         CsvData capturedData = csvDataArgumentCaptor.getValue();
 
         Map<String, Object[]> fieldMappings = Map.of(
-            "Family Case number", new Object[]{caseData.getFamilymanCaseNumber(),
-                capturedData.getFamilymanCaseNumber(), "caseData.getId()"},
+            "Case Name", new Object[]{caseData.getCaseNameHmctsInternal(),
+                capturedData.getCaseNameHmctsInternal(), "caseData.getCaseNameHmctsInternal()"},
             "ID", new Object[]{caseData.getId(), capturedData.getId(), "caseData.getId()"},
             "Case Type", new Object[]{caseData.getCaseTypeOfApplication(),
                 capturedData.getCaseTypeOfApplication(), "caseData.getCaseTypeOfApplication()"},
@@ -447,7 +447,7 @@ class BaisDocumentUploadServiceTest {
 
     private AcroCaseData createCaseDataWithHearings(List<CaseHearing> hearings) {
         return AcroCaseData.builder()
-            .familymanCaseNumber("familymanCaseNumber")
+            .caseNameHmctsInternal("caseNameHmctsInternal")
             .fl404Orders(List.of(createOrderDetails()))
             .applicant(PartyDetails.builder().build())
             .respondent(PartyDetails.builder().build())
@@ -488,7 +488,7 @@ class BaisDocumentUploadServiceTest {
                 .id(1L)
                 .caseData(AcroCaseData.builder()
                     .fl404Orders(List.of(createOrderDetails()))
-                    .familymanCaseNumber("familymanCaseNumber")
+                    .caseNameHmctsInternal("caseNameHmctsInternal")
                     .applicant(PartyDetails.builder().build())
                     .respondent(PartyDetails.builder().build())
                     .build())

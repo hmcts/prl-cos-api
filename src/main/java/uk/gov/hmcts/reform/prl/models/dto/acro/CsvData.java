@@ -26,5 +26,5 @@ public class CsvData {
     private PartyDetails respondent;
     private String daApplicantContactInstructions;
     private String dateOrderMade;
-    private String familymanCaseNumber;
+    private String caseNameHmctsInternal;
 }

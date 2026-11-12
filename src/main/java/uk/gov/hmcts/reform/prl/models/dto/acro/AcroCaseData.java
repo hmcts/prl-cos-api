@@ -33,7 +33,8 @@ public class AcroCaseData {
     @Setter(AccessLevel.NONE)
     private List<Element<OrderDetails>> orderCollection;
 
-    private String familymanCaseNumber;
+    private String caseNameHmctsInternal;
+
     private String dateSubmitted;
     private String issueDate;
     private String caseTypeOfApplication;
