@@ -134,7 +134,6 @@ public class TestingSupportService {
             if (TS_SOLICITOR_APPLICATION.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
                 requestBody = loadCaseDetailsInDraftStage(initialCaseData);
                 // update the correct applicant policy with the logged in user
-                // GET ORGANISATION
                 UserDetails userDetails = userService.getUserDetails(authorisation);
                 Optional<Organisations> userOrganisation = organisationService.getOrganisationByEmailDetail(userDetails.getEmail());
                 if (userOrganisation.isPresent()) {
