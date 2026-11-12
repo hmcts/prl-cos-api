@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.documentremoval.DocumentRemovalService;
 
 import java.io.IOException;
@@ -31,6 +32,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 public class DocumentRemovalController {
 
     private final AuthorisationService authorisationService;
+    private final CafcassDateTimeService cafcassDateTimeService;
     private final DocumentRemovalService documentRemovalService;
 
     @PostMapping("/about-to-start")
@@ -87,7 +89,7 @@ public class DocumentRemovalController {
         log.info("Document removal about to submit callback received for case id: {}", caseDetails.getId());
 
         Map<String, Object> updatedCaseData = documentRemovalService.removeDocumentFromCaseData(caseDetails);
-
+        cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(updatedCaseData)
             .build();
