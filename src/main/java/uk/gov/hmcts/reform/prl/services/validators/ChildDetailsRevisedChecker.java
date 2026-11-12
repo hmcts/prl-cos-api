@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.CHILD_DETAILS_REVISED_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.Gender.other;
@@ -96,7 +98,7 @@ public class ChildDetailsRevisedChecker implements EventChecker {
         }
         fields.add(ofNullable(child.getOrderAppliedFor()));
         fields.add(ofNullable(child.getParentalResponsibilityDetails()));
-        fields.add(ofNullable(child.getWhoDoesTheChildLiveWith()));
+        fields.add(ofNullable(child.getWhoDoesTheChildLiveWith()).map(DynamicList::getValueCode).filter(code -> isNotBlank(code)));
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
 

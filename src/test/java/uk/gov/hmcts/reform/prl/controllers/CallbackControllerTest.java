@@ -108,6 +108,7 @@ import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.payment.PaymentRequestService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
+import uk.gov.hmcts.reform.prl.services.validators.ChildLivingArrangementsValidator;
 import uk.gov.hmcts.reform.prl.utils.ApplicantsListGenerator;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
@@ -241,6 +242,9 @@ public class CallbackControllerTest {
 
     @Mock
     UpdatePartyDetailsService updatePartyDetailsService;
+
+    @Mock
+    ChildLivingArrangementsValidator childLivingArrangementsValidator;
 
     @Mock
     SendgridService sendgridService;

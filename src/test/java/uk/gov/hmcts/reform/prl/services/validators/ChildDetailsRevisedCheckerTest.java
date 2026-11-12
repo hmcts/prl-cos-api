@@ -8,6 +8,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
@@ -93,7 +94,8 @@ public class ChildDetailsRevisedCheckerTest {
             .gender(female)
             .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
             .parentalResponsibilityDetails("test")
-            .whoDoesTheChildLiveWith(DynamicList.builder().build())
+            .whoDoesTheChildLiveWith(DynamicList.builder()
+                .value(DynamicListElement.builder().code("00000000-0000-4000-8000-000000000001").build()).build())
             .build();
 
         Element<ChildDetailsRevised> wrappedChildren = Element.<ChildDetailsRevised>builder().value(child).build();
@@ -145,7 +147,8 @@ public class ChildDetailsRevisedCheckerTest {
             .dateOfBirth(LocalDate.of(2000, 12, 22))
             .gender(other)
             .otherGender("unknow")
-            .whoDoesTheChildLiveWith(DynamicList.builder().build())
+            .whoDoesTheChildLiveWith(DynamicList.builder()
+                .value(DynamicListElement.builder().code("00000000-0000-4000-8000-000000000001").build()).build())
             .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
             .parentalResponsibilityDetails("test")
             .build();
@@ -173,6 +176,24 @@ public class ChildDetailsRevisedCheckerTest {
             .childrenKnownToLocalAuthorityTextArea("TestString")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.dontKnow)
             .build();
+        assertTrue(!childChecker.isFinished(caseData));
+    }
+
+    @Test
+    public void whenLivingWithSelectionIsEmptyThenIsFinishedReturnsFalse() {
+        ChildDetailsRevised child = ChildDetailsRevised.builder()
+            .firstName("Test").lastName("Child")
+            .dateOfBirth(LocalDate.of(2015, 1, 2)).gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .parentalResponsibilityDetails("Test")
+            .whoDoesTheChildLiveWith(DynamicList.builder().value(DynamicListElement.EMPTY).build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .newChildDetails(List.of(Element.<ChildDetailsRevised>builder().value(child).build()))
+            .childrenKnownToLocalAuthority(YesNoDontKnow.no)
+            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.no)
+            .build();
+
         assertTrue(!childChecker.isFinished(caseData));
     }
 

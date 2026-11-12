@@ -904,6 +904,7 @@ public class UpdatePartyDetailsService {
                 List<Element<ChildDetailsRevised>> listOfChildren = caseData.getNewChildDetails();
                 List<Element<ChildDetailsRevised>> listOfChildrenRevised = new ArrayList<>();
                 listOfChildren.forEach(child -> listOfChildrenRevised.add(element(
+                    child.getId(),
                     child.getValue().toBuilder()
                         .whoDoesTheChildLiveWith(
                             populateWhoDoesTheChildLiveWith(caseData)
@@ -1045,13 +1046,13 @@ public class UpdatePartyDetailsService {
 
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             List<Element<PartyDetails>> removeParty = new ArrayList<>();
-            removeParty.addAll(caseDataBefore.getApplicants().stream()
-                .filter(appBefore -> caseData.getApplicants().stream()
+            removeParty.addAll(nullSafeList(caseDataBefore.getApplicants()).stream()
+                .filter(appBefore -> nullSafeList(caseData.getApplicants()).stream()
                     .noneMatch(app -> appBefore.getId().equals(app.getId())))
                 .toList());
 
-            removeParty.addAll(caseDataBefore.getRespondents().stream()
-                .filter(respBefore -> caseData.getRespondents().stream()
+            removeParty.addAll(nullSafeList(caseDataBefore.getRespondents()).stream()
+                .filter(respBefore -> nullSafeList(caseData.getRespondents()).stream()
                     .noneMatch(resp -> respBefore.getId().equals(resp.getId())))
                 .toList());
 
