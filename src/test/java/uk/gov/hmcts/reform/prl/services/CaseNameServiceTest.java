@@ -243,4 +243,37 @@ class CaseNameServiceTest {
 
         assertEquals("Invalid caseTypeOfApplication found for case 1234", exception.getMessage());
     }
+
+    @Test
+    void returnCaseNameOrNullShouldReturnNullForNullCaseNameHmctsInternal() {
+        when(caseData.getCaseNameHmctsInternal()).thenReturn(null);
+
+        assertNull(caseNameService.returnCaseNameHmctsInternalOrNull(caseData));
+    }
+
+    @Test
+    void returnCaseNameOrNullShouldReturnNullForBlankCaseNameHmctsInternal() {
+        when(caseData.getCaseNameHmctsInternal()).thenReturn("");
+
+        assertNull(caseNameService.returnCaseNameHmctsInternalOrNull(caseData));
+    }
+
+    @Test
+    void returnCaseNameOrNullShouldReturnNullForCaseIssuedBeforeChangeDateHmctsInternal() {
+        when(caseData.getIssueDate()).thenReturn(LocalDate.of(2026, 9, 1));
+        when(caseData.getCaseNameHmctsInternal()).thenReturn("someCaseName");
+        when(featureToggleService.isCaseIssuedAfterReleaseDate(any())).thenReturn(false);
+
+        assertNull(caseNameService.returnCaseNameHmctsInternalOrNull(caseData));
+    }
+
+    @Test
+    void returnCaseNameOrNullShouldReturnNullForCaseIssuedAfterChangeDateHmctsInternal() {
+        when(caseData.getIssueDate()).thenReturn(LocalDate.of(2026, 12, 1));
+        when(caseData.getCaseNameHmctsInternal()).thenReturn("someCaseName");
+        when(featureToggleService.isCaseIssuedAfterReleaseDate(any())).thenReturn(true);
+
+        assertEquals("someCaseName", caseNameService.returnCaseNameHmctsInternalOrNull(caseData));
+    }
+
 }

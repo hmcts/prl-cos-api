@@ -45,6 +45,8 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.DocumentLink;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.services.CaseNameService;
+import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -79,6 +81,12 @@ public class BundlingServiceTest {
 
     @Mock
     private HearingDetailsMapperUtil hearingDetailsMapperUtil;
+
+    @Mock
+    private FeatureToggleService featureToggleService;
+
+    @Mock
+    private CaseNameService caseNameService;
 
     @Mock
     private CaseUtils caseUtils;
@@ -225,7 +233,7 @@ public class BundlingServiceTest {
             .bundleInformation(BundlingInformation.builder().build())
             //.home(homefull)
             .build();
-        bundleCreateRequestMapper = new BundleCreateRequestMapper(hearingDetailsMapperUtil);
+        bundleCreateRequestMapper = new BundleCreateRequestMapper(hearingDetailsMapperUtil, caseNameService);
 
         c100CaseDataOther = CaseData.builder()
             .id(123456789123L)

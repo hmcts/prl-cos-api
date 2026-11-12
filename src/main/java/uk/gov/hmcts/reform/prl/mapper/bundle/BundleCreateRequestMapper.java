@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.services.CaseNameService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
@@ -86,6 +87,7 @@ import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGro
 public class BundleCreateRequestMapper implements IBundleCreateRequestMapper {
 
     private final HearingDetailsMapperUtil hearingDetailsMapperUtil;
+    private final CaseNameService caseNameService;
 
     @Override
     public BundleCreateRequest mapCaseDataToBundleCreateRequest(CaseData caseData, String eventId, Hearings hearingDetails,
@@ -104,10 +106,12 @@ public class BundleCreateRequestMapper implements IBundleCreateRequestMapper {
     }
 
     private BundlingCaseData mapCaseData(CaseData caseData, Hearings hearingDetails, String bundleConfigFileName) {
+        String caseNameHmctsInternal = caseNameService.returnCaseNameHmctsInternalOrNull(caseData);
+
         return BundlingCaseData.builder().id(String.valueOf(caseData.getId())).bundleConfiguration(
                 bundleConfigFileName)
             .data(BundlingData.builder().caseNumber(String.valueOf(caseData.getId())).applicantCaseName(caseData.getApplicantCaseName())
-                      .caseNameHmctsInternal(caseData.getCaseNameHmctsInternal())
+                      .caseNameHmctsInternal(caseNameHmctsInternal)
                       .hearingDetails(hearingDetailsMapperUtil.mapHearingDetails(hearingDetails))
                       .applications(mapApplicationsFromCaseData(caseData))
                       .orders(mapOrdersFromCaseData(caseData.getOrderCollection()))
