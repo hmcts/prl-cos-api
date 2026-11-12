@@ -79,4 +79,14 @@ public class CaseNameService {
         }
         return  internalCaseName;
     }
+
+    public String returnCaseNameHmctsInternalOrNull(CaseData caseData) {
+        if (caseData.getCaseNameHmctsInternal() == null || caseData.getCaseNameHmctsInternal().isBlank()) {
+            return null;
+        }
+        if (featureToggleService.isCaseIssuedAfterReleaseDate(caseData.getIssueDate())) {
+            return caseData.getCaseNameHmctsInternal();
+        }
+        return null;
+    }
 }

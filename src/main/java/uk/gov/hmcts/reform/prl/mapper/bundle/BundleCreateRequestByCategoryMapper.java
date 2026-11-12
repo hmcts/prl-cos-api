@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingData;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingRequestDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.services.CaseNameService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -58,6 +59,7 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
     private final SystemUserService systemUserService;
     private final BundleCategoryConfig bundleCategoryConfig;
     private final HearingDetailsMapperUtil hearingDetailsMapperUtil;
+    private final CaseNameService caseNameService;
 
     @Override
     public BundleCreateRequest mapCaseDataToBundleCreateRequest(CaseData caseData, String eventId, Hearings hearingDetails,
@@ -120,10 +122,12 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
 
         specialCategories(caseData, applicationDocumentFromCategory, allOtherDocumentsFromCategory);
 
+        String caseNameHmctsInternal = caseNameService.returnCaseNameHmctsInternalOrNull(caseData);
+
         return BundlingCaseData.builder().id(String.valueOf(caseData.getId())).bundleConfiguration(
                 bundleConfigFileName)
             .data(BundlingData.builder().caseNumber(String.valueOf(caseData.getId())).applicantCaseName(caseData.getApplicantCaseName())
-                      .caseNameHmctsInternal(caseData.getCaseNameHmctsInternal())
+                      .caseNameHmctsInternal(caseNameHmctsInternal)
                       .hearingDetails(hearingDetailsMapperUtil.mapHearingDetails(hearingDetails))
                       .applications(applicationDocumentFromCategory)
                       .orders(ordersFromCategory)
