@@ -373,7 +373,6 @@ public class ServiceOfApplicationServiceTest {
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
-            .fl401FamilymanCaseNumber("familyman12345")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .build();
         Map<String, Object> casedata = new HashMap<>();

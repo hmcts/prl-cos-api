@@ -463,7 +463,6 @@ class CustomOrderServiceTest {
 
     @ParameterizedTest
     @CsvSource({
-        "SA26P12345, FamilyMan:, SA26P12345",
         "'', '', ''",
         "'   ', '', ''"
     })
