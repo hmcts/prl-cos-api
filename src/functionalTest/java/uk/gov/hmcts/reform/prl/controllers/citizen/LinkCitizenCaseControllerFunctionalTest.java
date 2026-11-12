@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.controllers;
+package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;

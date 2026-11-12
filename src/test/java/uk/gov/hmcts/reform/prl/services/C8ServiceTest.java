@@ -40,7 +40,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSI
 @ExtendWith(MockitoExtension.class)
 class C8ServiceTest {
     @Mock
-    private ManageOrderService manageOrderService;
+    private UserRoleService userRoleService;
     @Mock
     private DocumentLanguageService documentLanguageService;
     @Mock
