@@ -164,6 +164,7 @@ public class BaisDocumentUploadService {
             .dateOrderMade(formatOrderMadeDate(order))
             .orderExpiryDate(getOrderExpiryDate(order))
             .familymanCaseNumber(caseData.getFamilymanCaseNumber())
+            .caseNameHmctsInternal(caseData.getCaseNameHmctsInternal())
             .build();
     }
 

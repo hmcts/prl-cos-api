@@ -42,6 +42,7 @@ public class CsvWriter {
 
     public enum CsvColumn {
         FAMILY_CASE_NUMBER("Case No. FamilyMan", "familymanCaseNumber"),
+        CASE_NAME("Case Name", "caseNameHmctsInternal"),
         CASE_NUMBER("Case No. Manage Cases", "id"),
         COURT_NAME("Court Name/Location", "courtName"),
         COURT_ID("Court Code", "courtEpimsId"),
