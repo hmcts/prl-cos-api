@@ -74,6 +74,7 @@ feature-toggle:
   toggle:
     example: ${FEATURE_EXAMPLE:false}
     bundleByCategoryEnabled: ${BUNDLE_BY_CATEGORY_ENABLED:false}
+    caseNameWithPrefixReleaseDate: ${CASE_NAME_WITH_PREFIX_RELEASE_DATE:2026-10-23}
 
 xui:
   url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}

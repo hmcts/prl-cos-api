@@ -634,6 +634,8 @@ public class PrlAppsConstants {
     public static final String NEW_CHILDREN = "newChildDetails";
 
     public static final String CASE_NAME_HMCTS_INTERNAL = "caseNameHmctsInternal";
+    public static final String IS_ISSUED_AFTER_CASENAME_RELEASE = "isIssuedAfterCaseNameRelease";
+
     //C100 default court details
 
     public static final String SOLICITOR_C7_DRAFT_DOCUMENT = "SOLICITOR_C7_DRAFT";
