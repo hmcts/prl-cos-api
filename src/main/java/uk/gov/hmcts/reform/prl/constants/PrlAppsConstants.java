@@ -185,6 +185,7 @@ public class PrlAppsConstants {
     public static final String DOCUMENT_REQUEST = "documentRequestedByCourt";
 
     public static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
+    public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String CITIZEN_ROLE = "citizen";
 
     public static final String OTHER = "Other";
