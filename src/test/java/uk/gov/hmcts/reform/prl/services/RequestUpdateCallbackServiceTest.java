@@ -25,7 +25,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.A
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Payment;
-import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPaymentServiceRequestUpdate;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UploadAdditionalApplicationData;
@@ -83,7 +83,7 @@ class RequestUpdateCallbackServiceTest {
     AllTabServiceImpl allTabService;
 
     @Mock
-    private Court court;
+    private CourtVenue court;
 
     @Mock
     private UploadAdditionalApplicationUtils uploadAdditionalApplicationUtils;
@@ -508,7 +508,30 @@ class RequestUpdateCallbackServiceTest {
     }
 
     @Test
-    void shouldUpdateCaseStateToSubmittedWhenCurrentCaseStateIsPendingWhenPaymentIsSuccessful() {
+    void shouldPreserveExistingCourtWhenRefDataSiteNameIsBlank() throws NotFoundException {
+        CaseData caseData = CaseData.builder()
+            .id(1L)
+            .state(State.SUBMITTED_NOT_PAID)
+            .courtId("123")
+            .courtName("Existing Court")
+            .build();
+        ServiceRequestUpdateDto payment = ServiceRequestUpdateDto.builder().serviceRequestStatus("Paid").build();
+
+        for (String siteName : new String[]{null, "", " \t "}) {
+            when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(CourtVenue.builder()
+                .courtEpimmsId("234946").siteName(siteName).courtName("Formal Court Name").build());
+
+            CaseData updated = requestUpdateCallbackService.getCaseDataWithStateAndDateSubmitted(payment, caseData);
+
+            assertEquals("123", updated.getCourtId());
+            assertEquals("Existing Court", updated.getCourtName());
+            assertEquals(State.SUBMITTED_PAID, updated.getState());
+            assertNotNull(updated.getDateSubmitted());
+        }
+    }
+
+    @Test
+    void shouldUpdateCaseStateToSubmittedWhenCurrentCaseStateIsPendingWhenPaymentIsSuccessful() throws Exception {
         CaseData caseData = CaseData.builder()
             .id(1L)
             .state(State.SUBMITTED_NOT_PAID)
@@ -524,6 +547,11 @@ class RequestUpdateCallbackServiceTest {
                          .build())
             .build();
 
+        when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(CourtVenue.builder()
+            .siteName("Swansea Civil Justice Centre")
+            .courtName("Swansea Civil And Family Justice Centre")
+            .courtEpimmsId("234946").build());
+
         CaseData updatedCaseData =
             requestUpdateCallbackService.getCaseDataWithStateAndDateSubmitted(serviceRequestUpdateDto, caseData);
 
@@ -532,6 +560,8 @@ class RequestUpdateCallbackServiceTest {
             "Case state should transition to SUBMITTED_PAID when payment is successful"
         );
 
+        assertEquals("234946", updatedCaseData.getCourtId());
+        assertEquals("Swansea Civil Justice Centre", updatedCaseData.getCourtName());
         assertNotNull(updatedCaseData.getDateSubmitted(), "Date submitted should be populated upon successful payment");
     }
 

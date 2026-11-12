@@ -11,15 +11,12 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.caseworkeremailnotification.CaseWorkerEmailNotificationEventEnum;
-import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNotificationEventEnum;
 import uk.gov.hmcts.reform.prl.events.CaseWorkerNotificationEmailEvent;
-import uk.gov.hmcts.reform.prl.events.SolicitorNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
-import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.court.PathFinderMapping;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -36,7 +33,6 @@ import java.util.UUID;
 import static java.lang.String.valueOf;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_STATUS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.PATH_FINDER_DECISION;
@@ -55,7 +51,6 @@ public class C100IssueCaseService {
     private final DocumentGenService documentGenService;
     private final LocationRefDataService locationRefDataService;
     private final CourtSealFinderService courtSealFinderService;
-    private final CourtFinderService courtFinderService;
     private final ObjectMapper objectMapper;
     private final EventService eventPublisher;
     private final DfjLookupService dfjLookupService;
@@ -78,13 +73,10 @@ public class C100IssueCaseService {
             caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
             caseDataUpdated.put("courtList", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
             if (courtVenue.isPresent()) {
-                String courtId = getFactCourtId(courtVenue.get());
                 String courtSeal = courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId());
                 caseData = caseData.toBuilder().courtName(courtVenue.get().getCourtName())
-                    .courtSeal(courtSeal).courtId(baseLocationId)
-                    .courtCodeFromFact(courtId).build();
+                    .courtSeal(courtSeal).courtId(baseLocationId).build();
                 caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
-                caseDataUpdated.put(COURT_CODE_FROM_FACT, courtId);
                 caseDataUpdated.keySet().removeAll(dfjLookupService.getAllCourtFields());
                 caseDataUpdated.putAll(dfjLookupService.getDfjAreaFieldsByCourtId(baseLocationId));
                 Optional<PathFinderMapping> pathFinderMapping = pathFinderLookupService.getPathFinderMappingByCourtField(baseLocationId);
@@ -144,32 +136,8 @@ public class C100IssueCaseService {
         return caseDataUpdated;
     }
 
-    public String getFactCourtId(CourtVenue courtVenue) {
-        String courtId = "";
-        String factUrl = courtVenue.getFactUrl();
-        if (factUrl != null && factUrl.split("/").length > 4) {
-            Court court = null;
-            try {
-                court = courtFinderService.getCourtDetails(factUrl.split("/")[4]);
-            } catch (Exception ex) {
-                log.error("Error fetching court details from Fact ", ex);
-            }
-            if (court != null) {
-                courtId = String.valueOf(court.getCountyLocationCode());
-            }
-        }
-        return courtId;
-    }
-
     public void issueAndSendToLocalCourNotification(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        if (No.equals(caseData.getConsentOrder())) {
-            SolicitorNotificationEmailEvent rpaEmailNotificationEvent = SolicitorNotificationEmailEvent.builder()
-                .typeOfEvent(SolicitorEmailNotificationEventEnum.notifyRpa.getDisplayedValue())
-                .caseDetailsModel(callbackRequest.getCaseDetails())
-                .build();
-            eventPublisher.publishEvent(rpaEmailNotificationEvent);
-        }
         CaseWorkerNotificationEmailEvent notifyLocalCourtEvent = CaseWorkerNotificationEmailEvent.builder()
             .typeOfEvent(CaseWorkerEmailNotificationEventEnum.sendEmailToCourtAdmin.getDisplayedValue())
             .caseDetailsModel(callbackRequest.getCaseDetails())

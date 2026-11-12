@@ -216,10 +216,8 @@ send-grid:
           SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP: ${SEND_GRID_SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP:d-8502be2765ac487fa2c3a68997e8b06b}
           SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP: ${SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP:d-5061ff6960a84b73adc1fa8c4eac214e}
           SEND_EMAIL_TO_EXTERNAL_PARTY: ${SEND_GRID_EMAIL_TO_EXTERNAL_PARTY:d-d6f807d095b046458517924e6c48e5ea}
-  rpa:
-    email:
-      to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
-      from: ${RPA_NOTIFY_FROM_EMAIL:xxxxxxxx}
+  email:
+    from: ${SEND_GRID_FROM_EMAIL:xxxxxxxx}
 
 payments:
   api:
@@ -287,10 +285,6 @@ send-letter:
 
 case_document_am:
   url: ${CCD_CASE_DOCS_AM_API:http://ccd-case-document-am-api-aat.service.core-compute-aat.internal}
-
-courtfinder:
-  api:
-    url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
 
 locationfinder:
   api:

@@ -9,7 +9,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
@@ -32,11 +31,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.refuge.RefugeConfidentialDocuments;
-import uk.gov.hmcts.reform.prl.models.court.Court;
-import uk.gov.hmcts.reform.prl.models.court.CourtAddress;
-import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
-import uk.gov.hmcts.reform.prl.models.court.ServiceArea;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -50,7 +45,6 @@ import uk.gov.hmcts.reform.prl.services.validators.FL401StatementOfTruthAndSubmi
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,7 +94,7 @@ public class FL401SubmitApplicationServiceTest {
     FL401StatementOfTruthAndSubmitChecker fl401StatementOfTruthAndSubmitChecker;
 
     @Mock
-    private Court court;
+    private CourtVenue court;
 
     @Mock
     private CaseDetails caseDetails;
@@ -111,8 +105,6 @@ public class FL401SubmitApplicationServiceTest {
     @Mock
     private LocationRefDataService locationRefDataService;
 
-    @Mock
-    private CourtFinderApi courtFinderApi;
 
     @Mock
     CourtSealFinderService courtSealFinderService;
@@ -146,6 +138,8 @@ public class FL401SubmitApplicationServiceTest {
 
     @Before
     public void setUp() {
+        dynamicList = DynamicList.builder()
+            .value(DynamicListElement.builder().code("reg-base-courtname-postcode-regname-basename").build()).build();
         caseData = CaseData.builder()
             .draftOrderDoc(Document.builder()
                                .documentUrl(generatedDocumentInfo.getUrl())
@@ -159,15 +153,9 @@ public class FL401SubmitApplicationServiceTest {
             .build();
 
         stringObjectMap = new HashMap<>();
-        CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
-            .address("brighton.breathingspace@justice.gov.uk")
-            .description("Horsham Court")
-            .explanation("Family")
-            .build();
 
-        court = Court.builder()
+        court = CourtVenue.builder()
             .courtName("testcourt")
-            .courtEmailAddresses(Collections.singletonList(courtEmailAddress))
             .build();
 
         userDetails = UserDetails.builder()
@@ -181,24 +169,6 @@ public class FL401SubmitApplicationServiceTest {
         fl401DocsMap.put(PrlAppsConstants.DOCUMENT_FIELD_FINAL, "test");
         fl401DocsMap.put(DOCUMENT_FIELD_C8_WELSH, "test");
         fl401DocsMap.put(DOCUMENT_FIELD_FINAL_WELSH, "test");
-        Court horshamCourt = Court.builder()
-            .courtName("Horsham County Court and Family Court")
-            .courtSlug("horsham-county-court-and-family-court")
-            .courtEmailAddresses(Collections.singletonList(courtEmailAddress))
-            .countyLocationCode(333)
-            .dxNumber(Collections.singletonList("The Law Courts"))
-            .inPerson(true)
-            .accessScheme(true)
-            .address(Collections.singletonList(CourtAddress.builder().build()))
-            .build();
-        dynamicList = DynamicList.builder()
-            .value(DynamicListElement.builder().code("reg-base-courtname-postcode-regname-basename").build()).build();
-        when(courtFinderApi.findClosestDomesticAbuseCourtByPostCode(Mockito.anyString()))
-            .thenReturn(ServiceArea.builder()
-                            .courts(Collections.singletonList(horshamCourt))
-                            .build());
-        when(courtFinderApi.getCourtDetails(Mockito.anyString())).thenReturn(horshamCourt);
-        when(courtFinderService.getEmailAddress(horshamCourt)).thenReturn(Optional.of(courtEmailAddress));
         when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(), Mockito.anyString()))
             .thenReturn(Optional.of(CourtVenue.builder()
                                         .courtName("test")
@@ -426,9 +396,8 @@ public class FL401SubmitApplicationServiceTest {
                              .build())
             .build();
 
-        Court closestDomesticAbuseCourt = courtFinderService.getNearestFamilyCourt(
+        CourtVenue closestDomesticAbuseCourt = courtFinderService.getNearestFamilyCourt(
             CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper));
-        Optional<CourtEmailAddress> matchingEmailAddress = courtFinderService.getEmailAddress(closestDomesticAbuseCourt);
 
         when(courtFinderService.getNearestFamilyCourt(CaseUtils.getCaseData(
             callbackRequest.getCaseDetails(),

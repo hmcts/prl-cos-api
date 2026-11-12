@@ -29,7 +29,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConf
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
-import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.AmendCourtService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
@@ -112,8 +111,6 @@ public class CallbackControllerIntegrationTest {
     @MockBean
     SendgridService sendgridService;
 
-    @MockBean
-    C100JsonMapper c100JsonMapper;
 
     @MockBean
     CourtFinderService courtLocatorService;
@@ -444,24 +441,6 @@ public class CallbackControllerIntegrationTest {
     @Test
     public void testSendToGatekeeper() throws Exception {
         String url = "/send-to-gatekeeper";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-
-        Mockito.when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-
-        mockMvc.perform(
-                post(url)
-                    .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
-                    .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
-                    .accept(APPLICATION_JSON)
-                    .contentType(APPLICATION_JSON)
-                    .content(jsonRequest))
-            .andExpect(status().isOk())
-            .andReturn();
-    }
-
-    @Test
-    public void testResendRpa() throws Exception {
-        String url = "/resend-rpa";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         Mockito.when(authorisationService.isAuthorized(any(), any())).thenReturn(true);

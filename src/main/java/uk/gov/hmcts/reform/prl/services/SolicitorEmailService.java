@@ -13,13 +13,15 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 
 import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Service
 @Slf4j
@@ -47,7 +49,7 @@ public class SolicitorEmailService {
                 .toList();
 
             String applicantNames = String.join(", ", applicantNamesList);
-            Court court = courtLocatorService.getNearestFamilyCourt(caseData);
+            CourtVenue court = courtLocatorService.getNearestFamilyCourt(caseData);
 
             String caseLink = manageCaseUrl + "/" + caseDetails.getId();
 
@@ -55,7 +57,7 @@ public class SolicitorEmailService {
                 .caseReference(String.valueOf(caseDetails.getId()))
                 .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
                 .applicantName(applicantNames)
-                .courtName((court != null) ? court.getCourtName() : "")
+                .courtName(court == null || isBlank(court.getCourtDisplayName()) ? "" : court.getCourtDisplayName())
                 .courtEmail(courtEmail)
                 .caseLink(caseLink + (isC100PendingPaymentSolEmail ? "#Service%20Request" : ""))
                 .solicitorName(caseData.getSolicitorName())

@@ -2600,7 +2600,6 @@
       "allChildrenAreRiskPhysicalAbuse": "Yes",
       "respondentConfidentialDetails": [],
       "familyMediatorServiceName": null,
-      "courtCodeFromFact": "344",
       "soaServeLocalAuthorityYesOrNo": "No",
       "confidentialDetails": {
         "isConfidentialDetailsAvailable": "No"
@@ -9392,7 +9391,6 @@
       "allChildrenAreRiskPhysicalAbuse": "Yes",
       "respondentConfidentialDetails": [],
       "familyMediatorServiceName": null,
-      "courtCodeFromFact": "344",
       "soaServeLocalAuthorityYesOrNo": "No",
       "confidentialDetails": {
         "isConfidentialDetailsAvailable": "No"

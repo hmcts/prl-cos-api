@@ -28,7 +28,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
-import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.UiCitizenCaseData;
@@ -585,14 +585,28 @@ public class CaseControllerTest {
     @Test
     public void testFindCourtByPostCodeAndService() throws Exception {
         String postcode = "SA1 3TU";
-        String courtName = "Court Name";
+        String courtName = "Aldershot Justice Centre";
 
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERV_AUTH_TOKEN)).thenReturn(true);
         when(authTokenGenerator.generate()).thenReturn(SERV_AUTH_TOKEN);
-        when(courtFinderService.getC100NearestFamilyCourt(postcode)).thenReturn(Court.builder()
-                                                                                            .courtName(courtName).build());
+        when(courtFinderService.getC100NearestFamilyCourt(postcode)).thenReturn(CourtVenue.builder()
+            .siteName(courtName).courtName("Formal Court Name").build());
         String actualCourtName = caseController.findCourtByPostCodeAndService(AUTH_TOKEN, SERV_AUTH_TOKEN, postcode);
         Assert.assertEquals(courtName, actualCourtName);
+    }
+
+    @Test
+    public void testFindCourtByPostCodeAndServiceWhenSiteNameIsBlank() throws Exception {
+        String postcode = "SA1 3TU";
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERV_AUTH_TOKEN)).thenReturn(true);
+
+        for (String siteName : new String[]{null, "", " \t "}) {
+            when(courtFinderService.getC100NearestFamilyCourt(postcode)).thenReturn(CourtVenue.builder()
+                .siteName(siteName).courtName("Formal Court Name").build());
+
+            assertEquals("No Court Fetched",
+                         caseController.findCourtByPostCodeAndService(AUTH_TOKEN, SERV_AUTH_TOKEN, postcode));
+        }
     }
 
     @Test

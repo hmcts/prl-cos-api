@@ -19,7 +19,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
-import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
@@ -48,6 +48,7 @@ import java.util.concurrent.Future;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static uk.gov.hmcts.reform.prl.config.DocumentGenerationExecutorVirtualConfig.DOCUMENT_EXECUTOR_SERVICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CURRENCY_SIGN_POUND;
@@ -113,7 +114,7 @@ public class PrePopulateFeeAndSolicitorNameController {
                         .errors(errorList)
                         .build();
                 }
-                Court closestChildArrangementsCourt = courtLocatorService
+                CourtVenue closestChildArrangementsCourt = courtLocatorService
                     .getNearestFamilyCourt(callbackRequest.getCaseDetails()
                                                .getCaseData());
 
@@ -128,7 +129,8 @@ public class PrePopulateFeeAndSolicitorNameController {
                     .applicantSolicitorEmailAddress(userDetails.getEmail())
                     .caseworkerEmailAddress(southamptonCourtEmailAddress)
                     .feeAmount(CURRENCY_SIGN_POUND + feeResponse.getAmount().toString())
-                    .courtName((closestChildArrangementsCourt != null) ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
+                    .courtName(closestChildArrangementsCourt == null || isBlank(closestChildArrangementsCourt.getCourtDisplayName())
+                                   ? "No Court Fetched" : closestChildArrangementsCourt.getCourtDisplayName())
                     .build();
                 if (TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())
                     && isNotEmpty(caseData.getMiamPolicyUpgradeDetails())) {

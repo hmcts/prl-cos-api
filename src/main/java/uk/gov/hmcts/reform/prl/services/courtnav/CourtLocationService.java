@@ -29,18 +29,28 @@ public class CourtLocationService {
         CaseData populatedCaseData = caseData;
 
         if (StringUtils.isNotBlank(epimsId)) {
+            log.info("CourtNav court RefData lookup: selectedEpimmsId={}", epimsId);
             Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(epimsId, auth);
 
             if (courtVenue.isPresent()) {
-                populatedCaseData = populateFromEpimsId(caseData, courtVenue.get(), epimsId);
+                CourtVenue venue = courtVenue.get();
+                log.info("CourtNav court RefData venue: selectedEpimmsId={}, epimmsId={}, siteName={}, courtName={}, "
+                             + "venueName={}, regionId={}",
+                         epimsId, venue.getCourtEpimmsId(), venue.getSiteName(), venue.getCourtName(),
+                         venue.getVenueName(), venue.getRegionId());
+                populatedCaseData = populateFromEpimsId(caseData, venue, epimsId);
             } else {
-                log.warn("Could not find court venue for EPIMS ID: {}", epimsId);
+                log.warn("CourtNav court RefData venue not found: selectedEpimmsId={}", epimsId);
             }
         } else {
-            log.debug("No EPIMS ID provided on case");
+            log.info("CourtNav court RefData lookup skipped: no EPIMMS ID provided");
         }
 
         validateCaseManagementLocation(populatedCaseData);
+        CaseManagementLocation location = populatedCaseData.getCaseManagementLocation();
+        log.info("CourtNav court details prepared: courtId={}, courtName={}, baseLocation={}, baseLocationName={}, regionId={}",
+                 populatedCaseData.getCourtId(), populatedCaseData.getCourtName(), location.getBaseLocation(),
+                 location.getBaseLocationName(), location.getRegion());
         return populatedCaseData;
     }
 

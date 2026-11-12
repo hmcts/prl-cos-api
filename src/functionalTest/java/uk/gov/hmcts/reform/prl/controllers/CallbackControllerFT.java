@@ -41,7 +41,7 @@ public class CallbackControllerFT {
     private static final String C100_UPDATE_APPLICATION = "requests/call-back-controller-update-application.json";
     private static final String C100_WITHDRAW_APPLICATION = "requests/call-back-controller-withdraw-application.json";
     private static final String C100_SEND_TO_GATEKEEPER = "requests/call-back-controller-send-to-gatekeeper.json";
-    private static final String C100_RESEND_RPA = "requests/call-back-controller-resend-rpa.json";
+    private static final String C100_COURT_ALLOCATION = "requests/call-back-controller-court-allocation.json";
     private static final String FL401_ABOUT_TO_SUBMIT_CREATION = "requests/call-back-controller-about-to-submit-case-creation.json";
     private static final String FL401_CASE_DATA = "requests/call-back-controller-fl401-case-data.json";
     private static final String C100_SEND_TO_GATEKEEPERJUDGE = "requests/call-back-controller-send-to-gatekeeperForJudge.json";
@@ -205,25 +205,6 @@ public class CallbackControllerFT {
     }
 
     @Test
-    public void givenC100Case_whenRpaResent_then200Response() throws Exception {
-        String requestBody = ResourceLoader.loadJson(C100_RESEND_RPA);
-        request
-            .header("Content-Type", APPLICATION_JSON_VALUE)
-            .header("Accepts", APPLICATION_JSON_VALUE)
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType(APPLICATION_JSON_VALUE)
-            .post("/update-party-details")
-            .then()
-            .assertThat().statusCode(200)
-            .body("data.caseTypeOfApplication", equalTo("C100"),
-                  "data.caApplicant1Policy.OrgPolicyCaseAssignedRole",  equalTo("[C100APPLICANTSOLICITOR1]"),
-                  "data.caRespondent1Policy.OrgPolicyCaseAssignedRole",  equalTo("[C100RESPONDENTSOLICITOR1]"));
-    }
-
-    @Test
     public void givenFl401Case_whenAboutToSubmitCaseCreation_then200ResponseAndApplicantNameUpdated() throws Exception {
         String requestBody = ResourceLoader.loadJson(FL401_ABOUT_TO_SUBMIT_CREATION);
         request
@@ -245,7 +226,7 @@ public class CallbackControllerFT {
 
     @Test
     public void givenC100CasePrePopulateCourtDetailsWithValidCourt() throws Exception {
-        String requestBody = ResourceLoader.loadJson(C100_RESEND_RPA);
+        String requestBody = ResourceLoader.loadJson(C100_COURT_ALLOCATION);
         request
             .header("Content-Type", APPLICATION_JSON_VALUE)
             .header("Accepts", APPLICATION_JSON_VALUE)
@@ -264,7 +245,7 @@ public class CallbackControllerFT {
 
     @Test
     public void givenC100CasePrePopulateCourtDetailsWithoutValidCourt() throws Exception {
-        String requestBody = ResourceLoader.loadJson(C100_RESEND_RPA);
+        String requestBody = ResourceLoader.loadJson(C100_COURT_ALLOCATION);
         request
             .header("Content-Type", APPLICATION_JSON_VALUE)
             .header("Accepts", APPLICATION_JSON_VALUE)

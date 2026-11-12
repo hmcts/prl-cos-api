@@ -32,12 +32,15 @@ import uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CourtLocationService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 
+import java.util.Map;
 import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV_USER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CAFCASS_USER_ROLE;
 
 @Slf4j
@@ -83,7 +86,9 @@ public class CourtNavCaseController {
         caseData = courtLocationService.populateCourtLocation(authorisation, caseData);
         CaseDetails caseDetails = courtNavCaseService.createCourtNavCase(authorisation, caseData);
 
-        log.info("Case has been created {}", caseDetails.getId());
+        Map<String, Object> createdCaseData = Optional.ofNullable(caseDetails.getData()).orElseGet(Map::of);
+        log.info("CourtNav case created: caseId={}, courtId={}, courtName={}",
+                 caseDetails.getId(), createdCaseData.get(COURT_ID_FIELD), createdCaseData.get(COURT_NAME_FIELD));
         courtNavCaseService.refreshTabs(authorisation, String.valueOf(caseDetails.getId()));
 
         return ResponseEntity.status(HttpStatus.CREATED)

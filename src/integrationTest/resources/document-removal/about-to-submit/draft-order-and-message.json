@@ -710,7 +710,6 @@
       },
       "respondentConfidentialDetails": [],
       "familyMediatorServiceName": null,
-      "courtCodeFromFact": "344",
       "caApplicant2InternalFlags": {
         "details": [],
         "groupId": "caApplicant2",
@@ -7298,7 +7297,6 @@
       },
       "respondentConfidentialDetails": [],
       "familyMediatorServiceName": null,
-      "courtCodeFromFact": "344",
       "caApplicant2InternalFlags": {
         "details": [],
         "groupId": "caApplicant2",

@@ -392,6 +392,7 @@ public class CaseDocumentController {
             .findFirst();
 
         if (matchedCaseData.isEmpty()) {
+            log.info("No delinked documents found.");
             return;
         }
 

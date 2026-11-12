@@ -1,236 +1,124 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import javassist.NotFoundException;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.clients.os.OsCourtFinderApi;
 import uk.gov.hmcts.reform.prl.models.LocalAuthorityCourt;
-import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.ordnancesurvey.Dpa;
 import uk.gov.hmcts.reform.prl.models.ordnancesurvey.OsPlacesResponse;
 import uk.gov.hmcts.reform.prl.models.ordnancesurvey.Result;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.verify;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class OsCourtFinderServiceTest {
-
-    private static final String USER_TOKEN = "userToken";
-    private static final String COURT_SLUG = "central-family-court";
-    public static final String FACT_URL = "https://www.find-court-tribunal.service.gov.uk/courts/";
-
     @Mock
     private SystemUserService systemUserService;
-
     @Mock
     private OsCourtFinderApi osCourtFinderApi;
-
     @Mock
     private LocalAuthorityCourtDataLoader localAuthorityCourtDataLoader;
     @Mock
     private LocationRefDataService locationRefDataService;
-    @Mock
-    private CourtFinderApi courtFinderApi;
-
     @InjectMocks
     private OsCourtFinderService osCourtFinderService;
 
     @Test
-    void shouldFindCourt() throws NotFoundException {
-        String epimmsId = "356855";
-        String localCustodianCode = "5570";
-        String localCustodianDescription = "Custodian Name";
-        LocalAuthorityCourt localAuthorityCourt = LocalAuthorityCourt.builder()
-            .localCustodianCode(localCustodianCode)
-            .specificPostCodes(new ArrayList<>())
-            .epimmsId(epimmsId)
-            .build();
+    void resolvesCourtUsingOsAndRefData() throws Exception {
+        LocalAuthorityCourt mapping = LocalAuthorityCourt.builder().localCustodianCode("123")
+            .epimmsId("234946").build();
+        when(localAuthorityCourtDataLoader.getLocalAuthorityCourtList()).thenReturn(List.of(mapping));
+        when(osCourtFinderApi.findCouncilByPostcode("SA1 2FA")).thenReturn(osResponse("123", "Swansea"));
+        CourtVenue venue = CourtVenue.builder().courtEpimmsId("234946")
+            .siteName("Swansea Civil Justice Centre").courtName("Swansea Civil And Family Justice Centre").build();
+        when(systemUserService.getSysUserToken()).thenReturn("system-token");
+        when(locationRefDataService.getCourtDetailsFromEpimmsId("234946", "system-token"))
+            .thenReturn(Optional.of(venue));
 
-        List<LocalAuthorityCourt> localAuthorityCourtList = new ArrayList<>();
-        localAuthorityCourtList.add(localAuthorityCourt);
-        OsPlacesResponse osPlacesResponse = OsPlacesResponse.builder()
-            .results(List.of(Result.builder()
-                                 .dpa(Dpa.builder()
-                                          .localCustodianCode(localCustodianCode)
-                                          .localCustodianCodeDescription(localCustodianDescription).build())
-                                 .build()))
-            .build();
+        CourtVenue actual = osCourtFinderService.getC100NearestFamilyCourt("SA1 2FA");
 
-        String postcode = "EC2A2AB";
-
-        when(osCourtFinderApi.findCouncilByPostcode(postcode)).thenReturn(osPlacesResponse);
-        when(systemUserService.getSysUserToken()).thenReturn(USER_TOKEN);
-        when(localAuthorityCourtDataLoader.getLocalAuthorityCourtList())
-            .thenReturn(localAuthorityCourtList);
-        CourtVenue courtVenue = CourtVenue.builder().factUrl(FACT_URL + COURT_SLUG).build();
-        when(locationRefDataService.getCourtDetailsFromEpimmsId(epimmsId, USER_TOKEN))
-            .thenReturn(Optional.of(courtVenue));
-
-        when(courtFinderApi.getCourtDetails(COURT_SLUG)).thenReturn(Court.builder().courtSlug(COURT_SLUG).build());
-
-        ImmutablePair<CourtVenue, Court> courtPair = osCourtFinderService.getC100NearestFamilyCourtAndVenue(postcode);
-
-        assertNotNull(courtPair);
-        assertNotNull(courtPair.getLeft());
-        assertNotNull(courtPair.getRight());
-        assertEquals(courtVenue, courtPair.getLeft());
-        assertEquals(COURT_SLUG, courtPair.getRight().getCourtSlug());
-
+        assertSame(venue, actual);
+        assertEquals("Swansea Civil Justice Centre", actual.getCourtDisplayName());
+        assertEquals("234946", actual.getCourtEpimmsId());
     }
 
     @Test
-    void shouldFindCourtWhenSpecificPostCodePresent() throws NotFoundException {
-        String epimmsId = "373584";
-        String localCustodianCode = "5420";
-        LocalAuthorityCourt localAuthorityCourt = LocalAuthorityCourt.builder()
-            .localCustodianCode(localCustodianCode)
-            .specificPostCodes(List.of("N2","N6","N8","N10","N11","N15","N17","N22"))
-            .epimmsId(epimmsId)
-            .build();
+    void specificPostcodeMappingDoesNotCallOs() throws Exception {
+        when(localAuthorityCourtDataLoader.getLocalAuthorityCourtList()).thenReturn(List.of(
+            LocalAuthorityCourt.builder().specificPostCodes(List.of("N11")).epimmsId("123456").build()));
+        CourtVenue venue = CourtVenue.builder().courtEpimmsId("123456")
+            .siteName("Family Court").courtName("Formal Family Court").build();
+        when(systemUserService.getSysUserToken()).thenReturn("system-token");
+        when(locationRefDataService.getCourtDetailsFromEpimmsId("123456", "system-token"))
+            .thenReturn(Optional.of(venue));
 
-        List<LocalAuthorityCourt> localAuthorityCourtList = new ArrayList<>();
-        localAuthorityCourtList.add(localAuthorityCourt);
-
-        when(systemUserService.getSysUserToken()).thenReturn(USER_TOKEN);
-        when(localAuthorityCourtDataLoader.getLocalAuthorityCourtList())
-            .thenReturn(localAuthorityCourtList);
-        CourtVenue courtVenue = CourtVenue.builder().factUrl(FACT_URL + COURT_SLUG).build();
-        when(locationRefDataService.getCourtDetailsFromEpimmsId(epimmsId, USER_TOKEN))
-            .thenReturn(Optional.of(courtVenue));
-
-        when(courtFinderApi.getCourtDetails(COURT_SLUG)).thenReturn(Court.builder().courtSlug(COURT_SLUG).build());
-
-        ImmutablePair<CourtVenue, Court> courtPair = osCourtFinderService.getC100NearestFamilyCourtAndVenue("N111JD");
-
-        assertNotNull(courtPair);
-        assertNotNull(courtPair.getLeft());
-        assertNotNull(courtPair.getRight());
-        assertEquals(courtVenue, courtPair.getLeft());
-        assertEquals(COURT_SLUG, courtPair.getRight().getCourtSlug());
-
+        assertSame(venue, osCourtFinderService.getC100NearestFamilyCourt("N11 1JD"));
         verifyNoInteractions(osCourtFinderApi);
-
+        assertEquals("Family Court", venue.getCourtDisplayName());
     }
 
     @Test
-    void shouldNotFindCourtWhenLocalAuthorityCourtIsEmpty() throws NotFoundException {
-        String postcode = "N111JD";
+    void returnsNullWhenNoLocalAuthorityMatches() throws Exception {
+        when(localAuthorityCourtDataLoader.getLocalAuthorityCourtList()).thenReturn(List.of());
+        when(osCourtFinderApi.findCouncilByPostcode("SA1 2FA")).thenReturn(osResponse("123", "Swansea"));
 
-        List<LocalAuthorityCourt> localAuthorityCourtList = new ArrayList<>();
-
-        when(systemUserService.getSysUserToken()).thenReturn(USER_TOKEN);
-        when(localAuthorityCourtDataLoader.getLocalAuthorityCourtList())
-            .thenReturn(localAuthorityCourtList);
-
-        Court court = osCourtFinderService.getC100NearestFamilyCourt(postcode);
-
-        assertNull(court);
-        verifyNoInteractions(locationRefDataService);
-        verifyNoInteractions(courtFinderApi);
+        assertNull(osCourtFinderService.getC100NearestFamilyCourt("SA1 2FA"));
+        verifyNoInteractions(locationRefDataService, systemUserService);
     }
 
     @Test
-    void shouldNotFindCourtWhenOsCourtFinderApiResponseIsNull() throws NotFoundException {
-        String postcode = "EC2A2AB";
-        String epimmsId = "373584";
-        String localCustodianCode = "5420";
-        LocalAuthorityCourt localAuthorityCourt = LocalAuthorityCourt.builder()
-            .localCustodianCode(localCustodianCode)
-            .specificPostCodes(new ArrayList<>())
-            .epimmsId(epimmsId)
-            .build();
+    void returnsNullWhenVenueIsMissing() throws Exception {
+        when(localAuthorityCourtDataLoader.getLocalAuthorityCourtList()).thenReturn(List.of(
+            LocalAuthorityCourt.builder().specificPostCodes(List.of("N11")).epimmsId("123456").build()));
+        when(systemUserService.getSysUserToken()).thenReturn("system-token");
+        when(locationRefDataService.getCourtDetailsFromEpimmsId("123456", "system-token"))
+            .thenReturn(Optional.empty());
 
-        List<LocalAuthorityCourt> localAuthorityCourtList = new ArrayList<>();
-        localAuthorityCourtList.add(localAuthorityCourt);
-
-        when(osCourtFinderApi.findCouncilByPostcode(postcode)).thenReturn(OsPlacesResponse.builder().build());
-        when(localAuthorityCourtDataLoader.getLocalAuthorityCourtList())
-            .thenReturn(localAuthorityCourtList);
-
-        Court court = osCourtFinderService.getC100NearestFamilyCourt(postcode);
-
-        assertNull(court);
-        verifyNoInteractions(locationRefDataService);
-        verifyNoInteractions(courtFinderApi);
+        assertNull(osCourtFinderService.getC100NearestFamilyCourt("N11 1JD"));
     }
 
     @Test
-    void shouldReturnLocalCustodianCodeByPostCode() throws NotFoundException {
-        String expectedValue = "123";
-        String localCustodianDescription = "Custodian Name";
-        OsPlacesResponse osPlacesResponse = OsPlacesResponse.builder()
-            .results(List.of(Result.builder()
-                                 .dpa(Dpa.builder()
-                                          .localCustodianCode(expectedValue)
-                                          .localCustodianCodeDescription(localCustodianDescription)
-                                          .build())
-                                 .build()))
-            .build();
-        when(osCourtFinderApi.findCouncilByPostcode("EC2A2AB")).thenReturn(osPlacesResponse);
-
-        String result = osCourtFinderService.getLocalCustodianCodeByPostCode("EC2A2AB");
-
-        assertEquals(expectedValue, result);
-        verify(osCourtFinderApi).findCouncilByPostcode(anyString());
+    void rejectsMissingPostcode() {
+        assertThrows(IllegalArgumentException.class, () -> osCourtFinderService.getC100NearestFamilyCourt(null));
+        assertThrows(IllegalArgumentException.class, () -> osCourtFinderService.getC100NearestFamilyCourt(""));
+        verifyNoInteractions(osCourtFinderApi, locationRefDataService);
     }
 
     @Test
-    void shouldReturnLocalCustodianCodeByPostCodeWhenOneDpaHasBlankCustodianDescription() throws NotFoundException {
-        String localCustodianCode1 = "123";
-        String localCustodianCode2 = "456";
-        String localCustodianDescription = "Custodian Name";
-        Result result1 = Result.builder().dpa(Dpa.builder()
-                                                  .localCustodianCode(localCustodianCode1)
-                                                  .build()).build();
-        Result result2 = Result.builder().dpa(Dpa.builder()
-                                                 .localCustodianCode(localCustodianCode2)
-                                                  .localCustodianCodeDescription(localCustodianDescription)
-                                                 .build()).build();
-        OsPlacesResponse osPlacesResponse = OsPlacesResponse.builder()
-            .results(List.of(result1, result2)).build();
-        when(osCourtFinderApi.findCouncilByPostcode("EC2A2AB")).thenReturn(osPlacesResponse);
-
-        String result = osCourtFinderService.getLocalCustodianCodeByPostCode("EC2A2AB");
-
-        assertEquals(localCustodianCode2, result);
-        verify(osCourtFinderApi).findCouncilByPostcode(anyString());
+    void skipsResultsWithoutCustodianDescription() throws NotFoundException {
+        when(osCourtFinderApi.findCouncilByPostcode("SA1 2FA")).thenReturn(OsPlacesResponse.builder()
+            .results(List.of(Result.builder().dpa(Dpa.builder().localCustodianCode("wrong").build()).build(),
+                             osResponse("123", "Swansea").getResults().getFirst())).build());
+        assertEquals("123", osCourtFinderService.getLocalCustodianCodeByPostCode("SA1 2FA"));
     }
 
     @Test
-    void shouldReturnNullIfOsApiReturnNoResultByPostCode() throws NotFoundException {
-
-        when(osCourtFinderApi.findCouncilByPostcode("EC2A2AB")).thenReturn(OsPlacesResponse.builder().build());
-
-        String result = osCourtFinderService.getLocalCustodianCodeByPostCode("EC2A2AB");
-
-        assertNull(result);
-        verify(osCourtFinderApi).findCouncilByPostcode(anyString());
+    void returnsNullWhenOsFails() throws Exception {
+        when(osCourtFinderApi.findCouncilByPostcode("SA1 2FA")).thenThrow(new RuntimeException("unavailable"));
+        assertNull(osCourtFinderService.getLocalCustodianCodeByPostCode("SA1 2FA"));
     }
 
     @Test
-    void shouldReturnNullIfOsApiReturnNull() throws NotFoundException {
+    void returnsNullWhenOsResponseIsEmpty() throws Exception {
+        when(osCourtFinderApi.findCouncilByPostcode("SA1 2FA")).thenReturn(OsPlacesResponse.builder().build());
+        assertNull(osCourtFinderService.getLocalCustodianCodeByPostCode("SA1 2FA"));
+    }
 
-        when(osCourtFinderApi.findCouncilByPostcode("EC2A2AB")).thenReturn(null);
-
-        String result = osCourtFinderService.getLocalCustodianCodeByPostCode("EC2A2AB");
-
-        assertNull(result);
-        verify(osCourtFinderApi).findCouncilByPostcode(anyString());
+    private OsPlacesResponse osResponse(String code, String description) {
+        return OsPlacesResponse.builder().results(List.of(Result.builder().dpa(Dpa.builder()
+            .localCustodianCode(code).localCustodianCodeDescription(description).build()).build())).build();
     }
 }
