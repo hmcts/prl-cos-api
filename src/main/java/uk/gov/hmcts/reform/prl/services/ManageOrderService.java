@@ -277,6 +277,17 @@ public class ManageOrderService {
 
     public static final String CIR_DOCUMENTS_REQUESTED = "cirDocumentsRequested";
 
+    public static final String NOT_TO_CONTACT = "[The respondent must not] contact or try to contact or communicate with the applicant"
+        + " in any way or by any means except that (i) you can contact the applicant through solicitors and/or through an agreed third party"
+        + " to make child contact arrangements (ii) you can contact the applicant directly by [means of communication] to make arrangements"
+        + " about the child/ren. (delete whichever of (i) and (ii) do not apply)";
+    public static final String NOT_TO_STREET_ADDRESS = "Go to or travel on [road name] but (i) you can enter [road name] to facilitate"
+        + " contact arrangements for the child/ren which must be agreed in writing or ordered by the court (ii) but otherwise you cannot"
+        + " park your vehicle or leave your bicycle/motorbike or scooter in [road name]. (delete as appropriate)";
+    public static final String NOT_TO_SEND_DOCUMENTS = "If the applicant does not have solicitors, this order does not prevent you"
+        + " from sending documents in respect of these or any other proceedings directly to them. If the applicant has solicitors,"
+        + " you should send any documents to the solicitors. This order shall remain in force until 16:00 on [date].";
+
 
     @Value("${document.templates.common.prl_sdo_draft_template}")
     protected String sdoDraftTemplate;
@@ -1622,6 +1633,18 @@ public class ManageOrderService {
                 caseDataUpdated.put(PENAL_NOTICE_RTF, ManageOrderService.STATIC_PENAL_NOTICE_RTF);
             }
         }
+
+        FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
+        if (fl404CustomFields == null) {
+            fl404CustomFields = FL404.builder().build();
+        }
+
+        fl404CustomFields.setFl404bRespondentNotToContactApplicantText(NOT_TO_CONTACT);
+        fl404CustomFields.setFl404bRespondentNotToStreetAddressText(NOT_TO_STREET_ADDRESS);
+        fl404CustomFields.setFl404bRespondentNotToSendDocumentsText(NOT_TO_SEND_DOCUMENTS);
+        caseData.getManageOrders().toBuilder().fl404CustomFields(
+            fl404CustomFields).build();
+        caseDataUpdated.put("fl404CustomFields", fl404CustomFields);
     }
 
     public DynamicMultiSelectList getChildOption(CaseData caseData) {
