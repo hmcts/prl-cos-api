@@ -41,9 +41,21 @@ public class FL404 {
     private final String fl404bMentionedProperty;
     private final String fl404bAddressOfProperty;
     private final List<String> fl404bRespondentNotToThreat;
+    // New Not to option start
+    private final String fl404bRespondentNotToContactApplicant;
+    private final String fl404bRespondentNotToPlace;
+    private final String fl404bRespondentNotToStreetAddress;
+    private final String fl404bRespondentNotToCommunicate;
+    private final String fl404bRespondentNotToTrack;
+    private final String fl404bRespondentNotToInterfere;
+    private final String fl404bRespondentNotToPost;
+    private final String fl404bRespondentNotToDisclose;
+    private final String fl404bRespondentNotToSendDocuments;
     private String fl404bRespondentNotToContactApplicantText;
     private String fl404bRespondentNotToStreetAddressText;
     private String fl404bRespondentNotToSendDocumentsText;
+    // New Not to option end
+
     private final List<String> fl404bRespondentNotIntimidate;
     private final List<String> fl404bRespondentNotToTelephone;
     private final List<String> fl404bRespondentNotToDamageOrThreat;
