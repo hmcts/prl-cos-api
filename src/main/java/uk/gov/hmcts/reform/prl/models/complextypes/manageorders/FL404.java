@@ -51,6 +51,9 @@ public class FL404 {
     private final List<String> fl404bRespondentNotToPost;
     private final List<String> fl404bRespondentNotToDisclose;
     private final List<String> fl404bRespondentNotToSendDocuments;
+    private String fl404bRespondentNotToContactApplicantLabel;
+    private String fl404bRespondentNotToStreetAddressLabel;
+    private String fl404bRespondentNotToSendDocumentsLabel;
     private String fl404bRespondentNotToContactApplicantText;
     private String fl404bRespondentNotToStreetAddressText;
     private String fl404bRespondentNotToSendDocumentsText;
