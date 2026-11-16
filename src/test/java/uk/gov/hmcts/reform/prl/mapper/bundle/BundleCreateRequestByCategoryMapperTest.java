@@ -599,4 +599,25 @@ class BundleCreateRequestByCategoryMapperTest {
         );
     }
 
+    @Test
+    void testCaseNameHmctsInternalAddedByMapper() {
+        CaseData c100CaseData = CaseData.builder()
+            .id(123456789123L)
+            .caseNameHmctsInternal("Prefix - ApplicantFirstNameAndLastName")
+            .build();
+
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        when(categoriesAndDocumentsHelper.getCategoriesAndDocuments(AUTH_TOKEN, c100CaseData))
+            .thenReturn(new ArrayList<>());
+        when(bundleCategoryConfig.getFolders()).thenReturn(new ArrayList<>());
+
+        BundleCreateRequest bundleCreateRequest = bundleCreateRequestByCategoryMapper
+            .mapCaseDataToBundleCreateRequest(c100CaseData, "eventId",
+                Hearings.hearingsWith().caseHearings(new ArrayList<>()).build(), "sample.yaml");
+
+        assertNotNull(bundleCreateRequest);
+        assertEquals("Prefix - ApplicantFirstNameAndLastName",
+                     bundleCreateRequest.getCaseDetails().getCaseData().getData().getCaseNameHmctsInternal());
+    }
+
 }

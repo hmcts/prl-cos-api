@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
-import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.services.validators.LegalAdviserChecker;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -37,6 +36,7 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.models.user.UserRoles.JUDGE;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmendOrderServiceTest {
@@ -60,11 +60,13 @@ public class AmendOrderServiceTest {
     private UserService userService;
 
     @Mock
+    private UserRoleService userRoleService;
+
+    @Mock
     private Time time;
 
     private final String validAuth = "VALID";
     private uk.gov.hmcts.reform.prl.models.documents.Document originalOrder;
-    private Document stampedDocument = testDocument();
     private UUID uuid = UUID.randomUUID();
     private List<Element<OrderDetails>> orderList;
     private CaseData caseData;
@@ -102,7 +104,7 @@ public class AmendOrderServiceTest {
             validAuth
         )).thenReturn(stampedDocument);*/
         when(time.now()).thenReturn(LocalDateTime.now());
-        when(manageOrderService.getLoggedInUserType(Mockito.anyString())).thenReturn("");
+        when(userRoleService.getLoggedInUserType(Mockito.anyString())).thenReturn("");
 
         UserDetails userDetails = UserDetails.builder().forename("test").build();
         when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
@@ -136,7 +138,7 @@ public class AmendOrderServiceTest {
         assertNotNull(amendOrderService.setDraftOrderCollection(caseData,
                                                                 uk.gov.hmcts.reform.prl.models.documents.Document
                                                                    .builder().build(),
-                                                                UserRoles.JUDGE.name(),"currentUserName"
+                                                                JUDGE.name(),"currentUserName", JUDGE
         ));
     }
 
@@ -153,7 +155,7 @@ public class AmendOrderServiceTest {
         assertNotNull(amendOrderService.setDraftOrderCollection(caseData,
                                                                 uk.gov.hmcts.reform.prl.models.documents.Document
                                                                     .builder().build(),
-                                                                "","currentUserName"));
+                                                                "","currentUserName", null));
     }
 
     @Test
@@ -169,7 +171,7 @@ public class AmendOrderServiceTest {
         assertNotNull(amendOrderService.setDraftOrderCollection(caseData,
                                                                 uk.gov.hmcts.reform.prl.models.documents.Document
                                                                     .builder().build(),
-                                                                "","currentUserName"));
+                                                                "","currentUserName", null));
     }
 
     @Test
@@ -185,7 +187,7 @@ public class AmendOrderServiceTest {
         assertNotNull(amendOrderService.setDraftOrderCollection(caseData,
                                                                 uk.gov.hmcts.reform.prl.models.documents.Document
                                                                     .builder().build(),
-                                                                "","currentUserName"));
+                                                                "","currentUserName", null));
     }
 
     @Test
@@ -210,7 +212,7 @@ public class AmendOrderServiceTest {
         assertNotNull(amendOrderService.setDraftOrderCollection(caseData,
                                                                 uk.gov.hmcts.reform.prl.models.documents.Document
                                                                     .builder().build(),
-                                                                "","currentUserName"));
+                                                                "","currentUserName", null));
     }
 
     @Test
@@ -227,7 +229,7 @@ public class AmendOrderServiceTest {
         assertNotNull(amendOrderService.setDraftOrderCollection(caseData,
                                                                 uk.gov.hmcts.reform.prl.models.documents.Document
                                                                     .builder().build(),
-                                                                UserRoles.JUDGE.name(),"currentUserName"));
+                                                                JUDGE.name(),"currentUserName", JUDGE));
     }
 
     @Test
@@ -250,7 +252,7 @@ public class AmendOrderServiceTest {
         assertNotNull(amendOrderService.setDraftOrderCollection(caseData,
                                                                 uk.gov.hmcts.reform.prl.models.documents.Document
                                                                     .builder().build(),
-                                                                "","currentUserName"));
+                                                                "","currentUserName", null));
     }
 
     @Test

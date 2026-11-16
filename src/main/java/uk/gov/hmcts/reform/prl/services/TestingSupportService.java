@@ -237,9 +237,15 @@ public class TestingSupportService {
             caseDataUpdated.put(CASE_DATA_ID, initialCaseDetails.getId());
             caseDataUpdated.put(APPLICANT_CASE_NAME, initialCaseData.getApplicantCaseName());
             caseDataUpdated.put(CASE_NAME_HMCTS_INTERNAL, initialCaseData.getApplicantCaseName());
-            caseDataUpdated.put(IS_ISSUED_AFTER_CASENAME_RELEASE,
-                          featureToggleService.isCaseIssuedAfterReleaseDate(LocalDate.now())
-                              ? Yes.getDisplayedValue() : No.getDisplayedValue());
+            if (adminCreateApplication) {
+                caseDataUpdated.put(
+                    IS_ISSUED_AFTER_CASENAME_RELEASE,
+                    featureToggleService.isCaseIssuedAfterReleaseDate(LocalDate.now())
+                        ? Yes.getDisplayedValue() : No.getDisplayedValue()
+                );
+            } else {
+                caseDataUpdated.put(IS_ISSUED_AFTER_CASENAME_RELEASE, No.getDisplayedValue());
+            }
             caseDataUpdated.put(CASE_ACCESS_CATEGORY,initialCaseData.getCaseTypeOfApplication());
             if (FL401_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
                 caseDataUpdated.put(APPLICANT_OR_RESPONDENT_CASE_NAME, initialCaseData.getApplicantCaseName());
