@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -19,8 +22,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AUTHORIZATION_H
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
-class CaseControllerFunctionalTest {
-
 @TestPropertySource(
     properties = {
         "idam.client.secret=${CITIZEN_IDAM_CLIENT_SECRET}",
