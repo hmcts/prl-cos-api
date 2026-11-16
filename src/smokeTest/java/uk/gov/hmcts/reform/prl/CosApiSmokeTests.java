@@ -9,7 +9,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
@@ -23,7 +22,12 @@ import static org.hamcrest.Matchers.hasKey;
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
-@ContextConfiguration
+@org.springframework.test.context.TestPropertySource(properties = {
+    "hearing_component.api.feign-url=http://localhost:4044",
+    "hearing_component.futureHearingStatus=HEARING_REQUESTED,AWAITING_LISTING,LISTED,UPDATE_REQUESTED,"
+        + "UPDATE_SUBMITTED,EXCEPTION,CANCELLATION_REQUESTED,CANCELLATION_SUBMITTED,AWAITING_ACTUALS",
+    "hearing_component.hearingStatusesToFilter=COMPLETED,AWAITING_ACTUALS"
+})
 public class CosApiSmokeTests {
 
     private static final String SEND_AND_REPLY_REQUEST = "requests/send-and-reply-request.json";

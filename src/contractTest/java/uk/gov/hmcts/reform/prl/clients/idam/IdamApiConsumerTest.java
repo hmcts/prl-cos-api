@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.idam.client"})
 @TestPropertySource(
-    properties = {"idam.api.url=localhost:5000"}
+    properties = {"idam.api.url=localhost:5000","hearing_component.api.feign-url="}
 )
 @EnableAutoConfiguration
 @ExtendWith(PactConsumerTestExt.class)
