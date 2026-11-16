@@ -9,16 +9,19 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
@@ -26,6 +29,7 @@ import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
+import uk.gov.hmcts.reform.prl.models.court.CourtOnboardingResponse;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
@@ -272,6 +276,29 @@ public class CaseController {
             return caseService.fetchIdamAmRoles(authorisation, emailId);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @GetMapping(value = "/search/{postcode}/onboarding", produces = APPLICATION_JSON)
+    @Operation(description = "Resolve a C100 court by postcode and check whether it is onboarded")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Court and onboarding status resolved"),
+        @ApiResponse(responseCode = "401", description = "Client is not authorised"),
+        @ApiResponse(responseCode = "404", description = "No court found for postcode"),
+        @ApiResponse(responseCode = "503", description = "OS postcode lookup unavailable"),
+        @ApiResponse(responseCode = "500", description = "Court lookup failed")
+    })
+    public CourtOnboardingResponse getCourtOnboardingStatus(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @PathVariable("postcode") String postcode) {
+        if (!authorisationService.isAuthorized(authorisation, s2sToken)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, INVALID_CLIENT);
+        }
+        try {
+            return courtFinderService.getC100CourtOnboardingStatus(postcode);
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No court found for postcode", e);
         }
     }
 

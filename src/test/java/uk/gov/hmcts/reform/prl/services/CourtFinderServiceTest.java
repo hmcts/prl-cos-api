@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndOtherPeopleRelatio
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.court.CourtOnboardingResponse;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
@@ -36,7 +37,10 @@ import java.util.Optional;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -809,4 +813,71 @@ public class CourtFinderServiceTest {
         assertNull(courtFinderService.getNearestFamilyCourt(caseData));
         verifyNoInteractions(locationRefDataService, systemUserService, osCourtFinderService);
     }
+
+    @Test
+    public void testCourtOnboardingUsesResolvedEpimmsId() throws Exception {
+        when(osCourtFinderService.getC100NearestFamilyCourt("SA1 2FA"))
+            .thenReturn(CourtVenue.builder().courtEpimmsId(" 234946 ").siteName("Swansea Civil Justice Centre").build());
+        when(locationRefDataService.isCourtOnboarded("234946")).thenReturn(true);
+
+        CourtOnboardingResponse response = courtFinderService.getC100CourtOnboardingStatus("SA1 2FA");
+
+        assertEquals("234946", response.getEpimmsId());
+        assertEquals("Swansea Civil Justice Centre", response.getCourtName());
+        assertTrue(response.isOnboarded());
+        verify(locationRefDataService).isCourtOnboarded("234946");
+    }
+
+    @Test
+    public void testCourtOnboardingReturnsFalseForOfflineOrUnconfiguredCourt() throws Exception {
+        when(osCourtFinderService.getC100NearestFamilyCourt("SA1 2FA"))
+            .thenReturn(CourtVenue.builder().courtEpimmsId("234946").siteName("Swansea Civil Justice Centre").build());
+        when(locationRefDataService.isCourtOnboarded("234946")).thenReturn(false);
+
+        CourtOnboardingResponse response = courtFinderService.getC100CourtOnboardingStatus("SA1 2FA");
+
+        assertEquals("234946", response.getEpimmsId());
+        assertFalse(response.isOnboarded());
+    }
+
+    @Test
+    public void testCourtOnboardingDoesNotDependOnTheCourtName() throws Exception {
+        when(osCourtFinderService.getC100NearestFamilyCourt("SA1 2FA"))
+            .thenReturn(CourtVenue.builder().courtEpimmsId("234946").build());
+        when(locationRefDataService.isCourtOnboarded("234946")).thenReturn(true);
+
+        CourtOnboardingResponse response = courtFinderService.getC100CourtOnboardingStatus("SA1 2FA");
+
+        assertNull(response.getCourtName());
+        assertTrue(response.isOnboarded());
+    }
+
+    @Test
+    public void testCourtOnboardingRejectsMissingCourt() throws Exception {
+        when(osCourtFinderService.getC100NearestFamilyCourt("SA1 2FA")).thenReturn(null);
+
+        assertThrows(NotFoundException.class, () -> courtFinderService.getC100CourtOnboardingStatus("SA1 2FA"));
+        verifyNoInteractions(locationRefDataService);
+    }
+
+    @Test
+    public void testCourtOnboardingRejectsMissingEpimmsId() throws Exception {
+        for (String courtId : new String[]{null, "", "   "}) {
+            when(osCourtFinderService.getC100NearestFamilyCourt("SA1 2FA"))
+                .thenReturn(CourtVenue.builder().courtEpimmsId(courtId).siteName("Swansea Civil Justice Centre").build());
+
+            assertThrows(NotFoundException.class, () -> courtFinderService.getC100CourtOnboardingStatus("SA1 2FA"));
+        }
+        verifyNoInteractions(locationRefDataService);
+    }
+
+    @Test
+    public void testCourtOnboardingPropagatesLookupFailures() throws Exception {
+        when(osCourtFinderService.getC100NearestFamilyCourt("SA1 2FA"))
+            .thenThrow(new IllegalStateException("RefData unavailable"));
+
+        assertThrows(IllegalStateException.class, () -> courtFinderService.getC100CourtOnboardingStatus("SA1 2FA"));
+        verifyNoInteractions(locationRefDataService);
+    }
+
 }

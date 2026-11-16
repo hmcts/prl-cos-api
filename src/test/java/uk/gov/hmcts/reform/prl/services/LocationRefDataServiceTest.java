@@ -37,7 +37,6 @@ import static uk.gov.hmcts.reform.prl.services.LocationRefDataService.SCOTLAND;
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class LocationRefDataServiceTest {
 
-
     @InjectMocks
     private LocationRefDataService locationRefDataService;
 
@@ -340,4 +339,48 @@ public class LocationRefDataServiceTest {
         assertEquals(MIDLANDS, caseManagementLocation.getRegionName());
         assertEquals("2", caseManagementLocation.getRegion());
     }
+
+    @Test
+    public void testCourtOnboardedWhenConfiguredWithoutEmail() {
+        for (String configuration : List.of("234946", "234946:", "234946:   ", " 123456:offline@example.test, 234946 ")) {
+            ReflectionTestUtils.setField(locationRefDataService, "courtsToFilter", configuration);
+            assertTrue(configuration, locationRefDataService.isCourtOnboarded("234946"));
+        }
+    }
+
+    @Test
+    public void testCourtWithConfiguredEmailIsOffline() {
+        ReflectionTestUtils.setField(locationRefDataService, "courtsToFilter", "234946:offline@example.test,195520");
+        assertFalse(locationRefDataService.isCourtOnboarded("234946"));
+        assertTrue(locationRefDataService.isCourtOnboarded("195520"));
+    }
+
+    @Test
+    public void testOfflineConfigurationTakesPrecedenceForDuplicateCourtIds() {
+        for (String configuration : List.of("234946,234946:offline@example.test", "234946:offline@example.test,234946")) {
+            ReflectionTestUtils.setField(locationRefDataService, "courtsToFilter", configuration);
+            assertFalse(configuration, locationRefDataService.isCourtOnboarded("234946"));
+        }
+    }
+
+    @Test
+    public void testCourtOnboardingRequiresAnExactConfiguredId() {
+        ReflectionTestUtils.setField(locationRefDataService, "courtsToFilter", "234946,195520:offline@example.test");
+        assertFalse(locationRefDataService.isCourtOnboarded("23494"));
+        assertFalse(locationRefDataService.isCourtOnboarded("999999"));
+        assertTrue(locationRefDataService.isCourtOnboarded(" 234946 "));
+    }
+
+    @Test
+    public void testCourtOnboardingWithMissingConfigurationOrId() {
+        for (String configuration : new String[]{null, "", "   "}) {
+            ReflectionTestUtils.setField(locationRefDataService, "courtsToFilter", configuration);
+            assertFalse(locationRefDataService.isCourtOnboarded("234946"));
+        }
+        ReflectionTestUtils.setField(locationRefDataService, "courtsToFilter", "234946");
+        for (String courtId : new String[]{null, "", "   "}) {
+            assertFalse(locationRefDataService.isCourtOnboarded(courtId));
+        }
+    }
+
 }

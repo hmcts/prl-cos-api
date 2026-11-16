@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndOtherPeopleRelatio
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.court.CourtOnboardingResponse;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -25,6 +26,7 @@ import java.util.Optional;
 
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.applicant;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.respondent;
@@ -60,6 +62,23 @@ public class CourtFinderService {
 
     public CourtVenue getC100NearestFamilyCourt(String postcode) throws NotFoundException {
         return osCourtFinderService.getC100NearestFamilyCourt(postcode);
+    }
+
+    public CourtOnboardingResponse getC100CourtOnboardingStatus(String postcode) throws NotFoundException {
+        CourtVenue court = getC100NearestFamilyCourt(postcode);
+        if (court == null || isBlank(court.getCourtEpimmsId())) {
+            throw new NotFoundException("No court found for postcode");
+        }
+
+        String epimmsId = court.getCourtEpimmsId().trim();
+        boolean onboarded = locationRefDataService.isCourtOnboarded(epimmsId);
+        log.info("C100 court onboarding decision: epimmsId={}, courtName={}, onboarded={}",
+                 epimmsId, court.getCourtDisplayName(), onboarded);
+        return CourtOnboardingResponse.builder()
+            .epimmsId(epimmsId)
+            .courtName(court.getCourtDisplayName())
+            .onboarded(onboarded)
+            .build();
     }
 
     private String getPostcode(CaseData caseData) throws NotFoundException {

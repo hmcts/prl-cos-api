@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.prl.clients.os.OsCourtFinderApi;
+import uk.gov.hmcts.reform.prl.exception.OsCourtLookupException;
 import uk.gov.hmcts.reform.prl.models.ordnancesurvey.Dpa;
 import uk.gov.hmcts.reform.prl.models.ordnancesurvey.OsPlacesResponse;
 import uk.gov.hmcts.reform.prl.models.ordnancesurvey.Result;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 public class OsCourtFinderApiClientIntegrationTest {
@@ -60,14 +62,11 @@ public class OsCourtFinderApiClientIntegrationTest {
     }
 
     @Test
-    void shouldReturnNullIfApiThrowException() throws Exception {
-        assertThat(osCourtFinderApi)
-            .isNotNull();
-
+    void shouldPropagateOsLookupFailure() {
         Mockito.doThrow(FeignException.FeignClientException.class).when(osCourtFinderApi).findCouncilByPostcode("EC2A2AB");
 
-        String response = osCourtFinderService.getLocalCustodianCodeByPostCode("EC2A2AB");
-
-        assertThat(response).isNull();
+        assertThatThrownBy(() -> osCourtFinderService.getLocalCustodianCodeByPostCode("EC2A2AB"))
+            .isInstanceOf(OsCourtLookupException.class)
+            .hasCauseInstanceOf(FeignException.FeignClientException.class);
     }
 }

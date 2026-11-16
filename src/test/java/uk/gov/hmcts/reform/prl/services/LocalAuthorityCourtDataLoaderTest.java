@@ -3,8 +3,11 @@ package uk.gov.hmcts.reform.prl.services;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.prl.models.LocalAuthorityCourt;
 import uk.gov.hmcts.reform.prl.utils.csv.CsvReader;
 
 import java.util.List;
@@ -38,6 +41,24 @@ class LocalAuthorityCourtDataLoaderTest {
         String custodianCode = dataLoader.getLocalAuthorityCourtList().getFirst().getLocalCustodianCode();
         assertEquals("Central Court", localAuthority);
         assertEquals("123", custodianCode);
+    }
+
+    @Test
+    void shouldNormalisePostcodePrefixesWhenLoadingCsvRows() {
+        when(csvReader.read(anyString())).thenReturn(List.of(Map.of(
+            "Specific PostCodes", " sw16 ; N4 ; ; \t ")));
+
+        LocalAuthorityCourt court = dataLoader.getLocalAuthorityCourtList().getFirst();
+
+        assertEquals(List.of("SW16", "N4"), court.getSpecificPostCodes());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", " ; ; ", "\t"})
+    void shouldNotCreatePostcodeOverridesForBlankPrefixes(String prefixes) {
+        when(csvReader.read(anyString())).thenReturn(List.of(Map.of("Specific PostCodes", prefixes)));
+
+        assertEquals(List.of(), dataLoader.getLocalAuthorityCourtList().getFirst().getSpecificPostCodes());
     }
 
 }

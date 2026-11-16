@@ -750,6 +750,8 @@ public class CaseData extends BaseCaseData implements MappableObject {
 
     private DynamicMultiSelectList removeLegalRepAndPartiesList;
 
+    // Retained to preserve historical CCD data; new court allocation does not populate this field.
+    private String courtCodeFromFact;
 
     private String tsPaymentServiceRequestReferenceNumber;
     private String tsPaymentStatus;

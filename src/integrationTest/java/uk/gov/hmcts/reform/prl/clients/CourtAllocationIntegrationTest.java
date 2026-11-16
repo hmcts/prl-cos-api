@@ -1,9 +1,14 @@
 package uk.gov.hmcts.reform.prl.clients;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
+import feign.FeignException;
+import javassist.NotFoundException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,8 +20,10 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.os.OsCourtFinderApi;
+import uk.gov.hmcts.reform.prl.exception.OsCourtLookupException;
 import uk.gov.hmcts.reform.prl.models.LocalAuthorityCourt;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
+import uk.gov.hmcts.reform.prl.models.court.CourtOnboardingResponse;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
@@ -33,11 +40,12 @@ import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = CourtAllocationIntegrationTest.Config.class,
     webEnvironment = SpringBootTest.WebEnvironment.NONE,
-    properties = {"postcodelookup.api.key=test-key", "courts.filter=234946:configured@example.com",
+    properties = {"postcodelookup.api.key=test-key", "courts.filter=234946:configured@example.com,123456",
         "courts.daFilter=234946:configured@example.com", "courts.caDefaultCourtEpimmsID=234946"})
 class CourtAllocationIntegrationTest {
     private static final WireMockServer UPSTREAM = new WireMockServer(0);
@@ -117,6 +125,41 @@ class CourtAllocationIntegrationTest {
         assertThat(UPSTREAM.getAllServeEvents()).hasSize(3);
     }
 
+    @ParameterizedTest
+    @CsvSource({"123456,true", "234946,false", "999999,false"})
+    void returnsOnboardingDecisionForOnboardedOfflineAndUnconfiguredCourts(String epimmsId, boolean expectedOnboarded)
+        throws Exception {
+        when(localAuthorityCourtDataLoader.getLocalAuthorityCourtList()).thenReturn(List.of(
+            LocalAuthorityCourt.builder().localCustodianCode("123").epimmsId(epimmsId).build()));
+        UPSTREAM.stubFor(get(urlPathEqualTo("/refdata/location/court-venues/services"))
+            .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody("""
+                {"court_venues":[{"epimms_id":"%s","court_type_id":"18","region":"Wales",
+                "site_name":"Swansea Civil Justice Centre"}]}
+                """.formatted(epimmsId))));
+
+        CourtOnboardingResponse response = courtFinderService.getC100CourtOnboardingStatus("SA1 2FA");
+
+        assertThat(response.getEpimmsId()).isEqualTo(epimmsId);
+        assertThat(response.getCourtName()).isEqualTo("Swansea Civil Justice Centre");
+        assertThat(response.isOnboarded()).isEqualTo(expectedOnboarded);
+        UPSTREAM.verify(1, getRequestedFor(urlPathEqualTo("/postcode")));
+        UPSTREAM.verify(1, getRequestedFor(urlPathEqualTo("/refdata/location/court-venues/services")));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"SA1 2FA", "sa1 2fa", "sa12fa"})
+    void postcodeOverrideResolvesRefDataVenueWithoutCallingOs(String postcode) throws Exception {
+        when(localAuthorityCourtDataLoader.getLocalAuthorityCourtList()).thenReturn(List.of(
+            LocalAuthorityCourt.builder().specificPostCodes(List.of("SA1")).epimmsId("234946").build()));
+
+        CourtOnboardingResponse response = courtFinderService.getC100CourtOnboardingStatus(postcode);
+
+        assertThat(response.getEpimmsId()).isEqualTo("234946");
+        assertThat(response.getCourtName()).isEqualTo("Swansea Civil Justice Centre");
+        UPSTREAM.verify(0, getRequestedFor(urlPathEqualTo("/postcode")));
+        UPSTREAM.verify(1, getRequestedFor(urlPathEqualTo("/refdata/location/court-venues/services")));
+    }
+
     @Test
     void missingVenueDoesNotFallBackToAnotherService() throws Exception {
         UPSTREAM.stubFor(get(urlPathEqualTo("/refdata/location/court-venues/services"))
@@ -124,6 +167,27 @@ class CourtAllocationIntegrationTest {
 
         assertThat(courtFinderService.getC100NearestFamilyCourt("SA1 2FA")).isNull();
         assertThat(UPSTREAM.getAllServeEvents()).hasSize(2);
+    }
+
+    @Test
+    void osServiceFailureIsNotReportedAsAnUnmatchedPostcode() {
+        UPSTREAM.stubFor(get(urlPathEqualTo("/postcode"))
+            .willReturn(aResponse().withStatus(503)));
+
+        assertThatThrownBy(() -> courtFinderService.getC100CourtOnboardingStatus("SA1 2FA"))
+            .isInstanceOf(OsCourtLookupException.class)
+            .hasCauseInstanceOf(FeignException.class);
+        UPSTREAM.verify(0, getRequestedFor(urlPathEqualTo("/refdata/location/court-venues/services")));
+    }
+
+    @Test
+    void successfulOsLookupWithNoResultsIsStillReportedAsAnUnmatchedPostcode() {
+        UPSTREAM.stubFor(get(urlPathEqualTo("/postcode"))
+            .willReturn(aResponse().withHeader("Content-Type", "application/json").withBody("{\"results\":[]}")));
+
+        assertThatThrownBy(() -> courtFinderService.getC100CourtOnboardingStatus("SA1 2FA"))
+            .isInstanceOf(NotFoundException.class);
+        UPSTREAM.verify(0, getRequestedFor(urlPathEqualTo("/refdata/location/court-venues/services")));
     }
 
     @Test

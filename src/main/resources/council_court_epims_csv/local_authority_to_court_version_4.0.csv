@@ -45,7 +45,7 @@ Herefordshire Council,Worcester Combined Court,Worcester Combined Court,1850,,,1
 Hertfordshire County Council,Watford County Court,Watford County Court And Family Court,1900,UB9,,403751,"Station Road, Cassiobury House,WD17 1EZ",,Open,Hertfordshire,South East
 Hull City Council ,Kingston upon Hull Combined Court,Kingston-Upon-Hull Combined Court Centre,2004,,,195520,"The Combined Court Centre,HU1 2EZ",,Open,Humberside,North East
 Isle of Anglesey County  Council,Caernarfon DFC,Caernarfon Justice Centre,6805,,,366572,"Llanberis Road,LL55 2DF",,Open,North Wales,Wales
-Kent County Council,Medway County Court and Family Court,Medway County Court Anchorage House,2275,,,487294,"47-67 High Street Chatham Kent,ME4 4DW",,Open,Kent,South East
+Kent County Council,Medway County Court and Family Court,Medway County Court Anchorage House,2275,,,369145,"HMCTS Main Entrance, Gun Wharf, Dock Road, Chatham,ME4 4AR",,Open,Kent,South East
 Kirklees Council ,Leeds Combined Court,Leeds Combined Court Centre,4715,,,455174,"Oxford Row,LS1 3BG",,Open,West Yorkshire,North East
 Knowsley Metropolitan Borough Council,Liverpool Civil and Family Court,Liverpool Civil And Family Court,4305,,,345663,"Vernon Street, City Square,L2 2BX",,Open,Cheshire Merseyside,North West
 Lancashire County Council,Preston Crown Court and Family Court (Sessions House),Preston Combined Court Centre,2371,,,232580,"The Law Courts, Openshaw Place, Ringway, PR1 2LL",,Open,Lancashire,North West
@@ -85,13 +85,13 @@ London Borough of Southwark ,Central Family Court,Central Family Court,5840,,,35
 London Borough of Sutton,West London Family Court,West London Family Court,5870,KT4;SM1;SM2;SM3;SM4;SM5;SM6;SM7,,373584,"Gloucester House, 4 Dukes Green, Feltham, Middlesex,TW14 0LR",,Open,West London,London
 London Borough of Sutton,East London Family Court,East London Family Court,5870,CR0;CR4;CR5,,898213,"Westferry Circus (Westferry House), Part Ground, 6th And 7th Floors, 11 Westferry Circus, Canary Wharf, London, E14 4HE,E14 4HD",,Open,East London,London
 London Borough of Tower Hamlets,East London Family Court,East London Family Court,5900,,,898213,"Westferry Circus (Westferry House), Part Ground, 6th And 7th Floors, 11 Westferry Circus, Canary Wharf, London, E14 4HE,E14 4HD",,Open,East London,London
-London Borough of Waltham Forest,East London Family Court,East London Family Court,5930, E7;E11;E15;IG8,,898213,"Westferry Circus (Westferry House), Part Ground, 6th And 7th Floors, 11 Westferry Circus, Canary Wharf, London, E14 4HE,E14 4HD",,Open,East London,London
-London Borough of Waltham Forest,Central Family Court,Central Family Court,5930, E4;E10;E17,,356855,"First Avenue House, High Holborn,WC1V 6NP",,Open,Central London,London
+London Borough of Waltham Forest,East London Family Court,East London Family Court,5930,E7;E11;E15;IG8,,898213,"Westferry Circus (Westferry House), Part Ground, 6th And 7th Floors, 11 Westferry Circus, Canary Wharf, London, E14 4HE,E14 4HD",,Open,East London,London
+London Borough of Waltham Forest,Central Family Court,Central Family Court,5930,E4;E10;E17,,356855,"First Avenue House, High Holborn,WC1V 6NP",,Open,Central London,London
 London Borough of Wandsworth,Central Family Court,Central Family Court,5960,,,356855,"First Avenue House, High Holborn,WC1V 6NP",,Open,Central London,London
 London Borough of Westminster,Central Family Court,Central Family Court,5990,,,356855,"First Avenue House, High Holborn,WC1V 6NP",,Open,Central London,London
 Luton Borough Council ,Luton Justice Centre,Arndale House,230,,,365554,"Floors 4 & 5, Arndale House, The Mall, Luton,LU1 2TH",,Open,Bedfordshire,South East
 Manchester City Council,Manchester Civil Justice Centre,Manchester County And Family Court,4215,,,701411,"Bridge Street West,M60 9DJ",,Open,Greater Manchester,North West
-Medway County Council,Medway County Court and Family Court,Medway County Court Anchorage House,2280,,,487294,"47-67 High Street Chatham Kent,ME4 4DW",,Open,Kent,South East
+Medway County Council,Medway County Court and Family Court,Medway County Court Anchorage House,2280,,,369145,"HMCTS Main Entrance, Gun Wharf, Dock Road, Chatham,ME4 4AR",,Open,Kent,South East
 Merthyr Tydfil County Council,Cardiff Civil Justice Centre,Cardiff Civil And Family Justice Centre,6925,,,234850,"Park Street, Cardiff,CF10 1ET",,Open,South East Wales,Wales
 Middlesbrough Borough Council ,Teesside Combined Court ,Teesside Combined Court Centre,734,SR8,,195537,"The Combined Centre, Russell Street, Middlesbrough,TS1 2AE",,Open,Cleveland and South Durham,North East
 Milton Keynes City Council  ,Milton Keynes County Court,Milton Keynes County Court And Family Court,435,,,815997,"Silbury Boulevard,MK9 2DT",,Open,Buckinghamshire,South East
@@ -167,7 +167,7 @@ Swindon County Council ,Swindon Combined Court ,Swindon Combined Court,3935,,,43
 Wiltshire Council ,Swindon Combined Court ,Swindon Combined Court,3940,,,438850,"The Law Courts, Islington Street,SN1 2HG",,Open,Wiltshire Council ,South West
 Southampton City Council ,Southampton Combined Court,Southampton Combined Court Centre,1780,SO16;SO30;SO32;SO40;SO41;SO42;SO45;SO50;SO51;SO52;SO53,,43104,"The Courts of Justice, London Road,SO15 2XQ",,Open,Southampton City Council ,South West
 Isle of Wight Council ,Portsmouth Combined Court ,Portsmouth Combined Court Centre,2114,,,460592,"Courts of Justice, Winston Churchill Avenue,PO1 2EB",,Open,Isle of Wight Council ,South West
-Portsmouth City Council ,Portsmouth Combined Court ,Portsmouth Combined Court Centre,1775,GU31;GU32;GU33;PO7;PO8;PO9:PO10;PO11;PO12;PO13;PO14;PO15;PO16,,460592,"Courts of Justice, Winston Churchill Avenue,PO1 2EB",,Open,Portsmouth City Council ,South West
+Portsmouth City Council ,Portsmouth Combined Court ,Portsmouth Combined Court Centre,1775,GU31;GU32;GU33;PO7;PO8;PO9;PO10;PO11;PO12;PO13;PO14;PO15;PO16,,460592,"Courts of Justice, Winston Churchill Avenue,PO1 2EB",,Open,Portsmouth City Council ,South West
 "Bournemouth, Christchurch and Poole Council ",Bournemouth combined Court ,Bournemouth Combined Court,1260,,,101633,"Wessex Fields, Castle Lane East,BH7 7DS",,Open,"Bournemouth, Christchurch and Poole Council ",South West
 Dorset Council ,Bournemouth combined Court ,Bournemouth Combined Court,1265,,,101633,"Wessex Fields, Castle Lane East,BH7 7DS",,Open,Dorset Council ,South West
 Cornwall Council ,Truro Combined Court ,Truro Combined Court,840,,,475776,"Courts of Justice, Edward Street,TR1 2PB",,Open,Cornwall Council ,South West
@@ -284,18 +284,18 @@ North Kesteven District Council,Lincoln Family Court,Lincoln County Court And Fa
 South Holland District Council,Lincoln Family Court,Lincoln County Court And Family Court,2525,,,195465,"High Street,LN5 7PS",,Open,Lincolnshire,Midlands
 South Kesteven District Council,Lincoln Family Court,Lincoln County Court And Family Court,2530,,,195465,"High Street,LN5 7PS",,Open,Lincolnshire,Midlands
 West Lindsey District Council,Lincoln Family Court,Lincoln County Court And Family Court,2535,,,195465,"High Street,LN5 7PS",,Open,Lincolnshire,Midlands
-Ashford Borough Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2205,,,487294,"47-67 High Street Chatham Kent,ME4 4DW",,Open,Kent,South East
-Canterbury City Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2210,,,487294,"47-67 High Street Chatham Kent,ME4 4DW",,Open,Kent,South East
-Dartford Borough Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2215,,,487294,"47-67 High Street Chatham Kent,ME4 4DW",,Open,Kent,South East
-Dover District Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2220,,,487294,"47-67 High Street Chatham Kent,ME4 4DW",,Open,Kent,South East
-Folkestone & Hythe District Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2250,,,487294,"47-67 High Street Chatham Kent,ME4 4DW",,Open,Kent,South East
-Gravesham Borough Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2230,,,487294,"47-67 High Street Chatham Kent,ME4 4DW",,Open,Kent,South East
-Maidstone Borough Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2235,,,487294,"47-67 High Street Chatham Kent,ME4 4DW",,Open,Kent,South East
-Sevenoaks District Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2245,,,487294,"47-67 High Street Chatham Kent,ME4 4DW",,Open,Kent,South East
-Swale Borough Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2255,,,487294,"47-67 High Street Chatham Kent,ME4 4DW",,Open,Kent,South East
-Thanet District Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2260,,,487294,"47-67 High Street Chatham Kent,ME4 4DW",,Open,Kent,South East
-Tonbridge & Malling Borough Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2265,,,487294,"47-67 High Street Chatham Kent,ME4 4DW",,Open,Kent,South East
-Tunbridge Wells Borough Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2270,,,487294,"47-67 High Street Chatham Kent,ME4 4DW",,Open,Kent,South East
+Ashford Borough Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2205,,,369145,"HMCTS Main Entrance, Gun Wharf, Dock Road, Chatham,ME4 4AR",,Open,Kent,South East
+Canterbury City Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2210,,,369145,"HMCTS Main Entrance, Gun Wharf, Dock Road, Chatham,ME4 4AR",,Open,Kent,South East
+Dartford Borough Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2215,,,369145,"HMCTS Main Entrance, Gun Wharf, Dock Road, Chatham,ME4 4AR",,Open,Kent,South East
+Dover District Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2220,,,369145,"HMCTS Main Entrance, Gun Wharf, Dock Road, Chatham,ME4 4AR",,Open,Kent,South East
+Folkestone & Hythe District Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2250,,,369145,"HMCTS Main Entrance, Gun Wharf, Dock Road, Chatham,ME4 4AR",,Open,Kent,South East
+Gravesham Borough Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2230,,,369145,"HMCTS Main Entrance, Gun Wharf, Dock Road, Chatham,ME4 4AR",,Open,Kent,South East
+Maidstone Borough Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2235,,,369145,"HMCTS Main Entrance, Gun Wharf, Dock Road, Chatham,ME4 4AR",,Open,Kent,South East
+Sevenoaks District Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2245,,,369145,"HMCTS Main Entrance, Gun Wharf, Dock Road, Chatham,ME4 4AR",,Open,Kent,South East
+Swale Borough Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2255,,,369145,"HMCTS Main Entrance, Gun Wharf, Dock Road, Chatham,ME4 4AR",,Open,Kent,South East
+Thanet District Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2260,,,369145,"HMCTS Main Entrance, Gun Wharf, Dock Road, Chatham,ME4 4AR",,Open,Kent,South East
+Tonbridge & Malling Borough Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2265,,,369145,"HMCTS Main Entrance, Gun Wharf, Dock Road, Chatham,ME4 4AR",,Open,Kent,South East
+Tunbridge Wells Borough Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2270,,,369145,"HMCTS Main Entrance, Gun Wharf, Dock Road, Chatham,ME4 4AR",,Open,Kent,South East
 Buckinghamshire Council,Milton Keynes County Court,Milton Keynes County Court And Family Court,440,,,815997,"Silbury Boulevard,MK9 2DT",,Open,Buckinghamshire,South East
 Milton Keynes City Council,Milton Keynes County Court,Milton Keynes County Court And Family Court,435,,,815997,"Silbury Boulevard,MK9 2DT",,Open,Buckinghamshire,South East
 Cherwell District Council,Oxford County Court,Oxford Combined Court Centre,3105,,,371016,"St Aldates,OX1 1TL",,Open,Berkshire and Oxford,South East

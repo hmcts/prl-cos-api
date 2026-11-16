@@ -99,7 +99,8 @@ public class PrePopulateFeeAndSolicitorNameControllerIntegrationTest {
                                                                      .forename("Solicitor Name")
                                                                      .build());
         when(courtLocatorService.getNearestFamilyCourt(any(CaseData.class))).thenReturn(CourtVenue.builder()
-                                                                                            .courtName("Court Name")
+                                                                                            .siteName("Court Name")
+                                                                                            .courtName("Formal Court Name")
                                                                                             .build());
         when(organisationService.getApplicantOrganisationDetails(any(CaseData.class))).thenReturn(CaseData.builder().build());
         when(organisationService.getRespondentOrganisationDetails(any(CaseData.class))).thenReturn(CaseData.builder().build());

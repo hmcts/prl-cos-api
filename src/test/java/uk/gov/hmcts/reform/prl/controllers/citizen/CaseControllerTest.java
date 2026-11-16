@@ -14,6 +14,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -22,12 +24,14 @@ import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.testingsupport.TestLogAppender;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.exception.OsCourtLookupException;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.court.CourtOnboardingResponse;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
@@ -52,7 +56,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TASK_LIST_V3_FLAG;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -630,6 +638,62 @@ public class CaseControllerTest {
         when(courtFinderService.getC100NearestFamilyCourt(postcode)).thenThrow(NotFoundException.class);
         String actualCourtName = caseController.findCourtByPostCodeAndService(AUTH_TOKEN, SERV_AUTH_TOKEN, postcode);
         Assert.assertNull(actualCourtName);
+    }
+
+
+    @Test
+    public void testCourtOnboardingEndpointReturnsJsonIncludingOfflineStatus() throws Exception {
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERV_AUTH_TOKEN)).thenReturn(true);
+        when(courtFinderService.getC100CourtOnboardingStatus("SA1 2FA"))
+            .thenReturn(CourtOnboardingResponse.builder().epimmsId("234946")
+                .courtName("Swansea Civil Justice Centre").onboarded(false).build());
+        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(caseController).build();
+
+        mockMvc.perform(get("/search/{postcode}/onboarding", "SA1 2FA")
+                            .header("Authorization", AUTH_TOKEN)
+                            .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, SERV_AUTH_TOKEN))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.epimmsId").value("234946"))
+            .andExpect(jsonPath("$.courtName").value("Swansea Civil Justice Centre"))
+            .andExpect(jsonPath("$.onboarded").value(false));
+    }
+
+    @Test
+    public void testCourtOnboardingEndpointReturnsNotFound() throws Exception {
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERV_AUTH_TOKEN)).thenReturn(true);
+        when(courtFinderService.getC100CourtOnboardingStatus("SA1 2FA"))
+            .thenThrow(new NotFoundException("No court found for postcode"));
+        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(caseController).build();
+
+        mockMvc.perform(get("/search/{postcode}/onboarding", "SA1 2FA")
+                            .header("Authorization", AUTH_TOKEN)
+                            .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, SERV_AUTH_TOKEN))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testCourtOnboardingEndpointReturnsServiceUnavailableWhenOsFails() throws Exception {
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERV_AUTH_TOKEN)).thenReturn(true);
+        when(courtFinderService.getC100CourtOnboardingStatus("SA1 2FA"))
+            .thenThrow(new OsCourtLookupException(new RuntimeException("OS unavailable")));
+        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(caseController).build();
+
+        mockMvc.perform(get("/search/{postcode}/onboarding", "SA1 2FA")
+                            .header("Authorization", AUTH_TOKEN)
+                            .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, SERV_AUTH_TOKEN))
+            .andExpect(status().isServiceUnavailable());
+    }
+
+    @Test
+    public void testCourtOnboardingEndpointRejectsUnauthorisedClient() throws Exception {
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERV_AUTH_TOKEN)).thenReturn(false);
+        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(caseController).build();
+
+        mockMvc.perform(get("/search/{postcode}/onboarding", "SA1 2FA")
+                            .header("Authorization", AUTH_TOKEN)
+                            .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, SERV_AUTH_TOKEN))
+            .andExpect(status().isUnauthorized());
+        verifyNoInteractions(courtFinderService);
     }
 
 }
