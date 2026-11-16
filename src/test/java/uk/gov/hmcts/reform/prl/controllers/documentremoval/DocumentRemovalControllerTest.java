@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.documentremoval.DocumentRemovalService;
 
 import java.io.IOException;
@@ -21,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,6 +32,8 @@ class DocumentRemovalControllerTest {
     private AuthorisationService authorisationService;
     @Mock
     private DocumentRemovalService documentRemovalService;
+    @Mock
+    private CafcassDateTimeService cafcassDateTimeService;
 
     @InjectMocks
     private DocumentRemovalController controller;
@@ -50,12 +54,14 @@ class DocumentRemovalControllerTest {
 
         assertEquals(data, response.getData());
         verify(documentRemovalService).getCaseDocuments(any());
+        verifyNoInteractions(cafcassDateTimeService);
     }
 
     @Test
     void aboutToStart_unauthorized_throwsException() {
         when(authorisationService.isAuthorized(auth, s2s)).thenReturn(false);
         assertThrows(InvalidClientException.class, () -> controller.aboutToStart(auth, s2s, callbackRequest));
+        verifyNoInteractions(cafcassDateTimeService);
     }
 
     @Test
@@ -68,12 +74,14 @@ class DocumentRemovalControllerTest {
 
         assertEquals(data, response.getData());
         verify(documentRemovalService).getCaseDocumentSelectedForRemoval(any());
+        verifyNoInteractions(cafcassDateTimeService);
     }
 
     @Test
     void midEvent_unauthorized_throwsException() {
         when(authorisationService.isAuthorized(auth, s2s)).thenReturn(false);
         assertThrows(InvalidClientException.class, () -> controller.midEvent(auth, s2s, callbackRequest));
+        verifyNoInteractions(cafcassDateTimeService);
     }
 
     @Test
@@ -86,12 +94,14 @@ class DocumentRemovalControllerTest {
 
         assertEquals(data, response.getData());
         verify(documentRemovalService).removeDocumentFromCaseData(any());
+        verify(cafcassDateTimeService).updateCafcassDateTime(callbackRequest);
     }
 
     @Test
     void aboutToSubmit_unauthorized_throwsException() {
         when(authorisationService.isAuthorized(auth, s2s)).thenReturn(false);
         assertThrows(InvalidClientException.class, () -> controller.aboutToSubmit(auth, s2s, callbackRequest));
+        verifyNoInteractions(cafcassDateTimeService);
     }
 
     @Test
@@ -103,11 +113,13 @@ class DocumentRemovalControllerTest {
         assertNotNull(response);
         verify(documentRemovalService).deleteDocument(any(CaseDetails.class));
         verify(documentRemovalService).executePostSubmittedActions(any(CallbackRequest.class));
+        verifyNoInteractions(cafcassDateTimeService);
     }
 
     @Test
     void submitted_unauthorized_throwsException() {
         when(authorisationService.isAuthorized(auth, s2s)).thenReturn(false);
         assertThrows(InvalidClientException.class, () -> controller.submitted(auth, s2s, callbackRequest));
+        verifyNoInteractions(cafcassDateTimeService);
     }
 }
