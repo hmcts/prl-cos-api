@@ -57,7 +57,7 @@ public class FL404 {
     private String fl404bRespondentNotToContactApplicantText;
     private String fl404bRespondentNotToStreetAddressText;
     private String fl404bRespondentNotToSendDocumentsText;
-    // New Not to option end
+    // New Not to the option end
 
     private final List<String> fl404bRespondentNotIntimidate;
     private final List<String> fl404bRespondentNotToTelephone;
