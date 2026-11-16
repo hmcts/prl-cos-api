@@ -264,6 +264,37 @@ public class CourtNavCaseServiceTest {
         verify(ccdCoreCaseDataService, never()).submitUpdate(any(), any(), any(), any(), anyBoolean());
     }
 
+    @Test
+    public void shouldNotUploadDuplicateDocumentWhenDocumentIdIsNullAndFilenameAlreadyExists() {
+        String existingFileName = "private-law.pdf";
+
+        QuarantineLegalDoc existingDoc = QuarantineLegalDoc.builder()
+            .courtNavQuarantineDocument(
+                uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                    .documentFileName(existingFileName)
+                    .build()
+            )
+            .build();
+
+        caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .applicantCaseName("xyz")
+            .reviewDocuments(ReviewDocuments.builder().build())
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .courtNavQuarantineDocumentList(List.of(element(existingDoc)))
+                                           .build())
+            .build();
+
+        when(CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper)).thenReturn(caseData);
+
+        // documentId is intentionally null; dedupe should happen by filename
+        courtNavCaseService.uploadDocument(authToken, file, "WITNESS_STATEMENT", "1234567891234567", null);
+
+        verify(caseDocumentClient, never()).uploadDocuments(any(), any(), any(), any(), any());
+        verify(manageDocumentsService, never()).moveDocumentsToQuarantineTab(any(), any(), any(), anyString());
+        verify(ccdCoreCaseDataService, never()).submitUpdate(any(), any(), any(), any(), anyBoolean());
+    }
+
     @Test(expected = ResponseStatusException.class)
     public void shouldNotUploadDocumentWhenInvalidDocumentTypeOfDocumentIsRequested() {
         courtNavCaseService.uploadDocument("Bearer abc", file, "InvalidTypeOfDocument",
