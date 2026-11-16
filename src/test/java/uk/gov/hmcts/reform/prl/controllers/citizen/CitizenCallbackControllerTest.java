@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamPolicyUpgradeDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenCaseSubmissionEmail;
@@ -39,8 +38,9 @@ import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -51,7 +51,6 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_1;
-
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CitizenCallbackControllerTest {
@@ -89,22 +88,12 @@ public class CitizenCallbackControllerTest {
     @Mock
     private EventService eventService;
 
-    @Mock
-    private GeneratedDocumentInfo generatedDocumentInfo;
-    CaseData caseData;
+    private CaseData caseData;
 
-    public static final String authToken = "Bearer TestAuthToken";
-
-
+    private static final String AUTH_TOKEN = "Bearer TestAuthToken";
 
     @Before
     public void setup() {
-        generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
-            .binaryUrl("binaryUrl")
-            .hashToken("testHashToken")
-            .build();
-
         Address address = Address.builder()
             .addressLine1("address")
             .postTown("London")
@@ -162,10 +151,52 @@ public class CitizenCallbackControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(systemUserService.getSysUserToken()).thenReturn("sysToken");
         when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(any(), any())).thenReturn(caseData);
-        citizenCallbackController.updateCitizenApplication(authToken, callbackRequest);
+        citizenCallbackController.updateCitizenApplication(AUTH_TOKEN, callbackRequest);
 
-        verify(allTabsService, times(1)).updateAllTabsIncludingConfTab(anyString());
+        verify(allTabsService).updateAllTabsIncludingConfTab(anyString());
+        verify(citizenEmailService).sendCitizenCaseSubmissionEmail(eq(AUTH_TOKEN), any());
         verify(miamPolicyUpgradeFileUploadService).deleteOldMiamPolicyUpgradeDocuments(caseData, caseData, "sysToken");
+    }
+
+    @Test
+    public void updateCitizenApplicationDoesNotDeleteMiamDocsForNonC100Test() throws JsonProcessingException {
+
+        CaseData fl401CaseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .taskListVersion(TASK_LIST_VERSION_V3)
+            .build();
+        Map<String, Object> stringObjectMap = fl401CaseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
+            .data(stringObjectMap).build();
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(caseDetails).caseDetailsBefore(caseDetails).build();
+        when(allTabsService.updateAllTabsIncludingConfTab(anyString())).thenReturn(callbackRequest.getCaseDetails());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(fl401CaseData);
+        when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(any(), any())).thenReturn(fl401CaseData);
+
+        citizenCallbackController.updateCitizenApplication(AUTH_TOKEN, callbackRequest);
+
+        verify(allTabsService).updateAllTabsIncludingConfTab(anyString());
+        verify(citizenEmailService).sendCitizenCaseSubmissionEmail(eq(AUTH_TOKEN), any());
+        verify(miamPolicyUpgradeFileUploadService, never())
+            .deleteOldMiamPolicyUpgradeDocuments(any(), any(), anyString());
+    }
+
+    @Test
+    public void handleSubmittedSubmitsSupplementaryDataTest() {
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
+            .data(stringObjectMap).build();
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(systemUserService.getSysUserToken()).thenReturn("sysToken");
+        when(authTokenGenerator.generate()).thenReturn("s2sToken");
+
+        citizenCallbackController.handleSubmitted(AUTH_TOKEN, callbackRequest);
+
+        verify(coreCaseDataApi).submitSupplementaryData(eq("sysToken"), eq("s2sToken"), anyString(), any());
     }
 
     @Test
@@ -186,8 +217,9 @@ public class CitizenCallbackControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        doNothing().when(citizenEmailService).sendCitizenCaseSubmissionEmail(authToken, caseData);
-        citizenCallbackController.sendNotificationsOnCaseWithdrawn(authToken, callbackRequest);
-        verify(allTabsService, times(0)).updateAllTabsIncludingConfTab(anyString());
+        doNothing().when(citizenEmailService).sendCitizenCaseSubmissionEmail(AUTH_TOKEN, caseData);
+        citizenCallbackController.sendNotificationsOnCaseWithdrawn(AUTH_TOKEN, callbackRequest);
+        verify(allTabsService, never()).updateAllTabsIncludingConfTab(anyString());
+        verify(citizenEmailService).sendCitizenCaseWithdrawalEmail(eq(AUTH_TOKEN), any());
     }
 }

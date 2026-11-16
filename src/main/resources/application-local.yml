@@ -9,3 +9,4 @@ prl:
 feature:
   toggle:
     cafcassDateTimeFeatureEnabled: ${CAFCASS_DATE_TIME_FEATURE_ENABLED:true}
+    awaitingInformationEnabled: ${AWAITING_INFORMATION_ENABLED:true}

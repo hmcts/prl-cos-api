@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -116,7 +115,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_APPLICANT_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENT_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_AND_CAFCASS_OFFICER_DETAILS;
@@ -126,7 +125,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDEN
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper.COMMA_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
-
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
 
 
 @Slf4j
@@ -215,7 +214,7 @@ public class ApplicationsTabService implements TabService {
 
     private CaseData upTabForMiam(CaseData caseData, Map<String, Object> applicationTab) {
         if (PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) {
-            if (ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails())) {
+            if (isNotEmpty(caseData.getMiamPolicyUpgradeDetails())) {
                 caseData = miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(caseData, new HashMap<>());
             }
             applicationTab.put("miamPolicyUpgradeTable", getMiamPolicyUpgradeTable(caseData));
@@ -693,10 +692,10 @@ public class ApplicationsTabService implements TabService {
             childEvidence = childCheck.get().getDisplayedValue();
         }
 
-        YesOrNo mpuIsDomesticAbuseEvidenceProvided = ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails()
+        YesOrNo mpuIsDomesticAbuseEvidenceProvided = isNotEmpty(caseData.getMiamPolicyUpgradeDetails()
                                                                                 .getMpuIsDomesticAbuseEvidenceProvided())
             ? caseData.getMiamPolicyUpgradeDetails().getMpuIsDomesticAbuseEvidenceProvided() : null;
-        String mpuTypeOfPreviousMiamAttendanceEvidence = ObjectUtils.isNotEmpty(caseData.getMiamPolicyUpgradeDetails()
+        String mpuTypeOfPreviousMiamAttendanceEvidence = isNotEmpty(caseData.getMiamPolicyUpgradeDetails()
                                                                                     .getMpuTypeOfPreviousMiamAttendanceEvidence())
             ? caseData.getMiamPolicyUpgradeDetails().getMpuTypeOfPreviousMiamAttendanceEvidence().getDisplayedValue() : null;
 
@@ -828,11 +827,13 @@ public class ApplicationsTabService implements TabService {
         List<Element<OtherProceedingsDetails>> otherProceedingsDetailsList = new ArrayList<>();
 
         for (ProceedingDetails p : proceedings) {
-            String ordersMade = p.getTypeOfOrder().stream().map(TypeOfOrderEnum::getDisplayedValue)
+            String ordersMade = nullSafeList(p.getTypeOfOrder()).stream().map(TypeOfOrderEnum::getDisplayedValue)
                 .collect(Collectors.joining(", "));
 
             OtherProceedingsDetails otherProceedingsDetails = OtherProceedingsDetails.builder()
-                .previousOrOngoingProceedings(p.getPreviousOrOngoingProceedings().getDisplayedValue())
+                .previousOrOngoingProceedings(isNotEmpty(p.getPreviousOrOngoingProceedings())
+                                                  ? p.getPreviousOrOngoingProceedings().getDisplayedValue()
+                                                  : null)
                 .caseNumber(p.getCaseNumber())
                 .dateStarted(p.getDateStarted())
                 .dateEnded(p.getDateEnded())
