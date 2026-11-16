@@ -1639,9 +1639,15 @@ public class ManageOrderService {
             fl404CustomFields = FL404.builder().build();
         }
 
-        fl404CustomFields.setFl404bRespondentNotToContactApplicantText(NOT_TO_CONTACT);
-        fl404CustomFields.setFl404bRespondentNotToStreetAddressText(NOT_TO_STREET_ADDRESS);
-        fl404CustomFields.setFl404bRespondentNotToSendDocumentsText(NOT_TO_SEND_DOCUMENTS);
+        if (StringUtils.isEmpty(fl404CustomFields.getFl404bRespondentNotToContactApplicantText())) {
+            fl404CustomFields.setFl404bRespondentNotToContactApplicantText(NOT_TO_CONTACT);
+        }
+        if (StringUtils.isEmpty(fl404CustomFields.getFl404bRespondentNotToStreetAddressText())) {
+            fl404CustomFields.setFl404bRespondentNotToStreetAddressText(NOT_TO_STREET_ADDRESS);
+        }
+        if (StringUtils.isEmpty(fl404CustomFields.getFl404bRespondentNotToSendDocumentsText())) {
+            fl404CustomFields.setFl404bRespondentNotToSendDocumentsText(NOT_TO_SEND_DOCUMENTS);
+        }
         caseData.getManageOrders().toBuilder().fl404CustomFields(
             fl404CustomFields).build();
         caseDataUpdated.put("fl404CustomFields", fl404CustomFields);
