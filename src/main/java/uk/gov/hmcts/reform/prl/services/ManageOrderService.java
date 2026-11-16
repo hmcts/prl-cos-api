@@ -1629,29 +1629,31 @@ public class ManageOrderService {
         if (caseDataUpdated.get(PENAL_NOTICE_RTF) == null
             || StringUtils.isBlank(caseDataUpdated.get(PENAL_NOTICE_RTF).toString())) {
             if (blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())
-                ||  childArrangementsSpecificProhibitedOrder.equals(caseData.getCreateSelectOrderOptions())) {
+                || childArrangementsSpecificProhibitedOrder.equals(caseData.getCreateSelectOrderOptions())) {
                 caseDataUpdated.put(PENAL_NOTICE_RTF, ManageOrderService.STATIC_PENAL_NOTICE_RTF);
             }
         }
 
-        FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
-        if (fl404CustomFields == null) {
-            fl404CustomFields = FL404.builder().build();
-        }
+        if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData)) || ManageOrdersUtils
+            .isDaOrderSelectedForCaCase(String.valueOf(caseData.getCreateSelectOrderOptions()), caseData)) {
+            FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
+            if (fl404CustomFields == null) {
+                fl404CustomFields = FL404.builder().build();
+            }
 
-        log.info("Fl404bRespondentNotToContactApplicantLabel:" + fl404CustomFields.getFl404bRespondentNotToContactApplicantLabel());
-        if (StringUtils.isEmpty(fl404CustomFields.getFl404bRespondentNotToContactApplicantText())) {
-            fl404CustomFields.setFl404bRespondentNotToContactApplicantText(NOT_TO_CONTACT);
+            if (StringUtils.isEmpty(fl404CustomFields.getFl404bRespondentNotToContactApplicantText())) {
+                fl404CustomFields.setFl404bRespondentNotToContactApplicantText(NOT_TO_CONTACT);
+            }
+            if (StringUtils.isEmpty(fl404CustomFields.getFl404bRespondentNotToStreetAddressText())) {
+                fl404CustomFields.setFl404bRespondentNotToStreetAddressText(NOT_TO_STREET_ADDRESS);
+            }
+            if (StringUtils.isEmpty(fl404CustomFields.getFl404bRespondentNotToSendDocumentsText())) {
+                fl404CustomFields.setFl404bRespondentNotToSendDocumentsText(NOT_TO_SEND_DOCUMENTS);
+            }
+            caseData.getManageOrders().toBuilder().fl404CustomFields(
+                fl404CustomFields).build();
+            caseDataUpdated.put("fl404CustomFields", fl404CustomFields);
         }
-        if (StringUtils.isEmpty(fl404CustomFields.getFl404bRespondentNotToStreetAddressText())) {
-            fl404CustomFields.setFl404bRespondentNotToStreetAddressText(NOT_TO_STREET_ADDRESS);
-        }
-        if (StringUtils.isEmpty(fl404CustomFields.getFl404bRespondentNotToSendDocumentsText())) {
-            fl404CustomFields.setFl404bRespondentNotToSendDocumentsText(NOT_TO_SEND_DOCUMENTS);
-        }
-        caseData.getManageOrders().toBuilder().fl404CustomFields(
-            fl404CustomFields).build();
-        caseDataUpdated.put("fl404CustomFields", fl404CustomFields);
     }
 
     public DynamicMultiSelectList getChildOption(CaseData caseData) {

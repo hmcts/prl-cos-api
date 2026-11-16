@@ -193,6 +193,9 @@ import static uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum
 import static uk.gov.hmcts.reform.prl.enums.serveorder.LocalAuthorityDocumentsEnum.childImpactReport1La;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.CHILD_OPTION;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.INVALID_EMAIL_ADDRESS_ERROR;
+import static uk.gov.hmcts.reform.prl.services.ManageOrderService.NOT_TO_CONTACT;
+import static uk.gov.hmcts.reform.prl.services.ManageOrderService.NOT_TO_SEND_DOCUMENTS;
+import static uk.gov.hmcts.reform.prl.services.ManageOrderService.NOT_TO_STREET_ADDRESS;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.SDO_FACT_FINDING_FLAG;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.STATIC_PENAL_NOTICE_RTF;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.VALIDATION_ADDRESS_ERROR_OTHER_PARTY;
@@ -8559,6 +8562,67 @@ class ManageOrderServiceTest {
         dataMap.put("penalNoticeRtf", "originalValue");
         manageOrderService.updatePrefilledOrderFields(caseData, dataMap);
         assertEquals("originalValue", dataMap.get("penalNoticeRtf").toString());
+    }
+
+    @Test
+    void testCreateOrderPrefillFl404CustomFieldsForCaCases() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.interim)
+            .uploadOrderDoc(Document.builder().build())
+            .dateOrderMade(LocalDate.now())
+            .approvalDate(LocalDate.now())
+            .judgeDirectionsToAdmin("Test Direction")
+            .wasTheOrderApprovedAtHearing(No)
+            .isSdoSelected(Yes)
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .applicants(of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
+            .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
+            .manageOrders(manageOrders)
+            .judgeOrMagistratesLastName("Test Judge Name")
+            .justiceLegalAdviserFullName("Test LA Name")
+            .welshLanguageRequirement(No)
+            .build();
+
+        HashMap<String, Object> dataMap = new HashMap<>();
+        manageOrderService.updatePrefilledOrderFields(caseData, dataMap);
+        assertNull(dataMap.get("fl404CustomFields"));
+    }
+
+    @Test
+    void testCreateOrderPrefillFl404CustomFieldsForDaCases() throws JsonProcessingException {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.interim)
+            .uploadOrderDoc(Document.builder().build())
+            .dateOrderMade(LocalDate.now())
+            .approvalDate(LocalDate.now())
+            .judgeDirectionsToAdmin("Test Direction")
+            .wasTheOrderApprovedAtHearing(No)
+            .isSdoSelected(Yes)
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .applicants(of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
+            .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
+            .manageOrders(manageOrders)
+            .judgeOrMagistratesLastName("Test Judge Name")
+            .justiceLegalAdviserFullName("Test LA Name")
+            .welshLanguageRequirement(No)
+            .build();
+
+        HashMap<String, Object> dataMap = new HashMap<>();
+        when(objectMapper.convertValue(dataMap.get("fl404CustomFields"), FL404.class)).thenReturn(FL404.builder().build());
+        manageOrderService.updatePrefilledOrderFields(caseData, dataMap);
+        assertNotNull(dataMap.get("fl404CustomFields"));
+        String fl404CustomFieldsJson = dataMap.get("fl404CustomFields").toString();
+        assertTrue(fl404CustomFieldsJson.contains(NOT_TO_CONTACT));
+        assertTrue(fl404CustomFieldsJson.contains(NOT_TO_STREET_ADDRESS));
+        assertTrue(fl404CustomFieldsJson.contains(NOT_TO_SEND_DOCUMENTS));
     }
 
     @Test
