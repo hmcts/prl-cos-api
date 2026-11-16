@@ -1639,6 +1639,7 @@ public class ManageOrderService {
             fl404CustomFields = FL404.builder().build();
         }
 
+        log.info("Fl404bRespondentNotToContactApplicantLabel:" + fl404CustomFields.getFl404bRespondentNotToContactApplicantLabel());
         if (StringUtils.isEmpty(fl404CustomFields.getFl404bRespondentNotToContactApplicantText())) {
             fl404CustomFields.setFl404bRespondentNotToContactApplicantText(NOT_TO_CONTACT);
         }
