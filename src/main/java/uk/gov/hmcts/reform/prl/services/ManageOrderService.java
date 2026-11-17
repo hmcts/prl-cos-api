@@ -168,6 +168,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NAME_OF_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NOT_TO_CONTACT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NOT_TO_SEND_DOCUMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NOT_TO_STREET_ADDRESS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENAL_NOTICE_RTF;
@@ -276,17 +279,6 @@ public class ManageOrderService {
     public static final String AND = " and";
 
     public static final String CIR_DOCUMENTS_REQUESTED = "cirDocumentsRequested";
-
-    public static final String NOT_TO_CONTACT = "[The respondent must not] contact or try to contact or communicate with the applicant"
-        + " in any way or by any means except that (i) you can contact the applicant through solicitors and/or through an agreed third party"
-        + " to make child contact arrangements (ii) you can contact the applicant directly by [means of communication] to make arrangements"
-        + " about the child/ren. (delete whichever of (i) and (ii) do not apply)";
-    public static final String NOT_TO_STREET_ADDRESS = "Go to or travel on [road name] but (i) you can enter [road name] to facilitate"
-        + " contact arrangements for the child/ren which must be agreed in writing or ordered by the court (ii) but otherwise you cannot"
-        + " park your vehicle or leave your bicycle/motorbike or scooter in [road name]. (delete as appropriate)";
-    public static final String NOT_TO_SEND_DOCUMENTS = "If the applicant does not have solicitors, this order does not prevent you"
-        + " from sending documents in respect of these or any other proceedings directly to them. If the applicant has solicitors,"
-        + " you should send any documents to the solicitors. This order shall remain in force until 16:00 on [date].";
 
 
     @Value("${document.templates.common.prl_sdo_draft_template}")

@@ -167,6 +167,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_DATA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NOT_TO_CONTACT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NOT_TO_SEND_DOCUMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NOT_TO_STREET_ADDRESS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
@@ -193,9 +196,6 @@ import static uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum
 import static uk.gov.hmcts.reform.prl.enums.serveorder.LocalAuthorityDocumentsEnum.childImpactReport1La;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.CHILD_OPTION;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.INVALID_EMAIL_ADDRESS_ERROR;
-import static uk.gov.hmcts.reform.prl.services.ManageOrderService.NOT_TO_CONTACT;
-import static uk.gov.hmcts.reform.prl.services.ManageOrderService.NOT_TO_SEND_DOCUMENTS;
-import static uk.gov.hmcts.reform.prl.services.ManageOrderService.NOT_TO_STREET_ADDRESS;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.SDO_FACT_FINDING_FLAG;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.STATIC_PENAL_NOTICE_RTF;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.VALIDATION_ADDRESS_ERROR_OTHER_PARTY;
