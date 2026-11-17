@@ -22,7 +22,7 @@ java:
           alias: LAUNCH_DARKLY_SDK_KEY
         - name: send-grid-api-key
           alias: SEND_GRID_API_KEY
-        - name: send-grid-from-email
+        - name: rpa-notify-from-email
           alias: SEND_GRID_FROM_EMAIL
         - name: AppInsightsInstrumentationKey
           alias: APP_INSIGHTS_INSTRUMENTATION_KEY

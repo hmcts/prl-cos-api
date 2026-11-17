@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -21,6 +22,8 @@ import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.caseworkeremailnotification.CaseWorkerEmailNotificationEventEnum;
+import uk.gov.hmcts.reform.prl.events.CaseWorkerNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -56,7 +59,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -120,10 +122,6 @@ public class C100IssueCaseServiceTest {
 
     @Mock
     AllTabServiceImpl allTabsService;
-
-    @Mock
-    SendgridService sendgridService;
-
 
     @Mock
     private OrganisationService organisationService;
@@ -587,7 +585,7 @@ public class C100IssueCaseServiceTest {
     }
 
     @Test
-    public void issueAndSendLocalCourtEventShouldNotifyLocalCourtForNonConsentApplication() {
+    public void issueAndSendLocalCourtEventShouldOnlyNotifyLocalCourtForNonConsentApplication() {
         CaseData caseData = CaseData.builder()
             .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("Test")
@@ -618,11 +616,15 @@ public class C100IssueCaseServiceTest {
 
         c100IssueCaseService.issueAndSendToLocalCourNotification(callbackRequest);
 
-        verify(eventPublisher).publishEvent(Mockito.any(uk.gov.hmcts.reform.prl.events.CaseWorkerNotificationEmailEvent.class));
+        ArgumentCaptor<CaseWorkerNotificationEmailEvent> notification = ArgumentCaptor.forClass(CaseWorkerNotificationEmailEvent.class);
+        verify(eventPublisher).publishEvent(notification.capture());
+        assertThat(notification.getValue().getTypeOfEvent())
+            .isEqualTo(CaseWorkerEmailNotificationEventEnum.sendEmailToCourtAdmin.getDisplayedValue());
+        verifyNoMoreInteractions(eventPublisher);
     }
 
     @Test
-    public void issueAndSendLocalCourtEventShouldOnlyNotifyLocalCourt() {
+    public void issueAndSendLocalCourtEventShouldOnlyNotifyLocalCourtForConsentApplication() {
         CaseData caseData = CaseData.builder()
             .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("Test")
@@ -653,7 +655,11 @@ public class C100IssueCaseServiceTest {
 
         c100IssueCaseService.issueAndSendToLocalCourNotification(callbackRequest);
 
-        verify(eventPublisher,times(1)).publishEvent(Mockito.any());
+        ArgumentCaptor<CaseWorkerNotificationEmailEvent> notification = ArgumentCaptor.forClass(CaseWorkerNotificationEmailEvent.class);
+        verify(eventPublisher).publishEvent(notification.capture());
+        assertThat(notification.getValue().getTypeOfEvent())
+            .isEqualTo(CaseWorkerEmailNotificationEventEnum.sendEmailToCourtAdmin.getDisplayedValue());
+        verifyNoMoreInteractions(eventPublisher);
     }
 
     @Test

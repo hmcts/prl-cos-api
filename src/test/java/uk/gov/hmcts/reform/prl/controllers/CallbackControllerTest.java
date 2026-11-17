@@ -92,7 +92,6 @@ import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
-import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -238,9 +237,6 @@ public class CallbackControllerTest {
 
     @Mock
     UpdatePartyDetailsService updatePartyDetailsService;
-
-    @Mock
-    SendgridService sendgridService;
 
     @Mock
     DocumentLanguageService documentLanguageService;

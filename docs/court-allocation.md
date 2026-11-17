@@ -22,11 +22,11 @@ Those other SendGrid functions require the shared sender address:
 
 - Local environment: `SEND_GRID_FROM_EMAIL`.
 - Application property: `send-grid.email.from`.
-- Deployment secret: `send-grid-from-email`, exposed as `SEND_GRID_FROM_EMAIL`.
+- Existing deployment secret: `rpa-notify-from-email`, exposed as `SEND_GRID_FROM_EMAIL`.
 
-Before deploying, provision `send-grid-from-email` with the existing approved sender address. Renaming the configuration does not create a Key Vault secret. For local development, set the new variable in the ignored `.aat-env`.
+Jenkins and Helm use the existing approved sender address from `rpa-notify-from-email`. No new Key Vault secret is required. For local development, provide that address as `SEND_GRID_FROM_EMAIL` in the ignored `.aat-env`.
 
-The companion CCD definition change removes the retired resend event. Import that definition with this service change. Historical case data is not purged.
+The companion CCD definition retains the retired `resendRpa` event and its read permissions for historical entries, with create/update permissions and its callback removed. Import that definition before, or alongside, this service change so the action is unavailable in XUI and historical entries remain readable.
 
 The `courtCodeFromFact` text field and its existing CCD permissions remain for compatibility with historical cases. COS also retains the model field so that reading, updating and writing existing case data preserves the value. New court allocation does not populate or use it, and new cases omit it. Removing the field definition before historical data is migrated would cause CCD to reject callback responses containing the old field.
 

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.handlers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,20 +11,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.events.SolicitorNotificationEmailEvent;
-import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
-
-
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 @Slf4j
 public class SolicitorEmailNotificationEventHandlerTest {
     @Mock
     private SolicitorEmailService solicitorEmailService;
-    @Mock
-    private ObjectMapper objectMapper;
-    @Mock
-    private SendgridService sendgridService;
 
     @InjectMocks
     private SolicitorEmailNotificationEventHandler solicitorEmailNotificationEventHandler;
