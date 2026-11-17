@@ -77,6 +77,7 @@ import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.payment.PaymentRequestService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
+import uk.gov.hmcts.reform.prl.services.validators.ChildLivingArrangementsValidator;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
@@ -155,6 +156,7 @@ public class CallbackController {
     private final C100JsonMapper c100JsonMapper;
     private final LocationRefDataService locationRefDataService;
     private final UpdatePartyDetailsService updatePartyDetailsService;
+    private final ChildLivingArrangementsValidator childLivingArrangementsValidator;
     private final PaymentRequestService paymentRequestService;
     private final ConfidentialityTabService confidentialityTabService;
     private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
@@ -293,6 +295,11 @@ public class CallbackController {
 
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            List<String> validationErrors = childLivingArrangementsValidator.validateSubmission(caseData);
+            if (isNotEmpty(validationErrors)) {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .data(callbackRequest.getCaseDetails().getData()).errors(validationErrors).build();
+            }
 
             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -571,6 +578,11 @@ public class CallbackController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            List<String> validationErrors = childLivingArrangementsValidator.validateRemoval(callbackRequest);
+            if (isNotEmpty(validationErrors)) {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .data(callbackRequest.getCaseDetails().getData()).errors(validationErrors).build();
+            }
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
                 .data(callbackRequest.getCaseDetails().getData())
@@ -594,6 +606,11 @@ public class CallbackController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            List<String> validationErrors = childLivingArrangementsValidator.validateRemoval(callbackRequest);
+            if (isNotEmpty(validationErrors)) {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .data(callbackRequest.getCaseDetails().getData()).errors(validationErrors).build();
+            }
             Map<String, Object> caseDataMap = updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, authorisation);
             cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
             return AboutToStartOrSubmitCallbackResponse
@@ -618,6 +635,11 @@ public class CallbackController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            List<String> validationErrors = childLivingArrangementsValidator.validateRemoval(callbackRequest);
+            if (isNotEmpty(validationErrors)) {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .data(callbackRequest.getCaseDetails().getData()).errors(validationErrors).build();
+            }
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
                 .data(updatePartyDetailsService.amendOtherPeopleInTheCase(callbackRequest))
@@ -966,6 +988,11 @@ public class CallbackController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            List<String> validationErrors = childLivingArrangementsValidator.validateRemoval(callbackRequest);
+            if (isNotEmpty(validationErrors)) {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .data(callbackRequest.getCaseDetails().getData()).errors(validationErrors).build();
+            }
             Map<String, Object> caseDataMap = updatePartyDetailsService.updateOtherPeopleInTheCaseConfidentialityData(
                 callbackRequest, authorisation);
             cafcassDateTimeService.updateCafcassDateTime(callbackRequest);

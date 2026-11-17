@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
@@ -2098,6 +2099,48 @@ class UpdatePartyDetailsServiceTest {
             .build();
         Map<String, Object> updatedCaseData = updatePartyDetailsService.setDefaultEmptyChildDetails(caseData);
         assertNotNull(updatedCaseData.get("newChildDetails"));
+    }
+
+    @Test
+    void shouldValidateInitialPartyPageWhenOtherCollectionsAreNotPopulated() {
+        Map<String, Object> beforeData = Map.of("caseTypeOfApplication", C100_CASE_TYPE);
+        Map<String, Object> currentData = Map.of("caseTypeOfApplication", C100_CASE_TYPE, "applicants", List.of());
+        CaseData before = CaseData.builder().caseTypeOfApplication(C100_CASE_TYPE).build();
+        CaseData current = before.toBuilder().applicants(List.of()).build();
+        CallbackRequest request = CallbackRequest.builder()
+            .caseDetailsBefore(CaseDetails.builder().data(beforeData).build())
+            .caseDetails(CaseDetails.builder().data(currentData).build()).build();
+        when(objectMapper.convertValue(beforeData, CaseData.class)).thenReturn(before);
+        when(objectMapper.convertValue(currentData, CaseData.class)).thenReturn(current);
+
+        assertThat(updatePartyDetailsService.validateUpdatePartyDetails(request)).isEmpty();
+    }
+
+    @Test
+    void shouldPreserveChildIdsAndExistingLivingArrangementsWhenRebuildingOptions() {
+        UUID firstChildId = UUID.randomUUID();
+        UUID secondChildId = UUID.randomUUID();
+        Element<PartyDetails> parent = element(PartyDetails.builder().firstName("Test").lastName("Parent").build());
+        DynamicList selection = DynamicList.builder()
+            .value(DynamicListElement.builder().code(parent.getId()).label("Test Parent").build()).build();
+        CaseData caseData = CaseData.builder().caseTypeOfApplication(C100_CASE_TYPE).taskListVersion("v3")
+            .respondents(List.of(parent))
+            .newChildDetails(List.of(
+                element(firstChildId, ChildDetailsRevised.builder().firstName("First child")
+                    .whoDoesTheChildLiveWith(selection).build()),
+                element(secondChildId, ChildDetailsRevised.builder().firstName("Second child")
+                    .whoDoesTheChildLiveWith(selection).build())))
+            .build();
+
+        Map<String, Object> updatedCaseData = updatePartyDetailsService.setDefaultEmptyChildDetails(caseData);
+        List<Element<ChildDetailsRevised>> children = (List<Element<ChildDetailsRevised>>) updatedCaseData.get("newChildDetails");
+
+        assertThat(children).extracting(Element::getId).containsExactly(firstChildId, secondChildId);
+        assertThat(children).allSatisfy(child -> {
+            DynamicList actual = child.getValue().getWhoDoesTheChildLiveWith();
+            assertThat(actual.getValue()).isEqualTo(selection.getValue());
+            assertThat(actual.getListItems()).extracting(DynamicListElement::getCode).containsExactly(parent.getId().toString());
+        });
     }
 
     @Test
