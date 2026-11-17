@@ -2434,6 +2434,10 @@ public class DraftAnOrderService {
             && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData.getCreateSelectOrderOptions())) {
             caseData.setAppointedGuardianName(manageOrderService.addGuardianDetails(caseData));
         }
+        if (caseData.getCreateSelectOrderOptions() != null) {
+            populateNotToOptionDefaultValue(caseDataUpdated, caseData);
+        }
+
         if (!(blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
             && (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             || ManageOrdersUtils.isDaOrderSelectedForCaCase(String.valueOf(caseData.getCreateSelectOrderOptions()),
@@ -2603,12 +2607,16 @@ public class DraftAnOrderService {
         }
         caseDataMap.put(SCHEDULE_TO_ORDER_RTF, selectedOrder.getScheduleToOrderRtf());
 
-        if (CreateSelectOrderOptionsEnum.nonMolestation.equals(selectedOrder.getOrderType())) {
-            FL404 fl404CustomFields = selectedOrder.getFl404CustomFields();
+        return caseDataMap;
+    }
+
+    private void populateNotToOptionDefaultValue(Map<String, Object> caseDataMap, CaseData caseData) {
+        log.info("populateNotToOptionDefaultValue");
+        if (CreateSelectOrderOptionsEnum.nonMolestation.equals(caseData.getCreateSelectOrderOptions())) {
+            FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
             if (fl404CustomFields == null) {
                 fl404CustomFields = FL404.builder().build();
             }
-
             if (StringUtils.isEmpty(fl404CustomFields.getFl404bRespondentNotToContactApplicantText())) {
                 fl404CustomFields.setFl404bRespondentNotToContactApplicantText(NOT_TO_CONTACT);
             }
@@ -2618,11 +2626,12 @@ public class DraftAnOrderService {
             if (StringUtils.isEmpty(fl404CustomFields.getFl404bRespondentNotToSendDocumentsText())) {
                 fl404CustomFields.setFl404bRespondentNotToSendDocumentsText(NOT_TO_SEND_DOCUMENTS);
             }
-            selectedOrder.setFl404CustomFields(fl404CustomFields);
-            caseDataMap.put("fl404CustomFields", fl404CustomFields);
-        }
 
-        return caseDataMap;
+            caseData.getManageOrders().toBuilder().fl404CustomFields(
+                fl404CustomFields).build();
+            caseDataMap.put("fl404CustomFields", fl404CustomFields);
+            log.info("values are pouplated in populateNotToOptionDefaultValue");
+        }
     }
 
     private AboutToStartOrSubmitCallbackResponse prohibitedOrdersForSolicitor(List<String> errorList, String language) {

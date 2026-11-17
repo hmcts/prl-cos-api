@@ -1376,61 +1376,6 @@ class DraftAnOrderServiceTest {
             draftOrder, PrlAppsConstants.ENGLISH, Optional.empty());
 
         assertEquals(CreateSelectOrderOptionsEnum.blankOrderOrDirections, caseDataMap.get("orderType"));
-        assertNull(caseDataMap.get("fl404CustomFields"));
-    }
-
-    @Test
-    void testPopulateCommonDraftOrderFieldsForNonMolestationOrderType() {
-        final String authorisation = "Bearer someAuthorisationToken";
-        DraftOrder draftOrder = DraftOrder.builder()
-            .orderType(nonMolestation)
-            .otherDetails(OtherDraftOrderDetails.builder()
-                              .dateCreated(LocalDateTime.now())
-                              .createdBy("test")
-                              .build())
-            .c21OrderOptions(C21OrderOptionsEnum.c21other)
-            .orderType(nonMolestation)
-            .isTheOrderAboutAllChildren(No)
-            .build();
-
-        Element<DraftOrder> draftOrderElement = element(draftOrder);
-        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
-        draftOrderCollection.add(draftOrderElement);
-        PartyDetails partyDetails = PartyDetails.builder()
-            .solicitorOrg(Organisation.builder().organisationName("test").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-            .build();
-        Element<PartyDetails> respondents = element(partyDetails);
-        List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
-                                                    .value(Child.builder().build()).build());
-        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
-                                                                  .build()).build();
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("C100")
-            .children(children)
-            .draftOrderCollection(draftOrderCollection)
-            .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
-            .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
-            .respondents(List.of(respondents))
-            .build();
-        when(elementUtils.getDynamicListSelectedValue(
-            caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
-        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
-            .getChildrenMultiSelectList(caseData);
-        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
-
-        when(manageOrderService.populateHearingsDropdown(authorisation, caseData)).thenReturn(dynamicList);
-
-        Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData,
-                                                                                             draftOrder, PrlAppsConstants.ENGLISH, Optional.empty());
-
-        assertEquals(nonMolestation, caseDataMap.get("orderType"));
-        assertNotNull(caseDataMap.get("fl404CustomFields"));
-        String fl404CustomFieldsJson = caseDataMap.get("fl404CustomFields").toString();
-        assertTrue(fl404CustomFieldsJson.contains(NOT_TO_CONTACT));
-        assertTrue(fl404CustomFieldsJson.contains(NOT_TO_STREET_ADDRESS));
-        assertTrue(fl404CustomFieldsJson.contains(NOT_TO_SEND_DOCUMENTS));
     }
 
     @Test
@@ -3597,10 +3542,66 @@ class DraftAnOrderServiceTest {
             CaseData.class
         )).thenReturn(caseData);
         when(manageOrderService.populateCustomOrderFields(any(), Mockito.any(), Mockito.any())).thenReturn(caseData);
+        Map<String, Object> caseDataMap = draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken,
+                                                                                             null, PrlAppsConstants.ENGLISH);
         assertEquals(
             stringObjectMap,
-            draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken, null, PrlAppsConstants.ENGLISH)
+            caseDataMap
         );
+        assertNull(caseDataMap.get("fl404CustomFields"));
+    }
+
+    @Test
+    void testPopulateDraftOrderFieldsWhenDraftAnOrderForFL401NonMolestation() throws Exception {
+        caseData = CaseData.builder()
+            .id(123L)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantCaseName("Jo Davis & Jon Smith")
+            .createSelectOrderOptions(nonMolestation)
+            .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
+            .manageOrders(ManageOrders.builder()
+                              .isTheOrderByConsent(Yes)
+                              .recitalsOrPreamble("test recitals")
+                              .orderDirections("test orders")
+                              .furtherDirectionsIfRequired("test further directions")
+                              .furtherInformationIfRequired("test further information")
+                              .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
+                              .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
+                              .isTheOrderAboutChildren(Yes)
+                              .childOption(DynamicMultiSelectList.builder()
+                                               .value(List.of(DynamicMultiselectListElement.builder().label(
+                                                   "John (Child 1)").build())).build()
+                              )
+                              .cafcassCymruEmail("test@test.com")
+                              .build())
+            .standardDirectionOrder(StandardDirectionOrder.builder()
+                                        .sdoAfterSecondGatekeeping("test")
+                                        .sdoAllocateOrReserveJudge(AllocateOrReserveJudgeEnum.allocatedTo)
+                                        .build())
+            .selectedOrder("ABC")
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        )).thenReturn(caseData);
+        when(manageOrderService.populateCustomOrderFields(any(), Mockito.any(), Mockito.any())).thenReturn(caseData);
+        Map<String, Object> caseDataMap = draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken,
+                                                                                             null, PrlAppsConstants.ENGLISH);
+        assertEquals(
+            stringObjectMap,
+            caseDataMap
+        );
+        assertNotNull(caseDataMap.get("fl404CustomFields"));
+        String fl404CustomFieldsJson = caseDataMap.get("fl404CustomFields").toString();
+        assertTrue(fl404CustomFieldsJson.contains(NOT_TO_CONTACT));
+        assertTrue(fl404CustomFieldsJson.contains(NOT_TO_STREET_ADDRESS));
+        assertTrue(fl404CustomFieldsJson.contains(NOT_TO_SEND_DOCUMENTS));
     }
 
     @Test
