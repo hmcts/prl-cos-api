@@ -14,7 +14,7 @@ The remaining SendGrid notifications still need a sender address. Their configur
 
 Jenkins and Helm read the existing `rpa-notify-from-email` secret and expose it as `SEND_GRID_FROM_EMAIL`. The legacy secret name remains because it supplies the shared sender used by the other notifications. No Key Vault secret or sender-address change is required. The retired recipient secret is no longer read. For local development, provide the existing sender address as `SEND_GRID_FROM_EMAIL`.
 
-Deploy the companion CCD definition that removes the retired resend event before, or alongside, this service change so the event is no longer offered in XUI.
+Deploy the companion CCD definition that disables the retired resend action before, or alongside, this service change so the action is no longer offered in XUI. Retain the `resendRpa` event definition and existing read permissions for historical entries, with create/update permissions and its callback removed.
 
 ## Validation
 
