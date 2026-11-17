@@ -311,7 +311,7 @@ public class ManageOrderEmailServiceTest {
                                  .documentHash(generatedDocumentInfo.getHashToken())
                                  .documentFileName("PRL-ORDER-C21-COMMON.docx")
                                  .build())
-            .familymanCaseNumber("12345678")
+            .familymanCaseNumber("")
             .issueDate(LocalDate.parse("2022-02-16"))
             .build();
 
@@ -400,7 +400,6 @@ public class ManageOrderEmailServiceTest {
                                  .documentHash(generatedDocumentInfo.getHashToken())
                                  .documentFileName("PRL-ORDER-C21-COMMON.docx")
                                  .build())
-            .fl401FamilymanCaseNumber("12345678")
             .issueDate(LocalDate.parse("2022-02-16"))
             .build();
 
@@ -497,7 +496,6 @@ public class ManageOrderEmailServiceTest {
                                  .documentHash(generatedDocumentInfo.getHashToken())
                                  .documentFileName("PRL-ORDER-C21-COMMON.docx")
                                  .build())
-            .fl401FamilymanCaseNumber("12345678")
             .issueDate(LocalDate.parse("2022-02-16"))
             .build();
 
@@ -4452,7 +4450,7 @@ public class ManageOrderEmailServiceTest {
         assertEquals("coverLetter.pdf", capturedDocs.get(0).getDocumentFileName());
         assertEquals(coverLetterDoc.getDocumentFileName(), capturedDocs.get(1).getDocumentFileName());
     }
-  
+
     private void verifySendGridConfigContainsCaseReference(SendgridEmailConfig sendgridEmailConfig, long caseReference) {
         assertEquals(String.valueOf(caseReference), sendgridEmailConfig.getCaseReference());
     }

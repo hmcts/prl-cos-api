@@ -76,7 +76,7 @@ public class C100JsonMapperTest {
         Element<OtherChildrenNotInTheCase> childElement = Element.<OtherChildrenNotInTheCase>builder().value(child).build();
         List<Element<OtherChildrenNotInTheCase>> children = Collections.singletonList(childElement);
         CaseData caseData = CaseData.builder().courtId("CourtId").id(213123).feeAmount("312312")
-            .familymanCaseNumber("123123")
+            .familymanCaseNumber("")
             .childrenNotInTheCase(children)
             .dateSubmitted("2019/1/2").build();
         when(otherChildrenNotInTheCaseMapper.map(children)).thenReturn(JsonValue.EMPTY_JSON_ARRAY);
@@ -108,7 +108,7 @@ public class C100JsonMapperTest {
 
         CaseData caseData = CaseData.builder().courtId("CourtId").id(213123).feeAmount("312312")
             .childrenNotInTheCase(listOfOtherChildrenNotInTheCase)
-            .familymanCaseNumber("123123").dateSubmitted("2019/1/2").build();
+            .familymanCaseNumber("").dateSubmitted("2019/1/2").build();
         when(otherChildrenNotInTheCaseMapper.map(listOfOtherChildrenNotInTheCase)).thenReturn(JsonValue.EMPTY_JSON_ARRAY);
         assertNotNull(c100JsonMapper.map(caseData));
     }
@@ -131,7 +131,7 @@ public class C100JsonMapperTest {
                 .relations(Relations.builder().build())
             .taskListVersion(TASK_LIST_VERSION_V2)
             .childrenNotInTheCase(listOfOtherChildrenNotInTheCase)
-            .familymanCaseNumber("123123").dateSubmitted("2019/1/2").build();
+            .familymanCaseNumber("").dateSubmitted("2019/1/2").build();
         when(otherChildrenNotInTheCaseMapper.map(listOfOtherChildrenNotInTheCase)).thenReturn(JsonValue.EMPTY_JSON_ARRAY);
         assertNotNull(c100JsonMapper.map(caseData));
     }

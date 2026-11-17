@@ -69,7 +69,7 @@ public class AutomatedHearingTransactionRequestMapper {
                 .hearingData(getHearingDataForRequest(hearingData))
                 .taskListVersion(caseData.getTaskListVersion())
                 .createdDate(caseData.getCreatedDate())
-                .familymanCaseNumber(caseData.getFamilymanCaseNumber())
+                .familymanCaseNumber("")
                 .dateSubmitted(caseData.getDateSubmitted())
                 .caseTypeOfApplication(caseData.getCaseTypeOfApplication())
                 .otherPartyInTheCaseRevised(automatedHearingOtherPartyInTheCaseRevised)
