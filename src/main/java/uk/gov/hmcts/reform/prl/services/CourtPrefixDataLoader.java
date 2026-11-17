@@ -23,7 +23,7 @@ public class CourtPrefixDataLoader {
 
     private void loadCourtPrefixCsv() {
         List<Map<String, String>> rows = csvReader.read(COURT_PREFIX_CSV_FILE_PATH);
-
+        log.info("CourtPrefix csv file rows {}", rows.size());
         rows.forEach(line -> {
             CourtPrefix courtPrefix = CourtPrefix.map(line);
             courtPrefixMap.put(courtPrefix.getEpimmsId(), courtPrefix.getPrefix());
