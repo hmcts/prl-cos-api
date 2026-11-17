@@ -38,6 +38,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NAME_HMCTS
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_STATUS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_ISSUED_AFTER_CASENAME_RELEASE;
@@ -145,7 +146,8 @@ public class C100IssueCaseService {
                 .build());
         }
         caseDataUpdated.put("issueDate", caseData.getIssueDate());
-        caseDataUpdated.put(CASE_NAME_HMCTS_INTERNAL, caseNameService.getInternalCaseNameForIssueDate(
+        String epimmsId = objectMapper.convertValue(caseDataUpdated.get(COURT_ID_FIELD), String.class);
+        caseDataUpdated.put(CASE_NAME_HMCTS_INTERNAL, caseNameService.getInternalCaseNameForIssueDate(epimmsId,
             caseData.getApplicantCaseName(), caseData.getIssueDate(), true));
 
         caseDataUpdated.put(IS_ISSUED_AFTER_CASENAME_RELEASE,
