@@ -2611,7 +2611,6 @@ public class DraftAnOrderService {
     }
 
     private void populateNotToOptionDefaultValue(Map<String, Object> caseDataMap, CaseData caseData) {
-        log.info("populateNotToOptionDefaultValue");
         if (CreateSelectOrderOptionsEnum.nonMolestation.equals(caseData.getCreateSelectOrderOptions())) {
             FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
             if (fl404CustomFields == null) {
@@ -2630,7 +2629,6 @@ public class DraftAnOrderService {
             caseData.getManageOrders().toBuilder().fl404CustomFields(
                 fl404CustomFields).build();
             caseDataMap.put("fl404CustomFields", fl404CustomFields);
-            log.info("values are pouplated in populateNotToOptionDefaultValue");
         }
     }
 
