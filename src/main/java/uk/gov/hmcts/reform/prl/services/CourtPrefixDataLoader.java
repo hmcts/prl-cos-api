@@ -1,9 +1,12 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.CourtPrefix;
+import uk.gov.hmcts.reform.prl.models.LocalAuthorityCourt;
 import uk.gov.hmcts.reform.prl.utils.csv.CsvReader;
 
 import java.util.HashMap;
@@ -19,16 +22,15 @@ public class CourtPrefixDataLoader {
 
     private final CsvReader csvReader;
 
-    private final Map<String, String> courtPrefixMap = new HashMap<>();
+    private final List<CourtPrefix> courtPrefixList = new ArrayList<>();
+    private Map<String, String> courtPrefixMap = new HashMap<>();
 
     private void loadCourtPrefixCsv() {
         List<Map<String, String>> rows = csvReader.read(COURT_PREFIX_CSV_FILE_PATH);
         log.info("CourtPrefix csv file rows {}", rows.size());
-        rows.forEach(line -> {
-            CourtPrefix courtPrefix = CourtPrefix.map(line);
-            courtPrefixMap.put(courtPrefix.getEpimmsId(), courtPrefix.getPrefix());
-        });
-
+        rows.forEach(line -> courtPrefixList.add(CourtPrefix.map(line)));
+        courtPrefixMap = courtPrefixList.stream().collect(Collectors.toMap(CourtPrefix::getEpimmsId,
+                                                                           CourtPrefix::getPrefix));
         log.info("Loaded {} court prefixes", courtPrefixMap.size());
 
     }
