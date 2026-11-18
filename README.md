@@ -183,6 +183,13 @@ Afterwords in a different Terminal window or within IntelliJ you can run the fun
 You'll get a report of the functional tests in the `build/reports/tests/test/index.html` file.
 This method also allows for individual functional tests to be run as long as bootWithCCD is running in the background.
 
+## Running Functional Tests against AAT
+Just need to set the TEST_URL
+eg:
+export TEST_URL=http://prl-cos-aat.service.core-compute-aat.internal
+export test_environment=aat
+./gradlew localFunctionalTests --tests "*CitizenCaseUpdateControllerFunctionalTest*" --rerun-tasks
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
