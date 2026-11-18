@@ -20,7 +20,7 @@ public class CourtPrefix {
     @JsonIgnore
     public static CourtPrefix map(Map<String, String> row) {
         return CourtPrefix.builder()
-            .epimmsId(row.getOrDefault("EpimmsId", ""))
+            .epimmsId(row.getOrDefault("\uFEFFEpimmsId", ""))
             .refDataCourtName(row.getOrDefault("RefDataCourtName", ""))
             .location(row.getOrDefault("Location", ""))
             .prefix(row.getOrDefault("Prefix", ""))
