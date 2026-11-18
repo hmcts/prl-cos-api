@@ -6,9 +6,11 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.CourtPrefix;
 import uk.gov.hmcts.reform.prl.utils.csv.CsvReader;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -19,16 +21,16 @@ public class CourtPrefixDataLoader {
 
     private final CsvReader csvReader;
 
-    private final Map<String, String> courtPrefixMap = new HashMap<>();
+    private final List<CourtPrefix> courtPrefixList = new ArrayList<>();
+    private Map<String, CourtPrefix> courtPrefixMap = new HashMap<>();
 
     private void loadCourtPrefixCsv() {
         List<Map<String, String>> rows = csvReader.read(COURT_PREFIX_CSV_FILE_PATH);
-
-        rows.forEach(line -> {
-            CourtPrefix courtPrefix = CourtPrefix.map(line);
-            courtPrefixMap.put(courtPrefix.getEpimmsId(), courtPrefix.getPrefix());
-        });
-
+        log.info("csv file rows {}", rows.size());
+        rows.forEach(line -> courtPrefixList.add(CourtPrefix.map(line)));
+        log.info("csv file courtPrefix {}", rows.size());
+        courtPrefixMap = courtPrefixList.stream().collect(Collectors.toMap(CourtPrefix::getEpimmsId,
+                                                                           c -> c));
         log.info("Loaded {} court prefixes", courtPrefixMap.size());
 
     }
@@ -37,6 +39,10 @@ public class CourtPrefixDataLoader {
         if (courtPrefixMap.isEmpty()) {
             loadCourtPrefixCsv();
         }
-        return courtPrefixMap.get(epimmsId);
+        if (!courtPrefixMap.containsKey(epimmsId)) {
+            log.warn("No court prefix found for epimmsId: {}", epimmsId);
+            return "";
+        }
+        return courtPrefixMap.get(epimmsId).getPrefix();
     }
 }

@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -39,8 +38,8 @@ class CourtPrefixDataLoaderTest {
     }
 
     @Test
-    void shouldReturnNullForEpigramsIdNotPresentInCsv() {
+    void shouldReturnBlankForEpigramsIdNotPresentInCsv() {
         String prefix = dataLoader.getPrefixForGivenEpimmsId("234");
-        assertNull(prefix);
+        assertEquals("", prefix);
     }
 }

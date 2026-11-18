@@ -13,14 +13,18 @@ import java.util.Map;
 public class CourtPrefix {
     String epimmsId;
     String refDataCourtName;
+    String location;
     String prefix;
+    String locationCode;
 
     @JsonIgnore
     public static CourtPrefix map(Map<String, String> row) {
         return CourtPrefix.builder()
             .epimmsId(row.getOrDefault("EpimmsId", ""))
             .refDataCourtName(row.getOrDefault("RefDataCourtName", ""))
+            .location(row.getOrDefault("Location", ""))
             .prefix(row.getOrDefault("Prefix", ""))
+            .locationCode(row.getOrDefault("LocationCode", ""))
             .build();
     }
 }
