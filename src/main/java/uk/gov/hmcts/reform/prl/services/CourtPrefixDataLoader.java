@@ -26,8 +26,9 @@ public class CourtPrefixDataLoader {
 
     private void loadCourtPrefixCsv() {
         List<Map<String, String>> rows = csvReader.read(COURT_PREFIX_CSV_FILE_PATH);
-        log.info("CourtPrefix csv file rows {}", rows.size());
+        log.info("csv file rows {}", rows.size());
         rows.forEach(line -> courtPrefixList.add(CourtPrefix.map(line)));
+        log.info("csv file courtPrefix {}", rows.size());
         courtPrefixMap = courtPrefixList.stream().collect(Collectors.toMap(CourtPrefix::getEpimmsId,
                                                                            c -> c));
         log.info("Loaded {} court prefixes", courtPrefixMap.size());
