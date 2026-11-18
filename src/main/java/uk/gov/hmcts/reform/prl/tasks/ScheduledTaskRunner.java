@@ -21,8 +21,12 @@ public class ScheduledTaskRunner {
         final var task = getTask(beanName);
 
         if (task != null) {
-            log.info("Running task: {}", beanName);
-            task.run();
+            try {
+                log.info("Running task: {}", beanName);
+                task.run();
+            } catch (Exception e) {
+                log.error("Error running task {}", beanName, e);
+            }
         } else {
             log.error("Task not found: {}", beanName);
         }
