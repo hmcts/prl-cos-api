@@ -39,8 +39,8 @@ class CourtPrefixDataLoaderTest {
     }
 
     @Test
-    void shouldReturnNullForEpigramsIdNotPresentInCsv() {
+    void shouldReturnBlankForEpigramsIdNotPresentInCsv() {
         String prefix = dataLoader.getPrefixForGivenEpimmsId("234");
-        assertNull(prefix);
+        assertEquals("", prefix);
     }
 }

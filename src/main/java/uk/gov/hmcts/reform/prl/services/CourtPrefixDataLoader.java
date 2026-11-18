@@ -22,14 +22,14 @@ public class CourtPrefixDataLoader {
     private final CsvReader csvReader;
 
     private final List<CourtPrefix> courtPrefixList = new ArrayList<>();
-    private Map<String, String> courtPrefixMap = new HashMap<>();
+    private Map<String, CourtPrefix> courtPrefixMap = new HashMap<>();
 
     private void loadCourtPrefixCsv() {
         List<Map<String, String>> rows = csvReader.read(COURT_PREFIX_CSV_FILE_PATH);
         log.info("CourtPrefix csv file rows {}", rows.size());
         rows.forEach(line -> courtPrefixList.add(CourtPrefix.map(line)));
         courtPrefixMap = courtPrefixList.stream().collect(Collectors.toMap(CourtPrefix::getEpimmsId,
-                                                                           CourtPrefix::getPrefix));
+                                                                           c -> c));
         log.info("Loaded {} court prefixes", courtPrefixMap.size());
 
     }
@@ -38,6 +38,10 @@ public class CourtPrefixDataLoader {
         if (courtPrefixMap.isEmpty()) {
             loadCourtPrefixCsv();
         }
-        return courtPrefixMap.get(epimmsId);
+        if (!courtPrefixMap.containsKey(epimmsId)) {
+            log.warn("No court prefix found for epimmsId: {}", epimmsId);
+            return "";
+        }
+        return courtPrefixMap.get(epimmsId).getPrefix();
     }
 }
