@@ -212,7 +212,6 @@ public class BaseCaseData {
     private YesOrNo miamForOrder;
     private DynamicList customOrderHearingsType;
     private YesOrNo isIssuedAfterCaseNameRelease;
-    private YesOrNo isCaseBeforePrefix;
 
     private WhoToSendToGatekeeperTypeEnum whoToSendTheCaseToForGatekeeping;
     private List<JudgeOrLegalAdviserGatekeepingEnum> judgeOrLegalAdviserForGatekeeping;
