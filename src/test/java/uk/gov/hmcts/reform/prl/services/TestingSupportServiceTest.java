@@ -144,6 +144,9 @@ public class TestingSupportServiceTest {
     @Mock
     private TestingSupportFixtureLoader fixtureLoader;
 
+    @Mock
+    private OrganisationService organisationService;
+
     private CourtNavFl401 courtNavFl401;
 
     Map<String, Object> caseDataMap;
@@ -313,8 +316,15 @@ public class TestingSupportServiceTest {
         when(authorisationService.authoriseUser(anyString())).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(anyString())).thenReturn(Boolean.TRUE);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                     .email("test@test.com")
                                                                      .roles(List.of("caseworker-privatelaw-solicitor"))
                                                                      .build());
+
+        when(organisationService.getOrganisationByEmailDetail("test@test.com"))
+            .thenReturn(Optional.of(Organisations.builder()
+                            .organisationIdentifier("TESTORG")
+                            .name("Test organisation")
+                            .build()));
     }
 
     @Test
