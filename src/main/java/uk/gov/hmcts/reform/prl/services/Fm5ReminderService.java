@@ -42,7 +42,6 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -67,6 +66,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class Fm5ReminderService {
 
+    private static final int PAGE_SIZE = 10;
     private static final int HEARING_API_BATCH_SIZE = 10;
 
     private final SystemUserService systemUserService;
@@ -283,9 +283,7 @@ public class Fm5ReminderService {
     }
 
     public List<CaseDetails> retrieveCasesInHearingStatePendingFm5Reminders() {
-
-        SearchResultResponse response = SearchResultResponse.builder()
-            .cases(new ArrayList<>()).build();
+        List<CaseDetails> caseDetailsList = new ArrayList<>();
 
         QueryParam ccdQueryParam = buildCcdQueryParam();
 
@@ -304,22 +302,55 @@ public class Fm5ReminderService {
                 searchString
             );
 
-            response = objectMapper.convertValue(
+            int totalCases = searchResult.getTotal();
+            int pages = (int) Math.ceil((double) totalCases / PAGE_SIZE);
+            log.info("Search result size {}, split across {} pages", totalCases, pages);
+            if (totalCases == 0) {
+                return caseDetailsList;
+            }
+
+            SearchResultResponse searchResultResponse = objectMapper.convertValue(
                 searchResult,
                 SearchResultResponse.class
             );
+
+            if (searchResultResponse != null) {
+                // add the first page, as we got it from the initial search to find total numbers
+                caseDetailsList.addAll(searchResultResponse.getCases());
+
+                for (int i = 1; i < pages; i++) {
+                    log.info("Processing page {} of {}", i + 1, pages);
+                    QueryParam paginatedQueryParam = buildCcdQueryParam(i * PAGE_SIZE);
+                    String paginatedSearchString = objectMapper.writeValueAsString(paginatedQueryParam);
+                    log.info("Paginated searchString {}", paginatedSearchString);
+                    SearchResult paginatedSearchResult = coreCaseDataApi.searchCases(
+                        userToken,
+                        s2sToken,
+                        CASE_TYPE,
+                        paginatedSearchString
+                    );
+                    SearchResultResponse paginatedSearchResultResponse = objectMapper.convertValue(
+                        paginatedSearchResult,
+                        SearchResultResponse.class
+                    );
+                    caseDetailsList.addAll(paginatedSearchResultResponse.getCases());
+                }
+            } else {
+                log.info("FM5 case search result was empty, no cases found");
+            }
         } catch (JsonProcessingException e) {
             log.error("Exception happened in parsing query param {}", e.getMessage());
         }
 
-        if (null != response) {
-            log.info("{} cases retrieved out of a total of {} search results", response.getCases().size(), response.getTotal());
-            return response.getCases();
-        }
-        return Collections.emptyList();
+        log.info("Total no. of cases retrieved {}", caseDetailsList.size());
+        return caseDetailsList;
     }
 
     private QueryParam buildCcdQueryParam() {
+        return buildCcdQueryParam(0);
+    }
+
+    private QueryParam buildCcdQueryParam(int from) {
         //C100 cases where fm5 reminders are not sent already
         List<Should> shoulds = List.of(Should.builder()
                                              .match(Match.builder()
@@ -354,8 +385,7 @@ public class Fm5ReminderService {
 
         return QueryParam.builder()
             .query(Query.builder().bool(finalFilter).build())
-            //Revert to default size 100 cases
-            .size("100")
+            .from(String.valueOf(from))
             .build();
     }
 

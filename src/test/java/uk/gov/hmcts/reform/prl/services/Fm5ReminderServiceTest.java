@@ -50,6 +50,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -708,8 +709,8 @@ class Fm5ReminderServiceTest {
         ArgumentCaptor<List<String>> batchCaptor = ArgumentCaptor.forClass(List.class);
         org.mockito.Mockito.verify(hearingApiClient, org.mockito.Mockito.times(3))
             .getHearingsForAllCaseIdsWithCourtVenue(
-                org.mockito.Mockito.eq(AUTH_TOKEN),
-                org.mockito.Mockito.eq(S2S_TOKEN),
+                eq(AUTH_TOKEN),
+                eq(S2S_TOKEN),
                 batchCaptor.capture()
             );
 
@@ -769,8 +770,8 @@ class Fm5ReminderServiceTest {
         ArgumentCaptor<List<String>> batchCaptor = ArgumentCaptor.forClass(List.class);
         org.mockito.Mockito.verify(hearingApiClient, org.mockito.Mockito.times(3))
             .getHearingsForAllCaseIdsWithCourtVenue(
-                org.mockito.Mockito.eq(AUTH_TOKEN),
-                org.mockito.Mockito.eq(S2S_TOKEN),
+                eq(AUTH_TOKEN),
+                eq(S2S_TOKEN),
                 batchCaptor.capture()
             );
 
@@ -807,6 +808,93 @@ class Fm5ReminderServiceTest {
         Map<String, Fm5PendingParty> result = fm5ReminderService.getQualifiedCasesAndHearingsForNotifications(caseDetailsList, 1L);
 
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    void retrieveCasesInHearingStatePendingFm5Reminders_shouldPageAndAggregateResults() throws Exception {
+        // PAGE_SIZE in service = 10, so total 15 should trigger 2 calls (page 0 + page 1)
+        CaseDetails case1 = CaseDetails.builder().id(1L).data(Map.of()).build();
+        CaseDetails case2 = CaseDetails.builder().id(2L).data(Map.of()).build();
+        CaseDetails case3 = CaseDetails.builder().id(3L).data(Map.of()).build();
+
+        SearchResult firstPageSearchResult = SearchResult.builder()
+            .total(15)
+            .build();
+        SearchResult secondPageSearchResult = SearchResult.builder()
+            .total(15)
+            .build();
+
+        SearchResultResponse firstPageResponse = SearchResultResponse.builder()
+            .total(15)
+            .cases(List.of(case1, case2))
+            .build();
+
+        SearchResultResponse secondPageResponse = SearchResultResponse.builder()
+            .total(15)
+            .cases(List.of(case3))
+            .build();
+
+        when(coreCaseDataApi.searchCases(eq(AUTH_TOKEN), eq(S2S_TOKEN), eq(CASE_TYPE), anyString()))
+            .thenReturn(firstPageSearchResult)
+            .thenReturn(secondPageSearchResult);
+
+        when(objectMapper.writeValueAsString(any())).thenReturn("{\"query\":\"q\"}");
+
+        when(objectMapper.convertValue(any(SearchResult.class), eq(SearchResultResponse.class)))
+            .thenReturn(firstPageResponse)
+            .thenReturn(secondPageResponse);
+
+        List<CaseDetails> result = fm5ReminderService.retrieveCasesInHearingStatePendingFm5Reminders();
+
+        assertThat(result).containsExactly(case1, case2, case3);
+        verify(coreCaseDataApi, times(2))
+            .searchCases(eq(AUTH_TOKEN), eq(S2S_TOKEN), eq(CASE_TYPE), anyString());
+    }
+
+    @Test
+    void retrieveCasesInHearingStatePendingFm5Reminders_shouldNotPageWhenSinglePage() throws Exception {
+        CaseDetails case1 = CaseDetails.builder().id(1L).data(Map.of()).build();
+
+        SearchResult firstPageSearchResult = SearchResult.builder()
+            .total(10) // exactly PAGE_SIZE => 1 page
+            .build();
+
+        SearchResultResponse firstPageResponse = SearchResultResponse.builder()
+            .total(10)
+            .cases(List.of(case1))
+            .build();
+
+        when(coreCaseDataApi.searchCases(eq(AUTH_TOKEN), eq(S2S_TOKEN), eq(CASE_TYPE), anyString()))
+            .thenReturn(firstPageSearchResult);
+
+        when(objectMapper.writeValueAsString(any())).thenReturn("{\"query\":\"q\"}");
+        when(objectMapper.convertValue(firstPageSearchResult, SearchResultResponse.class))
+            .thenReturn(firstPageResponse);
+
+        List<CaseDetails> result = fm5ReminderService.retrieveCasesInHearingStatePendingFm5Reminders();
+
+        assertThat(result).containsExactly(case1);
+        verify(coreCaseDataApi, times(1))
+            .searchCases(eq(AUTH_TOKEN), eq(S2S_TOKEN), eq(CASE_TYPE), anyString());
+    }
+
+    @Test
+    void retrieveCasesInHearingStatePendingFm5Reminders_shouldReturnEmptyWhenNoResults() throws Exception {
+        SearchResult emptySearchResult = SearchResult.builder()
+            .total(0)
+            .build();
+
+        when(coreCaseDataApi.searchCases(eq(AUTH_TOKEN), eq(S2S_TOKEN), eq(CASE_TYPE), anyString()))
+            .thenReturn(emptySearchResult);
+
+        when(objectMapper.writeValueAsString(any())).thenReturn("{\"query\":\"q\"}");
+
+        List<CaseDetails> result = fm5ReminderService.retrieveCasesInHearingStatePendingFm5Reminders();
+
+        assertThat(result).isEmpty();
+        verify(coreCaseDataApi, times(1))
+            .searchCases(eq(AUTH_TOKEN), eq(S2S_TOKEN), eq(CASE_TYPE), anyString());
+        verify(objectMapper, times(0)).convertValue(any(), eq(SearchResultResponse.class));
     }
 
     private CaseDetails caseDetailsWithMinimalData(long caseId) {
