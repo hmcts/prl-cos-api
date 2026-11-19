@@ -117,6 +117,7 @@ class HearingServiceTest {
         caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
+            .caseNameHmctsInternal("TestCaseName_casenamehmctsinternal")
             .caseTypeOfApplication("C100")
             .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             .applicants(listOfApplicants)
@@ -350,10 +351,12 @@ class HearingServiceTest {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         AutomatedHearingCaseData automatedHearingCaseData = AutomatedHearingTransactionRequestMapper
             .mappingAutomatedHearingTransactionRequest(caseData, HearingData.builder().build());
-        when(hearingApiClient.createAutomatedHearing(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        when(hearingApiClient.createAutomatedHearing(Mockito.anyString(), Mockito.anyString(), Mockito.eq(automatedHearingCaseData)))
             .thenReturn(ResponseEntity.ok(AutomatedHearingResponse.builder().build()));
         AutomatedHearingResponse automatedHearingsResponse = hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
         Assert.assertNotNull(automatedHearingsResponse);
+        Assert.assertEquals("TestCaseName", automatedHearingCaseData.getApplicantCaseName());
+        Assert.assertEquals("TestCaseName_casenamehmctsinternal", automatedHearingCaseData.getCaseNameHmctsInternal());
     }
 
     @Test
