@@ -234,7 +234,7 @@ public class UpdatePartyDetailsService {
             }
             Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
             applicantList.ifPresent(elements -> setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData,
-                    ElementUtils.unwrapElements(elements).get(0)));
+                    ElementUtils.unwrapElements(elements).getFirst()));
             CaseData latest = objectMapper.convertValue(updatedCaseData, CaseData.class);
             List<Element<PartyDetails>> respondentsForC8 = latest.getRespondents();
 
@@ -352,7 +352,7 @@ public class UpdatePartyDetailsService {
                 .stream()
                 .map(Element::getValue)
                 .toList();
-            PartyDetails applicant1 = applicants.get(0);
+            PartyDetails applicant1 = applicants.getFirst();
             if (Objects.nonNull(applicant1)) {
                 updatedCaseData.put("applicantName", applicant1.getFirstName() + " " + applicant1.getLastName());
             }
@@ -549,9 +549,9 @@ public class UpdatePartyDetailsService {
         }
     }
 
-    private void generateC8DocumentsForRespondents(Map<String, Object> updatedCaseData, CallbackRequest callbackRequest, String authorisation,
-                                                       CaseData caseData, List<Element<PartyDetails>> currentRespondents)
-        throws Exception {
+    private void generateC8DocumentsForRespondents(Map<String, Object> updatedCaseData, CallbackRequest callbackRequest,
+                                                   String authorisation, CaseData caseData,
+                                                   List<Element<PartyDetails>> currentRespondents) {
         int respondentIndex = 0;
         Map<String, Object> casDataMap = callbackRequest.getCaseDetailsBefore().getData();
         CaseData caseDataBefore = objectMapper.convertValue(casDataMap, CaseData.class);
@@ -588,7 +588,7 @@ public class UpdatePartyDetailsService {
         caseDataUpdated.putAll(documentGenService.createUpdatedCaseDataWithDocuments(authorisation, caseData));
         CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
 
-        caseData = caseData.toBuilder()
+        caseData.toBuilder()
             .c8Document(updatedCaseData.getC8Document())
             .c8WelshDocument(updatedCaseData.getC8WelshDocument())
             .build();
@@ -628,29 +628,26 @@ public class UpdatePartyDetailsService {
                     && (CaseUtils.isEmailAddressChanged(respondent.getValue(), resp1.getValue())
                     || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), resp1.getValue())
                     || CaseUtils.isPhoneNumberChanged(respondent.getValue(), resp1.getValue())
-                    || !StringUtils.equals(resp1.getValue().getLabelForDynamicList(), respondent.getValue()
-                    .getLabelForDynamicList()))).toList();
+                    || !(resp1.getValue().getLabelForDynamicList().equals(respondent.getValue()
+                    .getLabelForDynamicList())))).toList();
         } else {
             PartyDetails respondentDetailsFL401 = caseDataBefore.getRespondentsFL401();
             if ((CaseUtils.isEmailAddressChanged(respondent.getValue(), respondentDetailsFL401))
                 || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), respondentDetailsFL401)
                 || (CaseUtils.isPhoneNumberChanged(respondent.getValue(), respondentDetailsFL401))
-                || !StringUtils.equals(respondent.getValue().getLabelForDynamicList(), respondentDetailsFL401
-                .getLabelForDynamicList())) {
+                || !(respondent.getValue().getLabelForDynamicList().equals(respondentDetailsFL401
+                .getLabelForDynamicList()))) {
                 return true;
             }
         }
-        if (respondentList != null && !respondentList.isEmpty()) {
-            return true;
-        }
-        return false;
+        return respondentList != null && !respondentList.isEmpty();
     }
 
 
 
     public void populateC8Documents(String authorisation, Map<String, Object> updatedCaseData, CaseData caseData,
                                       Map<String, Object> dataMap, Boolean isDetailsChanged, int partyIndex,
-                                      Element<PartyDetails> respondent) throws Exception {
+                                      Element<PartyDetails> respondent) {
         //prl-6790 - getting user-role and adding to datamap
         dataMap.put("loggedInUserRole", manageOrderService.getLoggedInUserType(authorisation));
 
@@ -711,8 +708,7 @@ public class UpdatePartyDetailsService {
                                                                        Map<String, Object> dataMap,
                                                                        List<Element<ResponseDocuments>> c8Documents,
                                                                        boolean isDetailsChanged,
-                                                                       Element<PartyDetails> respondent)
-        throws  Exception {
+                                                                       Element<PartyDetails> respondent) {
         Document c8FinalDocument;
         Document c8FinalWelshDocument = null;
         String partyName = respondent.getValue().getLabelForDynamicList();
@@ -822,6 +818,7 @@ public class UpdatePartyDetailsService {
                 List<Element<ChildDetailsRevised>> listOfChildren = caseData.getNewChildDetails();
                 List<Element<ChildDetailsRevised>> listOfChildrenRevised = new ArrayList<>();
                 listOfChildren.forEach(child -> listOfChildrenRevised.add(element(
+                    child.getId(),
                     child.getValue().toBuilder()
                         .whoDoesTheChildLiveWith(
                             populateWhoDoesTheChildLiveWith(caseData)
@@ -969,9 +966,11 @@ public class UpdatePartyDetailsService {
             if (!removeParty.isEmpty()) {
                 StringBuilder validationMsg = new StringBuilder("Barrister is associated with the party ");
                 AtomicBoolean isBarristerExists = new AtomicBoolean(false);
-                removeParty.stream().forEach(party -> {
+                removeParty.forEach(party -> {
                     if (party.getValue().getBarrister() != null && party.getValue().getBarrister().getBarristerEmail() != null) {
-                        validationMsg.append(party.getValue().getFirstName() + " " + party.getValue().getLastName() + "\n");
+                        validationMsg.append(party.getValue().getFirstName())
+                            .append(" ").append(party.getValue().getLastName())
+                            .append("\n");
                         isBarristerExists.set(true);
                     }
                 });
