@@ -9,6 +9,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -21,6 +22,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.mapper.NonEmptyObjectMapper;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -29,6 +31,7 @@ import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 
 import java.nio.file.Files;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +47,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.AUTHORISATION_HEADER;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.CAFCASS_END_DATE_PARAM;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.CAFCASS_END_DATE_PARAM_VALUE;
@@ -54,9 +59,10 @@ import static uk.gov.hmcts.reform.prl.utils.TestConstants.SEARCH_CASE_ENDPOINT;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.SERVICE_AUTHORISATION_HEADER;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_AUTH_TOKEN;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_SERVICE_AUTH_TOKEN;
+import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_SYS_USER_TOKEN;
 
 @Slf4j
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = {Application.class})
 public class CafCassControllerFunctionalTest {
 
     private static final String USER_TOKEN = "Bearer testToken";
@@ -107,17 +113,18 @@ public class CafCassControllerFunctionalTest {
         Mockito.when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         Mockito.when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
         when(systemUserService.getSysUserToken()).thenReturn(USER_TOKEN);
-        Mockito.when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString())).thenReturn(expectedSearchResult);
+        Mockito.when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString())).thenReturn(
+            expectedSearchResult);
 
         MvcResult mvcResult = mockMvc.perform(get(SEARCH_CASE_ENDPOINT)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
-                        .header(SERVICE_AUTHORISATION_HEADER, TEST_SERVICE_AUTH_TOKEN)
-                        .queryParam(CAFCASS_START_DATE_PARAM, "2022-08-22T10:54:43.49")
-                        .queryParam(CAFCASS_END_DATE_PARAM, "2022-08-22T11:00:43.49")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
+                                                  .contentType(MediaType.APPLICATION_JSON)
+                                                  .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
+                                                  .header(SERVICE_AUTHORISATION_HEADER, TEST_SERVICE_AUTH_TOKEN)
+                                                  .queryParam(CAFCASS_START_DATE_PARAM, "2022-08-22T10:54:43.49")
+                                                  .queryParam(CAFCASS_END_DATE_PARAM, "2022-08-22T11:00:43.49")
+                                                  .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
 
         CafCassResponse actualCafcassResponse = objectMapper.readValue(
             mvcResult.getResponse().getContentAsString(),
@@ -144,7 +151,7 @@ public class CafCassControllerFunctionalTest {
         String cafcassResponseStr = new String(Files.readAllBytes(ResourceUtils.getFile(CREATE_SERVICE_RESPONSE).toPath()));
         ObjectMapper objectMapper = NonEmptyObjectMapper.getObjectMapper();
         Map<String, String> refDataMap = new HashMap<>();
-        refDataMap.put("ABA5-APL","Appeal");
+        refDataMap.put("ABA5-APL", "Appeal");
 
         SearchResult expectedSearchResult = objectMapper.readValue(cafcassResponseStr, SearchResult.class);
         Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
@@ -157,20 +164,26 @@ public class CafCassControllerFunctionalTest {
         )).thenReturn(Hearings.hearingsWith().hmctsServiceCode("ABA5")
                           .caseHearings(List.of(
                               CaseHearing.caseHearingWith().hearingType("ABA5-APL").build()))
-            .build());
-        Mockito.when(refDataService.getRefDataCategoryValueMap("authorisation", authTokenGenerator.generate(), "ABA5", "HearingType")).thenReturn(
+                          .build());
+        Mockito.when(refDataService.getRefDataCategoryValueMap(
+            "authorisation",
+            authTokenGenerator.generate(),
+            "ABA5",
+            "HearingType"
+        )).thenReturn(
             refDataMap);
-        Mockito.when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString())).thenReturn(expectedSearchResult);
+        Mockito.when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString())).thenReturn(
+            expectedSearchResult);
 
         MvcResult mvcResult = mockMvc.perform(get(SEARCH_CASE_ENDPOINT)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
-                        .header(SERVICE_AUTHORISATION_HEADER, TEST_SERVICE_AUTH_TOKEN)
-                        .queryParam(CAFCASS_START_DATE_PARAM, CAFCASS_END_DATE_PARAM_VALUE)
-                        .queryParam(CAFCASS_END_DATE_PARAM, CAFCASS_START_DATE_PARAM_VALUE)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
+                                                  .contentType(MediaType.APPLICATION_JSON)
+                                                  .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
+                                                  .header(SERVICE_AUTHORISATION_HEADER, TEST_SERVICE_AUTH_TOKEN)
+                                                  .queryParam(CAFCASS_START_DATE_PARAM, CAFCASS_END_DATE_PARAM_VALUE)
+                                                  .queryParam(CAFCASS_END_DATE_PARAM, CAFCASS_START_DATE_PARAM_VALUE)
+                                                  .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
 
         String contentAsString = mvcResult.getResponse().getContentAsString();
 
@@ -185,13 +198,86 @@ public class CafCassControllerFunctionalTest {
                 assertNotNull(actualCafcassResponse.getCases().get(responseCaseCnt).getState());
                 assertNotNull(actualCafcassResponse.getCases().get(responseCaseCnt).getCaseTypeId());
                 assertNotNull(actualCafcassResponse.getCases()
-                        .get(responseCaseCnt).getCaseTypeOfApplication());
+                                  .get(responseCaseCnt).getCaseTypeOfApplication());
 
-                assertEquals(actualCafcassResponse.getCases().get(responseCaseCnt).getCaseTypeId(),
-                        expectedSearchResult.getCases().get(responseCaseCnt).getCaseTypeId());
+                assertEquals(
+                    actualCafcassResponse.getCases().get(responseCaseCnt).getCaseTypeId(),
+                    expectedSearchResult.getCases().get(responseCaseCnt).getCaseTypeId()
+                );
                 assertEquals(CASE_TYPE, actualCafcassResponse.getCases().get(responseCaseCnt).getCaseTypeId());
-                assertEquals(C100_CASE_TYPE, actualCafcassResponse.getCases().get(responseCaseCnt).getCaseTypeOfApplication());
+                assertEquals(
+                    C100_CASE_TYPE,
+                    actualCafcassResponse.getCases().get(responseCaseCnt).getCaseTypeOfApplication()
+                );
             }
         }
+    }
+
+    @Test
+    public void givenPastAndFutureHearingsWhenSearchCasesThenOnlyFutureHearingsAreReturned() throws Exception {
+        String caseRef = "1793887553253302";
+        String regionId = "5-816875";
+        LocalDateTime now = LocalDateTime.now();
+
+        ObjectMapper objectMapper = NonEmptyObjectMapper.getObjectMapper();
+        SearchResult searchResult = objectMapper.readValue(
+            new ClassPathResource("response/cafcass-search-response-past-and-future-hearings.json").getInputStream(),
+            SearchResult.class
+        );
+
+        HearingDaySchedule pastHearingDaySchedule = HearingDaySchedule.hearingDayScheduleWith().hearingVenueName(
+            "Chelmsford Magistrates' Court And Family Court").courtTypeId("18").epimsId("624810").hearingStartDateTime(
+            now.minusHours(2)).hearingEndDateTime(now.minusHours(1)).build();
+
+        CaseHearing pastHearing = CaseHearing.caseHearingWith().hmcStatus(COMPLETED).hearingID(1L).hearingType(
+            "ABA5-FHD").hearingTypeValue(
+            "First Hearing Dispute Resolution Appointment (FHDRA)").hearingDaySchedule(List.of(pastHearingDaySchedule)).build();
+
+        HearingDaySchedule futureHearingDaySchedule = HearingDaySchedule.hearingDayScheduleWith().hearingVenueName(
+            "Chelmsford Magistrates' Court And Family Court").courtTypeId("18").epimsId("624810").hearingStartDateTime(
+            now.plusHours(1)).hearingEndDateTime(now.plusHours(2)).build();
+
+        CaseHearing futureHearing = CaseHearing.caseHearingWith().hmcStatus(LISTED).hearingID(2L).hearingType("ABA5-FHD").hearingTypeValue(
+            "Decision").hearingDaySchedule(List.of(futureHearingDaySchedule)).build();
+
+        Hearings caseHearing = Hearings.hearingsWith().caseRef(caseRef).hmctsServiceCode("ABA5").courtTypeId(
+            "18").courtName("Chelmsford County And Family Court").caseHearings(List.of(
+            pastHearing,
+            futureHearing
+        )).build();
+
+        when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
+        when(authorisationService.authoriseService("Bearer " + TEST_SERVICE_AUTH_TOKEN)).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_AUTH_TOKEN);
+        when(systemUserService.getSysUserToken()).thenReturn(TEST_SYS_USER_TOKEN);
+        when(authorisationService.authoriseUser(TEST_AUTH_TOKEN)).thenReturn(Optional.of(userInfo));
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString())).thenReturn(searchResult);
+        when(hearingService.getHearingsForAllCases(TEST_AUTH_TOKEN, Map.of(caseRef, regionId))).thenReturn(
+            List.of(caseHearing));
+
+        MvcResult mvcResult = mockMvc.perform(get(SEARCH_CASE_ENDPOINT)
+                                                  .contentType(MediaType.APPLICATION_JSON)
+                                                  .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
+                                                  .header(SERVICE_AUTHORISATION_HEADER, TEST_SERVICE_AUTH_TOKEN)
+                                                  .queryParam(CAFCASS_START_DATE_PARAM, "2022-08-22T10:54:43.49")
+                                                  .queryParam(CAFCASS_END_DATE_PARAM, "2022-08-22T11:00:43.49")
+                                                  .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        CafCassResponse actualCafcassResponse = objectMapper.readValue(
+            mvcResult.getResponse().getContentAsString(),
+            CafCassResponse.class
+        );
+
+        List<CaseHearing> returnedHearings = actualCafcassResponse.getCases()
+            .getFirst()
+            .getCaseData()
+            .getHearingData()
+            .getCaseHearings();
+
+        assertEquals(1, actualCafcassResponse.getCases().size());
+        assertEquals(1, returnedHearings.size());
+        assertEquals(2L, returnedHearings.getFirst().getHearingID());
     }
 }

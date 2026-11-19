@@ -22,6 +22,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
@@ -56,6 +58,33 @@ final class CafcassUpdateHelperUtils {
                                          .toList());
             }
         }
+    }
+
+    static void filterFullyEndedHearings(List<Hearings> listOfHearingDetails) {
+        if (CollectionUtils.isNotEmpty(listOfHearingDetails)) {
+            for (Hearings hearings : listOfHearingDetails) {
+                hearings.setCaseHearings(hearings.getCaseHearings()
+                                             .stream()
+                                             .filter(caseHearing -> !hasHearingFullyEndedBeforeNow(caseHearing))
+                                             .toList());
+            }
+        }
+    }
+
+    private static boolean hasHearingFullyEndedBeforeNow(CaseHearing caseHearing) {
+        if (caseHearing == null
+            || CollectionUtils.isEmpty(caseHearing.getHearingDaySchedule())) {
+            return false;
+        }
+
+        LocalDateTime nowInLondon = LocalDateTime.now(ZoneId.of("Europe/London"));
+
+        // Every scheduled day must have a known end time in the past.
+        return caseHearing.getHearingDaySchedule().stream()
+            .allMatch(schedule ->
+                          schedule.getHearingEndDateTime() != null
+                              && schedule.getHearingEndDateTime().isBefore(nowInLondon)
+            );
     }
 
     static void updateCaseWithHearingData(CafCassCaseDetail cafCassCaseDetail, Hearings filteredHearing) {

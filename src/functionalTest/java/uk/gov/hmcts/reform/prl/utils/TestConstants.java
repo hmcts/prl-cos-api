@@ -15,6 +15,7 @@ public class TestConstants {
     public static final String SEARCH_CASE_ENDPOINT = "/cases/searchCases";
     public static final String SERVICE_AUTHORISATION_HEADER = "ServiceAuthorization";
     public static final String TEST_AUTH_TOKEN = "authorisation";
+    public static final String TEST_SYS_USER_TOKEN = "abcd1234";
     public static final String TEST_SERVICE_AUTH_TOKEN = "serviceauthorisation";
     public static final String CAFCASS_DOCUMENT_DOWNLOAD_ENDPOINT = "/cases/documents/{documentId}/binary";
     public static final String CAFCASS_DUMMY_UPLOAD_FILE = "classpath:courtnav/Dummy_pdf_file.pdf";

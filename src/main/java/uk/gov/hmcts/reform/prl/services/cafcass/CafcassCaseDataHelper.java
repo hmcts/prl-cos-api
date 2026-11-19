@@ -591,6 +591,7 @@ public class CafcassCaseDataHelper {
             caseIdWithRegionIdMap
         );
         filterCancelledHearingsBeforeListing(listOfHearingDetails);
+        filterFullyEndedHearings(listOfHearingDetails);
         updateHearingDataCafcass(filteredCafcassResponse, listOfHearingDetails);
 
         return filteredCafcassResponse;
@@ -598,6 +599,10 @@ public class CafcassCaseDataHelper {
 
     public void filterCancelledHearingsBeforeListing(List<Hearings> listOfHearingDetails) {
         CafcassUpdateHelperUtils.filterCancelledHearingsBeforeListing(listOfHearingDetails);
+    }
+
+    public void filterFullyEndedHearings(List<Hearings> listOfHearingDetails) {
+        CafcassUpdateHelperUtils.filterFullyEndedHearings(listOfHearingDetails);
     }
 
     public boolean checkIfDocumentsNeedToExclude(List<String> excludedDocumentList, String documentFilename) {
