@@ -1,0 +1,7 @@
+# Block all.
+*
+
+# Allow only files/directoryes used for the COPY commands in the Dockerfile.
+!lib/AI-Agent.xml
+!lib/applicationinsights.json
+!build/libs/prl-cos-api.jar
