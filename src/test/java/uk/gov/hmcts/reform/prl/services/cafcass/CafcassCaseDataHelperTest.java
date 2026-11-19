@@ -1295,6 +1295,45 @@ class CafcassCaseDataHelperTest {
         ));
     }
 
+    @Test
+    void shouldNotThrowWhenServedOrderMatchesOrderWithNullOrderType() {
+        String documentId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
+        String documentUrl = "http://dm-store/documents/" + documentId;
+
+        // orderType is intentionally omitted so order.getOrderType() is null.
+        // NOTICE_OF_HEARING_ORDER_TYPES is backed by Set.of(), whose contains(null) throws NPE,
+        // so this guards against that path when matching a served document to an order.
+        Map<String, Object> order = new HashMap<>();
+        order.put("orderDocument", Map.of("document_id", documentId));
+
+        Map<String, Object> servedDocument = caseDocument(documentUrl, "served-order.pdf");
+
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("caseManagementLocation", caseManagementLocation());
+        caseData.put("orderCollection", List.of(element("11111111-1111-1111-1111-111111111111", order)));
+        caseData.put("finalServedApplicationDetailsList", List.of(element(
+            "22222222-2222-2222-2222-222222222222",
+            Map.of("emailNotificationDetails", List.of(element(
+                "33333333-3333-3333-3333-333333333333",
+                Map.of("docs", List.of(element("44444444-4444-4444-4444-444444444444", servedDocument))))))
+        )));
+
+        Map<String, Object> caseDataBefore = new HashMap<>();
+        caseDataBefore.put("caseManagementLocation", caseManagementLocation());
+        caseDataBefore.put("orderCollection", List.of(element("11111111-1111-1111-1111-111111111111", order)));
+        caseDataBefore.put("finalServedApplicationDetailsList", List.of(element(
+            "22222222-2222-2222-2222-222222222222",
+            Map.of("emailNotificationDetails", List.of(element(
+                "33333333-3333-3333-3333-333333333333",
+                Map.of("docs", List.of(element("44444444-4444-4444-4444-444444444444", servedDocument))))))
+        )));
+
+        assertFalse(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
+            caseDetails(caseData),
+            caseDetails(caseDataBefore)
+        ));
+    }
+
     private Map<String, Object> caseManagementLocation() {
         Map<String, Object> caseManagementLocation = new HashMap<>();
         caseManagementLocation.put("regionId", "1");

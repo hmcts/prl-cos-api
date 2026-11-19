@@ -93,6 +93,7 @@ public class SealAuditService {
         int totalOrders = 0;
         int missingSeals = 0;
         int presentSeals = 0;
+        int docxOrders = 0;
         int errors = 0;
         boolean foundAnyCases = false;
         boolean completed = false;
@@ -145,7 +146,11 @@ public class SealAuditService {
                         for (Element<OrderDetails> orderElement : orderCollection) {
                             OrderDetails order = orderElement.getValue();
 
-                            if (!isServedPdfOrder(order)) {
+                            boolean docxOrder = isDocxOrder(order);
+
+                            // Only process served PDF orders and non-finalised docx orders. A .docx document
+                            // in the order collection indicates an order that was never finalised to a sealed PDF.
+                            if (!docxOrder && !isServedPdfOrder(order)) {
                                 continue;
                             }
 
@@ -157,7 +162,10 @@ public class SealAuditService {
                             totalOrders++;
                             Document orderDoc = order.getOrderDocument();
 
-                            SealStatus status = checkSealStatus(orderDoc, sysUserToken, s2sToken, caseReference);
+                            // Skip the document download/seal check for docx orders - they are never sealed PDFs.
+                            SealStatus status = docxOrder
+                                ? SealStatus.DOCX
+                                : checkSealStatus(orderDoc, sysUserToken, s2sToken, caseReference);
 
                             String orderType = order.getOrderTypeId();
                             String firstServedDateTime = getFirstServedDateTime(order);
@@ -172,6 +180,29 @@ public class SealAuditService {
                                 case PRESENT -> presentSeals++;
                                 case MISSING -> {
                                     missingSeals++;
+                                    logOrderResult(
+                                        caseReference,
+                                        courtName,
+                                        orderElement.getId().toString(),
+                                        orderType,
+                                        orderUploadTimestamp,
+                                        orderFilename,
+                                        dateOrderMade,
+                                        firstServedDateTime,
+                                        status
+                                    );
+                                    csvRows.add(buildCsvRow(
+                                        caseReference,
+                                        courtName,
+                                        orderType,
+                                        orderUploadTimestamp,
+                                        orderFilename,
+                                        dateOrderMade,
+                                        status
+                                    ));
+                                }
+                                case DOCX -> {
+                                    docxOrders++;
                                     logOrderResult(
                                         caseReference,
                                         courtName,
@@ -284,11 +315,12 @@ public class SealAuditService {
             log.info("Total served PDF orders checked: {}", totalOrders);
             log.info("Seals present: {}", presentSeals);
             log.info("Seals missing: {}", missingSeals);
+            log.info("Docx orders (not finalised to sealed PDF): {}", docxOrders);
             log.info("Errors: {}", errors);
             log.info("Duration: {}s", duration);
 
             try {
-                sendSummaryEmail(totalOrders, presentSeals, missingSeals, errors, duration, csvRows,
+                sendSummaryEmail(totalOrders, presentSeals, missingSeals, docxOrders, errors, duration, csvRows,
                     completed, failureReason, totalCasesProcessed);
             } catch (Throwable emailErr) {
                 log.error("Failed to send seal audit summary email", emailErr);
@@ -387,6 +419,19 @@ public class SealAuditService {
 
         List<Element<ServedParties>> servedParties = order.getServeOrderDetails().getServedParties();
         return servedParties != null && !servedParties.isEmpty();
+    }
+
+    private boolean isDocxOrder(OrderDetails order) {
+        if (order == null || order.getOrderDocument() == null) {
+            return false;
+        }
+
+        Document doc = order.getOrderDocument();
+        if (doc.getDocumentFileName() == null || doc.getDocumentBinaryUrl() == null) {
+            return false;
+        }
+
+        return doc.getDocumentFileName().toLowerCase().endsWith(".docx");
     }
 
     private String getFirstServedDateTime(OrderDetails order) {
@@ -527,6 +572,7 @@ public class SealAuditService {
         int totalOrders,
         int presentSeals,
         int missingSeals,
+        int docxOrders,
         int errors,
         long durationSeconds,
         List<String> csvRows,
@@ -561,7 +607,7 @@ public class SealAuditService {
                 statusSummary = "INCOMPLETE RUN - " + (failureReason != null ? failureReason
                     : "audit did not finish") + ". Partial results below (processed "
                     + casesProcessed + " cases before stopping). Totals and attached CSV are NOT a full report.";
-            } else if (missingSeals == 0 && errors == 0) {
+            } else if (missingSeals == 0 && errors == 0 && docxOrders == 0) {
                 statusSummary = "All seals present";
             } else {
                 statusSummary = "Issues found";
@@ -580,6 +626,7 @@ public class SealAuditService {
             templateVars.put("total_orders", String.valueOf(totalOrders));
             templateVars.put("seals_present", String.valueOf(presentSeals));
             templateVars.put("seals_missing", String.valueOf(missingSeals));
+            templateVars.put("docx_orders", String.valueOf(docxOrders));
             templateVars.put("errors", String.valueOf(errors));
             templateVars.put("duration", String.valueOf(durationSeconds));
 

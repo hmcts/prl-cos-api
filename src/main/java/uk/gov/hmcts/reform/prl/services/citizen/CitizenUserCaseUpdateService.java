@@ -19,8 +19,7 @@ public class CitizenUserCaseUpdateService {
     private final AllTabServiceImpl allTabService;
     private final CitizenCoreCaseDataService citizenCoreCaseDataService;
 
-    public void validateCitizenCaseAccess(String authorisation,
-                                          String caseId) {
+    public void validateCitizenCaseAccess(String authorisation, String caseId) {
         if (!citizenCoreCaseDataService.hasCitizenAccess(authorisation, caseId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
@@ -59,9 +58,8 @@ public class CitizenUserCaseUpdateService {
     }
 
     private StartAllTabsUpdateDataContent startCitizenUserEvent(String authorisation,
-                                                               String caseId,
-                                                               CaseEvent caseEvent) {
-
+                                                                String caseId,
+                                                                CaseEvent caseEvent) {
         return allTabService.getStartUpdateForSpecificUserEvent(
             caseId,
             caseEvent.getValue(),

@@ -23,7 +23,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestReferenceStatusResponse;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.services.citizen.CitizenUserCaseUpdateService;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -50,7 +50,7 @@ public class PaymentRequestService {
     public static final String GBP_CURRENCY = "GBP";
     public static final String ENG_LANGUAGE = "English";
     private static final String PAYMENT_STATUS_SUCCESS = "Success";
-    private final AllTabServiceImpl allTabService;
+    private final CitizenUserCaseUpdateService citizenUserCaseUpdateService;
 
     @Value("${payments.api.callback-url}")
     String callBackUrl;
@@ -92,6 +92,11 @@ public class PaymentRequestService {
 
     public PaymentResponse createPayment(String authorization,
                                          CreatePaymentRequest createPaymentRequest) throws Exception {
+        citizenUserCaseUpdateService.validateCitizenCaseAccess(
+            authorization,
+            createPaymentRequest.getCaseId()
+        );
+
         FeeResponse feeResponse = feeService.fetchFeeDetails(createPaymentRequest.getFeeType());
         if (null == feeResponse) {
             log.error("Error in fetching fee details for caseId {} feeType {}", createPaymentRequest.getCaseId(),
@@ -99,58 +104,17 @@ public class PaymentRequestService {
             return null;
         }
 
-        log.info("Retrieving caseData for caseId : {}", createPaymentRequest.getCaseId());
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
-            allTabService.getStartUpdateForSpecificEvent(
-                createPaymentRequest.getCaseId(),
-                CITIZEN_CASE_UPDATE.getValue()
-            );
-        CaseData caseData = startAllTabsUpdateDataContent.caseData();
-        Map<String, Object> caseDataMap = new HashMap<>();
-        if (null == caseData) {
-            log.info(
-                "Retrieved caseData is null for caseId {}, please provide a valid caseId",
-                createPaymentRequest.getCaseId()
-            );
-            return null;
-        }
-
-        createPaymentRequest = createPaymentRequest.toBuilder()
-            .applicantCaseName(caseData.getApplicantCaseName()).build();
-
-        PaymentResponse paymentResponse;
-        if (isApplicationNotAwp(createPaymentRequest)) {
-            log.info("*** Citizen C100 and other applications case payment ***");
-            paymentResponse = createPayment(
+        return citizenUserCaseUpdateService.updateCaseUsingCitizenUserAuthAndReturn(
+            authorization,
+            createPaymentRequest.getCaseId(),
+            CITIZEN_CASE_UPDATE,
+            startAllTabsUpdateDataContent -> createPaymentAndUpdateCase(
                 authorization,
                 createPaymentRequest,
-                caseData.getPaymentServiceRequestReferenceNumber(),
-                caseData.getPaymentReferenceNumber(),
-                feeResponse
-            );
-            //update service request & payment request reference
-            caseDataMap.put("paymentServiceRequestReferenceNumber", paymentResponse.getServiceRequestReference());
-            caseDataMap.put("paymentReferenceNumber", paymentResponse.getPaymentReference());
-            caseDataMap.put("feeAmount", String.valueOf(feeResponse.getAmount()));
-        } else {
-            log.info("*** Citizen awp payment ***");
-            paymentResponse = handleCitizenAwpPayment(authorization,
-                                                      caseData,
-                                                      caseDataMap,
-                                                      createPaymentRequest,
-                                                      feeResponse);
-        }
-
-        //update case
-        allTabService.submitAllTabsUpdate(
-            startAllTabsUpdateDataContent.authorisation(),
-            createPaymentRequest.getCaseId(),
-            startAllTabsUpdateDataContent.startEventResponse(),
-            startAllTabsUpdateDataContent.eventRequestData(),
-            caseDataMap
+                feeResponse,
+                startAllTabsUpdateDataContent
+            )
         );
-
-        return paymentResponse;
     }
 
     public PaymentResponse createPayment(String authorization,
@@ -210,6 +174,52 @@ public class PaymentRequestService {
                                       paymentReferenceNumber, feeResponse);
         }
     }
+
+    private PaymentResponse createPaymentAndUpdateCase(String authorization,
+                                                       CreatePaymentRequest createPaymentRequest,
+                                                       FeeResponse feeResponse,
+                                                       StartAllTabsUpdateDataContent startAllTabsUpdateDataContent) {
+        CaseData caseData = startAllTabsUpdateDataContent.caseData();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        if (null == caseData) {
+            log.info(
+                "Retrieved caseData is null for caseId {}, please provide a valid caseId",
+                createPaymentRequest.getCaseId()
+            );
+            return null;
+        }
+
+        createPaymentRequest = createPaymentRequest.toBuilder()
+            .applicantCaseName(caseData.getApplicantCaseName()).build();
+
+        PaymentResponse paymentResponse;
+        if (isApplicationNotAwp(createPaymentRequest)) {
+            log.info("*** Citizen C100 and other applications case payment ***");
+            paymentResponse = createPayment(
+                authorization,
+                createPaymentRequest,
+                caseData.getPaymentServiceRequestReferenceNumber(),
+                caseData.getPaymentReferenceNumber(),
+                feeResponse
+            );
+            //update service request & payment request reference
+            caseDataMap.put("paymentServiceRequestReferenceNumber", paymentResponse.getServiceRequestReference());
+            caseDataMap.put("paymentReferenceNumber", paymentResponse.getPaymentReference());
+            caseDataMap.put("feeAmount", String.valueOf(feeResponse.getAmount()));
+        } else {
+            log.info("*** Citizen awp payment ***");
+            paymentResponse = handleCitizenAwpPayment(authorization,
+                                                      caseData,
+                                                      caseDataMap,
+                                                      createPaymentRequest,
+                                                      feeResponse);
+        }
+
+        startAllTabsUpdateDataContent.caseDataMap().putAll(caseDataMap);
+
+        return paymentResponse;
+    }
+
 
     private PaymentResponse getPaymentResponse(String authorization,
                                                CreatePaymentRequest createPaymentRequest,

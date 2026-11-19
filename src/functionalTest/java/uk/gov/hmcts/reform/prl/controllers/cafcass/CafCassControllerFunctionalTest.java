@@ -19,7 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.Application;
-import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.mapper.NonEmptyObjectMapper;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
@@ -99,7 +99,7 @@ public class CafCassControllerFunctionalTest {
     @Test
     public void givenRedactedDocumentsWhenGetRequestToSearchCasesThenRedactedDocumentsAreExcluded() throws Exception {
         String cafcassResponseStr = new String(Files.readAllBytes(ResourceUtils.getFile(REDACTED_DOCUMENTS_RESPONSE).toPath()));
-        ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
+        ObjectMapper objectMapper = NonEmptyObjectMapper.getObjectMapper();
         SearchResult expectedSearchResult = objectMapper.readValue(cafcassResponseStr, SearchResult.class);
 
         Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
@@ -142,7 +142,7 @@ public class CafCassControllerFunctionalTest {
     @Test
     public void givenDatetimeWindowWhenGetRequestToSearchCasesByCafCassControllerThen200Response() throws Exception {
         String cafcassResponseStr = new String(Files.readAllBytes(ResourceUtils.getFile(CREATE_SERVICE_RESPONSE).toPath()));
-        ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
+        ObjectMapper objectMapper = NonEmptyObjectMapper.getObjectMapper();
         Map<String, String> refDataMap = new HashMap<>();
         refDataMap.put("ABA5-APL","Appeal");
 

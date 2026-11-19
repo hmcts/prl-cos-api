@@ -4338,6 +4338,28 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
+    public void testHandSubmittedSendAndReplyWhenRespondToMessageNull() {
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        Message message = Message.builder().isReplying(YesOrNo.Yes).build();
+
+        caseData = CaseData.builder().id(12345L)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .respondToMessage(YesOrNo.Yes)
+                    .messages(messages)
+                    .build())
+            .messageReply(message)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyService.sendAndReplySubmitted(callbackRequest, auth);
+        Assertions.assertThat(response.getStatusCode().value()).isEqualTo(200);
+
+    }
+
+    @Test
     public void testClearDynamicLists() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().isReplying(YesOrNo.Yes).build();

@@ -1,9 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.cafcass;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
-import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.mapper.NonEmptyObjectMapper;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
@@ -96,11 +93,7 @@ public class CafcassCaseDataService {
             if (caseTypeList != null && !caseTypeList.isEmpty()) {
                 caseTypeList = caseTypeList.stream().map(String::trim).toList();
 
-                ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
-                objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-                objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-                objectMapper.registerModule(new ParameterNamesModule());
-                objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+                ObjectMapper objectMapper = NonEmptyObjectMapper.getObjectMapper();
 
                 QueryParam ccdQueryParam = buildCcdQueryParam(startDate, endDate);
                 String searchString = objectMapper.writeValueAsString(ccdQueryParam);

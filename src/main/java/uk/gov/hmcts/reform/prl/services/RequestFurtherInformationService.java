@@ -56,13 +56,17 @@ public class RequestFurtherInformationService {
     }
 
     public Map<String, Object> addToCase(CallbackRequest callbackRequest) {
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        Map<String, Object> caseDataUpdated = updateCaseState(callbackRequest.getCaseDetails().getData());
+        CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
+        return caseDataUpdated;
+    }
+
+    private Map<String, Object> updateCaseState(Map<String, Object> caseDataUpdated) {
         caseDataUpdated.put(
             CASE_STATUS, CaseStatus.builder()
                 .state(AWAITING_INFORMATION.getLabel())
                 .build()
         );
-        CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
         return caseDataUpdated;
     }
 
@@ -126,7 +130,8 @@ public class RequestFurtherInformationService {
         String caseId = valueOf(callbackRequest.getCaseDetails().getId());
         var startEventResponse =
             ccdCoreCaseDataService.startUpdate(systemAuthToken, eventRequestData, caseId, true);
-        var requestFurtherInformation = getRequestFurtherInformation(startEventResponse.getCaseDetails().getData());
+        var caseDataUpdated = updateCaseState(startEventResponse.getCaseDetails().getData());
+        var requestFurtherInformation = getRequestFurtherInformation(caseDataUpdated);
 
         var caseDataContent = CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())

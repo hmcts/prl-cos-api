@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_ARRAY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
+import static uk.gov.hmcts.reform.prl.services.validators.LegalAdviserChecker.isLegalAdviserListPresent;
 
 @Component
 @Slf4j
@@ -45,27 +46,29 @@ public class AllocatedJudgeDetailsGenerator implements FieldGenerator {
     }
 
     private boolean isLastNameAndEmailAvailable(String[] judgeOrLegalAdvisorDetails) {
-        return (null != judgeOrLegalAdvisorDetails && judgeOrLegalAdvisorDetails.length == 2);
+        return judgeOrLegalAdvisorDetails != null && judgeOrLegalAdvisorDetails.length == 2
+            && judgeOrLegalAdvisorDetails[0] != null && judgeOrLegalAdvisorDetails[1] != null;
     }
 
     private String[] splitLastNameAndEmailAddress(uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge allocatedJudge) {
 
-        if (null != allocatedJudge && YesOrNo.Yes.equals(allocatedJudge.getIsSpecificJudgeOrLegalAdviserNeeded())
-            && null != allocatedJudge.getIsJudgeOrLegalAdviser()) {
+        if (allocatedJudge != null && YesOrNo.Yes.equals(allocatedJudge.getIsSpecificJudgeOrLegalAdviserNeeded())
+            && allocatedJudge.getIsJudgeOrLegalAdviser() != null) {
             if (AllocatedJudgeTypeEnum.judge.equals(allocatedJudge.getIsJudgeOrLegalAdviser())) {
                 String[] judgeOrLegalAdvisorDetails = new String[2];
                 judgeOrLegalAdvisorDetails[0] = allocatedJudge.getJudgeName();
                 judgeOrLegalAdvisorDetails[1] = allocatedJudge.getJudgeEmail();
                 return judgeOrLegalAdvisorDetails;
             } else if (AllocatedJudgeTypeEnum.legalAdviser.equals(allocatedJudge.getIsJudgeOrLegalAdviser())) {
-                String legalAdviserNameAndEmail = allocatedJudge.getLegalAdviserList().getValueLabel();
-                if (null != legalAdviserNameAndEmail) {
-                    return legalAdviserNameAndEmail.split("\\)")[0].split("\\(");
+                if (allocatedJudge.getLegalAdviserName() != null || allocatedJudge.getLegalAdviserEmail() != null) {
+                    return new String[]{allocatedJudge.getLegalAdviserName(), allocatedJudge.getLegalAdviserEmail()};
+                }
+                if (isLegalAdviserListPresent(allocatedJudge.getLegalAdviserList())) {
+                    return allocatedJudge.getLegalAdviserList().getValueLabel().split("\\)")[0].split("\\(");
                 }
             }
 
         }
-
         return EMPTY_ARRAY;
     }
 }

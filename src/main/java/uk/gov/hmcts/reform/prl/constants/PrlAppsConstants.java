@@ -191,6 +191,7 @@ public class PrlAppsConstants {
     public static final String DOCUMENT_REQUEST = "documentRequestedByCourt";
 
     public static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
+    public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String CITIZEN_ROLE = "citizen";
 
     public static final String OTHER = "Other";
@@ -599,6 +600,7 @@ public class PrlAppsConstants {
 
     public static final String IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING =  "isJudgeOrLegalAdviserGatekeeping";
     public static final String JUDGE_NAME = "judgeName";
+    public static final String LEGAL_ADVISER_USER = "legalAdviser";
 
     public static final String JUDGE = "Judge";
     public static final String CASEWORKER = "CaseWorker";
@@ -799,6 +801,7 @@ public class PrlAppsConstants {
     public static final String C1A_DOCUMENT_WELSH_FILENAME = "C1A_Document_Welsh.pdf";
     public static final String C1A_BLANK_DOCUMENT_WELSH_FILENAME = "C1A_Blank_Welsh.pdf";
     public static final String C7_BLANK_DOCUMENT_FILENAME = "Blank_C7.pdf";
+    public static final String C7_BLANK_DOCUMENT_WELSH_FILENAME = "Blank_C7_Welsh.pdf";
     public static final String SOA_C6A_OTHER_PARTIES_ORDER = "Notice_Of_Proceeding_Order_C6a.pdf";
     public static final String SOA_C6A_OTHER_PARTIES_ORDER_WELSH = "Welsh_Notice_Of_Proceeding_Order_C6a.pdf";
 
@@ -974,6 +977,7 @@ public class PrlAppsConstants {
     public static final String FL401_LIST_ON_NOTICE_HEARING_INSTRUCTION = "fl401listOnNoticeHearingInstruction";
 
     public static final String LIST_ON_NOTICE_HEARING_INSTRUCTIONS = "List on notice - hearing instructions";
+    public static final String LIST_ON_NOTICE = "List On Notice";
 
     public static final String REJECT_WITHOUT_NOTICE_REASONS = "Reject without notice - reasons";
 
