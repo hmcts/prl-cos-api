@@ -18,9 +18,12 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.exception.CaseActivationNotAllowedException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
+import uk.gov.hmcts.reform.prl.models.citizen.CaseActivationResponse;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -32,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_APPLICANTS;
@@ -58,19 +62,31 @@ public class LinkCitizenCaseService {
     public static final String VALID = "Valid";
     public static final String LINKED = "Linked";
     public static final String DUPLICATE = "Duplicate";
+    public static final String NOT_READY = "NotReady";
     public static final String YES = "Yes";
     public static final String CASE_INVITES = "caseInvites";
+    private static final Set<State> ALLOWED_ACTIVATION_STATES = Set.of(State.PREPARE_FOR_HEARING_CONDUCT_HEARING);
 
     public Optional<CaseDetails> linkCitizenToCase(String authorisation, String caseId, String accessCode) {
         Optional<CaseDetails> caseDetails = Optional.empty();
-        CaseData dbCaseData = findAndGetCase(caseId);
+        String activationStatus = checkCaseActivation(caseId, accessCode, authorisation).status();
+        if (NOT_READY.equals(activationStatus)) {
+            throw new CaseActivationNotAllowedException();
+        }
 
-        if (VALID.equalsIgnoreCase(findAccessCodeStatus(accessCode, dbCaseData, authorisation))) {
+        if (VALID.equals(activationStatus)) {
             UserDetails userDetails = idamClient.getUserDetails(authorisation);
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                 = allTabService.getStartUpdateForSpecificEvent(caseId, CaseEvent.LINK_CITIZEN.getValue());
 
             CaseData caseData = startAllTabsUpdateDataContent.caseData();
+            // Recheck the event snapshot before changing the invitation or granting case access.
+            if (caseData.getState() == null || !ALLOWED_ACTIVATION_STATES.contains(caseData.getState())) {
+                throw new CaseActivationNotAllowedException();
+            }
+            if (!VALID.equals(findAccessCodeStatus(accessCode, caseData, authorisation))) {
+                return Optional.empty();
+            }
 
             Map<String, Object> caseDataUpdated = getCaseDataMapToLinkCitizen(accessCode, caseData, userDetails);
 
@@ -107,11 +123,25 @@ public class LinkCitizenCaseService {
     }
 
     private CaseData findAndGetCase(String caseId) {
-        String anonymousUserToken = systemUserService.getSysUserToken();
         return objectMapper.convertValue(
-            ccdCoreCaseDataService.findCaseById(anonymousUserToken, caseId).getData(),
+            findCaseDetails(caseId).getData(),
             CaseData.class
         );
+    }
+
+    private CaseDetails findCaseDetails(String caseId) {
+        return ccdCoreCaseDataService.findCaseById(systemUserService.getSysUserToken(), caseId);
+    }
+
+    public CaseActivationResponse checkCaseActivation(String caseId, String accessCode, String authorisation) {
+        CaseDetails caseDetails = findCaseDetails(caseId);
+        CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
+        String status = caseData == null ? INVALID : findAccessCodeStatus(accessCode, caseData, authorisation);
+        if (VALID.equals(status)
+            && State.tryFromValue(caseDetails.getState()).filter(ALLOWED_ACTIVATION_STATES::contains).isEmpty()) {
+            status = NOT_READY;
+        }
+        return new CaseActivationResponse(status);
     }
 
     public Map<String, Object> getCaseDataMapToLinkCitizen(String accessCode,

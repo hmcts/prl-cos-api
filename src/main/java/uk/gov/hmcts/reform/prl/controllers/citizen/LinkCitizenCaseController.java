@@ -10,14 +10,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.exception.CaseActivationNotAllowedException;
 import uk.gov.hmcts.reform.prl.models.citizen.AccessCodeRequest;
+import uk.gov.hmcts.reform.prl.models.citizen.CaseActivationRequest;
+import uk.gov.hmcts.reform.prl.models.citizen.CaseActivationResponse;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.UiCitizenCaseData;
@@ -42,6 +49,24 @@ public class LinkCitizenCaseController {
     private final CaseService caseService;
     private static final String INVALID_CLIENT = "Invalid Client";
     private static final String CASE_LINKING_FAILED = "Case Linking has failed";
+
+    @PostMapping(value = "/check-case-activation")
+    @Operation(description = "Validate an access code and check whether the case can be activated without granting access")
+    public CaseActivationResponse checkCaseActivation(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody @Valid CaseActivationRequest request) {
+        if (!authorisationService.isAuthorized(authorisation, s2sToken)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, INVALID_CLIENT);
+        }
+        return linkCitizenCaseService.checkCaseActivation(request.caseId(), request.accessCode(), authorisation);
+    }
+
+    @ExceptionHandler(CaseActivationNotAllowedException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public CaseActivationResponse handleCaseActivationNotAllowed() {
+        return new CaseActivationResponse(LinkCitizenCaseService.NOT_READY);
+    }
 
     @PostMapping(value = "/link-case-to-account")
     @Operation(description = "Linking case to citizen account with access code")
