@@ -29,7 +29,7 @@ def versions = [
   ccdClient                    : '5.3.0',
   commonsBeanUtils             : '1.11.0',
   commonsIo                    : '2.22.0',
-  commonsLang3                 : '3.21.0',
+  commonsLang3                 : '3.22.0',
   commonsMath3                 : '3.6.1',
   commonsValidator             : '1.11.0',
   dumbster                     : '1.7.1',
@@ -143,7 +143,7 @@ allprojects {
       }
 
         // solves CVE-2014-3488, CVE-2015-2156, CVE-2019-16869, CVE-2021-21409,CVE-2025-25193
-        dependencySet(group: 'io.netty', version: '4.2.15.Final') {
+        dependencySet(group: 'io.netty', version: '4.2.21.Final') {
             entry 'netty-buffer'
             entry 'netty-codec'
             entry 'netty-codec-http'
@@ -182,7 +182,7 @@ allprojects {
       dependency group: 'org.springframework.security', name: 'spring-security-crypto', version: versions.springSecurityCrypto
 
       //CVE-2023-42795, CVE-2023-45648
-      dependencySet(group: 'org.apache.tomcat.embed', version: '10.1.61') {
+      dependencySet(group: 'org.apache.tomcat.embed', version: '10.1.62') {
         entry 'tomcat-embed-core'
         entry 'tomcat-embed-websocket'
       }
@@ -361,7 +361,7 @@ dependencies {
   implementation(group: 'org.bouncycastle', name: 'bcpkix-jdk18on', version: versions.bcpkixJdk18on)
   implementation(group: 'org.springframework.security', name: 'spring-security-rsa', version: versions.springSecurityRsa)
   implementation(group: 'org.springframework.security', name: 'spring-security-crypto', version: versions.springSecurityCrypto)
-  implementation group: 'io.netty', name: 'netty-transport-native-epoll', version: '4.2.15.Final'
+  implementation group: 'io.netty', name: 'netty-transport-native-epoll', version: '4.2.21.Final'
   constraints{
     implementation group: 'com.warrenstrange', name: 'googleauth', version: '1.5.0'
   }
