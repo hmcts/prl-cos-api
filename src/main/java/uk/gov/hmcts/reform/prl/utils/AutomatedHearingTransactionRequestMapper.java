@@ -84,6 +84,7 @@ public class AutomatedHearingTransactionRequestMapper {
                                                 .build())
                 .caseLinks(automatedHearingCaseLinks)
                 .applicantCaseName(caseData.getApplicantCaseName())
+                .caseNameHmctsInternal(caseData.getCaseNameHmctsInternal())
                 .allPartyFlags(caseData.getAllPartyFlags())
                 .attendHearing(isNull(caseData.getAttendHearing()) ? AutomatedHearingAttendHearing.automatedHearingAttendHearingWith().build() :
                                    AutomatedHearingAttendHearing.automatedHearingAttendHearingWith()
