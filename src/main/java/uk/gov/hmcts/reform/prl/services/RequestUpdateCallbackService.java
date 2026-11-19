@@ -51,7 +51,6 @@ public class RequestUpdateCallbackService {
     private final ObjectMapper objectMapper;
     private final SystemUserService systemUserService;
     private final SolicitorEmailService solicitorEmailService;
-    private final CaseWorkerEmailService caseWorkerEmailService;
     private final AllTabServiceImpl allTabService;
     private final CourtFinderService courtFinderService;
     private final CcdCoreCaseDataService coreCaseDataService;
@@ -170,7 +169,6 @@ public class RequestUpdateCallbackService {
 
             if (PAID.equalsIgnoreCase(serviceRequestUpdateDto.getServiceRequestStatus())) {
                 solicitorEmailService.sendEmail(allTabsUpdateStartEventResponse.getCaseDetails());
-                caseWorkerEmailService.sendEmail(allTabsUpdateStartEventResponse.getCaseDetails());
             }
         }
     }

@@ -504,7 +504,6 @@ class RequestUpdateCallbackServiceTest {
         verify(coreCaseDataService, times(1)).submitUpdate(anyString(), any(), any(), eq(caseId.toString()), eq(true));
         verify(allTabService).mapAndSubmitAllTabsUpdate(any(), any(), any(), any(), any());
         verify(solicitorEmailService).sendEmail(any());
-        verify(caseWorkerEmailService).sendEmail(any());
     }
 
     @Test
