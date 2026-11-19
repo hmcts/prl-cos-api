@@ -243,48 +243,6 @@ class CaseWorkerEmailServiceTest {
     }
 
     @Test
-    void sendEmailSuccessfully() {
-        PartyDetails applicant = PartyDetails.builder()
-            .firstName("TestFirst")
-            .lastName("TestLast")
-            .build();
-
-        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
-        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
-
-        PartyDetails respondent = PartyDetails.builder()
-            .lastName("respondentLast")
-            .build();
-
-        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
-        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("TestCaseName")
-            .applicants(listOfApplicants)
-            .respondents(listOfRespondents)
-            .ordersApplyingFor(Collections.singletonList(OrderTypeEnum.specificIssueOrder))
-            .isCaseUrgent(YesOrNo.No)
-            .doYouNeedAWithoutNoticeHearing(YesOrNo.No)
-            .caseworkerEmailAddress("test@test.com")
-            .doYouRequireAHearingWithReducedNotice(YesOrNo.Yes)
-            .build();
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("caseworkerEmailAddress", "test@test.com");
-
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(caseData.getId())
-            .data(data)
-            .build();
-        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-
-        caseWorkerEmailService.sendEmail(caseDetails);
-        assertEquals("test@test.com", caseDetails.getData().get("caseworkerEmailAddress").toString());
-    }
-
-    @Test
     void testCourtAdminEmailWithNoUrgency() {
         PartyDetails applicant1 = PartyDetails.builder()
             .canYouProvideEmailAddress(YesOrNo.No)
@@ -764,79 +722,5 @@ class CaseWorkerEmailServiceTest {
         caseWorkerEmailService.sendWithdrawApplicationEmailToLocalCourt(caseDetails, caseData.getCourtEmailAddress());
 
         assertEquals("testing@localcourt.com", caseData.getCourtEmailAddress());
-    }
-
-    @Test
-    void sendEmailShouldNotThrowWhenEmailIsNullOrBlank() {
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(12345L)
-            .data(new HashMap<>()) // No email address
-            .build();
-
-        // Should not throw any exception, just log a warning
-        caseWorkerEmailService.sendEmail(caseDetails);
-
-        Mockito.verify(emailService, Mockito.never()).send(
-            Mockito.anyString(),
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.any()
-        );
-    }
-
-    @Test
-    void sendEmailShouldHandleExceptionFromEmailService() {
-        Map<String, Object> data = new HashMap<>();
-        data.put("caseworkerEmailAddress", "test@test.com");
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(12345L)
-            .data(data)
-            .build();
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicants(new ArrayList<>())
-            .respondents(new ArrayList<>())
-            .ordersApplyingFor(new ArrayList<>())
-            .isCaseUrgent(YesOrNo.No)
-            .doYouNeedAWithoutNoticeHearing(YesOrNo.No)
-            .doYouRequireAHearingWithReducedNotice(YesOrNo.No)
-            .build();
-        Mockito.when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        Mockito.doThrow(new RuntimeException("Email send failed"))
-            .when(emailService).send(
-                Mockito.anyString(),
-                Mockito.any(),
-                Mockito.any(),
-                Mockito.any()
-            );
-
-        // Should not throw, just log error
-        caseWorkerEmailService.sendEmail(caseDetails);
-
-        Mockito.verify(emailService, Mockito.times(1)).send(
-            Mockito.anyString(),
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.any()
-        );
-    }
-
-    @Test
-    void sendEmailShouldNotThrowWhenEmailIsBlank() {
-        Map<String, Object> data = new HashMap<>();
-        data.put("caseworkerEmailAddress", "   "); // blank string
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(12345L)
-            .data(data)
-            .build();
-
-        caseWorkerEmailService.sendEmail(caseDetails);
-
-        Mockito.verify(emailService, Mockito.never()).send(
-            Mockito.anyString(),
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.any()
-        );
     }
 }

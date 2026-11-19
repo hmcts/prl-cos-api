@@ -132,31 +132,6 @@ public class CaseWorkerEmailService {
             .build();
     }
 
-    public void sendEmail(CaseDetails caseDetails) {
-        Object emailObj = caseDetails.getData().get(CASEWORKER_EMAIL_ADDRESS);
-
-        if (emailObj == null || emailObj.toString().isBlank()) {
-            log.warn("No caseworker email address found for case ID: {}", caseDetails.getId());
-            return;
-        }
-
-        String email = emailObj.toString();
-
-        try {
-            emailService.send(
-                email,
-                EmailTemplateNames.CASEWORKER,
-                buildEmail(caseDetails),
-                LanguagePreference.english
-            );
-            log.info("Email sent to caseworker for case ID: {}", caseDetails.getId());
-
-        } catch (Exception e) {
-            log.error("Failed to send email to caseworker for case ID: {}. Error: {}",
-                      caseDetails.getId(), e.getMessage(), e);
-        }
-    }
-
     private EmailTemplateVars buildReturnApplicationEmail(CaseDetails caseDetails) {
         CaseData caseData = emailService.getCaseData(caseDetails);
 

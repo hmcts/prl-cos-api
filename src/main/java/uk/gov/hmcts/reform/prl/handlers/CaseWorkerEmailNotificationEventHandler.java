@@ -23,11 +23,6 @@ public class CaseWorkerEmailNotificationEventHandler {
         );
     }
 
-    @EventListener(condition = "#event.typeOfEvent eq 'Resubmit email'")
-    public void notifyCaseWorkerForCaseResubmission(final CaseWorkerNotificationEmailEvent event) {
-        caseWorkerEmailService.sendEmail(event.getCaseDetailsModel());
-    }
-
     @EventListener(condition = "#event.typeOfEvent eq 'Notify court admin'")
     public void notifyCourtAdmin(final CaseWorkerNotificationEmailEvent event) {
         caseWorkerEmailService.sendEmailToCourtAdmin(event.getCaseDetailsModel());
