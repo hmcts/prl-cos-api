@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.exception.CaseActivationNotAllowedException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
-import uk.gov.hmcts.reform.prl.models.citizen.CaseActivationResponse;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -69,7 +68,7 @@ public class LinkCitizenCaseService {
 
     public Optional<CaseDetails> linkCitizenToCase(String authorisation, String caseId, String accessCode) {
         Optional<CaseDetails> caseDetails = Optional.empty();
-        String activationStatus = checkCaseActivation(caseId, accessCode, authorisation).status();
+        String activationStatus = validateAccessCode(caseId, accessCode, authorisation);
         if (NOT_READY.equals(activationStatus)) {
             throw new CaseActivationNotAllowedException();
         }
@@ -120,28 +119,6 @@ public class LinkCitizenCaseService {
             .map(Element::getValue)
             .filter(invite -> invite.getHasLinked() != null && invite.getHasLinked().equals(YES))
             .anyMatch(invite -> userInfo.getUid().equals(invite.getInvitedUserId()));
-    }
-
-    private CaseData findAndGetCase(String caseId) {
-        return objectMapper.convertValue(
-            findCaseDetails(caseId).getData(),
-            CaseData.class
-        );
-    }
-
-    private CaseDetails findCaseDetails(String caseId) {
-        return ccdCoreCaseDataService.findCaseById(systemUserService.getSysUserToken(), caseId);
-    }
-
-    public CaseActivationResponse checkCaseActivation(String caseId, String accessCode, String authorisation) {
-        CaseDetails caseDetails = findCaseDetails(caseId);
-        CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
-        String status = caseData == null ? INVALID : findAccessCodeStatus(accessCode, caseData, authorisation);
-        if (VALID.equals(status)
-            && State.tryFromValue(caseDetails.getState()).filter(ALLOWED_ACTIVATION_STATES::contains).isEmpty()) {
-            status = NOT_READY;
-        }
-        return new CaseActivationResponse(status);
     }
 
     public Map<String, Object> getCaseDataMapToLinkCitizen(String accessCode,
@@ -260,10 +237,13 @@ public class LinkCitizenCaseService {
     }
 
     public String validateAccessCode(String caseId, String accessCode, String authorisation) {
-        CaseData caseData = findAndGetCase(caseId);
-        if (null == caseData) {
-            return INVALID;
+        CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(systemUserService.getSysUserToken(), caseId);
+        CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
+        String status = caseData == null ? INVALID : findAccessCodeStatus(accessCode, caseData, authorisation);
+        if (VALID.equals(status)
+            && State.tryFromValue(caseDetails.getState()).filter(ALLOWED_ACTIVATION_STATES::contains).isEmpty()) {
+            return NOT_READY;
         }
-        return findAccessCodeStatus(accessCode, caseData, authorisation);
+        return status;
     }
 }

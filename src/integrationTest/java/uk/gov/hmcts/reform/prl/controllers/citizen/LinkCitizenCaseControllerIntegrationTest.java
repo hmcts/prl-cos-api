@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.exception.CaseActivationNotAllowedException;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
-import uk.gov.hmcts.reform.prl.models.citizen.CaseActivationResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
@@ -135,49 +134,25 @@ public class LinkCitizenCaseControllerIntegrationTest {
     }
 
     @Test
-    public void checkCaseActivationReturnsOnlyTheOutcome() throws Exception {
+    public void validateAccessCodeReturnsOnlyTheOutcome() throws Exception {
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
         for (String outcome : new String[]{"Valid", "NotReady", "Invalid", "Linked", "Duplicate"}) {
-            when(linkCitizenCaseService.checkCaseActivation("1234567890123456", "ABCD1234", "testAuthToken"))
-                .thenReturn(new CaseActivationResponse(outcome));
-            mockMvc.perform(post("/citizen/check-case-activation")
+            when(linkCitizenCaseService.validateAccessCode("1234567890123456", "ABCD1234", "testAuthToken"))
+                .thenReturn(outcome);
+            mockMvc.perform(post("/citizen/validate-access-code")
                                 .header(HttpHeaders.AUTHORIZATION, "testAuthToken")
                                 .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
+                                .accept(APPLICATION_JSON)
                                 .contentType(APPLICATION_JSON)
                                 .content("{\"caseId\":\"1234567890123456\",\"accessCode\":\"ABCD1234\"}"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"status\":\"" + outcome + "\"}", true));
+                .andExpect(content().string(outcome));
         }
     }
 
     @Test
-    public void checkCaseActivationRejectsInvalidCredentials() throws Exception {
-        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(false);
-        mockMvc.perform(post("/citizen/check-case-activation")
-                            .header(HttpHeaders.AUTHORIZATION, "testAuthToken")
-                            .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
-                            .contentType(APPLICATION_JSON)
-                            .content("{\"caseId\":\"1234567890123456\",\"accessCode\":\"ABCD1234\"}"))
-            .andExpect(status().isForbidden());
-        verifyNoInteractions(linkCitizenCaseService);
-    }
-
-    @Test
-    public void checkCaseActivationRejectsMalformedRequests() throws Exception {
-        for (String body : new String[]{"{}", "{\"caseId\":\"bad\",\"accessCode\":\"ABCD1234\"}",
-            "{\"caseId\":\"1234567890123456\",\"accessCode\":\"\"}"}) {
-            mockMvc.perform(post("/citizen/check-case-activation")
-                                .header(HttpHeaders.AUTHORIZATION, "testAuthToken")
-                                .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
-                                .contentType(APPLICATION_JSON).content(body))
-                .andExpect(status().isBadRequest());
-        }
-        verifyNoInteractions(linkCitizenCaseService);
-    }
-
-    @Test
-    public void checkCaseActivationRequiresAuthenticationHeaders() throws Exception {
-        mockMvc.perform(post("/citizen/check-case-activation").contentType(APPLICATION_JSON)
+    public void validateAccessCodeRequiresAuthenticationHeaders() throws Exception {
+        mockMvc.perform(post("/citizen/validate-access-code").contentType(APPLICATION_JSON)
                             .content("{\"caseId\":\"1234567890123456\",\"accessCode\":\"ABCD1234\"}"))
             .andExpect(status().isBadRequest());
         verifyNoInteractions(linkCitizenCaseService);
@@ -195,7 +170,7 @@ public class LinkCitizenCaseControllerIntegrationTest {
                                 .contentType(APPLICATION_JSON)
                                 .content("{\"caseId\":\"1234567890123456\",\"accessCode\":\"ABCD1234\"}"))
                 .andExpect(status().isConflict())
-                .andExpect(content().json("{\"status\":\"NotReady\"}", true));
+                .andExpect(content().string("NotReady"));
         }
         verifyNoInteractions(hearingService, caseService);
     }

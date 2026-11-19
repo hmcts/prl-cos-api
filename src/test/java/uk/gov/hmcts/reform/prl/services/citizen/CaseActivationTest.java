@@ -89,7 +89,7 @@ public class CaseActivationTest {
     public void checksUnlinkedHearingCaseUsingSystemAccountWithoutGrantingAccess() {
         mockCase(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue(), "C100", "Yes", Map.of());
 
-        assertEquals(VALID, service.checkCaseActivation(CASE_ID, ACCESS_CODE, USER_TOKEN).status());
+        assertEquals(VALID, service.validateAccessCode(CASE_ID, ACCESS_CODE, USER_TOKEN));
         verify(ccdCoreCaseDataService).findCaseById(SYSTEM_TOKEN, CASE_ID);
         verifyNoInteractions(caseAccessApi, allTabService);
     }
@@ -99,7 +99,7 @@ public class CaseActivationTest {
         mockCase(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue(), "FL401", "No", Map.of());
         when(launchDarklyClient.isFeatureEnabled(PrlAppsConstants.CITIZEN_ALLOW_DA_JOURNEY)).thenReturn(true);
 
-        assertEquals(VALID, service.checkCaseActivation(CASE_ID, ACCESS_CODE, USER_TOKEN).status());
+        assertEquals(VALID, service.validateAccessCode(CASE_ID, ACCESS_CODE, USER_TOKEN));
         verifyNoInteractions(caseAccessApi, allTabService);
     }
 
@@ -109,7 +109,7 @@ public class CaseActivationTest {
             if (state != State.PREPARE_FOR_HEARING_CONDUCT_HEARING) {
                 mockCase(state.getValue(), "C100", "Yes", Map.of());
                 assertEquals(state.getValue(), NOT_READY,
-                             service.checkCaseActivation(CASE_ID, ACCESS_CODE, USER_TOKEN).status());
+                             service.validateAccessCode(CASE_ID, ACCESS_CODE, USER_TOKEN));
             }
         }
         verifyNoInteractions(caseAccessApi, allTabService);
@@ -119,7 +119,7 @@ public class CaseActivationTest {
     public void refusesMissingOrUnknownState() {
         for (String state : new String[]{null, "", "UNKNOWN"}) {
             mockCase(state, "C100", "Yes", Map.of());
-            assertEquals(NOT_READY, service.checkCaseActivation(CASE_ID, ACCESS_CODE, USER_TOKEN).status());
+            assertEquals(NOT_READY, service.validateAccessCode(CASE_ID, ACCESS_CODE, USER_TOKEN));
         }
         verifyNoInteractions(caseAccessApi, allTabService);
     }
@@ -128,26 +128,26 @@ public class CaseActivationTest {
     public void invalidCodeDoesNotDiscloseWhetherTheCaseIsReady() {
         mockCase(State.AWAITING_INFORMATION.getValue(), "C100", "Yes", Map.of());
 
-        assertEquals(INVALID, service.checkCaseActivation(CASE_ID, "BADCODE1", USER_TOKEN).status());
+        assertEquals(INVALID, service.validateAccessCode(CASE_ID, "BADCODE1", USER_TOKEN));
         verifyNoInteractions(caseAccessApi, allTabService, idamClient);
     }
 
     @Test
     public void preservesLinkedAndDuplicateResultsBeforeCheckingState() {
         mockCase(State.AWAITING_INFORMATION.getValue(), "C100", "Yes", Map.of("hasLinked", "Yes"));
-        assertEquals(LINKED, service.checkCaseActivation(CASE_ID, ACCESS_CODE, USER_TOKEN).status());
+        assertEquals(LINKED, service.validateAccessCode(CASE_ID, ACCESS_CODE, USER_TOKEN));
 
         mockCase(State.AWAITING_INFORMATION.getValue(), "C100", "Yes",
                  Map.of("hasLinked", "Yes", "invitedUserId", "citizen-id"));
-        assertEquals(DUPLICATE, service.checkCaseActivation(CASE_ID, ACCESS_CODE, USER_TOKEN).status());
+        assertEquals(DUPLICATE, service.validateAccessCode(CASE_ID, ACCESS_CODE, USER_TOKEN));
         verifyNoInteractions(caseAccessApi, allTabService);
     }
 
     @Test
-    public void keepsLegacyAccessCodeValidationUnchanged() {
+    public void reportsNotReadyForValidCodeBeforeHearing() {
         mockCase(State.AWAITING_INFORMATION.getValue(), "C100", "Yes", Map.of());
 
-        assertEquals(VALID, service.validateAccessCode(CASE_ID, ACCESS_CODE, USER_TOKEN));
+        assertEquals(NOT_READY, service.validateAccessCode(CASE_ID, ACCESS_CODE, USER_TOKEN));
     }
 
     @Test
