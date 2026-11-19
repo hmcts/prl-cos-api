@@ -1129,5 +1129,5 @@ public class PrlAppsConstants {
         + " park your vehicle or leave your bicycle/motorbike or scooter in [road name]. (delete as appropriate)";
     public static final String NOT_TO_SEND_DOCUMENTS = "If the applicant does not have solicitors, this order does not prevent you"
         + " from sending documents in respect of these or any other proceedings directly to them. If the applicant has solicitors,"
-        + " you should send any documents to the solicitors. This order shall remain in force until 16:00 on [date].";
+        + " you should send any documents to the solicitors.";
 }
