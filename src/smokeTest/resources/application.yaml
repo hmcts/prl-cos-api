@@ -307,10 +307,6 @@ send-letter:
 case_document_am:
   url: ${CCD_CASE_DOCS_AM_API:http://ccd-case-document-am-api-aat.service.core-compute-aat.internal}
 
-courtfinder:
-  api:
-    url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
-
 locationfinder:
   api:
     url: ${LOCATION_REF_API:http://rd-location-ref-api-aat.service.core-compute-aat.internal}

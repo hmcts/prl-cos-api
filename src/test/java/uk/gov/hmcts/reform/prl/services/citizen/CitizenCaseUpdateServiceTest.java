@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +36,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfidentialCheckFailed;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
-import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
@@ -65,6 +63,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PERMISSION_REQUIRED_DOCUMENT;
@@ -323,11 +322,8 @@ public class CitizenCaseUpdateServiceTest {
         when(objectMapper.convertValue(any(CaseData.class), eq(Map.class))).thenReturn(caseDetails1);
         when(partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(12345L)))
             .thenReturn(CaseDetails.builder().id(12345L).build());
-        ImmutablePair<CourtVenue, Court> courtCourtVenueMap = new ImmutablePair<>(
-            CourtVenue.builder().courtEpimmsId("123").build(),
-            Court.builder().courtName("Test court").build()
-        );
-        when(courtLocatorService.getC100NearestFamilyCourtAndVenue(any(CaseData.class))).thenReturn(courtCourtVenueMap);
+        CourtVenue courtVenue = CourtVenue.builder().courtEpimmsId("123").siteName("Test court").build();
+        when(courtLocatorService.getNearestFamilyCourt(any(CaseData.class))).thenReturn(courtVenue);
         Assert.assertNotNull(citizenCaseUpdateService.submitCitizenC100Application(
             authToken,
             String.valueOf(caseId),
@@ -375,18 +371,25 @@ public class CitizenCaseUpdateServiceTest {
         when(objectMapper.convertValue(any(CaseData.class), eq(Map.class))).thenReturn(caseDetails1);
         when(partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(12345L)))
             .thenReturn(CaseDetails.builder().id(12345L).build());
-        ImmutablePair<CourtVenue, Court> courtCourtVenueMap = new ImmutablePair<>(
-            CourtVenue.builder().courtEpimmsId("123").build(),
-            null
-        );
+        for (String siteName : new String[]{null, "", " \t "}) {
+            CourtVenue courtVenue = CourtVenue.builder().courtEpimmsId("123")
+                .siteName(siteName).courtName("Formal Court Name").build();
+            when(courtLocatorService.getNearestFamilyCourt(any(CaseData.class))).thenReturn(courtVenue);
 
-        when(courtLocatorService.getC100NearestFamilyCourtAndVenue(any(CaseData.class))).thenReturn(courtCourtVenueMap);
-        Assert.assertNotNull(citizenCaseUpdateService.submitCitizenC100Application(
-            authToken,
-            String.valueOf(caseId),
-            "citizenSaveC100DraftInternal",
-            caseData
-        ));
+            Assert.assertNotNull(citizenCaseUpdateService.submitCitizenC100Application(
+                authToken,
+                String.valueOf(caseId),
+                "citizenSaveC100DraftInternal",
+                caseData
+            ));
+        }
+
+        ArgumentCaptor<CaseData> courtDataCaptor = ArgumentCaptor.forClass(CaseData.class);
+        verify(citizenPartyDetailsMapper, times(3)).buildUpdatedCaseData(courtDataCaptor.capture(), eq(c100RebuildData));
+        for (CaseData submittedCaseData : courtDataCaptor.getAllValues()) {
+            Assert.assertEquals("No Court Fetched", submittedCaseData.getCourtName());
+            Assert.assertNull(submittedCaseData.getCourtId());
+        }
     }
 
     @Test
@@ -537,12 +540,9 @@ public class CitizenCaseUpdateServiceTest {
             .thenReturn(caseDetailsMap);
         when(partyLevelCaseFlagsService.generateAndStoreCaseFlags(anyString()))
             .thenReturn(CaseDetails.builder().id(12345L).build());
-        ImmutablePair<CourtVenue, Court> courtCourtVenueMap = new ImmutablePair<>(
-            CourtVenue.builder().courtEpimmsId("123").build(),
-            Court.builder().courtName("Test court").build()
-        );
+        CourtVenue courtVenue = CourtVenue.builder().courtEpimmsId("123").siteName("Test court").build();
 
-        when(courtLocatorService.getC100NearestFamilyCourtAndVenue(any(CaseData.class))).thenReturn(courtCourtVenueMap);
+        when(courtLocatorService.getNearestFamilyCourt(any(CaseData.class))).thenReturn(courtVenue);
 
         when(allTabService.submitUpdateForSpecificUserEvent(
             any(), any(), any(), any(), any(), any()
@@ -604,12 +604,9 @@ public class CitizenCaseUpdateServiceTest {
                 UserDetails.builder().build()
             );
 
-        ImmutablePair<CourtVenue, Court> courtCourtVenueMap = new ImmutablePair<>(
-            CourtVenue.builder().courtEpimmsId("123").build(),
-            Court.builder().build()
-        );
+        CourtVenue courtVenue = CourtVenue.builder().courtEpimmsId("123").siteName("Test court").build();
 
-        when(courtLocatorService.getC100NearestFamilyCourtAndVenue(any(CaseData.class))).thenReturn(courtCourtVenueMap);
+        when(courtLocatorService.getNearestFamilyCourt(any(CaseData.class))).thenReturn(courtVenue);
 
         when(citizenPartyDetailsMapper.buildUpdatedCaseData(any(), any()))
             .thenReturn(caseData);

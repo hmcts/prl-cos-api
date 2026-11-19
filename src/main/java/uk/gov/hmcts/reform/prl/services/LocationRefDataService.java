@@ -34,7 +34,6 @@ public class LocationRefDataService {
     public static final String LOCATION_REFERENCE_DATA_LOOKUP_FAILED = "Location Reference Data Lookup Failed - ";
     private final AuthTokenGenerator authTokenGenerator;
     private final LocationRefDataApi locationRefDataApi;
-    private final FeatureToggleService featureToggleService;
 
     public static final String SCOTLAND = "Scotland";
     public static final String MIDLANDS = "Midlands";
@@ -47,6 +46,24 @@ public class LocationRefDataService {
 
     @Value("${courts.caDefaultCourtEpimmsID}")
     protected String caDefaultCourtEpimmsID;
+
+    public boolean isCourtOnboarded(String epimmsId) {
+        if (StringUtils.isBlank(epimmsId) || StringUtils.isBlank(courtsToFilter)) {
+            return false;
+        }
+
+        boolean configured = false;
+        for (String court : courtsToFilter.split(",")) {
+            String[] entry = court.split(":", 2);
+            if (epimmsId.trim().equals(entry[0].trim())) {
+                if (entry.length > 1 && StringUtils.isNotBlank(entry[1])) {
+                    return false;
+                }
+                configured = true;
+            }
+        }
+        return configured;
+    }
 
     public List<DynamicListElement> getCourtLocations(String authToken) {
         try {
@@ -197,30 +214,44 @@ public class LocationRefDataService {
     }
 
     public DynamicListElement getDisplayEntryFromEpimmsId(String baseLocationId, String authToken) {
-        DynamicListElement selectedElement = DynamicListElement.EMPTY;
-        if (featureToggleService.isOsCourtLookupFeatureEnabled()) {
-            Optional<CourtVenue> optionalCourtVenue = getCourtDetailsFromEpimmsId(baseLocationId, authToken);
-            if (optionalCourtVenue.isPresent()) {
-                selectedElement = getDisplayEntry(optionalCourtVenue.get());
-            }
-        }
-
-        return  selectedElement;
+        return getCourtDetailsFromEpimmsId(baseLocationId, authToken)
+            .map(this::getDisplayEntry)
+            .orElse(DynamicListElement.EMPTY);
     }
 
     public Optional<CourtVenue> getCourtDetailsFromEpimmsId(String baseLocationId, String authToken) {
+        log.info("RefData court venue lookup started: epimmsId={}, serviceCode={}, courtTypeId={}",
+                 baseLocationId, SERVICE_ID, FAMILY_COURT_TYPE_ID);
         CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(
             authToken,
             authTokenGenerator.generate(),
             SERVICE_ID
         );
-        return  (null == courtDetails || null == courtDetails.getCourtVenues())
-            ? Optional.empty()
-            : courtDetails.getCourtVenues().stream().filter(location -> !SCOTLAND.equals(
+        if (courtDetails == null || courtDetails.getCourtVenues() == null) {
+            log.warn("RefData court venue response contains no venues: epimmsId={}", baseLocationId);
+            return Optional.empty();
+        }
+        List<CourtVenue> matchingVenues = courtDetails.getCourtVenues().stream()
+            .filter(location -> StringUtils.equalsIgnoreCase(baseLocationId, location.getCourtEpimmsId()))
+            .toList();
+        log.info("RefData court venue response: requestedEpimmsId={}, totalVenueCount={}, matchingVenues={}",
+                 baseLocationId, courtDetails.getCourtVenues().size(), matchingVenues);
+        Optional<CourtVenue> selectedVenue = courtDetails.getCourtVenues().stream().filter(location -> !SCOTLAND.equals(
                 location.getRegion()))
             .filter(location -> FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId()))
             .filter(location -> baseLocationId.equalsIgnoreCase(location.getCourtEpimmsId()))
             .findFirst();
+        if (selectedVenue.isPresent()) {
+            CourtVenue venue = selectedVenue.get();
+            log.info("RefData court venue selected: requestedEpimmsId={}, courtVenueId={}, epimmsId={}, "
+                         + "siteName={}, courtName={}, venueName={}, postcode={}",
+                     baseLocationId, venue.getCourtVenueId(), venue.getCourtEpimmsId(), venue.getSiteName(),
+                     venue.getCourtName(), venue.getVenueName(), venue.getPostcode());
+        } else {
+            log.warn("RefData court venue response contains no matching England/Wales family court: epimmsId={}, courtTypeId={}",
+                     baseLocationId, FAMILY_COURT_TYPE_ID);
+        }
+        return selectedVenue;
     }
 
 

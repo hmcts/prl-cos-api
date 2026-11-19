@@ -2511,7 +2511,6 @@
       "allChildrenAreRiskPhysicalAbuse": "Yes",
       "respondentConfidentialDetails": [],
       "familyMediatorServiceName": null,
-      "courtCodeFromFact": "344",
       "soaServeLocalAuthorityYesOrNo": "No",
       "confidentialDetails": {
         "isConfidentialDetailsAvailable": "No"
@@ -5559,7 +5558,6 @@
       },
       "respondentConfidentialDetails": [],
       "familyMediatorServiceName": null,
-      "courtCodeFromFact": "344",
       "soaServeLocalAuthorityYesOrNo": "No",
       "caApplicant2InternalFlags": {
         "details": [],
@@ -10043,7 +10041,6 @@
         "classification": "PUBLIC"
       },
       "familyMediatorServiceName": "PUBLIC",
-      "courtCodeFromFact": "PUBLIC",
       "soaServeLocalAuthorityYesOrNo": "PUBLIC",
       "caApplicant2InternalFlags": {
         "value": {

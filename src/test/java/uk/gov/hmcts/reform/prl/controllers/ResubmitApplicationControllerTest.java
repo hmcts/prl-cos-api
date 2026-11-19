@@ -23,7 +23,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseEvidenceDocument;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
-import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
@@ -100,7 +100,7 @@ public class ResubmitApplicationControllerTest {
     @Mock
     private CourtFinderService courtFinderService;
     @Mock
-    private Court court;
+    private CourtVenue court;
     @Mock
     private ConfidentialityTabService confidentialityTabService;
     @Mock
@@ -224,11 +224,34 @@ public class ResubmitApplicationControllerTest {
             .caseDetails(caseDetails)
             .build();
 
-        court = Court.builder()
+        court = CourtVenue.builder()
+            .siteName("testcourt")
             .courtName("testcourt")
-            .countyLocationCode(123)
+            .courtEpimmsId("123")
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+    }
+
+    @Test
+    public void preservesCourtDetailsOnResubmissionWhenRefDataSiteNameIsBlank() throws Exception {
+        CaseData original = CaseData.builder().id(12345L).caseTypeOfApplication("C100")
+            .courtId("123").courtName("").build();
+        CaseDetails originalDetails = CaseDetails.builder().id(original.getId())
+            .data(Map.of("caseTypeOfApplication", "C100", "courtId", "123", "courtName", "")).build();
+        CallbackRequest request = CallbackRequest.builder().caseDetails(originalDetails).build();
+        when(objectMapper.convertValue(originalDetails.getData(), CaseData.class)).thenReturn(original);
+        when(caseEventService.findEventsForCase("12345")).thenReturn(List.of());
+
+        for (String siteName : new String[]{null, "", " \t "}) {
+            when(courtFinderService.getNearestFamilyCourt(original)).thenReturn(CourtVenue.builder()
+                .courtEpimmsId("234946").siteName(siteName).courtName("Formal Court Name").build());
+
+            AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(
+                AUTH_TOKEN, S2S_TOKEN, request);
+
+            assertEquals("123", response.getData().get("courtId"));
+            assertEquals("", response.getData().get("courtName"));
+        }
     }
 
     @Test

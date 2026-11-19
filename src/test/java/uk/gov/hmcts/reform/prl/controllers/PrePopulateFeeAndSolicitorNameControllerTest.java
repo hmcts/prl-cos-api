@@ -25,7 +25,7 @@ import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
@@ -107,7 +107,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
     private FeeResponse feeResponse;
 
-    private Court court;
+    private CourtVenue court;
 
     private CaseDetails caseDetails;
 
@@ -236,7 +236,8 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .caseData(caseData)
             .build();
 
-        court = Court.builder()
+        court = CourtVenue.builder()
+            .siteName("testcourt")
             .courtName("testcourt")
             .build();
 
@@ -444,7 +445,8 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .thenReturn(caseData);
         CallbackRequest callbackRequestCourt = getCallbackRequest();
 
-        Court court1 = Court.builder()
+        CourtVenue court1 = CourtVenue.builder()
+            .siteName("testcourt")
             .courtName("testcourt")
             .build();
         when(submitAndPayChecker.hasMandatoryCompleted(any(CaseData.class))).thenReturn(true);
@@ -502,7 +504,8 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .thenReturn(caseData);
         CallbackRequest callbackRequest = getCallbackRequest();
 
-        Court court1 = Court.builder()
+        CourtVenue court1 = CourtVenue.builder()
+            .siteName("testcourt")
             .courtName("testcourt")
             .build();
         Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
@@ -715,6 +718,21 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         CaseData result = (CaseData) response.getData();
         assertNotNull(result);
         assertEquals("No Court Fetched", result.getCourtName());
+    }
+
+    @Test
+    public void usesMissingCourtFallbackWhenRefDataSiteNameIsBlank() throws Exception {
+        stubSuccessfulJourney();
+
+        for (String siteName : new String[]{null, "", " \t "}) {
+            when(courtFinderService.getNearestFamilyCourt(any(CaseData.class))).thenReturn(CourtVenue.builder()
+                .siteName(siteName).courtName("Formal Court Name").build());
+
+            CallbackResponse response = prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(
+                AUTH_TOKEN, S2S_TOKEN, callbackRequestShared);
+
+            assertEquals("No Court Fetched", ((CaseData) response.getData()).getCourtName());
+        }
     }
 
     protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,

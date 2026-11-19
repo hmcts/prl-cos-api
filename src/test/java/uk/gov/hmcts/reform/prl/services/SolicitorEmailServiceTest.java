@@ -13,14 +13,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.court.Court;
-import uk.gov.hmcts.reform.prl.models.court.ServiceArea;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SolicitorEmail;
@@ -63,14 +61,10 @@ public class SolicitorEmailServiceTest {
 
     private Map<String, String> expectedEmailVarsAsMap;
 
-    @Mock
-    private CourtFinderApi courtFinderApi;
 
     @Mock
-    private Court court;
+    private CourtVenue court;
 
-    @Mock
-    private ServiceArea serviceArea;
     @Mock
     private ObjectMapper objectMapper;
 
@@ -95,21 +89,31 @@ public class SolicitorEmailServiceTest {
             .applicants(listOfApplicants)
             .build();
 
-        court = Court.builder()
+        court = CourtVenue.builder()
+            .siteName("testcourt")
             .courtName("testcourt")
             .build();
 
-        List<Court> courtList = new ArrayList<>();
-        courtList.add(court);
-
-        serviceArea = ServiceArea.builder()
-            .courts(courtList)
-            .build();
 
         userDetails = UserDetails.builder()
             .email("solicitor@example.com")
             .surname("userLast")
             .build();
+    }
+
+    @Test
+    public void usesEmptyCourtNameInEmailWhenRefDataSiteNameIsBlank() throws NotFoundException {
+        CaseDetails caseDetails = CaseDetails.builder().id(caseData.getId()).build();
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+
+        for (String siteName : new String[]{null, "", " \t "}) {
+            when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(CourtVenue.builder()
+                .siteName(siteName).courtName("Formal Court Name").build());
+
+            SolicitorEmail email = (SolicitorEmail) solicitorEmailService.buildEmail(caseDetails, false);
+
+            assertEquals("", email.getCourtName());
+        }
     }
 
     @Test

@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_LIST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
@@ -35,7 +35,6 @@ import static uk.gov.hmcts.reform.prl.utils.CommonUtils.isEmpty;
 @RequiredArgsConstructor
 public class AmendCourtService {
 
-    private final C100IssueCaseService c100IssueCaseService;
     private final LocationRefDataService locationRefDataService;
     private final CourtSealFinderService courtSealFinderService;
     private final ObjectMapper objectMapper;
@@ -45,23 +44,32 @@ public class AmendCourtService {
     public Map<String, Object> handleAmendCourtSubmission(String authorisation, CallbackRequest callbackRequest,
                                                           Map<String, Object> caseDataUpdated) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Long caseId = callbackRequest.getCaseDetails().getId();
         if (!CollectionUtils.isEmpty(caseData.getCantFindCourtCheck())) {
             caseDataUpdated.put(COURT_NAME_FIELD, caseData.getAnotherCourt());
             caseDataUpdated.put(STATE_FIELD, State.PROCEEDS_IN_HERITAGE_SYSTEM);
+            log.info("Court update using manually entered details: caseId={}, eventId={}, courtName={}; RefData lookup skipped",
+                     caseId, callbackRequest.getEventId(), caseData.getAnotherCourt());
         } else {
 
             String baseLocationId = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[0];
+            log.info("Court update RefData lookup: caseId={}, eventId={}, selectedEpimmsId={}",
+                     caseId, callbackRequest.getEventId(), baseLocationId);
             Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(
                 baseLocationId,
                 authorisation
             );
+            if (courtVenue.isPresent()) {
+                CourtVenue venue = courtVenue.get();
+                log.info("Court update RefData venue: caseId={}, eventId={}, epimmsId={}, siteName={}, courtName={}, "
+                             + "venueName={}, regionId={}",
+                         caseId, callbackRequest.getEventId(), venue.getCourtEpimmsId(), venue.getSiteName(),
+                         venue.getCourtName(), venue.getVenueName(), venue.getRegionId());
+            } else {
+                log.warn("Court update RefData venue not found: caseId={}, eventId={}, selectedEpimmsId={}",
+                         caseId, callbackRequest.getEventId(), baseLocationId);
+            }
             caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
-            courtVenue.ifPresent(venue -> caseDataUpdated.put(
-                COURT_CODE_FROM_FACT,
-                c100IssueCaseService.getFactCourtId(
-                    venue
-                )
-            ));
             caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(caseData.getCourtList().getValue()).build());
             if (courtVenue.isPresent()) {
                 String courtSeal = courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId());
@@ -73,6 +81,10 @@ public class AmendCourtService {
         }
         caseDataUpdated.put(TRANSFERRED_COURT_FROM, caseData.getCourtName());
         caseDataUpdated.putAll(caseSummaryTab.updateTab(objectMapper.convertValue(caseDataUpdated, CaseData.class)));
+        log.info("Court update prepared: caseId={}, eventId={}, courtId={}, courtName={}, state={}, transferredCourtFrom={}",
+                 caseId, callbackRequest.getEventId(), caseDataUpdated.get(COURT_ID_FIELD),
+                 caseDataUpdated.get(COURT_NAME_FIELD), caseDataUpdated.get(STATE_FIELD),
+                 caseDataUpdated.get(TRANSFERRED_COURT_FROM));
         return caseDataUpdated;
     }
 

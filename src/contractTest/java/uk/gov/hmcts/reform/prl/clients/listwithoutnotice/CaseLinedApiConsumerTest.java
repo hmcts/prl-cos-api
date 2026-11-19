@@ -36,7 +36,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
     properties = {"bundle.api.url=","idam.api.url=localhost:5000","commonData.api.url=localhost:5000",
         "fis_hearing.api.url=http://localhost:8899",
         "refdata.api.url=",
-        "courtfinder.api.url=",
         "fees-register.api.url=",
         "judicialUsers.api.url=",
         "locationfinder.api.url=",

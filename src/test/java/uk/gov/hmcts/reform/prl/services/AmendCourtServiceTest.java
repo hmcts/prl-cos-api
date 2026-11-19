@@ -90,7 +90,6 @@ public class AmendCourtServiceTest {
             .build();
         when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(), Mockito.anyString()))
             .thenReturn(Optional.of(courtVenue));
-        when(c100IssueCaseService.getFactCourtId(courtVenue)).thenReturn("");
         when(courtSealFinderService.getCourtSeal(Mockito.anyString())).thenReturn("");
         when(dfjLookupService.getDfjAreaFieldsByCourtId("234946"))
             .thenReturn(Map.of("dfjArea", "SWANSEA", "swanseaDFJCourt", "234946"));

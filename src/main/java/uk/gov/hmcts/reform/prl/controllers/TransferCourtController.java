@@ -12,7 +12,6 @@ import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,19 +24,14 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.events.TransferToAnotherCourtEvent;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
-import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
-import uk.gov.hmcts.reform.prl.models.court.Court;
-import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AmendCourtService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.EventService;
-import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -45,7 +39,6 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
@@ -72,7 +65,6 @@ public class TransferCourtController {
     private final AllTabServiceImpl allTabsService;
     private final CourtFinderService courtLocatorService;
     private final EventService eventPublisher;
-    private final FeatureToggleService featureToggleService;
 
     @PostMapping(path = "/transfer-court/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to Issue and send to local court")
@@ -176,28 +168,9 @@ public class TransferCourtController {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-            Court closestChildArrangementsCourt = null;
-            if (featureToggleService.isOsCourtLookupFeatureEnabled()) {
-                ImmutablePair<CourtVenue, Court> courtCourtVenueMap = courtLocatorService.getC100NearestFamilyCourtAndVenue(caseData);
-                if (courtCourtVenueMap != null && courtCourtVenueMap.getRight() != null) {
-                    closestChildArrangementsCourt = courtCourtVenueMap.getRight();
-                }
-                if (courtCourtVenueMap != null && courtCourtVenueMap.getLeft() != null) {
-                    caseDataUpdated.put(COURT_ID_FIELD, courtCourtVenueMap.getLeft().getCourtEpimmsId());
-                }
-            } else {
-                closestChildArrangementsCourt = courtLocatorService.getNearestFamilyCourt(caseData);
-            }
-
-            Optional<CourtEmailAddress> courtEmailAddress = closestChildArrangementsCourt == null ? Optional.empty() : courtLocatorService
-                .getEmailAddress(closestChildArrangementsCourt);
-            if (courtEmailAddress.isPresent()) {
-                log.info("Found court email for case id {}", caseData.getId());
-                caseDataUpdated.put("localCourtAdmin", List.of(
-                    Element.<LocalCourtAdminEmail>builder().value(LocalCourtAdminEmail.builder().email(courtEmailAddress.get().getAddress()).build())
-                        .build()));
-            } else {
-                log.info("Court email not found for case id {}", caseData.getId());
+            CourtVenue courtVenue = courtLocatorService.getNearestFamilyCourt(caseData);
+            if (courtVenue != null) {
+                caseDataUpdated.put(COURT_ID_FIELD, courtVenue.getCourtEpimmsId());
             }
             List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
             addAndSelectCourtList(caseDataUpdated, courtList, authorisation);
