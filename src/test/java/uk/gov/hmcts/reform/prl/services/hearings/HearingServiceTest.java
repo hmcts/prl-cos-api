@@ -355,8 +355,8 @@ class HearingServiceTest {
             .thenReturn(ResponseEntity.ok(AutomatedHearingResponse.builder().build()));
         AutomatedHearingResponse automatedHearingsResponse = hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
         Assert.assertNotNull(automatedHearingsResponse);
-        Assert.assertEquals("TestCaseName", automatedHearingCaseData.getApplicantCaseName());
-        Assert.assertEquals("TestCaseName_casenamehmctsinternal", automatedHearingCaseData.getCaseNameHmctsInternal());
+        assertEquals("TestCaseName", automatedHearingCaseData.getApplicantCaseName());
+        assertEquals("TestCaseName_casenamehmctsinternal", automatedHearingCaseData.getCaseNameHmctsInternal());
     }
 
     @Test
