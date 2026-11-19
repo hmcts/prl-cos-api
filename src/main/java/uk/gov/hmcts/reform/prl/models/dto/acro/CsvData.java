@@ -27,4 +27,5 @@ public class CsvData {
     private String daApplicantContactInstructions;
     private String dateOrderMade;
     private String familymanCaseNumber;
+    private String caseNameHmctsInternal;
 }
