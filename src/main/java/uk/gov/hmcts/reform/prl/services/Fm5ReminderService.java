@@ -42,7 +42,6 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -67,6 +66,9 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class Fm5ReminderService {
 
+    private static final int PAGE_SIZE = 10;
+    private static final int HEARING_API_BATCH_SIZE = 10;
+
     private final SystemUserService systemUserService;
     private final AuthTokenGenerator authTokenGenerator;
     private final CoreCaseDataApi coreCaseDataApi;
@@ -88,42 +90,7 @@ public class Fm5ReminderService {
             log.info("Final count of cases to process for FM5 notifications: {}",
                      qualifiedCasesAndPartiesBeforeHearing.size());
             //Send FM5 reminders to cases meeting all system rules, else update not needed
-            qualifiedCasesAndPartiesBeforeHearing.forEach(
-                (key, fm5PendingParty) -> {
-                    log.info("Processing FM5 notification for case {}", key);
-                    StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
-                    Map<String, Object> caseDataUpdated = new HashMap<>();
-                    if (Fm5PendingParty.NOTIFICATION_NOT_REQUIRED.equals(fm5PendingParty)) {
-                        log.info("FM5 reminders are not needed for caseId {}, update the flag fm5RemindersSent->NOT_REQUIRED", key);
-                        startAllTabsUpdateDataContent
-                            = allTabService.getStartUpdateForSpecificEvent(key, FM5_NOTIFICATION_NOT_REQUIRED_CASE_UPDATE.getValue());
-                        caseDataUpdated.put("fm5RemindersSent", "NOT_REQUIRED");
-                    } else {
-                        log.info("*** Sending FM5 reminders for caseId {}", key);
-                        startAllTabsUpdateDataContent
-                            = allTabService.getStartUpdateForSpecificEvent(key, FM5_NOTIFICATION_CASE_UPDATE.getValue());
-
-                        List<Element<NotificationDetails>> fm5ReminderNotifications = fm5NotificationService.sendFm5ReminderNotifications(
-                            startAllTabsUpdateDataContent.caseData(),
-                            fm5PendingParty
-                        );
-
-                        if (isNotEmpty(fm5ReminderNotifications)) {
-                            log.info("FM5 reminders are sent for caseId {}, update the flag fm5RemindersSent->YES", key);
-                            caseDataUpdated.put("fm5ReminderNotifications", fm5ReminderNotifications);
-                            caseDataUpdated.put("fm5RemindersSent", "YES");
-                        }
-                    }
-                    //Save case data
-                    allTabService.submitAllTabsUpdate(
-                        startAllTabsUpdateDataContent.authorisation(),
-                        key,
-                        startAllTabsUpdateDataContent.startEventResponse(),
-                        startAllTabsUpdateDataContent.eventRequestData(),
-                        caseDataUpdated
-                    );
-                }
-            );
+            qualifiedCasesAndPartiesBeforeHearing.forEach(this::processCase);
         }
 
         log.info(
@@ -132,50 +99,117 @@ public class Fm5ReminderService {
         );
     }
 
+    private void processCase(String key, Fm5PendingParty fm5PendingParty) {
+        log.info("Processing FM5 notification for case {}", key);
+
+        try {
+            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
+            Map<String, Object> caseDataUpdated = new HashMap<>();
+            if (Fm5PendingParty.NOTIFICATION_NOT_REQUIRED.equals(fm5PendingParty)) {
+                log.info(
+                    "FM5 reminders are not needed for caseId {}, update the flag fm5RemindersSent->NOT_REQUIRED",
+                    key
+                );
+                startAllTabsUpdateDataContent
+                    = allTabService.getStartUpdateForSpecificEvent(
+                    key,
+                    FM5_NOTIFICATION_NOT_REQUIRED_CASE_UPDATE.getValue()
+                );
+                caseDataUpdated.put("fm5RemindersSent", "NOT_REQUIRED");
+            } else {
+                log.info("*** Sending FM5 reminders for caseId {}", key);
+                startAllTabsUpdateDataContent
+                    = allTabService.getStartUpdateForSpecificEvent(key, FM5_NOTIFICATION_CASE_UPDATE.getValue());
+
+                List<Element<NotificationDetails>> fm5ReminderNotifications = fm5NotificationService.sendFm5ReminderNotifications(
+                    startAllTabsUpdateDataContent.caseData(),
+                    fm5PendingParty
+                );
+
+                if (isNotEmpty(fm5ReminderNotifications)) {
+                    log.info("FM5 reminders are sent for caseId {}, update the flag fm5RemindersSent->YES", key);
+                    caseDataUpdated.put("fm5ReminderNotifications", fm5ReminderNotifications);
+                    caseDataUpdated.put("fm5RemindersSent", "YES");
+                }
+            }
+            //Save case data
+            allTabService.submitAllTabsUpdate(
+                startAllTabsUpdateDataContent.authorisation(),
+                key,
+                startAllTabsUpdateDataContent.startEventResponse(),
+                startAllTabsUpdateDataContent.eventRequestData(),
+                caseDataUpdated
+            );
+        } catch (Exception e) {
+            log.error("FM5 reminder service: Error processing caseId {}: {}", key, e.getMessage(), e);
+        }
+    }
 
     public Map<String, Fm5PendingParty> getQualifiedCasesAndHearingsForNotifications(List<CaseDetails> caseDetailsList,
-                                                                                          Long hearingAwayDays) {
+                                                                                     Long hearingAwayDays) {
         log.info("Running system rules on the cases");
         List<String> caseIdsForHearing = new ArrayList<>();
         Map<String, Fm5PendingParty> qualifiedCasesAndPartiesBeforeHearing = new HashMap<>();
         Map<String, Fm5PendingParty> filteredCaseAndParties = new HashMap<>();
 
         for (CaseDetails caseDetails : caseDetailsList) {
-            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            try {
+                CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-            filteredCaseAndParties.putAll(validateNonHearingSystemRules(caseData));
+                filteredCaseAndParties.putAll(validateNonHearingSystemRules(caseData));
 
-            if (!Fm5PendingParty.NOTIFICATION_NOT_REQUIRED.equals(filteredCaseAndParties.get(String.valueOf(caseData.getId())))) {
-                caseIdsForHearing.add(String.valueOf(caseData.getId()));
-            } else {
-                qualifiedCasesAndPartiesBeforeHearing.put(
-                    String.valueOf(caseData.getId()),
-                    Fm5PendingParty.NOTIFICATION_NOT_REQUIRED
-                );
+                if (!Fm5PendingParty.NOTIFICATION_NOT_REQUIRED.equals(filteredCaseAndParties.get(String.valueOf(caseData.getId())))) {
+                    caseIdsForHearing.add(String.valueOf(caseData.getId()));
+                } else {
+                    qualifiedCasesAndPartiesBeforeHearing.put(
+                        String.valueOf(caseData.getId()),
+                        Fm5PendingParty.NOTIFICATION_NOT_REQUIRED
+                    );
+                }
+            } catch (Exception e) {
+                log.error("FM5 reminder service: Error processing caseId {}: {}", caseDetails.getId(), e.getMessage(), e);
             }
         }
 
         if (isNotEmpty(caseIdsForHearing)) {
-            log.info("Fetching hearings for cases {}", caseIdsForHearing);
-            List<Hearings> hearingsForAllCaseIdsWithCourtVenue = hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
-                systemUserService.getSysUserToken(),
-                authTokenGenerator.generate(),
-                caseIdsForHearing
-            );
+            log.info("Fetching hearings for {} cases in batches of {}", caseIdsForHearing.size(), HEARING_API_BATCH_SIZE);
+
+            String userToken = systemUserService.getSysUserToken();
+            String serviceToken = authTokenGenerator.generate();
+
+            List<Hearings> hearingsForAllCaseIdsWithCourtVenue = new ArrayList<>();
+
+            for (int i = 0; i < caseIdsForHearing.size(); i += HEARING_API_BATCH_SIZE) {
+                int end = Math.min(i + HEARING_API_BATCH_SIZE, caseIdsForHearing.size());
+                List<String> batch = caseIdsForHearing.subList(i, end);
+
+                try {
+                    log.info("Fetching hearings batch {}-{} {}", i, end - 1, batch);
+                    List<Hearings> batchHearings = hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
+                        userToken,
+                        serviceToken,
+                        batch
+                    );
+
+                    if (isNotEmpty(batchHearings)) {
+                        hearingsForAllCaseIdsWithCourtVenue.addAll(batchHearings);
+                    }
+                } catch (Exception ex) {
+                    // Continue processing other batches rather than failing whole job
+                    log.error("FM5 reminder service: Failed to fetch hearings for batch {}-{}: {}", i, end - 1, ex.getMessage(), ex);
+                }
+            }
 
             if (isNotEmpty(hearingsForAllCaseIdsWithCourtVenue)) {
-                hearingsForAllCaseIdsWithCourtVenue.forEach(
-                    hearing -> {
-                        if (isFirstListedHearingAwayForDays(hearing,
-                                                            null != hearingAwayDays ? hearingAwayDays : 18)) {
-                            log.info("Putting qualified case before hearing for case {}", hearing.getCaseRef());
-                            qualifiedCasesAndPartiesBeforeHearing.put(
-                                hearing.getCaseRef(),
-                                filteredCaseAndParties.get(hearing.getCaseRef())
-                            );
-                        }
+                hearingsForAllCaseIdsWithCourtVenue.forEach(hearing -> {
+                    if (isFirstListedHearingAwayForDays(hearing, hearingAwayDays != null ? hearingAwayDays : 18)) {
+                        log.info("Putting qualified case before hearing for case {}", hearing.getCaseRef());
+                        qualifiedCasesAndPartiesBeforeHearing.put(
+                            hearing.getCaseRef(),
+                            filteredCaseAndParties.get(hearing.getCaseRef())
+                        );
                     }
-                );
+                });
             }
         }
         return qualifiedCasesAndPartiesBeforeHearing;
@@ -249,9 +283,7 @@ public class Fm5ReminderService {
     }
 
     public List<CaseDetails> retrieveCasesInHearingStatePendingFm5Reminders() {
-
-        SearchResultResponse response = SearchResultResponse.builder()
-            .cases(new ArrayList<>()).build();
+        List<CaseDetails> caseDetailsList = new ArrayList<>();
 
         QueryParam ccdQueryParam = buildCcdQueryParam();
 
@@ -270,22 +302,55 @@ public class Fm5ReminderService {
                 searchString
             );
 
-            response = objectMapper.convertValue(
+            int totalCases = searchResult.getTotal();
+            int pages = (int) Math.ceil((double) totalCases / PAGE_SIZE);
+            log.info("Search result size {}, split across {} pages", totalCases, pages);
+            if (totalCases == 0) {
+                return caseDetailsList;
+            }
+
+            SearchResultResponse searchResultResponse = objectMapper.convertValue(
                 searchResult,
                 SearchResultResponse.class
             );
+
+            if (searchResultResponse != null) {
+                // add the first page, as we got it from the initial search to find total numbers
+                caseDetailsList.addAll(searchResultResponse.getCases());
+
+                for (int i = 1; i < pages; i++) {
+                    log.info("Processing page {} of {}", i + 1, pages);
+                    QueryParam paginatedQueryParam = buildCcdQueryParam(i * PAGE_SIZE);
+                    String paginatedSearchString = objectMapper.writeValueAsString(paginatedQueryParam);
+                    log.info("Paginated searchString {}", paginatedSearchString);
+                    SearchResult paginatedSearchResult = coreCaseDataApi.searchCases(
+                        userToken,
+                        s2sToken,
+                        CASE_TYPE,
+                        paginatedSearchString
+                    );
+                    SearchResultResponse paginatedSearchResultResponse = objectMapper.convertValue(
+                        paginatedSearchResult,
+                        SearchResultResponse.class
+                    );
+                    caseDetailsList.addAll(paginatedSearchResultResponse.getCases());
+                }
+            } else {
+                log.info("FM5 case search result was empty, no cases found");
+            }
         } catch (JsonProcessingException e) {
             log.error("Exception happened in parsing query param {}", e.getMessage());
         }
 
-        if (null != response) {
-            log.info("Total no. of cases retrieved {}", response.getTotal());
-            return response.getCases();
-        }
-        return Collections.emptyList();
+        log.info("Total no. of cases retrieved {}", caseDetailsList.size());
+        return caseDetailsList;
     }
 
     private QueryParam buildCcdQueryParam() {
+        return buildCcdQueryParam(0);
+    }
+
+    private QueryParam buildCcdQueryParam(int from) {
         //C100 cases where fm5 reminders are not sent already
         List<Should> shoulds = List.of(Should.builder()
                                              .match(Match.builder()
@@ -320,8 +385,7 @@ public class Fm5ReminderService {
 
         return QueryParam.builder()
             .query(Query.builder().bool(finalFilter).build())
-            //Revert to default size 100 cases
-            .size("100")
+            .from(String.valueOf(from))
             .build();
     }
 
@@ -344,7 +408,7 @@ public class Fm5ReminderService {
         if (CollectionUtils.isNotEmpty(sortedSchedules)) {
             LocalDate today = LocalDate.now();
             LocalDate targetDate = today.plusDays(days);
-            LocalDate firstHearingDate = LocalDate.from(sortedSchedules.get(0).getHearingStartDateTime());
+            LocalDate firstHearingDate = LocalDate.from(sortedSchedules.getFirst().getHearingStartDateTime());
 
             if (firstHearingDate.isBefore(today)) {
                 log.info("First hearing date {} is in the past for case {}", firstHearingDate, hearings.getCaseRef());
