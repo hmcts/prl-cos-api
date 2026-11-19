@@ -5,13 +5,11 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
@@ -19,12 +17,10 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRUE;
-import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunctionalTest.VALID_CAFCASS_REQUEST_JSON;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
@@ -37,7 +33,6 @@ public class CallbackControllerFunctionalTest {
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
     private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
-    private static final String FL401_VALID_REQUEST_BODY = "requests/fl401-add-case-number.json";
     private static final String MIAM_VALIDATION_REQUEST_ERROR = "requests/call-back-controller-miam-request-error.json";
     private static final String MIAM_VALIDATION_REQUEST_NO_ERROR = "requests/call-back-controller-miam-request-no-error.json";
     private static final String APPLICANT_CASE_NAME_REQUEST = "requests/call-back-controller-applicant-case-name.json";
@@ -161,41 +156,6 @@ public class CallbackControllerFunctionalTest {
             .post("/case-withdrawn-about-to-submit")
             .then()
             .assertThat().statusCode(200);
-    }
-
-    @Test
-    public void givenRequestWithCaseNumberAdded_ResponseContainsIssueDate() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
-        RequestSpecification requestA = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
-        CaseDetails caseDetails =  requestA
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/testing-support/create-ccd-case-data")
-            .then()
-            .assertThat().statusCode(200)
-            .extract()
-            .as(CaseDetails.class);
-
-        log.info("givenRequestWithCaseNumberAdded_ResponseContainsIssueDate caseId:" + caseDetails.getId());
-        Assertions.assertNotNull(caseDetails);
-        Assertions.assertNotNull(caseDetails.getId());
-
-        String requestBodyB = ResourceLoader.loadJson(FL401_VALID_REQUEST_BODY);
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBodyB.replaceAll("1730736698088469", caseDetails.getId().toString()))
-            .when()
-            .contentType("application/json")
-            .post("/fl401-add-case-number")
-            .then()
-            .assertThat().statusCode(200)
-            .body("data.issueDate", notNullValue(),
-                  "data.caseTypeOfApplication", equalTo("FL401"));
-
     }
 
     @Test

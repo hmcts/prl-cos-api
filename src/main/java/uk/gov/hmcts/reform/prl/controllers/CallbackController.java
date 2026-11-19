@@ -708,21 +708,6 @@ public class CallbackController {
         }
     }
 
-    @PostMapping(path = "/fl401-add-case-number", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback for add case number submit event (legacy cases)")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed.",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
-        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse addCaseNumberSubmitted(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest
-    ) {
-        return handleAddCaseNumber(authorisation, s2sToken, callbackRequest, false);
-    }
-
     @PostMapping(path = "/fl401-add-case-numberWithPrefix", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for DA issue case: adds case number and sets case name with prefix")
     @ApiResponses(value = {
