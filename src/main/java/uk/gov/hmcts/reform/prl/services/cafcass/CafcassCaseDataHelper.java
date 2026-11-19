@@ -810,7 +810,6 @@ public class CafcassCaseDataHelper {
         Arrays.asList(
             caseData.getCourtStaffUploadDocListDocTab(),
             caseData.getLegalProfUploadDocListDocTab(),
-            caseData.getCafcassUploadDocListDocTab(),
             caseData.getLocalAuthorityUploadDocListDocTab(),
             caseData.getCitizenUploadedDocListDocTab(),
             caseData.getConfidentialDocuments(),
