@@ -60,11 +60,11 @@ import uk.gov.hmcts.reform.prl.services.C8Service;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
-import uk.gov.hmcts.reform.prl.services.DfjLookupService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.PrlCourtConfigService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -170,7 +170,7 @@ public class CallbackController {
     private final MiamPolicyUpgradeService miamPolicyUpgradeService;
     private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
     private final SystemUserService systemUserService;
-    private final DfjLookupService dfjLookupService;
+    private final PrlCourtConfigService prlCourtConfigService;
     private final CafcassDateTimeService cafcassDateTimeService;
     private final C8Service c8Service;
 
@@ -366,8 +366,8 @@ public class CallbackController {
             caseDataUpdated.put("caseManagementLocation", location);
 
             // add DFJ filter info based on the Court Name, as the default "court" is likely the CTSC offices
-            caseDataUpdated.keySet().removeAll(dfjLookupService.getAllCourtFields());
-            caseDataUpdated.putAll(dfjLookupService.getDfjAreaFieldsByCourtName(caseData.getCourtName()));
+            caseDataUpdated.keySet().removeAll(prlCourtConfigService.getAllCourtFields());
+            caseDataUpdated.putAll(prlCourtConfigService.getDfjAreaFieldsByCourtName(caseData.getCourtName()));
 
             caseDataUpdated.put("caseFlags", Flags.builder().build());
             confidentialityC8RefugeService.processRefugeDocumentsOnSubmit(
