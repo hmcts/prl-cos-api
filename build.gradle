@@ -29,7 +29,7 @@ def versions = [
   ccdClient                    : '5.3.0',
   commonsBeanUtils             : '1.11.0',
   commonsIo                    : '2.22.0',
-  commonsLang3                 : '3.21.0',
+  commonsLang3                 : '3.22.0',
   commonsMath3                 : '3.6.1',
   commonsValidator             : '1.11.0',
   dumbster                     : '1.7.1',
@@ -341,8 +341,6 @@ dependencies {
   implementation group: 'joda-time', name: 'joda-time', version: versions.jodaTime
   implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '7.17.5'
   implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '9.5.6'
-  implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
-  implementation group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
   implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.10.3'
   implementation group: 'commons-net', name: 'commons-net', version: '3.13.0'
   implementation group: 'org.springframework.security', name: 'spring-security-web', version: '6.5.11'

@@ -86,9 +86,6 @@ public class PrlAppsConstants {
     public static final String DOCUMENT_FIELD_C8_DRAFT_WELSH = "c8WelshDraftDocument";
     public static final String DOCUMENT_FIELD_FINAL_WELSH = "finalWelshDocument";
 
-    public static final String CHILD_ARRANGEMENT_CASE = "CHILD ARRANGEMENT CASE";
-    public static final String ISSUE_EVENT_CODE = "001";
-    public static final String ISSUE_EVENT_SEQUENCE = "1";
     public static final String BLANK_STRING = "";
     public static final String WITHOUT_NOTICE = "Without notice";
 
