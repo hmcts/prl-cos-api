@@ -36,8 +36,11 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.services.CaseNameService;
+import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,7 +51,10 @@ import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ANY_OTHER_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_C1A_RESPONSE;
@@ -102,10 +108,16 @@ public class BundleCreateRequestMapperTest {
 
     private LocalDateTime futureHearingDateTime;
 
+    private CaseNameService caseNameService;
+
+    private FeatureToggleService featureToggleService;
+
     @Before
     public void setUp() {
         hearingDetailsMapperUtil = new HearingDetailsMapperUtil();
-        bundleCreateRequestMapper = new BundleCreateRequestMapper(hearingDetailsMapperUtil);
+        featureToggleService = mock(FeatureToggleService.class);
+        caseNameService = new CaseNameService(featureToggleService);
+        bundleCreateRequestMapper = new BundleCreateRequestMapper(hearingDetailsMapperUtil, caseNameService);
         futureHearingDateTime = LocalDateTime.now().plusDays(7);
     }
 
@@ -1352,10 +1364,27 @@ public class BundleCreateRequestMapperTest {
     }
 
     @Test
-    public void testHmctsCaseNameInternalAddedDuringMapping() {
+    public void testHmctsCaseNameInternalAddedDuringMappingForCasesIssuedBeforeReleaseDate() {
         CaseData caseData = CaseData.builder()
             .caseNameHmctsInternal("somePrefix - someCaseName")
+            .issueDate(LocalDate.of(2023, 6, 1))
             .build();
+
+        when(featureToggleService.isCaseIssuedAfterReleaseDate(caseData.getIssueDate())).thenReturn(false);
+
+        BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(caseData, "eventI", null, "sample.yaml");
+        assertNotNull(bundleCreateRequest);
+        assertNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getCaseNameHmctsInternal());
+    }
+
+    @Test
+    public void testHmctsCaseNameInternalAddedDuringMappingForCasesIssuedAfterReleaseDate() {
+        CaseData caseData = CaseData.builder()
+            .caseNameHmctsInternal("somePrefix - someCaseName")
+            .issueDate(LocalDate.of(2026, 11, 1))
+            .build();
+
+        when(featureToggleService.isCaseIssuedAfterReleaseDate(caseData.getIssueDate())).thenReturn(true);
 
         BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(caseData, "eventI", null, "sample.yaml");
         assertNotNull(bundleCreateRequest);
