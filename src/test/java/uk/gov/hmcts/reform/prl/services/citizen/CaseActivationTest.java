@@ -3,13 +3,16 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CaseAccessApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -32,12 +35,13 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
@@ -51,7 +55,7 @@ import static uk.gov.hmcts.reform.prl.services.citizen.LinkCitizenCaseService.LI
 import static uk.gov.hmcts.reform.prl.services.citizen.LinkCitizenCaseService.NOT_READY;
 import static uk.gov.hmcts.reform.prl.services.citizen.LinkCitizenCaseService.VALID;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CaseActivationTest {
     private static final String CASE_ID = "1234567890123456";
     private static final String ACCESS_CODE = "ABCD1234";
@@ -79,44 +83,45 @@ public class CaseActivationTest {
     private ObjectMapper objectMapper = new ObjectMapper()
         .registerModule(new ParameterNamesModule()).registerModule(new JavaTimeModule());
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         when(systemUserService.getSysUserToken()).thenReturn(SYSTEM_TOKEN);
         lenient().when(idamClient.getUserInfo(USER_TOKEN)).thenReturn(UserInfo.builder().uid("citizen-id").build());
     }
 
-    @Test
-    public void checksUnlinkedHearingCaseUsingSystemAccountWithoutGrantingAccess() {
-        mockCase(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue(), "C100", "Yes", Map.of());
+    @ParameterizedTest
+    @MethodSource("allowedActivationStates")
+    void checksUnlinkedEligibleCaseUsingSystemAccountWithoutGrantingAccess(State state) {
+        mockCase(state.getValue(), "C100", "Yes", Map.of());
 
         assertEquals(VALID, service.validateAccessCode(CASE_ID, ACCESS_CODE, USER_TOKEN));
         verify(ccdCoreCaseDataService).findCaseById(SYSTEM_TOKEN, CASE_ID);
         verifyNoInteractions(caseAccessApi, allTabService);
     }
 
-    @Test
-    public void permitsRespondentAndEnabledFl401ActivationAtHearing() {
-        mockCase(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue(), "FL401", "No", Map.of());
+    @ParameterizedTest
+    @MethodSource("allowedActivationStates")
+    void permitsRespondentAndEnabledFl401ActivationInEligibleStates(State state) {
+        mockCase(state.getValue(), "FL401", "No", Map.of());
         when(launchDarklyClient.isFeatureEnabled(PrlAppsConstants.CITIZEN_ALLOW_DA_JOURNEY)).thenReturn(true);
 
         assertEquals(VALID, service.validateAccessCode(CASE_ID, ACCESS_CODE, USER_TOKEN));
         verifyNoInteractions(caseAccessApi, allTabService);
     }
 
-    @Test
-    public void refusesAllOtherStatesWithoutChangingTheCase() {
-        for (State state : State.values()) {
-            if (state != State.PREPARE_FOR_HEARING_CONDUCT_HEARING) {
-                mockCase(state.getValue(), "C100", "Yes", Map.of());
-                assertEquals(state.getValue(), NOT_READY,
-                             service.validateAccessCode(CASE_ID, ACCESS_CODE, USER_TOKEN));
-            }
-        }
+    @ParameterizedTest
+    @EnumSource(value = State.class, names = {
+        "PREPARE_FOR_HEARING_CONDUCT_HEARING", "DECISION_OUTCOME", "ALL_FINAL_ORDERS_ISSUED"
+    }, mode = EnumSource.Mode.EXCLUDE)
+    void refusesAllOtherStatesWithoutChangingTheCase(State state) {
+        mockCase(state.getValue(), "C100", "Yes", Map.of());
+
+        assertEquals(NOT_READY, service.validateAccessCode(CASE_ID, ACCESS_CODE, USER_TOKEN));
         verifyNoInteractions(caseAccessApi, allTabService);
     }
 
     @Test
-    public void refusesMissingOrUnknownState() {
+    void refusesMissingOrUnknownState() {
         for (String state : new String[]{null, "", "UNKNOWN"}) {
             mockCase(state, "C100", "Yes", Map.of());
             assertEquals(NOT_READY, service.validateAccessCode(CASE_ID, ACCESS_CODE, USER_TOKEN));
@@ -125,7 +130,7 @@ public class CaseActivationTest {
     }
 
     @Test
-    public void invalidCodeDoesNotDiscloseWhetherTheCaseIsReady() {
+    void invalidCodeDoesNotDiscloseWhetherTheCaseIsReady() {
         mockCase(State.AWAITING_INFORMATION.getValue(), "C100", "Yes", Map.of());
 
         assertEquals(INVALID, service.validateAccessCode(CASE_ID, "BADCODE1", USER_TOKEN));
@@ -133,7 +138,7 @@ public class CaseActivationTest {
     }
 
     @Test
-    public void preservesLinkedAndDuplicateResultsBeforeCheckingState() {
+    void preservesLinkedAndDuplicateResultsBeforeCheckingState() {
         mockCase(State.AWAITING_INFORMATION.getValue(), "C100", "Yes", Map.of("hasLinked", "Yes"));
         assertEquals(LINKED, service.validateAccessCode(CASE_ID, ACCESS_CODE, USER_TOKEN));
 
@@ -144,24 +149,28 @@ public class CaseActivationTest {
     }
 
     @Test
-    public void reportsNotReadyForValidCodeBeforeHearing() {
+    void reportsNotReadyForValidCodeBeforeHearing() {
         mockCase(State.AWAITING_INFORMATION.getValue(), "C100", "Yes", Map.of());
 
         assertEquals(NOT_READY, service.validateAccessCode(CASE_ID, ACCESS_CODE, USER_TOKEN));
     }
 
-    @Test
-    public void directLinkRequestCannotBypassTheStateCheck() {
-        mockCase(State.AWAITING_INFORMATION.getValue(), "C100", "Yes", Map.of());
+    @ParameterizedTest
+    @EnumSource(value = State.class, names = {
+        "PREPARE_FOR_HEARING_CONDUCT_HEARING", "DECISION_OUTCOME", "ALL_FINAL_ORDERS_ISSUED"
+    }, mode = EnumSource.Mode.EXCLUDE)
+    void directLinkRequestCannotBypassTheStateCheck(State state) {
+        mockCase(state.getValue(), "C100", "Yes", Map.of());
 
         assertThrows(CaseActivationNotAllowedException.class,
                      () -> service.linkCitizenToCase(USER_TOKEN, CASE_ID, ACCESS_CODE));
         verifyNoInteractions(caseAccessApi, allTabService);
     }
 
-    @Test
-    public void refusesLinkingIfStateChangesAfterTheInitialRead() {
-        CaseDetails details = mockCase(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue(), "C100", "Yes", Map.of());
+    @ParameterizedTest
+    @MethodSource("allowedActivationStates")
+    void refusesLinkingIfStateChangesAfterTheInitialRead(State state) {
+        CaseDetails details = mockCase(state.getValue(), "C100", "Yes", Map.of());
         CaseData eventData = objectMapper.convertValue(details.getData(), CaseData.class).toBuilder()
             .state(State.AWAITING_INFORMATION).build();
         mockEvent(eventData);
@@ -172,9 +181,10 @@ public class CaseActivationTest {
         assertNull(eventData.getCaseInvites().getFirst().getValue().getHasLinked());
     }
 
-    @Test
-    public void refusesLinkingIfTheEventSnapshotHasNoState() {
-        CaseDetails details = mockCase(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue(), "C100", "Yes", Map.of());
+    @ParameterizedTest
+    @MethodSource("allowedActivationStates")
+    void refusesLinkingIfTheEventSnapshotHasNoState(State state) {
+        CaseDetails details = mockCase(state.getValue(), "C100", "Yes", Map.of());
         CaseData eventData = objectMapper.convertValue(details.getData(), CaseData.class);
         mockEvent(eventData);
 
@@ -184,11 +194,12 @@ public class CaseActivationTest {
         assertNull(eventData.getCaseInvites().getFirst().getValue().getHasLinked());
     }
 
-    @Test
-    public void refusesLinkingIfTheCodeWasUsedAfterTheInitialRead() {
-        CaseDetails details = mockCase(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue(), "C100", "Yes", Map.of());
+    @ParameterizedTest
+    @MethodSource("allowedActivationStates")
+    void refusesLinkingIfTheCodeWasUsedAfterTheInitialRead(State state) {
+        CaseDetails details = mockCase(state.getValue(), "C100", "Yes", Map.of());
         CaseData eventData = objectMapper.convertValue(details.getData(), CaseData.class).toBuilder()
-            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING).build();
+            .state(state).build();
         eventData.getCaseInvites().getFirst().getValue().setHasLinked("Yes");
         mockEvent(eventData);
 
@@ -196,11 +207,12 @@ public class CaseActivationTest {
         verifyNoInteractions(caseAccessApi);
     }
 
-    @Test
-    public void linksAndUpdatesInvitationWhenTheEventSnapshotIsEligible() {
-        CaseDetails details = mockCase(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue(), "C100", "Yes", Map.of());
+    @ParameterizedTest
+    @MethodSource("allowedActivationStates")
+    void linksAndUpdatesInvitationWhenTheEventSnapshotIsEligible(State state) {
+        CaseDetails details = mockCase(state.getValue(), "C100", "Yes", Map.of());
         CaseData eventData = objectMapper.convertValue(details.getData(), CaseData.class).toBuilder()
-            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING).build();
+            .state(state).build();
         mockEvent(eventData);
         when(idamClient.getUserDetails(SYSTEM_TOKEN)).thenReturn(UserDetails.builder().id("system-id").build());
         when(authTokenGenerator.generate()).thenReturn("service-token");
@@ -210,8 +222,13 @@ public class CaseActivationTest {
         verify(caseAccessApi).grantAccessToCase(eq(SYSTEM_TOKEN), eq("service-token"), eq("system-id"),
                                               eq(PrlAppsConstants.JURISDICTION), eq(PrlAppsConstants.CASE_TYPE),
                                               eq(CASE_ID), any());
+        verify(allTabService).submitAllTabsUpdate(eq(SYSTEM_TOKEN), eq(CASE_ID), any(), any(), anyMap());
         assertEquals("Yes", eventData.getCaseInvites().getFirst().getValue().getHasLinked());
         assertEquals("citizen-id", eventData.getCaseInvites().getFirst().getValue().getInvitedUserId());
+    }
+
+    private static Stream<State> allowedActivationStates() {
+        return Stream.of(State.PREPARE_FOR_HEARING_CONDUCT_HEARING, State.DECISION_OUTCOME, State.ALL_FINAL_ORDERS_ISSUED);
     }
 
     private void mockEvent(CaseData eventData) {

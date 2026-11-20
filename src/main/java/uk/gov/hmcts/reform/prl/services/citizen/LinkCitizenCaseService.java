@@ -64,7 +64,8 @@ public class LinkCitizenCaseService {
     public static final String NOT_READY = "NotReady";
     public static final String YES = "Yes";
     public static final String CASE_INVITES = "caseInvites";
-    private static final Set<State> ALLOWED_ACTIVATION_STATES = Set.of(State.PREPARE_FOR_HEARING_CONDUCT_HEARING);
+    private static final Set<State> ALLOWED_ACTIVATION_STATES = Set.of(
+        State.PREPARE_FOR_HEARING_CONDUCT_HEARING, State.DECISION_OUTCOME, State.ALL_FINAL_ORDERS_ISSUED);
 
     public Optional<CaseDetails> linkCitizenToCase(String authorisation, String caseId, String accessCode) {
         Optional<CaseDetails> caseDetails = Optional.empty();
