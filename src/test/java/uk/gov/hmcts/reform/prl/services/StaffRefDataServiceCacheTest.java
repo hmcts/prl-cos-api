@@ -72,6 +72,9 @@ class StaffRefDataServiceCacheTest {
     private JudicialUserDetailsApi judicialUserDetailsApi;
 
     @MockitoBean
+    private HearingRefDataService hearingRefDataService;
+
+    @MockitoBean
     private CommonDataRefApi commonDataRefApi;
 
     @MockitoBean
