@@ -339,10 +339,8 @@ send-grid:
           SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP: ${SEND_GRID_SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP:d-7a5eb527c4d4487d9ce7fc09e00d83df}
           SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP: ${SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP:d-985fad2d0eb7452e9372dce27ddefbd7}
           SEND_EMAIL_TO_EXTERNAL_PARTY: ${SEND_GRID_EMAIL_TO_EXTERNAL_PARTY:d-d6f807d095b046458517924e6c48e5ea}
-  rpa:
-    email:
-      to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
-      from: ${RPA_NOTIFY_FROM_EMAIL:xxxxxxxx}
+  email:
+    from: ${SEND_GRID_FROM_EMAIL:xxxxxxxx}
 
 bankHolidays:
   api:
@@ -554,6 +552,10 @@ judicialUsers:
     refreshDelayMillis: 1800000
 
 commonData:
+  cache:
+    refreshDelayMillis: 1800000
+    emptyRefreshDelayMillis: 30000
+    failureRetryDelayMillis: 5000
   api:
     url: ${COMMON_DATA_API:http://rd-commondata-api-aat.service.core-compute-aat.internal}
 
