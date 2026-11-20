@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -9,6 +10,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,13 +19,25 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 
 @ExtendWith(MockitoExtension.class)
 class CaseNameServiceTest {
+    private static final LocalDate ISSUED_DATE_BEFORE = LocalDate.of(2026, 9, 1);
+    private static final LocalDate ISSUED_DATE_AFTER = LocalDate.of(2026, 12, 1);
 
     @InjectMocks
     CaseNameService caseNameService;
+
+    @Mock
+    FeatureToggleService featureToggleService;
+    @Mock
+    CourtPrefixDataLoader courtPrefixDataLoader;
+    @Mock
+    ObjectMapper objectMapper;
+
     @Mock
     CaseData caseData;
     @Mock
@@ -79,7 +93,7 @@ class CaseNameServiceTest {
     }
 
     @Test
-    void shouldUpdateFinalCaseNameC100() {
+    void shouldUpdateFinalCaseNameC100AWithoutCaseIssued() {
         updatedCaseData.put("applicantCaseName", "CaseNameBefore");
         when(applicant.getLastName()).thenReturn("AppLN");
         when(respondent.getLastName()).thenReturn("RespLN");
@@ -89,6 +103,7 @@ class CaseNameServiceTest {
         when(caseData.getApplicants()).thenReturn(applicantsList);
         when(caseData.getRespondents()).thenReturn(respondentsList);
         when(caseData.getCaseTypeOfApplication()).thenReturn("C100");
+        when(featureToggleService.isCaseIssuedAfterReleaseDate(any())).thenReturn(false);
 
         caseNameService.setFinalCaseName(updatedCaseData, caseData);
 
@@ -97,7 +112,49 @@ class CaseNameServiceTest {
     }
 
     @Test
-    void shouldUpdateFinalCaseNameFL401() {
+    void shouldUpdateFinalCaseNameC100ABefore() {
+        updatedCaseData.put("applicantCaseName", "CaseNameBefore");
+        when(applicant.getLastName()).thenReturn("AppLN");
+        when(respondent.getLastName()).thenReturn("RespLN");
+
+        List<Element<PartyDetails>> applicantsList = List.of(Element.<PartyDetails>builder().value(applicant).build());
+        List<Element<PartyDetails>> respondentsList = List.of(Element.<PartyDetails>builder().value(respondent).build());
+        when(caseData.getApplicants()).thenReturn(applicantsList);
+        when(caseData.getRespondents()).thenReturn(respondentsList);
+        when(caseData.getCaseTypeOfApplication()).thenReturn("C100");
+        when(caseData.getIssueDate()).thenReturn(ISSUED_DATE_BEFORE);
+        when(featureToggleService.isCaseIssuedAfterReleaseDate(any())).thenReturn(false);
+
+        caseNameService.setFinalCaseName(updatedCaseData, caseData);
+
+        assertEquals("AppLN V RespLN", updatedCaseData.get("applicantCaseName"));
+        assertEquals("AppLN V RespLN", updatedCaseData.get("caseNameHmctsInternal"));
+    }
+
+    @Test
+    void shouldUpdateFinalCaseNameC100After() {
+        updatedCaseData.put("applicantCaseName", "CaseNameBefore");
+        updatedCaseData.put(COURT_ID_FIELD, "234946");
+        when(applicant.getLastName()).thenReturn("AppLN");
+        when(respondent.getLastName()).thenReturn("RespLN");
+
+        List<Element<PartyDetails>> applicantsList = List.of(Element.<PartyDetails>builder().value(applicant).build());
+        List<Element<PartyDetails>> respondentsList = List.of(Element.<PartyDetails>builder().value(respondent).build());
+        when(caseData.getApplicants()).thenReturn(applicantsList);
+        when(caseData.getRespondents()).thenReturn(respondentsList);
+        when(caseData.getCaseTypeOfApplication()).thenReturn("C100");
+        when(caseData.getIssueDate()).thenReturn(ISSUED_DATE_AFTER);
+        when(courtPrefixDataLoader.getPrefixForGivenEpimmsId(any())).thenReturn("WV");
+        when(featureToggleService.isCaseIssuedAfterReleaseDate(any())).thenReturn(true);
+
+        caseNameService.setFinalCaseName(updatedCaseData, caseData);
+
+        assertEquals("AppLN V RespLN", updatedCaseData.get("applicantCaseName"));
+        assertEquals("WV26P12 - AppLN V RespLN", updatedCaseData.get("caseNameHmctsInternal"));
+    }
+
+    @Test
+    void shouldUpdateFinalCaseNameFL401Before() {
         updatedCaseData.put("applicantCaseName", "CaseNameBefore");
         when(applicant.getFirstName()).thenReturn("AppFN");
         when(applicant.getLastName()).thenReturn("AppLN");
@@ -107,11 +164,35 @@ class CaseNameServiceTest {
         when(caseData.getApplicantsFL401()).thenReturn(applicant);
         when(caseData.getRespondentsFL401()).thenReturn(respondent);
         when(caseData.getCaseTypeOfApplication()).thenReturn("FL401");
+        when(caseData.getIssueDate()).thenReturn(ISSUED_DATE_BEFORE);
+        when(featureToggleService.isCaseIssuedAfterReleaseDate(any())).thenReturn(false);
 
         caseNameService.setFinalCaseName(updatedCaseData, caseData);
 
         assertEquals("AppFN AppLN & RespFN RespLN", updatedCaseData.get("applicantCaseName"));
         assertEquals("AppFN AppLN & RespFN RespLN", updatedCaseData.get("caseNameHmctsInternal"));
+    }
+
+    @Test
+    void shouldUpdateFinalCaseNameFL401After() {
+        updatedCaseData.put("applicantCaseName", "CaseNameBefore");
+        updatedCaseData.put(COURT_ID_FIELD, "234946");
+        when(applicant.getFirstName()).thenReturn("AppFN");
+        when(applicant.getLastName()).thenReturn("AppLN");
+        when(respondent.getFirstName()).thenReturn("RespFN");
+        when(respondent.getLastName()).thenReturn("RespLN");
+
+        when(caseData.getApplicantsFL401()).thenReturn(applicant);
+        when(caseData.getRespondentsFL401()).thenReturn(respondent);
+        when(caseData.getCaseTypeOfApplication()).thenReturn("FL401");
+        when(courtPrefixDataLoader.getPrefixForGivenEpimmsId(any())).thenReturn("WV");
+        when(caseData.getIssueDate()).thenReturn(ISSUED_DATE_AFTER);
+        when(featureToggleService.isCaseIssuedAfterReleaseDate(any())).thenReturn(true);
+
+        caseNameService.setFinalCaseName(updatedCaseData, caseData);
+
+        assertEquals("AppFN AppLN & RespFN RespLN", updatedCaseData.get("applicantCaseName"));
+        assertEquals("WV26D12 - AppFN AppLN & RespFN RespLN", updatedCaseData.get("caseNameHmctsInternal"));
     }
 
     @Test

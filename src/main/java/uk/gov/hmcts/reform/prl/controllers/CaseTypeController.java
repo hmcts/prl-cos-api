@@ -1,0 +1,58 @@
+package uk.gov.hmcts.reform.prl.controllers;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.GetCaseCallbackResponse;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.EventService;
+import uk.gov.hmcts.reform.prl.services.InjectedCaseDataResponseService;
+
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+
+@Slf4j
+@RestController
+@SecurityRequirement(name = "Bearer Authentication")
+@RequestMapping("/case-type")
+public class CaseTypeController extends AbstractCallbackController {
+    private final AuthorisationService authorisationService;
+    private final InjectedCaseDataResponseService injectedCaseDataResponseService;
+
+    protected CaseTypeController(ObjectMapper objectMapper, EventService eventPublisher,
+                                 AuthorisationService authorisationService,
+                                 InjectedCaseDataResponseService injectedCaseDataResponseService) {
+        super(objectMapper, eventPublisher);
+        this.authorisationService = authorisationService;
+        this.injectedCaseDataResponseService = injectedCaseDataResponseService;
+    }
+
+    @PostMapping(path = "/inject-case-metadata", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Inject case metadata ")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Case details extended"),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    public GetCaseCallbackResponse injectCaseMetadata(
+            @RequestHeader("Authorization") @Parameter(hidden = true) String authorization,
+            @RequestHeader("ServiceAuthorization") @Parameter(hidden = true) String serviceAuthorization,
+            @RequestBody CallbackRequest callbackRequest) {
+        if (authorisationService.isAuthorized(authorization, serviceAuthorization)) {
+            CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
+            return injectedCaseDataResponseService.getInjectedCallbackResponse(caseData);
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+}
