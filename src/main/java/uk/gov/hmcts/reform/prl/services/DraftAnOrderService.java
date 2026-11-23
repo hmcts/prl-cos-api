@@ -124,6 +124,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_NOT_NEE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JOINING_INSTRUCTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORUTY_LETTER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NOT_TO_CONTACT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NOT_TO_SEND_DOCUMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NOT_TO_STREET_ADDRESS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_DIRECTIONS_RTF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
@@ -2431,6 +2434,10 @@ public class DraftAnOrderService {
             && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData.getCreateSelectOrderOptions())) {
             caseData.setAppointedGuardianName(manageOrderService.addGuardianDetails(caseData));
         }
+        if (caseData.getCreateSelectOrderOptions() != null) {
+            populateNotToOptionDefaultValue(caseDataUpdated, caseData);
+        }
+
         if (!(blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
             && (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             || ManageOrdersUtils.isDaOrderSelectedForCaCase(String.valueOf(caseData.getCreateSelectOrderOptions()),
@@ -2599,7 +2606,30 @@ public class DraftAnOrderService {
             caseDataMap.put(RECITALS_OR_PREAMBLE_RTF, selectedOrder.getRecitalsOrPreambleRtf());
         }
         caseDataMap.put(SCHEDULE_TO_ORDER_RTF, selectedOrder.getScheduleToOrderRtf());
+
         return caseDataMap;
+    }
+
+    private void populateNotToOptionDefaultValue(Map<String, Object> caseDataMap, CaseData caseData) {
+        if (CreateSelectOrderOptionsEnum.nonMolestation.equals(caseData.getCreateSelectOrderOptions())) {
+            FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
+            if (fl404CustomFields == null) {
+                fl404CustomFields = FL404.builder().build();
+            }
+            if (StringUtils.isEmpty(fl404CustomFields.getFl404bRespondentNotToContactApplicantText())) {
+                fl404CustomFields.setFl404bRespondentNotToContactApplicantText(NOT_TO_CONTACT);
+            }
+            if (StringUtils.isEmpty(fl404CustomFields.getFl404bRespondentNotToStreetAddressText())) {
+                fl404CustomFields.setFl404bRespondentNotToStreetAddressText(NOT_TO_STREET_ADDRESS);
+            }
+            if (StringUtils.isEmpty(fl404CustomFields.getFl404bRespondentNotToSendDocumentsText())) {
+                fl404CustomFields.setFl404bRespondentNotToSendDocumentsText(NOT_TO_SEND_DOCUMENTS);
+            }
+
+            caseData.getManageOrders().toBuilder().fl404CustomFields(
+                fl404CustomFields).build();
+            caseDataMap.put("fl404CustomFields", fl404CustomFields);
+        }
     }
 
     private AboutToStartOrSubmitCallbackResponse prohibitedOrdersForSolicitor(List<String> errorList, String language) {
