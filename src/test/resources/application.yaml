@@ -343,6 +343,8 @@ send-grid:
     email:
       to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
       from: ${RPA_NOTIFY_FROM_EMAIL:xxxxxxxx}
+  email:
+    from: ${SEND_GRID_FROM_EMAIL:xxxxxxxx}
 
 fees-register:
   api:
@@ -543,6 +545,10 @@ judicialUsers:
     refreshDelayMillis: 1800000
 
 commonData:
+  cache:
+    refreshDelayMillis: 1800000
+    emptyRefreshDelayMillis: 30000
+    failureRetryDelayMillis: 5000
   api:
     url: ${COMMON_DATA_API:http://rd-commondata-api-aat.service.core-compute-aat.internal}
 
