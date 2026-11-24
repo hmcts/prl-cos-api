@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.prl.models.Features.IS_BARRISTER_FEATURE_ENABLED;
 import static uk.gov.hmcts.reform.prl.models.Features.IS_CAFCASS_DATE_TIME_FEATURE_ENABLED;
 import static uk.gov.hmcts.reform.prl.models.Features.IS_CREATE_REQUEST_CIR_UPDATE_TASK_ENABLED;
 import static uk.gov.hmcts.reform.prl.models.Features.IS_OS_COURT_LOOKUP_ENABLED;
@@ -40,13 +39,6 @@ public class FeatureToggleService {
         return Optional.ofNullable(toggle.get(feature.getName()))
             .map(Boolean::parseBoolean)
             .orElse(false);
-    }
-
-    /*
-     * Defaulted to true. Only to be set to false in Preview as ACA API is not deployed there
-     */
-    public boolean isBarristerFeatureEnabled() {
-        return isFeatureEnabled(IS_BARRISTER_FEATURE_ENABLED);
     }
 
     public boolean isCafcassDateTimeFeatureEnabled() {

@@ -184,13 +184,11 @@ public class CaseAssignmentService {
 
     public void removeAmBarristerCaseRole(final CaseData caseData,
                                 Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap) {
-        if (featureToggleService.isBarristerFeatureEnabled()) {
-            selectedPartyDetailsMap.values().stream()
-                .map(Element::getValue)
-                .filter(partyDetails -> partyDetails.getBarrister() != null
-                    && partyDetails.getBarrister().getBarristerId() != null)
-                .forEach(selectedParty -> removeAmBarristerCaseRole(caseData, selectedParty));
-        }
+        selectedPartyDetailsMap.values().stream()
+            .map(Element::getValue)
+            .filter(partyDetails -> partyDetails.getBarrister() != null
+                && partyDetails.getBarrister().getBarristerId() != null)
+            .forEach(selectedParty -> removeAmBarristerCaseRole(caseData, selectedParty));
     }
 
     private void removeAmBarristerCaseRole(CaseData caseData, PartyDetails partyDetails) {
@@ -462,56 +460,48 @@ public class CaseAssignmentService {
     }
 
     public void removeAmBarristerIfPresent(CaseDetails caseDetails) {
-        if (featureToggleService.isBarristerFeatureEnabled()) {
-            CaseData caseData = getCaseData(caseDetails, objectMapper);
+        CaseData caseData = getCaseData(caseDetails, objectMapper);
 
-            removeBarristerIfPresent(caseData,
-                                     caseData.getChangeOrganisationRequestField(),
-                                     partyDetailsElement ->
-                                         removeAmBarristerCaseRole(caseData,
-                                                                   partyDetailsElement.getValue()),
-                                     partyDetails -> removeAmBarristerCaseRole(caseData,
-                                                                               partyDetails)
-            );
-        } else {
-            log.info("Barrister feature is disabled");
-        }
+        removeBarristerIfPresent(caseData,
+                                 caseData.getChangeOrganisationRequestField(),
+                                 partyDetailsElement ->
+                                     removeAmBarristerCaseRole(caseData,
+                                                               partyDetailsElement.getValue()),
+                                 partyDetails -> removeAmBarristerCaseRole(caseData,
+                                                                           partyDetails)
+        );
     }
 
     public void removePartyBarristerIfPresent(CaseData caseData,
                                               ChangeOrganisationRequest changeOrganisationRequest) {
-        if (featureToggleService.isBarristerFeatureEnabled()) {
-            removeBarristerIfPresent(caseData,
-                                     changeOrganisationRequest,
-                                     caPartyDetailsElement -> {
-                                         barristerHelper.setAllocatedBarrister(
-                                             caPartyDetailsElement.getValue(),
-                                             caseData,
-                                             caPartyDetailsElement.getId());
+        removeBarristerIfPresent(caseData,
+                                 changeOrganisationRequest,
+                                 caPartyDetailsElement -> {
+                                     barristerHelper.setAllocatedBarrister(
+                                         caPartyDetailsElement.getValue(),
+                                         caseData,
+                                         caPartyDetailsElement.getId());
 
-                                         barristerRemoveService.notifyBarrister(caseData);
-                                         caPartyDetailsElement.getValue().setBarrister(null);
-                                         partyLevelCaseFlagsService.updateCaseDataWithGeneratePartyCaseFlags(
-                                             caseData,
-                                             partyLevelCaseFlagsService::generatePartyCaseFlagsForBarristerOnly
-                                         );
-                                     },
-                                     daPartyDetails -> {
-                                         barristerHelper.setAllocatedBarrister(daPartyDetails,
-                                                                          caseData,
-                                                                          daPartyDetails.getPartyId());
-                                         barristerRemoveService.notifyBarrister(caseData);
-                                         daPartyDetails.setBarrister(null);
-                                         partyLevelCaseFlagsService.updateCaseDataWithGeneratePartyCaseFlags(
-                                             caseData,
-                                             partyLevelCaseFlagsService::generatePartyCaseFlagsForBarristerOnly
-                                         );
-                                     }
+                                     barristerRemoveService.notifyBarrister(caseData);
+                                     caPartyDetailsElement.getValue().setBarrister(null);
+                                     partyLevelCaseFlagsService.updateCaseDataWithGeneratePartyCaseFlags(
+                                         caseData,
+                                         partyLevelCaseFlagsService::generatePartyCaseFlagsForBarristerOnly
+                                     );
+                                 },
+                                 daPartyDetails -> {
+                                     barristerHelper.setAllocatedBarrister(daPartyDetails,
+                                                                      caseData,
+                                                                      daPartyDetails.getPartyId());
+                                     barristerRemoveService.notifyBarrister(caseData);
+                                     daPartyDetails.setBarrister(null);
+                                     partyLevelCaseFlagsService.updateCaseDataWithGeneratePartyCaseFlags(
+                                         caseData,
+                                         partyLevelCaseFlagsService::generatePartyCaseFlagsForBarristerOnly
+                                     );
+                                 }
 
-            );
-        } else {
-            log.info("Barrister feature is disabled");
-        }
+        );
     }
 
     private void removeBarristerIfPresent(CaseData caseData,

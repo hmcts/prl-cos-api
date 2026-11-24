@@ -43,13 +43,11 @@ public class BarristerChangeEventHandler {
     @Async
     @EventListener(condition = "#event.typeOfEvent.displayedValue eq 'Add Barrister'")
     public void notifyAddBarrister(final BarristerChangeEvent event) {
-        if (featureToggleService.isBarristerFeatureEnabled()) {
-            // notify - barrister
-            sendEmail(event, CA_DA_ADD_BARRISTER_SELF, AllocatedBarrister::getBarristerEmail);
+        // notify - barrister
+        sendEmail(event, CA_DA_ADD_BARRISTER_SELF, AllocatedBarrister::getBarristerEmail);
 
-            // notify applicants/respondents Solicitors
-            sendEmail(event, CA_DA_ADD_BARRISTER_TO_SOLICITOR, AllocatedBarrister::getSolicitorEmail);
-        }
+        // notify applicants/respondents Solicitors
+        sendEmail(event, CA_DA_ADD_BARRISTER_TO_SOLICITOR, AllocatedBarrister::getSolicitorEmail);
     }
 
     private void sendEmail(BarristerChangeEvent event,
@@ -82,13 +80,11 @@ public class BarristerChangeEventHandler {
     @Async
     @EventListener(condition = "#event.typeOfEvent.displayedValue eq 'Remove Barrister'")
     public void notifyWhenBarristerRemoved(final BarristerChangeEvent event) {
-        if (featureToggleService.isBarristerFeatureEnabled()) {
-            // notify - barrister
-            sendEmail(event, CA_DA_REMOVE_BARRISTER_SELF, AllocatedBarrister::getBarristerEmail);
+        // notify - barrister
+        sendEmail(event, CA_DA_REMOVE_BARRISTER_SELF, AllocatedBarrister::getBarristerEmail);
 
-            // notify - solicitor
-            sendEmail(event, CA_DA_REMOVE_BARRISTER_TO_SOLICITOR, AllocatedBarrister::getSolicitorEmail);
-        }
+        // notify - solicitor
+        sendEmail(event, CA_DA_REMOVE_BARRISTER_TO_SOLICITOR, AllocatedBarrister::getSolicitorEmail);
     }
 
     private EmailTemplateVars buildEmailBarrister(CaseData caseData, String solicitorFullName) {

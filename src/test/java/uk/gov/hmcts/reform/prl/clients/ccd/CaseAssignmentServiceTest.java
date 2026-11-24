@@ -1023,8 +1023,6 @@ class CaseAssignmentServiceTest {
             .thenReturn("sysUserToken");
         when(tokenGenerator.generate())
             .thenReturn("token");
-        when(featureToggleService.isBarristerFeatureEnabled())
-            .thenReturn(true);
 
         ChangeOrganisationRequest changeOrganisationRequest = ChangeOrganisationRequest.builder()
             .caseRoleId(DynamicList.builder()
@@ -1103,8 +1101,6 @@ class CaseAssignmentServiceTest {
                                        .build())
                             .build())
             .build();
-        when(featureToggleService.isBarristerFeatureEnabled())
-            .thenReturn(true);
 
         localCaseAssignmentService.removePartyBarristerIfPresent(fl401CaseData,
                                                                  changeOrganisationRequest);
@@ -1185,8 +1181,6 @@ class CaseAssignmentServiceTest {
             barristerRemoveService,
             partyLevelCaseFlagsService
         );
-        when(featureToggleService.isBarristerFeatureEnabled())
-            .thenReturn(true);
 
         localCaseAssignmentService.removeAmBarristerIfPresent(localCaseDetails);
         assertThat(parties.apply(c100CaseData).get(index).getValue().getBarrister())
@@ -1233,9 +1227,6 @@ class CaseAssignmentServiceTest {
                                        .build())
                             .build())
             .build();
-        when(featureToggleService.isBarristerFeatureEnabled())
-            .thenReturn(true);
-
         localCaseAssignmentService.removePartyBarristerIfPresent(c100CaseData,
                                                                  changeOrganisationRequest);
         assertThat(parties.apply(c100CaseData).get(index).getValue().getBarrister())
@@ -1252,9 +1243,6 @@ class CaseAssignmentServiceTest {
 
     @Test
     void testInvalidSolicitorRoleWhenCaseTypeC100() {
-        when(featureToggleService.isBarristerFeatureEnabled())
-            .thenReturn(true);
-
         ChangeOrganisationRequest changeOrganisationRequest = ChangeOrganisationRequest.builder()
             .caseRoleId(DynamicList.builder()
                             .value(DynamicListElement.builder()
@@ -1284,8 +1272,6 @@ class CaseAssignmentServiceTest {
             .thenReturn("sysUserToken");
         when(tokenGenerator.generate())
             .thenReturn("token");
-        when(featureToggleService.isBarristerFeatureEnabled())
-            .thenReturn(true);
 
         caseAssignmentService.removeAmBarristerCaseRole(caseData,
                                                         Map.of(Optional.of(SolicitorRole.C100APPLICANTSOLICITOR3),
@@ -1328,8 +1314,6 @@ class CaseAssignmentServiceTest {
             .id(1234L)
             .data(caseDataWithNullRequest.toMap(objectMapper))
             .build();
-
-        when(featureToggleService.isBarristerFeatureEnabled()).thenReturn(true);
 
         CaseAssignmentService localCaseAssignmentService = new CaseAssignmentService(
             caseAssignmentApi,

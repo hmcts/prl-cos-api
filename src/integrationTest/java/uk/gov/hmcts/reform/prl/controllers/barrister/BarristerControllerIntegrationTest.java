@@ -40,9 +40,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.util.TestConstants.AUTHORISATION_HEADER;
 
 @Slf4j
-@SpringBootTest(properties = {
-    "feature.toggle.barristerFeatureEnabled=true"
-})
+@SpringBootTest(properties = {})
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 public class BarristerControllerIntegrationTest {

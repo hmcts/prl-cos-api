@@ -120,7 +120,6 @@ pba:
 
 feature:
   toggle:
-    barristerFeatureEnabled: ${BARRISTER_FEATURE_ENABLED:false}
     cafcassDateTimeFeatureEnabled: ${CAFCASS_DATE_TIME_FEATURE_ENABLED:false}
     osCourtLookupEnabled: ${OS_COURT_LOOKUP_ENABLED:false}
     bundleByCategoryEnabled: ${BUNDLE_BY_CATEGORY_ENABLED:false}
