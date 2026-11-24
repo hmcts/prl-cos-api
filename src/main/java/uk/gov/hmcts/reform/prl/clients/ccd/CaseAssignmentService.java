@@ -28,7 +28,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
-import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -69,7 +68,6 @@ public class CaseAssignmentService {
     private final RoleAssignmentService roleAssignmentService;
     private final MaskEmail maskEmail;
     private final ObjectMapper objectMapper;
-    private final FeatureToggleService featureToggleService;
     private final BarristerHelper barristerHelper;
     private final BarristerRemoveService barristerRemoveService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;

@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.BarristerEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.EmailService;
-import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.MaskEmail;
 
@@ -38,7 +37,6 @@ public class BarristerChangeEventHandler {
     private String manageCaseUrl;
 
     private final EmailService emailService;
-    private final FeatureToggleService featureToggleService;
 
     @Async
     @EventListener(condition = "#event.typeOfEvent.displayedValue eq 'Add Barrister'")

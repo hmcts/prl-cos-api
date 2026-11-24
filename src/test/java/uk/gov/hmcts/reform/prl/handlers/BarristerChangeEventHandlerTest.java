@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.BarristerEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.EmailService;
-import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.MaskEmail;
 
@@ -52,8 +51,6 @@ class BarristerChangeEventHandlerTest {
 
     @Mock
     private EmailService emailService;
-    @Mock
-    private FeatureToggleService featureToggleService;
     @Spy
     private MaskEmail maskEmail;
     @Captor

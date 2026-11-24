@@ -43,7 +43,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
-import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -102,8 +101,6 @@ class CaseAssignmentServiceTest {
     private OrganisationService organisationService;
     @Mock
     private MaskEmail maskEmail;
-    @Mock
-    private FeatureToggleService featureToggleService;
     @Mock
     private BarristerHelper barristerHelper;
     @Mock
@@ -319,7 +316,6 @@ class CaseAssignmentServiceTest {
             roleAssignmentService,
             maskEmail,
             objectMapper,
-            featureToggleService,
             barristerHelper,
             barristerRemoveService,
             partyLevelCaseFlagsService
@@ -1049,7 +1045,6 @@ class CaseAssignmentServiceTest {
             roleAssignmentService,
             maskEmail,
             objectMapper,
-            featureToggleService,
             barristerHelper,
             barristerRemoveService,
             partyLevelCaseFlagsService
@@ -1080,7 +1075,6 @@ class CaseAssignmentServiceTest {
             roleAssignmentService,
             maskEmail,
             objectMapper,
-            featureToggleService,
             barristerHelper,
             barristerRemoveService,
             partyLevelCaseFlagsService
@@ -1176,7 +1170,6 @@ class CaseAssignmentServiceTest {
             roleAssignmentService,
             maskEmail,
             objectMapper,
-            featureToggleService,
             barristerHelper,
             barristerRemoveService,
             partyLevelCaseFlagsService
@@ -1206,7 +1199,6 @@ class CaseAssignmentServiceTest {
             roleAssignmentService,
             maskEmail,
             objectMapper,
-            featureToggleService,
             barristerHelper,
             barristerRemoveService,
             partyLevelCaseFlagsService
@@ -1323,7 +1315,6 @@ class CaseAssignmentServiceTest {
             roleAssignmentService,
             maskEmail,
             objectMapper,
-            featureToggleService,
             barristerHelper,
             barristerRemoveService,
             partyLevelCaseFlagsService
