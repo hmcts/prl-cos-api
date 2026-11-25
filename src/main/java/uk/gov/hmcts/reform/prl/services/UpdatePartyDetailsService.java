@@ -988,6 +988,7 @@ public class UpdatePartyDetailsService {
         return address;
     }
 
+    @SuppressWarnings("unchecked")
     public Map<String, Object> updateOtherPeopleInTheCaseConfidentialityData(CallbackRequest callbackRequest, String authorisation) {
         Map<String, Object> updatedCaseData =  amendOtherPeopleInTheCase(callbackRequest);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
