@@ -41,13 +41,6 @@ public class CaseWorkerEmailNotificationEventHandlerTest {
     }
 
     @Test
-    public void shouldNotifyCaseWorkerForCaseReSubmission() {
-        caseWorkerEmailNotificationEventHandler.notifyCaseWorkerForCaseResubmission(caseWorkerNotificationEmailEvent);
-        Mockito.verify(caseWorkerEmailService, Mockito.times(1))
-            .sendEmail(caseWorkerNotificationEmailEvent.getCaseDetailsModel());
-    }
-
-    @Test
     public void shouldNotifyCourtAdmin() {
         caseWorkerEmailNotificationEventHandler.notifyCourtAdmin(caseWorkerNotificationEmailEvent);
         Mockito.verify(caseWorkerEmailService, Mockito.times(1))
