@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.BarristerEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.EmailService;
-import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.MaskEmail;
 
@@ -36,7 +35,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -53,8 +51,6 @@ class BarristerChangeEventHandlerTest {
 
     @Mock
     private EmailService emailService;
-    @Mock
-    private FeatureToggleService featureToggleService;
     @Spy
     private MaskEmail maskEmail;
     @Captor
@@ -123,8 +119,6 @@ class BarristerChangeEventHandlerTest {
 
     @Test
     void shouldNotifyAddBarristerWhenCaseTypeIsC100() {
-        when(featureToggleService.isBarristerFeatureEnabled())
-            .thenReturn(true);
         barristerChangeEventHandler.notifyAddBarrister(barristerChangeEvent);
 
         BarristerEmail expectedBarristerEmailVars = BarristerEmail.builder()
@@ -181,8 +175,6 @@ class BarristerChangeEventHandlerTest {
 
     @Test
     void shouldNotifyAddBarristerWhenCaseTypeIsC100AndHasOneSolicitor() {
-        when(featureToggleService.isBarristerFeatureEnabled())
-            .thenReturn(true);
         caseData = caseData.toBuilder()
             .allocatedBarrister(caseData.getAllocatedBarrister().toBuilder()
                                     .solicitorEmail(null)
@@ -212,8 +204,6 @@ class BarristerChangeEventHandlerTest {
 
     @Test
     void shouldNotifyAddBarristerWhenCaseTypeIsFL401() {
-        when(featureToggleService.isBarristerFeatureEnabled())
-            .thenReturn(true);
         caseData = caseData.toBuilder()
             .allocatedBarrister(caseData.getAllocatedBarrister().toBuilder()
                                     .solicitorEmail(null)
@@ -247,8 +237,6 @@ class BarristerChangeEventHandlerTest {
 
     @Test
     void shouldNotifyWhenBarristerIsRemovedWhenCaseTypeIsC100() {
-        when(featureToggleService.isBarristerFeatureEnabled())
-            .thenReturn(true);
         BarristerChangeEvent barristerRemoveEvent = barristerChangeEvent.toBuilder()
             .typeOfEvent(removeBarrister)
             .build();
@@ -284,24 +272,9 @@ class BarristerChangeEventHandlerTest {
             .isEqualTo(expectedBarristerEmailVars);
     }
 
-    @Test
-    void shouldNotNotifyWhenBarristerFeatureIsNotEnabled() {
-        when(featureToggleService.isBarristerFeatureEnabled())
-            .thenReturn(false);
-        barristerChangeEventHandler.notifyWhenBarristerRemoved(barristerChangeEvent);
-
-        verify(emailService, never()).send(
-            anyString(),
-            any(),
-            any(),
-            any());
-
-    }
 
     @Test
     void shouldNotNotifyWhenBarristerIsRemovedWhenNoEmailAddressIsProvided() {
-        when(featureToggleService.isBarristerFeatureEnabled())
-            .thenReturn(true);
         caseData = CaseData.builder()
             .id(123L)
             .allocatedBarrister(AllocatedBarrister.builder()
@@ -332,8 +305,6 @@ class BarristerChangeEventHandlerTest {
 
     @Test
     void shouldNotifyWhenBarristerIsRemovedWhenCaseTypeIsC100AndHasOneSolicitor() {
-        when(featureToggleService.isBarristerFeatureEnabled())
-            .thenReturn(true);
         caseData = caseData.toBuilder()
             .applicants(Arrays.asList(element(applicant1)))
             .respondents(Arrays.asList(element(respondent1)))
@@ -356,8 +327,6 @@ class BarristerChangeEventHandlerTest {
 
     @Test
     void shouldNotifyWhenBarristerIsRemovedWhenCaseTypeIsFL401() {
-        when(featureToggleService.isBarristerFeatureEnabled())
-            .thenReturn(true);
         caseData = caseData.toBuilder()
             .applicants(Collections.emptyList())
             .respondents(Collections.emptyList())

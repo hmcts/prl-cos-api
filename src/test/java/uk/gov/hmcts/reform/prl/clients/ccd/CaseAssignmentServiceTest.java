@@ -43,7 +43,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
-import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -102,8 +101,6 @@ class CaseAssignmentServiceTest {
     private OrganisationService organisationService;
     @Mock
     private MaskEmail maskEmail;
-    @Mock
-    private FeatureToggleService featureToggleService;
     @Mock
     private BarristerHelper barristerHelper;
     @Mock
@@ -319,7 +316,6 @@ class CaseAssignmentServiceTest {
             roleAssignmentService,
             maskEmail,
             objectMapper,
-            featureToggleService,
             barristerHelper,
             barristerRemoveService,
             partyLevelCaseFlagsService
@@ -1023,8 +1019,6 @@ class CaseAssignmentServiceTest {
             .thenReturn("sysUserToken");
         when(tokenGenerator.generate())
             .thenReturn("token");
-        when(featureToggleService.isBarristerFeatureEnabled())
-            .thenReturn(true);
 
         ChangeOrganisationRequest changeOrganisationRequest = ChangeOrganisationRequest.builder()
             .caseRoleId(DynamicList.builder()
@@ -1051,7 +1045,6 @@ class CaseAssignmentServiceTest {
             roleAssignmentService,
             maskEmail,
             objectMapper,
-            featureToggleService,
             barristerHelper,
             barristerRemoveService,
             partyLevelCaseFlagsService
@@ -1082,7 +1075,6 @@ class CaseAssignmentServiceTest {
             roleAssignmentService,
             maskEmail,
             objectMapper,
-            featureToggleService,
             barristerHelper,
             barristerRemoveService,
             partyLevelCaseFlagsService
@@ -1103,8 +1095,6 @@ class CaseAssignmentServiceTest {
                                        .build())
                             .build())
             .build();
-        when(featureToggleService.isBarristerFeatureEnabled())
-            .thenReturn(true);
 
         localCaseAssignmentService.removePartyBarristerIfPresent(fl401CaseData,
                                                                  changeOrganisationRequest);
@@ -1180,13 +1170,10 @@ class CaseAssignmentServiceTest {
             roleAssignmentService,
             maskEmail,
             objectMapper,
-            featureToggleService,
             barristerHelper,
             barristerRemoveService,
             partyLevelCaseFlagsService
         );
-        when(featureToggleService.isBarristerFeatureEnabled())
-            .thenReturn(true);
 
         localCaseAssignmentService.removeAmBarristerIfPresent(localCaseDetails);
         assertThat(parties.apply(c100CaseData).get(index).getValue().getBarrister())
@@ -1212,7 +1199,6 @@ class CaseAssignmentServiceTest {
             roleAssignmentService,
             maskEmail,
             objectMapper,
-            featureToggleService,
             barristerHelper,
             barristerRemoveService,
             partyLevelCaseFlagsService
@@ -1233,9 +1219,6 @@ class CaseAssignmentServiceTest {
                                        .build())
                             .build())
             .build();
-        when(featureToggleService.isBarristerFeatureEnabled())
-            .thenReturn(true);
-
         localCaseAssignmentService.removePartyBarristerIfPresent(c100CaseData,
                                                                  changeOrganisationRequest);
         assertThat(parties.apply(c100CaseData).get(index).getValue().getBarrister())
@@ -1252,9 +1235,6 @@ class CaseAssignmentServiceTest {
 
     @Test
     void testInvalidSolicitorRoleWhenCaseTypeC100() {
-        when(featureToggleService.isBarristerFeatureEnabled())
-            .thenReturn(true);
-
         ChangeOrganisationRequest changeOrganisationRequest = ChangeOrganisationRequest.builder()
             .caseRoleId(DynamicList.builder()
                             .value(DynamicListElement.builder()
@@ -1284,8 +1264,6 @@ class CaseAssignmentServiceTest {
             .thenReturn("sysUserToken");
         when(tokenGenerator.generate())
             .thenReturn("token");
-        when(featureToggleService.isBarristerFeatureEnabled())
-            .thenReturn(true);
 
         caseAssignmentService.removeAmBarristerCaseRole(caseData,
                                                         Map.of(Optional.of(SolicitorRole.C100APPLICANTSOLICITOR3),
@@ -1329,8 +1307,6 @@ class CaseAssignmentServiceTest {
             .data(caseDataWithNullRequest.toMap(objectMapper))
             .build();
 
-        when(featureToggleService.isBarristerFeatureEnabled()).thenReturn(true);
-
         CaseAssignmentService localCaseAssignmentService = new CaseAssignmentService(
             caseAssignmentApi,
             systemUserService,
@@ -1339,7 +1315,6 @@ class CaseAssignmentServiceTest {
             roleAssignmentService,
             maskEmail,
             objectMapper,
-            featureToggleService,
             barristerHelper,
             barristerRemoveService,
             partyLevelCaseFlagsService
