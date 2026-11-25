@@ -4,21 +4,21 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 @Slf4j
-@SpringBootTest
-@RunWith(SpringRunner.class)
-@ContextConfiguration
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
 public class BarristerControllerFunctionalTest {
+    public static final String APPLICATION_JSON = "application/json";
+    public static final String SERVICE_AUTHORIZATION = "ServiceAuthorization";
+    public static final String AUTHORIZATION = "Authorization";
+
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
 
@@ -38,12 +38,13 @@ public class BarristerControllerFunctionalTest {
     @Test
     public void testBarristerAddAboutToStartCallback() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+
         request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
-            .contentType("application/json")
+            .contentType(APPLICATION_JSON)
             .post("/barrister/add/about-to-start")
             .then()
             .assertThat().statusCode(200);
@@ -53,11 +54,11 @@ public class BarristerControllerFunctionalTest {
     public void testBarristerRemoveAboutToStartCallback() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
-            .contentType("application/json")
+            .contentType(APPLICATION_JSON)
             .post("/barrister/remove/about-to-start")
             .then()
             .assertThat().statusCode(200);
@@ -67,11 +68,11 @@ public class BarristerControllerFunctionalTest {
     public void testBarristerStopRepresentingAboutToStartCallback() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
-            .contentType("application/json")
+            .contentType(APPLICATION_JSON)
             .post("/barrister/stop-representing/about-to-start")
             .then()
             .assertThat().statusCode(500);
@@ -81,11 +82,11 @@ public class BarristerControllerFunctionalTest {
     public void testBarristerAddSubmittedCallback() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
-            .contentType("application/json")
+            .contentType(APPLICATION_JSON)
             .post("/barrister/add/submitted")
             .then()
             .assertThat().statusCode(200);
@@ -95,11 +96,11 @@ public class BarristerControllerFunctionalTest {
     public void testBarristerRemoveSubmittedCallback() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
-            .contentType("application/json")
+            .contentType(APPLICATION_JSON)
             .post("/barrister/remove/submitted")
             .then()
             .assertThat().statusCode(200);

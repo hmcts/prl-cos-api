@@ -4,22 +4,18 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -37,10 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @Slf4j
-@SpringBootTest
-@RunWith(SpringRunner.class)
-@ContextConfiguration
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
 public class ServiceOfApplicationControllerFunctionalTest {
 
     private static final String VALID_REQUEST_BODY = "requests/service-of-application.json";
@@ -66,8 +59,7 @@ public class ServiceOfApplicationControllerFunctionalTest {
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
-
-    @Before
+    @BeforeEach
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
@@ -76,7 +68,6 @@ public class ServiceOfApplicationControllerFunctionalTest {
     private SendAndReplyService sendAndReplyService;
 
     private static CaseDetails caseDetails;
-
 
     @Test
     public void createCcdTestCase() throws Exception {
@@ -94,10 +85,9 @@ public class ServiceOfApplicationControllerFunctionalTest {
             .extract()
             .as(CaseDetails.class);
 
-        Assert.assertNotNull(caseDetails);
-        Assert.assertNotNull(caseDetails.getId());
+        Assertions.assertNotNull(caseDetails);
+        Assertions.assertNotNull(caseDetails.getId());
     }
-
 
     @Test
     public void givenRequestWithCaseData_ResponseContainsHeaderAndCollapsable() throws Exception {
@@ -132,7 +122,7 @@ public class ServiceOfApplicationControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void givenRequestWithCaseData_Response_Submitted() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);

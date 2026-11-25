@@ -49,6 +49,7 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -248,7 +249,7 @@ public class ReviewAdditionalApplicationControllerTest {
 
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(sendAndReplyService.populateDynamicListsForSendAndReply(any(CaseData.class), anyString())).thenReturn(caseData);
+        when(sendAndReplyService.populateDynamicListsForSendAndReply(any(CaseData.class), anyString(), eq(false), eq(null))).thenReturn(caseData);
 
         CallbackResponse response = controller
             .reviewAdditionalApplicatonMidEvent(AUTH_TOKEN, callbackRequest);
@@ -350,10 +351,10 @@ public class ReviewAdditionalApplicationControllerTest {
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(sendAndReplyService.populateDynamicListsForSendAndReply(caseData,auth)).thenReturn(caseData);
+        when(sendAndReplyService.populateDynamicListsForSendAndReply(caseData,auth, false, null)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         controller.reviewAdditionalApplicatonMidEvent(auth, callbackRequest);
-        verify(sendAndReplyService).populateDynamicListsForSendAndReply(caseData,auth);
+        verify(sendAndReplyService).populateDynamicListsForSendAndReply(caseData,auth, false, null);
         verifyNoInteractions(reviewAdditionalApplicationService);
     }
 
@@ -395,12 +396,12 @@ public class ReviewAdditionalApplicationControllerTest {
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(sendAndReplyService.populateDynamicListsForSendAndReply(caseData,auth)).thenReturn(caseData);
+        when(sendAndReplyService.populateDynamicListsForSendAndReply(caseData,auth, false, null)).thenReturn(caseData);
         when(reviewAdditionalApplicationService.getApplicationBundleDynamicCode(any(AdditionalApplicationsBundle.class)))
             .thenReturn(awpOtherCode);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         controller.reviewAdditionalApplicatonMidEvent(auth, callbackRequest);
-        verify(sendAndReplyService).populateDynamicListsForSendAndReply(caseData,auth);
+        verify(sendAndReplyService).populateDynamicListsForSendAndReply(caseData,auth, false, null);
         verify(reviewAdditionalApplicationService).getApplicationBundleDynamicCode(any(AdditionalApplicationsBundle.class));
     }
 
@@ -409,10 +410,45 @@ public class ReviewAdditionalApplicationControllerTest {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        when(sendAndReplyService.sendAndReplySubmitted(callbackRequest, auth)).thenReturn(ok(SubmittedCallbackResponse.builder().build()));
+        UUID uuid = UUID.randomUUID();
+        DynamicListElement dynamicListElement = DynamicListElement.builder()
+            .code(awpOtherCode)
+            .label("test-document")
+            .build();
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(dynamicListElement);
+        DynamicList list = DynamicList.builder()
+            .listItems(dynamicListElements)
+            .value(DynamicListElement.builder().code(uuid).build()).build();
+        Message message = Message.builder()
+            .applicationsList(DynamicList.builder()
+                                  .listItems(list.getListItems())
+                                  .value(list.getValue())
+                                  .build())
+            .isReplying(YesOrNo.No).build();
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .reviewAdditionalApplicationWrapper(ReviewAdditionalApplicationWrapper.builder()
+                                                    .isAdditionalApplicationReviewed(Yes)
+                                                    .selectedAdditionalApplicationsBundle(AdditionalApplicationsBundle.builder()
+                                                                                              .build())
+                                                    .build())
+            .messageReply(message)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(message)
+                    .respondToMessage(No)
+                    .messages(messages)
+                    .build())
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .sendOrReplyDto(SendOrReplyDto.builder().closedMessages(Collections.singletonList(element(message))).build())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(sendAndReplyService.sendAndReplySubmittedForChoice(caseData, SEND, auth)).thenReturn(ok(SubmittedCallbackResponse.builder().build()));
         ResponseEntity<SubmittedCallbackResponse> response  = controller.handleSubmittedSendAndReply(auth, callbackRequest);
         Assertions.assertThat(response.getStatusCode().value()).isEqualTo(200);
-        verify(sendAndReplyService).sendAndReplySubmitted(callbackRequest, auth);
+        verify(sendAndReplyService).sendAndReplySubmittedForChoice(caseData, SEND, auth);
 
     }
 

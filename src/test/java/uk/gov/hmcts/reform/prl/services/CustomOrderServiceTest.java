@@ -11,6 +11,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CustomOrderNameOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
@@ -39,6 +41,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.document.PoiTlDocxRenderer;
+import uk.gov.hmcts.reform.prl.services.document.pdf.PdfGenerationService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.io.IOException;
@@ -56,8 +59,12 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -83,7 +90,7 @@ class CustomOrderServiceTest {
     @Mock
     private AllTabServiceImpl allTabService;
     @Mock
-    private uk.gov.hmcts.reform.prl.clients.DgsApiClient dgsApiClient;
+    private PdfGenerationService pdfGenerationService;
     @Mock
     private DocumentSealingService documentSealingService;
 
@@ -1711,7 +1718,7 @@ class CustomOrderServiceTest {
 
     @ParameterizedTest
     @CsvSource({
-        "standardDirectionsOrder, Standard directions order",
+        "standardDirectionsOrder, Directions on Issue",
         "blankOrderOrDirections, Blank order or directions (C21)",
         "nonMolestation, Non-molestation order (FL404A)"
     })
@@ -2233,6 +2240,49 @@ class CustomOrderServiceTest {
 
         // Assert - should skip processing (no download attempts)
         verify(documentGenService, never()).getDocumentBytes(any(), any(), any());
+    }
+
+    @Test
+    void testCombineAndFinalizeCustomOrder_cleansUpCustomOrderDocAndPreviewOrderDoc() throws IOException {
+        // Verify customOrderDoc and previewOrderDoc are cleaned up after successful processing
+        uk.gov.hmcts.reform.prl.models.documents.Document customDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentBinaryUrl("http://custom-binary")
+                .documentFileName("custom.docx")
+                .build();
+
+        uk.gov.hmcts.reform.prl.models.documents.Document previewDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentBinaryUrl("http://preview-binary")
+                .documentFileName("preview.docx")
+                .build();
+
+        uk.gov.hmcts.reform.prl.models.documents.Document finalDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentFileName("final.pdf")
+                .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderDoc", customDoc);
+        caseDataUpdated.put("previewOrderDoc", previewDoc);
+
+        when(objectMapper.convertValue(customDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class))
+            .thenReturn(customDoc);
+        when(objectMapper.convertValue(previewDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class))
+            .thenReturn(previewDoc);
+
+        CaseData caseData = CaseData.builder().id(123L).build();
+
+        // Use spy to mock just processCustomOrderOnSubmitted
+        CustomOrderService spyService = Mockito.spy(customOrderService);
+        doReturn(finalDoc).when(spyService).processCustomOrderOnSubmitted(
+            anyString(), anyLong(), any(), anyString(), anyString(), any(), anyBoolean());
+
+        spyService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, false);
+
+        // Assert cleanup happened
+        assertNull(caseDataUpdated.get("customOrderDoc"));
+        assertNull(caseDataUpdated.get("previewOrderDoc"));
     }
 
     // ========== Tests for findRelationshipById ==========
@@ -3867,6 +3917,71 @@ class CustomOrderServiceTest {
         assertEquals(1, updatedList.size());
         assertEquals("final.docx", updatedList.get(0).getValue().getOrderDocument().getDocumentFileName());
         assertEquals("Final Custom Order", updatedList.get(0).getValue().getOrderTypeId());
+    }
+
+    @Test
+    void testUpdateFinalOrderCollection_doesNotSetOrderMadeDateWhenMissing() {
+        uk.gov.hmcts.reform.prl.models.OrderDetails existingOrder = uk.gov.hmcts.reform.prl.models.OrderDetails.builder()
+            .orderTypeId("Old Order")
+            .otherDetails(OtherOrderDetails.builder()
+                              .orderCreatedBy("Court Admin")
+                              .build())
+            .build();
+        List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(Element.<uk.gov.hmcts.reform.prl.models.OrderDetails>builder()
+            .id(UUID.randomUUID())
+            .value(existingOrder)
+            .build());
+
+        CaseData caseData = CaseData.builder()
+            .dateOrderMade(LocalDate.of(2026, 8, 24))
+            .orderCollection(orderList)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        uk.gov.hmcts.reform.prl.models.documents.Document doc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentFileName("final.docx")
+            .documentUrl("http://url")
+            .build();
+
+        customOrderService.updateFinalOrderCollection(caseData, caseDataUpdated, doc, "Final Custom Order");
+
+        @SuppressWarnings("unchecked")
+        List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> updatedList =
+            (List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>>) caseDataUpdated.get("orderCollection");
+        OtherOrderDetails otherDetails = updatedList.get(0).getValue().getOtherDetails();
+        assertNull(otherDetails.getOrderMadeDate());
+        assertEquals("Court Admin", otherDetails.getOrderCreatedBy());
+    }
+
+    @Test
+    void testUpdateFinalOrderCollection_preservesBlankOrderMadeDate() {
+        uk.gov.hmcts.reform.prl.models.OrderDetails existingOrder = uk.gov.hmcts.reform.prl.models.OrderDetails.builder()
+            .otherDetails(OtherOrderDetails.builder()
+                              .orderMadeDate(" ")
+                              .build())
+            .build();
+        List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(Element.<uk.gov.hmcts.reform.prl.models.OrderDetails>builder()
+            .id(UUID.randomUUID())
+            .value(existingOrder)
+            .build());
+
+        CaseData caseData = CaseData.builder()
+            .dateOrderMade(LocalDate.of(2026, 8, 24))
+            .orderCollection(orderList)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        uk.gov.hmcts.reform.prl.models.documents.Document doc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentFileName("final.docx")
+            .documentUrl("http://url")
+            .build();
+
+        customOrderService.updateFinalOrderCollection(caseData, caseDataUpdated, doc, "Final Custom Order");
+
+        @SuppressWarnings("unchecked")
+        List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> updatedList =
+            (List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>>) caseDataUpdated.get("orderCollection");
+        assertEquals(" ", updatedList.get(0).getValue().getOtherDetails().getOrderMadeDate());
     }
 
 

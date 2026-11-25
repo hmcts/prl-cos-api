@@ -11,9 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.caseworkeremailnotification.CaseWorkerEmailNotificationEventEnum;
-import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNotificationEventEnum;
 import uk.gov.hmcts.reform.prl.events.CaseWorkerNotificationEmailEvent;
-import uk.gov.hmcts.reform.prl.events.SolicitorNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -43,6 +41,7 @@ import static uk.gov.hmcts.reform.prl.enums.CaseEvent.PATH_FINDER_DECISION;
 import static uk.gov.hmcts.reform.prl.enums.State.PROCEEDS_IN_HERITAGE_SYSTEM;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
 
 @Service
 @Slf4j
@@ -58,9 +57,11 @@ public class C100IssueCaseService {
     private final ObjectMapper objectMapper;
     private final EventService eventPublisher;
     private final DfjLookupService dfjLookupService;
+    private final C8Service c8Service;
     private final PathFinderLookupService pathFinderLookupService;
     private final CcdCoreCaseDataService ccdCoreCaseDataService;
     private final SystemUserService systemUserService;
+    private final UpdatePartyDetailsService updatePartyDetailsService;
 
     public Map<String, Object> issueAndSendToLocalCourt(String authorisation, CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -115,6 +116,12 @@ public class C100IssueCaseService {
         // Generate All Docs and set to casedataupdated.
         caseDataUpdated.putAll(documentGenService.createUpdatedCaseDataWithDocuments(authorisation, caseData, true));
 
+        updatePartyDetailsService.generateC8DocumentsForRespondents(
+            caseDataUpdated, callbackRequest, authorisation, caseData, nullSafeList(caseData.getRespondents()), true
+        );
+        CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
+        caseDataUpdated.putAll(c8Service.generateOtherPartiesC8s(caseData, caseDataBefore, authorisation));
+
         // Refreshing the page in the same event. Hence no external event call needed.
         // Getting the tab fields and add it to the casedetails.
         Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
@@ -154,13 +161,6 @@ public class C100IssueCaseService {
 
     public void issueAndSendToLocalCourNotification(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        if (No.equals(caseData.getConsentOrder())) {
-            SolicitorNotificationEmailEvent rpaEmailNotificationEvent = SolicitorNotificationEmailEvent.builder()
-                .typeOfEvent(SolicitorEmailNotificationEventEnum.notifyRpa.getDisplayedValue())
-                .caseDetailsModel(callbackRequest.getCaseDetails())
-                .build();
-            eventPublisher.publishEvent(rpaEmailNotificationEvent);
-        }
         CaseWorkerNotificationEmailEvent notifyLocalCourtEvent = CaseWorkerNotificationEmailEvent.builder()
             .typeOfEvent(CaseWorkerEmailNotificationEventEnum.sendEmailToCourtAdmin.getDisplayedValue())
             .caseDetailsModel(callbackRequest.getCaseDetails())

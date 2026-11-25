@@ -5,6 +5,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -82,16 +83,27 @@ public class CaseDataOtherPersonsElementsMapper {
                     ? reverseYesOrNoForIsCurrentAddressKnown(otherPersonDetail.getAddressUnknown()) : Yes)
                 .address(buildAddress(otherPersonDetail.getOtherPersonAddress()))
                 .isAddressConfidential(null != otherPersonDetail.getOtherPersonAddress()
-                    ? livingInRefuge(otherPersonDetail) : null)
+                    ? addressConfidential(otherPersonDetail) : null)
         //.relationshipToChildren(buildChildRelationship(otherPersonDetail.getRelationshipDetails()))
         .build();
     }
 
-    private static YesOrNo livingInRefuge(OtherPersonDetail otherPersonDetails) {
+    private static YesNoIDontKnowV2 livingInRefuge(OtherPersonDetail otherPersonDetails) {
+        if (YesOrNo.Yes.equals(otherPersonDetails.getAddressUnknown())) {
+            return YesNoIDontKnowV2.No;
+        } else if (!YesOrNo.Yes.equals(otherPersonDetails.getAddressUnknown())
+            && YesNoIDontKnowV2.Yes.equals(otherPersonDetails.getLiveInRefuge())) {
+            return YesNoIDontKnowV2.Yes;
+        } else {
+            return YesNoIDontKnowV2.No;
+        }
+    }
+
+    private static YesOrNo addressConfidential(OtherPersonDetail otherPersonDetails) {
         if (YesOrNo.Yes.equals(otherPersonDetails.getAddressUnknown())) {
             return No;
         } else if (!YesOrNo.Yes.equals(otherPersonDetails.getAddressUnknown())
-            && YesOrNo.Yes.equals(otherPersonDetails.getLiveInRefuge())) {
+            && YesNoIDontKnowV2.Yes.equals(otherPersonDetails.getLiveInRefuge())) {
             return Yes;
         } else {
             return No;

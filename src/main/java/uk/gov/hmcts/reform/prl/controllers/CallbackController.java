@@ -42,6 +42,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
@@ -53,8 +54,8 @@ import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
-import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.C8Service;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
@@ -63,9 +64,7 @@ import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
-import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
-import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -80,7 +79,6 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -90,7 +88,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
@@ -110,8 +107,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GATEKEEPING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MIAM_ERROR_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PARTY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
@@ -125,9 +122,14 @@ import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROL
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TASK_LIST_V2_FLAG;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TASK_LIST_V3_FLAG;
 import static uk.gov.hmcts.reform.prl.enums.Event.SEND_TO_GATEKEEPER;
+import static uk.gov.hmcts.reform.prl.enums.State.AWAITING_INFORMATION;
+import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUED;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.services.gatekeeping.GatekeepingDetailsService.WHO_TO_SEND_TO_GATEKEEPER;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
 
 @Slf4j
 @RestController
@@ -145,15 +147,12 @@ public class CallbackController {
     private final CaseSummaryTabService caseSummaryTab;
     private final UserService userService;
     private final DocumentGenService documentGenService;
-    private final SendgridService sendgridService;
-    private final C100JsonMapper c100JsonMapper;
     private final LocationRefDataService locationRefDataService;
     private final UpdatePartyDetailsService updatePartyDetailsService;
     private final PaymentRequestService paymentRequestService;
     private final ConfidentialityTabService confidentialityTabService;
     private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
     private final LaunchDarklyClient launchDarklyClient;
-    private final RefDataUserService refDataUserService;
     private final GatekeepingDetailsService gatekeepingDetailsService;
     private final AuthorisationService authorisationService;
     private final ManageDocumentsService manageDocumentsService;
@@ -167,6 +166,7 @@ public class CallbackController {
     private final SystemUserService systemUserService;
     private final DfjLookupService dfjLookupService;
     private final CafcassDateTimeService cafcassDateTimeService;
+    private final C8Service c8Service;
 
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -325,6 +325,14 @@ public class CallbackController {
             if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
                 //PRL-6627 - Removed duplicate calls to generate documents
                 caseDataUpdated.putAll(documentGenService.generateC100DraftDocuments(authorisation, caseData));
+
+                // FPVTL-2202 - Generate C8 documents for others and respondents on application submit
+                List<Element<PartyDetails>> respondents = caseData.getRespondents();
+                updatePartyDetailsService.generateC8DocumentsForRespondents(caseDataUpdated, callbackRequest,
+                                                                            authorisation, caseData, respondents, true);
+                CaseData before = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
+                caseDataUpdated.putAll(c8Service.generateOtherPartiesC8s(caseData, before, authorisation));
+
                 //Update version V2 here to get latest data refreshed in tabs
                 if (launchDarklyClient.isFeatureEnabled(TASK_LIST_V3_FLAG)) {
                     caseDataUpdated.put(TASK_LIST_VERSION, TASK_LIST_VERSION_V3);
@@ -457,22 +465,31 @@ public class CallbackController {
 
             GatekeepingDetails gatekeepingDetails = gatekeepingDetailsService.getGatekeepingDetails(
                 caseDataUpdated,
-                caseData.getLegalAdviserList(),
-                refDataUserService
+                caseData.getLegalAdviserList()
             );
             caseData = caseData.toBuilder().gatekeepingDetails(gatekeepingDetails).build();
 
             caseDataUpdated.put("gatekeepingDetails", gatekeepingDetails);
+            caseDataUpdated.put("gatekeepingTaskType", gatekeepingDetailsService.identifyGatekeepingTaskType(caseData));
+
+            List<Element<PartyDetails>> respondents = C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())
+                ? nullSafeList(caseData.getRespondents())
+                : List.of(element(caseData.getRespondentsFL401()));
+            updatePartyDetailsService.generateC8DocumentsForRespondents(caseDataUpdated, callbackRequest, authorisation,
+                                                                        caseData, respondents, true);
+
 
             Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
             caseDataUpdated.putAll(allTabsFields);
-            if (caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING) != null
+            if (caseDataUpdated.get(WHO_TO_SEND_TO_GATEKEEPER) != null
                 && (gatekeepingDetails.getJudgeName() != null
+                || gatekeepingDetails.getLegalAdviser() != null
                 || (gatekeepingDetails.getLegalAdviserList() != null
                 && CollectionUtils.isNotEmpty(gatekeepingDetails.getLegalAdviserList().getListItems())))) {
                 RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
                     .judicialUser(gatekeepingDetails.getJudgeName())
                     .legalAdviserList(gatekeepingDetails.getLegalAdviserList())
+                    .legalAdviser(gatekeepingDetails.getLegalAdviser())
                     .build();
 
                 roleAssignmentService.createRoleAssignment(
@@ -484,30 +501,6 @@ public class CallbackController {
                     GATEKEEPING_JUDGE_ROLE
                 );
             }
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-    }
-
-    @PostMapping(path = "/resend-rpa", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Resend case data json to RPA")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed.",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
-        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse resendNotificationToRpa(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest
-    ) throws IOException {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            requireNonNull(caseData);
-            sendgridService.sendEmail(c100JsonMapper.map(caseData));
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -644,6 +637,7 @@ public class CallbackController {
                 caseData
             )).build();
         } else {
+            log.error("unauthorized credentials");
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
@@ -696,15 +690,25 @@ public class CallbackController {
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(callbackRequest.getCaseDetails().getId()));
 
-            Optional<String> previousState = eventsForCase.stream()
+            Optional<String> previousStateOpt = eventsForCase.stream()
                 .map(CaseEventDetail::getStateId)
                 .findFirst();
-            previousState.ifPresent(s -> caseDataUpdated.put(
-                VERIFY_CASE_NUMBER_ADDED,
-                SUBMITTED_PAID.getValue().equalsIgnoreCase(s) ? Yes.getDisplayedValue() : null
-            ));
+
+            if (previousStateOpt.isPresent()) {
+                String previousState = previousStateOpt.get();
+                if (AWAITING_INFORMATION.getValue().equalsIgnoreCase(previousState)) {
+                    caseDataUpdated.put(VERIFY_CASE_NUMBER_ADDED, Yes.getDisplayedValue());
+                    caseData = caseData.toBuilder().state(CASE_ISSUED).build();
+                    caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
+                    caseDataUpdated.put(STATE_FIELD, CASE_ISSUED.getValue());
+                } else if (SUBMITTED_PAID.getValue().equalsIgnoreCase(previousState)) {
+                    caseDataUpdated.put(VERIFY_CASE_NUMBER_ADDED, Yes.getDisplayedValue());
+                }
+            }
+
             caseDataUpdated.put(ISSUE_DATE_FIELD, LocalDate.now());
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
@@ -790,31 +794,33 @@ public class CallbackController {
     private Map<String, Object> getSolicitorDetails(String authorisation, Map<String, Object> caseDataUpdated, CaseData caseData) {
         try {
             UserDetails userDetails = userService.getUserDetails(authorisation);
-            Optional<Organisations> userOrganisation = organisationService.findUserOrganisation(authorisation);
+            Optional<Organisations> userOrganisation = organisationService.getOrganisationByEmailDetail(userDetails.getEmail());
             caseDataUpdated.put("caseSolicitorName", userDetails.getFullName());
             if (userOrganisation.isPresent()) {
                 caseDataUpdated.put("caseSolicitorOrgName", userOrganisation.get().getName());
-                if (launchDarklyClient.isFeatureEnabled("share-a-case")) {
-                    OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
-                        .organisation(Organisation.builder()
-                                          .organisationID(userOrganisation.get().getOrganisationIdentifier())
-                                          .organisationName(userOrganisation.get().getName())
-                                          .build())
+                log.info("userorg present: {}", caseData.getCaseSolicitorOrgName());
+                OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
+                    .organisation(Organisation.builder()
+                                      .organisationID(userOrganisation.get().getOrganisationIdentifier())
+                                      .organisationName(userOrganisation.get().getName())
+                                      .build())
+                    .build();
+                if (caseData.getApplicantOrganisationPolicy() != null) {
+                    applicantOrganisationPolicy = applicantOrganisationPolicy.toBuilder()
+                        .orgPolicyReference(caseData.getApplicantOrganisationPolicy().getOrgPolicyReference())
+                        .orgPolicyCaseAssignedRole(caseData.getApplicantOrganisationPolicy()
+                                                       .getOrgPolicyCaseAssignedRole())
                         .build();
-                    if (caseData.getApplicantOrganisationPolicy() != null) {
-                        applicantOrganisationPolicy = applicantOrganisationPolicy.toBuilder()
-                            .orgPolicyReference(caseData.getApplicantOrganisationPolicy().getOrgPolicyReference())
-                            .orgPolicyCaseAssignedRole(caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole())
-                            .build();
-                    } else {
-                        applicantOrganisationPolicy = applicantOrganisationPolicy.toBuilder()
-                            .orgPolicyReference(StringUtils.EMPTY)
-                            .orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]")
-                            .build();
-                    }
-                    caseDataUpdated.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
+                } else {
+                    applicantOrganisationPolicy = applicantOrganisationPolicy.toBuilder()
+                        .orgPolicyReference(StringUtils.EMPTY)
+                        .orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]")
+                        .build();
                 }
+                log.info("putting applicantOrganisationPolicy: {}", applicantOrganisationPolicy);
+                caseDataUpdated.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
             }
+
         } catch (Exception e) {
             log.error("Error while fetching User or Org details for the logged in user {}", e.getMessage());
         }
@@ -847,6 +853,7 @@ public class CallbackController {
                 COURT_STAFF,
                 quarantineLegalDocForBulkScannedDocument
             );
+            caseDataUpdated.remove(NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS);
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
                 .build();
@@ -929,7 +936,8 @@ public class CallbackController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            Map<String, Object> caseDataMap = updatePartyDetailsService.updateOtherPeopleInTheCaseConfidentialityData(callbackRequest);
+            Map<String, Object> caseDataMap = updatePartyDetailsService.updateOtherPeopleInTheCaseConfidentialityData(
+                callbackRequest, authorisation);
             cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
@@ -940,4 +948,3 @@ public class CallbackController {
         }
     }
 }
-

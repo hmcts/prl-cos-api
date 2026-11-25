@@ -33,10 +33,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
 import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
-import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
@@ -49,8 +46,8 @@ import uk.gov.hmcts.reform.prl.services.CustomOrderService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
-import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
+import uk.gov.hmcts.reform.prl.services.UserRoleService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
@@ -61,6 +58,8 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 import uk.gov.hmcts.reform.prl.utils.TaskUtils;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -72,6 +71,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.ws.rs.core.HttpHeaders;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -79,12 +79,14 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AMEND_ORDER_SEL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CURRENT_ORDER_A_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_DATE_ENDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_DATE_ENDS_OPTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_DOC;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_NAME_OPTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DO_YOU_WANT_TO_SERVE_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
@@ -93,11 +95,13 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NAME_OF_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIEW_ORDER_DOC;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_PERFORMING_ACTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WHAT_DO_WITH_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum.noCheck;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createCustomOrder;
@@ -110,6 +114,8 @@ import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenVa
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidationsForSdo;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeeded;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.validateCustomOrderHearingDetails;
+import static uk.gov.hmcts.reform.prl.utils.OrderUtils.getDraftOrderId;
+import static uk.gov.hmcts.reform.prl.utils.OrderUtils.getOrderId;
 
 @Slf4j
 @RestController
@@ -122,8 +128,8 @@ public class ManageOrdersController {
     private final CustomOrderService customOrderService;
     private final ManageOrderEmailService manageOrderEmailService;
     private final AmendOrderService amendOrderService;
-    private final RefDataUserService refDataUserService;
     private final UserService userService;
+    private final UserRoleService userRoleService;
     private final HearingDataService hearingDataService;
     private final AuthorisationService authorisationService;
     private final AllTabServiceImpl allTabService;
@@ -149,7 +155,7 @@ public class ManageOrdersController {
             // Custom order flow - skip preview rendering here, it will be done on Page 19 with hearing data
             if (caseData.getManageOrdersOptions() != null && caseData.getManageOrdersOptions().equals(createCustomOrder)) {
                 // Set loggedInUserType for field show conditions
-                String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+                String loggedInUserType = userRoleService.getLoggedInUserType(authorisation);
                 caseDataUpdated.put(LOGGED_IN_USER_TYPE, loggedInUserType);
                 // Copy custom order sub-selections to pre-existing fields and set createSelectOrderOptions
                 manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
@@ -168,6 +174,8 @@ public class ManageOrdersController {
                 ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
                 return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
             }
+
+            manageOrderService.updatePrefilledOrderFields(caseData, caseDataUpdated);
 
             String language = CaseUtils.getLanguage(clientContext);
             List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData, CaseUtils.getLanguage(clientContext));
@@ -249,13 +257,13 @@ public class ManageOrdersController {
 
     private void prepopulateHeaderFields(Map<String, Object> caseData, String authorisation) {
         caseData.put(IS_INVOKED_FROM_TASK, No);
-        caseData.put("dateOrderMade", java.time.LocalDate.now());
+        caseData.put("dateOrderMade", LocalDate.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)));
 
         ManageOrderService.LoggedInUserTypeDetails userTypeDetails = manageOrderService.getLoggedInUserTypeDetails(authorisation);
         if (UserRoles.JUDGE.name().equals(userTypeDetails.userType())) {
             uk.gov.hmcts.reform.idam.client.models.UserDetails userDetails = userService.getUserDetails(authorisation);
             if (userDetails != null && userDetails.getFullName() != null) {
-                JudgeOrMagistrateTitleEnum judgeTitle = null;
+                JudgeOrMagistrateTitleEnum judgeTitle;
 
                 // Legal advisers are not in JRD, so set title directly
                 if (userTypeDetails.isLegalAdviser()) {
@@ -272,13 +280,13 @@ public class ManageOrdersController {
 
                 if (JudgeOrMagistrateTitleEnum.justicesLegalAdviser == judgeTitle
                     || JudgeOrMagistrateTitleEnum.justicesClerk == judgeTitle) {
-                    caseData.put("justiceLegalAdviserFullName", userDetails.getFullName());
+                    caseData.put("justiceLegalAdviserFullName", userDetails.getSurname().orElse(userDetails.getForename()));
                 } else if (JudgeOrMagistrateTitleEnum.magistrate == judgeTitle) {
                     caseData.put("magistrateLastName", List.of(uk.gov.hmcts.reform.prl.utils.ElementUtils.element(
                         uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName.builder()
-                            .lastName(userDetails.getFullName()).build())));
+                            .lastName(userDetails.getSurname().orElse(userDetails.getForename())).build())));
                 } else {
-                    caseData.put("judgeOrMagistratesLastName", userDetails.getFullName());
+                    caseData.put("judgeOrMagistratesLastName", userDetails.getSurname().orElse(userDetails.getForename()));
                 }
             }
         }
@@ -364,7 +372,7 @@ public class ManageOrdersController {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = new HashMap<>();
             caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
-            caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
+            caseDataUpdated.put("loggedInUserType", userRoleService.getLoggedInUserType(authorisation));
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 caseDataUpdated.put(
                     "isInHearingState",
@@ -385,7 +393,8 @@ public class ManageOrdersController {
         }
     }
 
-    @PostMapping(path = "/case-order-email-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/"
+        + "case-order-email-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Send Email Notification on Case order")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.", content = @Content(mediaType = "application/json",
@@ -451,6 +460,7 @@ public class ManageOrdersController {
             //SNI-4330 fix
             //update caseSummaryTab with latest state
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
+            caseDataUpdated.putAll(cafcassDateTimeService.updateAndGetCafcassDatetime(callbackRequest));
 
             manageOrderService.removeLocalAuthorityFromCase(caseData, caseDataUpdated);
 
@@ -459,7 +469,7 @@ public class ManageOrdersController {
                 List<?> orders = (List<?>) caseDataUpdated.get(ORDER_COLLECTION);
                 log.info("Before submitAllTabsUpdate: orderCollection size={}", orders.size());
                 if (!orders.isEmpty()) {
-                    Object firstOrder = orders.get(0);
+                    Object firstOrder = orders.getFirst();
                     if (firstOrder instanceof Map) {
                         @SuppressWarnings("unchecked")
                         Map<String, Object> orderMap = (Map<String, Object>) firstOrder;
@@ -473,22 +483,39 @@ public class ManageOrdersController {
                 }
             }
 
+            // Clean up custom order fields BEFORE persisting - these fields are transient for the order journey
+            // and shouldn't persist to affect subsequent order creations.
+            // Note: This is a submitted callback using submitAllTabsUpdate, so the response is not used by CCD.
+            if (isCustomOrder) {
+                cleanupCustomOrderFields(caseDataUpdated);
+            }
+
             allTabService.submitAllTabsUpdate(
                     startAllTabsUpdateDataContent.authorisation(),
                     String.valueOf(callbackRequest.getCaseDetails().getId()),
                     startAllTabsUpdateDataContent.startEventResponse(),
                     startAllTabsUpdateDataContent.eventRequestData(),
                     caseDataUpdated);
+            boolean finalOrder = false;
+            boolean saveAsDraft = manageOrderService.isSaveAsDraft(caseData);
+            String loggedInUserType = userRoleService.getLoggedInUserType(authorisation);
+            if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)) {
+                if (!(!noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()) || saveAsDraft)) {
+                    finalOrder = true;
+                }
+            }
 
-            manageOrderService.orchestrateCirDocumentsRequestedTask(caseData, authorisation);
+            UUID newDraftOrderCollectionId;
+            if (finalOrder) {
+                newDraftOrderCollectionId = getOrderId(caseDataUpdated);
+            } else {
+                newDraftOrderCollectionId = getDraftOrderId(authorisation, caseDataUpdated, loggedInUserType);
+            }
+
+            manageOrderService.orchestrateCirDocumentsRequestedTask(caseData, authorisation, newDraftOrderCollectionId);
 
             // Note: Custom orders are now sealed directly during combining (above), not here
             // This avoids issues with CDAM association timing
-
-            // Clean up custom order fields to prevent them affecting subsequent order creations
-            if (isCustomOrder) {
-                cleanupCustomOrderFields(caseDataUpdated);
-            }
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
@@ -538,7 +565,16 @@ public class ManageOrdersController {
             //Added below fields for WA purpose
             //Add additional logged-in user check & empty check, to avoid null pointer & class cast exception, it needs refactoring in future
             //Refactoring should be done for each journey in manage order ie upload order along with the users ie court admin
-            UUID newDraftOrderCollectionId = getDraftOrderId(authorisation, caseData, caseDataUpdated);
+            Boolean currentOrderADraftOrder = (Boolean) caseDataUpdated.get(CURRENT_ORDER_A_DRAFT_ORDER);
+            boolean finalOrder = nonNull(currentOrderADraftOrder) && !currentOrderADraftOrder;
+            UUID newDraftOrderCollectionId;
+            String loggedInUserType = userRoleService.getLoggedInUserType(authorisation);
+            if (finalOrder) {
+                newDraftOrderCollectionId = getOrderId(caseDataUpdated);
+            } else {
+                newDraftOrderCollectionId = getDraftOrderId(authorisation, caseDataUpdated, loggedInUserType);
+            }
+            caseDataUpdated.remove(CURRENT_ORDER_A_DRAFT_ORDER);
             caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation,
                                                                          caseData,
                                                                          callbackRequest.getEventId(),
@@ -551,38 +587,19 @@ public class ManageOrdersController {
 
             cleanUpSelectedManageOrderOptions(caseDataUpdated);
 
-            cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
-
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new InvalidClientException(INVALID_CLIENT));
         }
     }
 
-    private UUID getDraftOrderId(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
-        UUID newDraftOrderCollectionId = null;
-        String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
-        if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
-            && !caseData.getManageOrdersOptions().equals(servedSavedOrders)
-            && !AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
-            && caseDataUpdated.containsKey(DRAFT_ORDER_COLLECTION)
-            && null != caseDataUpdated.get(DRAFT_ORDER_COLLECTION)) {
-            List<Element<DraftOrder>> draftOrderCollection = (List<Element<DraftOrder>>) caseDataUpdated.get(
-                DRAFT_ORDER_COLLECTION);
-
-            newDraftOrderCollectionId = CollectionUtils.isNotEmpty(draftOrderCollection)
-                ? draftOrderCollection.getFirst().getId() : null;
-        }
-        return newDraftOrderCollectionId;
-    }
-
-    /*
+    /**
      *  setHearingData is a misnomer this does setHearingData but then goes on to other action based on selection
-     *  including serving an order
+     *  including serving an order.
      * @param caseData original
      * @param caseDataUpdated updated
      * @param authorisation need auth for changes
-     */
+     **/
     private void setHearingData(CaseData caseData, Map<String, Object> caseDataUpdated, String authorisation) {
         try {
             doSetHearingData(caseData, caseDataUpdated, authorisation);
@@ -615,6 +632,16 @@ public class ManageOrdersController {
             } else if (isSdo) {
                 caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
             }
+            if (createCustomOrder.equals(caseData.getManageOrdersOptions())) {
+                String effectiveOrderName = customOrderService.getEffectiveOrderName(caseData, caseDataUpdated);
+                caseData.setNameOfOrder(effectiveOrderName);
+                caseDataUpdated.put(NAME_OF_ORDER, effectiveOrderName);
+            }
+            log.info("Custom order naming before save: customOrderNameOption={}, nameOfOrder={}, customOrderDoc={}",
+                     caseDataUpdated.get(CUSTOM_ORDER_NAME_OPTION),
+                     caseData.getNameOfOrder(),
+                     caseDataUpdated.get(CUSTOM_ORDER_DOC));
+
             caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                 authorisation,
                 caseData,
@@ -641,6 +668,9 @@ public class ManageOrdersController {
                 .legalAdviserList(JudgeOrLegalAdvisorCheckEnum.legalAdvisor
                                       .equals(caseData.getManageOrders().getAmendOrderSelectJudgeOrLa())
                                       ? caseData.getManageOrders().getNameOfLaToReviewOrder() : null)
+                .legalAdviser(JudgeOrLegalAdvisorCheckEnum.legalAdvisor
+                                      .equals(caseData.getManageOrders().getAmendOrderSelectJudgeOrLa())
+                                      ? caseData.getManageOrders().getLegalAdviserToReviewOrder() : null)
                 .build();
 
             roleAssignmentService.createRoleAssignment(
@@ -718,7 +748,7 @@ public class ManageOrdersController {
                 caseDataUpdated.putAll(manageOrderService.getOrderToAmendDownloadLink(caseData));
             }
 
-            caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
+            caseDataUpdated.put("loggedInUserType", userRoleService.getLoggedInUserType(authorisation));
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new InvalidClientException(INVALID_CLIENT));
@@ -756,6 +786,7 @@ public class ManageOrdersController {
                         caseData,
                         PrlAppsConstants.ENGLISH
                     ));
+                    caseDataUpdated.remove(CURRENT_ORDER_A_DRAFT_ORDER);
                 }
                 CaseData modifiedCaseData = objectMapper.convertValue(
                     caseDataUpdated,
@@ -829,6 +860,7 @@ public class ManageOrdersController {
                 // Clear custom order fields when a different option is selected
                 // This prevents stale data from a cancelled custom order flow affecting other flows
                 caseDataUpdated.put(CUSTOM_ORDER_DOC, null);
+                caseDataUpdated.put(CUSTOM_ORDER_NAME_OPTION, null);
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -861,18 +893,11 @@ public class ManageOrdersController {
         @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
-            caseDataUpdated.put(
-                "nameOfLaToReviewOrder",
-                DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
-                    .build()
-            );
 
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             ResponseEntity.BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.OK);
             if (objectMapper.convertValue(
-                    caseDataUpdated.get(IS_INVOKED_FROM_TASK),
+                callbackRequest.getCaseDetails().getData().get(IS_INVOKED_FROM_TASK),
                     new TypeReference<YesOrNo>() {
                     }
                 )
@@ -895,7 +920,7 @@ public class ManageOrdersController {
                     .orElseGet(ResponseEntity::ok);
             }
             return responseBuilder.body(AboutToStartOrSubmitCallbackResponse.builder()
-                                            .data(caseDataUpdated)
+                                            .data(callbackRequest.getCaseDetails().getData())
                                             .build());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -912,7 +937,7 @@ public class ManageOrdersController {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             List<String> errorList = new ArrayList<>();
-            String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+            String loggedInUserType = userRoleService.getLoggedInUserType(authorisation);
 
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
                 //SDO - hearing screen validations
@@ -1046,8 +1071,10 @@ public class ManageOrdersController {
             }
         }
 
-        // Check if this is a custom order - customOrderDoc being present is the indicator
-        boolean isCustomOrder = callbackData.get(CUSTOM_ORDER_DOC) != null;
+        // Check if this is a custom order by looking at performingAction in the callback data (this reflects the
+        // 'contents' page 1 option)
+        // We can't use any custom orders fields as they are sticky (persisted from previous orders)
+        boolean isCustomOrder = createCustomOrder.getDisplayedValue().equals(callbackData.get(WA_PERFORMING_ACTION));
         if (isCustomOrder) {
             // Copy customOrderDateEnds to fl404CustomFields for FL404/FL404A/FL406 custom orders
             copyCustomOrderDateEndsToFl404(callbackData, caseDataUpdated);
@@ -1147,7 +1174,7 @@ public class ManageOrdersController {
 
     private void processCustomOrder(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
         // Determine if this is a draft order based on user type and settings
-        String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+        String loggedInUserType = userRoleService.getLoggedInUserType(authorisation);
         Object amendCheckObj = caseDataUpdated.get(AMEND_ORDER_SELECT_CHECK_OPTIONS);
         AmendOrderCheckEnum amendCheck;
         if (amendCheckObj != null) {

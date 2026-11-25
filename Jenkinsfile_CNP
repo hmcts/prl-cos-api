@@ -7,7 +7,7 @@ properties([
   pipelineTriggers([[$class: 'GitHubPushTrigger']])
 ])
 
-@Library("Infrastructure")
+@Library("Infrastructure@2.14.0")
 
 def type = "java"
 def product = "prl"
@@ -64,8 +64,7 @@ def secrets = [
       secret("idam-solicitor-username", "IDAM_SOLICITOR_USERNAME"),
       secret("idam-solicitor-password", "IDAM_SOLICITOR_PASSWORD"),
       secret("send-grid-api-key", "SEND_GRID_API_KEY"),
-      secret("rpa-notify-to-email", "RPA_NOTIFY_TO_EMAIL"),
-      secret("rpa-notify-from-email", "RPA_NOTIFY_FROM_EMAIL"),
+      secret("rpa-notify-from-email", "SEND_GRID_FROM_EMAIL"),
       secret("cafcass-svc-username", "CAFCASS_USERNAME"),
       secret("cafcass-svc-password", "CAFCASS_PASSWORD"),
       secret("citizen-user", "IDAM_CITIZEN_USERNAME"),
@@ -78,7 +77,8 @@ def secrets = [
       secret('judge-testuser-one', 'JUDGE_USER_NAME'),
       secret('judge-testpassword', 'JUDGE_PASSWORD'),
       secret("courtadmin-swansea-testuser", "IDAM_COURT_ADMIN_USERNAME"),
-      secret("courtadmin-swansea-testuser-password", "IDAM_COURT_ADMIN_PASSWORD")
+      secret("courtadmin-swansea-testuser-password", "IDAM_COURT_ADMIN_PASSWORD"),
+      secret("docmosis-api-key", "DOCMOSIS_ACCESS_KEY")
    ]
 ]
 

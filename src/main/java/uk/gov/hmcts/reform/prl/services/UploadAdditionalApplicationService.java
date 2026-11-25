@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -120,23 +121,19 @@ public class UploadAdditionalApplicationService {
 
     private static final String CAT_AWP_APPLICANT   = "applicationsWithinProceedings";
     private static final String CAT_AWP_RESPONDENT = "applicationsWithinProceedingsRes";
-    private static final String CAT_AWP_UNDEFINED = "undefined";
+    private static final String CAT_AWP_OTHER = "applicationsFromOtherProceedings";
 
     private String categoryForParty(String raw) {
         return switch (raw.toLowerCase(Locale.ENGLISH)) {
             case "applicant" -> CAT_AWP_APPLICANT;
             case "respondent" -> CAT_AWP_RESPONDENT;
-            default -> CAT_AWP_UNDEFINED;
+            default -> CAT_AWP_OTHER;
         };
     }
 
     private static Document withCategory(Document doc, String categoryId) {
-        if (categoryId.equals(CAT_AWP_UNDEFINED)) {
-            return doc; // if no category play safe and don't add a default
-        }
         if (doc == null) {
-            throw new IllegalArgumentException(
-                "Document cannot be null");
+            return null;
         } else {
             return doc.toBuilder().categoryId(categoryId).build();
         }
@@ -397,11 +394,18 @@ public class UploadAdditionalApplicationService {
             OtherApplicationsBundle temporaryOtherApplicationsBundle = caseData.getUploadAdditionalApplicationData()
                 .getTemporaryOtherApplicationsBundle();
             applicationType = uploadAdditionalApplicationUtils.getOtherApplicationType(temporaryOtherApplicationsBundle);
+            String category = "";
+            log.info("Inside mapping solicitor journey other AWP category before if {}", category);
+            category = getCategoryTypeByPartyName(partyName);
+
+            log.info("Inside mapping solicitor journey other AWP category after if {}", category);
+            String cat = categoryForParty(category);
+            log.info("Inside mapping solicitor journey other AWP upload, final value for category is {}", cat);
             otherApplicationsBundle = OtherApplicationsBundle.builder()
                 .author(author)
                 .uploadedDateTime(currentDateTime)
                 .applicantName(partyName)
-                .finalDocument(List.of(element(temporaryOtherApplicationsBundle.getDocument())))
+                .finalDocument(List.of(element(withCategory(temporaryOtherApplicationsBundle.getDocument(), cat))))
                 .documentRelatedToCase(CollectionUtils.isNotEmpty(temporaryOtherApplicationsBundle.getDocumentAcknowledge())
                                            ? Yes : No)
                 .urgency(null != temporaryOtherApplicationsBundle.getUrgencyTimeFrameType()
@@ -412,7 +416,8 @@ public class UploadAdditionalApplicationService {
                 ))
                 .supportingEvidenceBundle(createSupportingEvidenceBundle(
                     temporaryOtherApplicationsBundle.getSupportingEvidenceBundle(),
-                    author
+                    author,
+                    cat
                 ))
                 .applicationType(applicationType)
                 .build();
@@ -425,13 +430,7 @@ public class UploadAdditionalApplicationService {
         if (caseData.getUploadAdditionalApplicationData().getTemporaryC2Document() != null) {
             String category = "";
             log.info("Inside mapping solicitor journey C2 category before if {}", category);
-            if (StringUtils.isNotEmpty(partyName) && partyName.toLowerCase().contains("applicant")) {
-                category = "applicant";
-            } else if (StringUtils.isNotEmpty(partyName) && partyName.toLowerCase().contains("respondent")) {
-                category = "respondent";
-            } else {
-                category = "undefined";
-            }
+            category = getCategoryTypeByPartyName(partyName);
 
             log.info("Inside mapping solicitor journey C2 category after if {}", category);
             String cat = categoryForParty(category);
@@ -456,7 +455,8 @@ public class UploadAdditionalApplicationService {
                     .supplementsBundle(createSupplementsBundle(temporaryC2Document.getSupplementsBundle(), author))
                     .supportingEvidenceBundle(createSupportingEvidenceBundle(
                         temporaryC2Document.getSupportingEvidenceBundle(),
-                        author
+                        author,
+                        cat
                     ))
                     .c2ApplicationDetails(C2ApplicationDetails.builder()
                                               .consent(C2ApplicationTypeEnum.applicationWithNotice.equals(
@@ -475,6 +475,18 @@ public class UploadAdditionalApplicationService {
             }
         }
         return c2DocumentBundle;
+    }
+
+    private static @NonNull String getCategoryTypeByPartyName(String partyName) {
+        String category;
+        if (StringUtils.isNotEmpty(partyName) && partyName.toLowerCase().contains("applicant")) {
+            category = "applicant";
+        } else if (StringUtils.isNotEmpty(partyName) && partyName.toLowerCase().contains("respondent")) {
+            category = "respondent";
+        } else {
+            category = "undefined";
+        }
+        return category;
     }
 
     private List<CombinedC2AdditionalOrdersRequested> getReasonsForApplication(C2DocumentBundle temporaryC2Document) {
@@ -513,13 +525,14 @@ public class UploadAdditionalApplicationService {
     }
 
     private List<Element<SupportingEvidenceBundle>> createSupportingEvidenceBundle(List<Element<SupportingEvidenceBundle>> supportingEvidenceBundle,
-                                                                                   String author) {
+                                                                                   String author,
+                                                                                   String cat) {
         List<Element<SupportingEvidenceBundle>> supportingElementList = new ArrayList<>();
         if (supportingEvidenceBundle != null && !supportingEvidenceBundle.isEmpty()) {
             for (Element<SupportingEvidenceBundle> supportingEvidenceBundleElement : supportingEvidenceBundle) {
                 SupportingEvidenceBundle supportingEvidence = SupportingEvidenceBundle.builder()
                     .dateTimeUploaded(LocalDateTime.now())
-                    .document(supportingEvidenceBundleElement.getValue().getDocument())
+                    .document(withCategory(supportingEvidenceBundleElement.getValue().getDocument(), cat))
                     .notes(supportingEvidenceBundleElement.getValue().getNotes())
                     .name(supportingEvidenceBundleElement.getValue().getName())
                     .documentRelatedToCase(CollectionUtils.isNotEmpty(supportingEvidenceBundleElement.getValue().getDocumentAcknowledge())

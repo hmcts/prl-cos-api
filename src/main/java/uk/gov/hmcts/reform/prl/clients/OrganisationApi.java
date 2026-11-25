@@ -1,10 +1,13 @@
 package uk.gov.hmcts.reform.prl.clients;
 
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.FeignClientProperties;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
 import uk.gov.hmcts.reform.prl.models.OrganisationUser;
 import uk.gov.hmcts.reform.prl.models.Organisations;
@@ -51,5 +54,12 @@ public interface OrganisationApi {
         @RequestHeader(AUTHORIZATION) String authorisation,
         @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorization,
         @RequestHeader("UserEmail") final String email
+    );
+
+    @GetMapping("/refdata/internal/v1/organisations/orgDetails/{userId}")
+    Organisations getOrganisationByUserId(
+        @RequestHeader(AUTHORIZATION) String authorisation,
+        @RequestHeader(CoreCaseDataApi.SERVICE_AUTHORIZATION) String serviceAuthorization,
+        @PathVariable("userId") @NotBlank String userId
     );
 }

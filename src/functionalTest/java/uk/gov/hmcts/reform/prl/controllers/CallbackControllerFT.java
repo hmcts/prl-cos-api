@@ -4,7 +4,7 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,6 @@ public class CallbackControllerFT {
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
-
     private static final String MIAM_VALIDATION_REQUEST_ERROR = "requests/call-back-controller-miam-request-error.json";
     private static final String MIAM_VALIDATION_REQUEST_NO_ERROR = "requests/call-back-controller-miam-request-no-error.json";
     private static final String C100_GENERATE_DRAFT_DOC = "requests/call-back-controller-generate-save-doc.json";
@@ -42,7 +41,7 @@ public class CallbackControllerFT {
     private static final String C100_UPDATE_APPLICATION = "requests/call-back-controller-update-application.json";
     private static final String C100_WITHDRAW_APPLICATION = "requests/call-back-controller-withdraw-application.json";
     private static final String C100_SEND_TO_GATEKEEPER = "requests/call-back-controller-send-to-gatekeeper.json";
-    private static final String C100_RESEND_RPA = "requests/call-back-controller-resend-rpa.json";
+    private static final String C100_COURT_ALLOCATION = "requests/call-back-controller-court-allocation.json";
     private static final String FL401_ABOUT_TO_SUBMIT_CREATION = "requests/call-back-controller-about-to-submit-case-creation.json";
     private static final String FL401_CASE_DATA = "requests/call-back-controller-fl401-case-data.json";
     private static final String C100_SEND_TO_GATEKEEPERJUDGE = "requests/call-back-controller-send-to-gatekeeperForJudge.json";
@@ -54,7 +53,6 @@ public class CallbackControllerFT {
         );
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
-
 
     @Test
     public void givenMiamAttendance_whenPostRequestToMiamValidatation_then200ResponseAndNoErrors() throws Exception {
@@ -168,8 +166,8 @@ public class CallbackControllerFT {
             .as(CaseDetails.class);
 
         log.info("givenC100Case_whenCaseWithdrawnEndpoint_then200ResponseAndDataContainsUpdatedTabData caseId:" + caseDetails.getId());
-        Assert.assertNotNull(caseDetails);
-        Assert.assertNotNull(caseDetails.getId());
+        Assertions.assertNotNull(caseDetails);
+        Assertions.assertNotNull(caseDetails.getId());
 
         String withdrawRequestBody = ResourceLoader.loadJson(C100_WITHDRAW_APPLICATION);
         RequestSpecification requestB = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
@@ -207,25 +205,6 @@ public class CallbackControllerFT {
     }
 
     @Test
-    public void givenC100Case_whenRpaResent_then200Response() throws Exception {
-        String requestBody = ResourceLoader.loadJson(C100_RESEND_RPA);
-        request
-            .header("Content-Type", APPLICATION_JSON_VALUE)
-            .header("Accepts", APPLICATION_JSON_VALUE)
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType(APPLICATION_JSON_VALUE)
-            .post("/update-party-details")
-            .then()
-            .assertThat().statusCode(200)
-            .body("data.caseTypeOfApplication", equalTo("C100"),
-                  "data.caApplicant1Policy.OrgPolicyCaseAssignedRole",  equalTo("[C100APPLICANTSOLICITOR1]"),
-                  "data.caRespondent1Policy.OrgPolicyCaseAssignedRole",  equalTo("[C100RESPONDENTSOLICITOR1]"));
-    }
-
-    @Test
     public void givenFl401Case_whenAboutToSubmitCaseCreation_then200ResponseAndApplicantNameUpdated() throws Exception {
         String requestBody = ResourceLoader.loadJson(FL401_ABOUT_TO_SUBMIT_CREATION);
         request
@@ -247,7 +226,7 @@ public class CallbackControllerFT {
 
     @Test
     public void givenC100CasePrePopulateCourtDetailsWithValidCourt() throws Exception {
-        String requestBody = ResourceLoader.loadJson(C100_RESEND_RPA);
+        String requestBody = ResourceLoader.loadJson(C100_COURT_ALLOCATION);
         request
             .header("Content-Type", APPLICATION_JSON_VALUE)
             .header("Accepts", APPLICATION_JSON_VALUE)
@@ -266,7 +245,7 @@ public class CallbackControllerFT {
 
     @Test
     public void givenC100CasePrePopulateCourtDetailsWithoutValidCourt() throws Exception {
-        String requestBody = ResourceLoader.loadJson(C100_RESEND_RPA);
+        String requestBody = ResourceLoader.loadJson(C100_COURT_ALLOCATION);
         request
             .header("Content-Type", APPLICATION_JSON_VALUE)
             .header("Accepts", APPLICATION_JSON_VALUE)
@@ -279,7 +258,6 @@ public class CallbackControllerFT {
             .then()
             .assertThat().statusCode(200)
             .body("data.caseTypeOfApplication", equalTo("C100"));
-
 
     }
 
@@ -339,6 +317,5 @@ public class CallbackControllerFT {
                   "data.manageDocumentsTriggeredBy", equalTo(STAFF));
 
     }
-
 
 }

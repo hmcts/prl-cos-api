@@ -70,18 +70,20 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 public class ManageOrdersUtils {
 
     private static final String[] HEARING_ORDER_IDS_NEED_SINGLE_HEARING =
-        {"noticeOfProceedingsParties","noticeOfProceedingsNonParties","noticeOfProceedings"};
+        {"noticeOfProceedingsParties","noticeOfProceedingsNonParties","noticeOfProceedings", "noticeOfHearingParties",
+            "noticeOfHearing"};
     private static final String[] VALID_ORDER_IDS_FOR_C100 = {"blankOrderOrDirections", "childArrangementsSpecificProhibitedOrder",
         "parentalResponsibility", "specialGuardianShip", "noticeOfProceedingsParties", "noticeOfProceedingsNonParties",
         "appointmentOfGuardian", "directionOnIssue", "standardDirectionsOrder"};
 
     private static final String[] VALID_ORDER_IDS_FOR_FL401 = {"nonMolestation", "occupation", "amendDischargedVaried",
-        "blank", "powerOfArrest", "generalForm", "noticeOfProceedings"};
+        "blank", "powerOfArrest", "generalForm", "noticeOfProceedings", "noticeOfHearing"};
     private static final String BOLD_BEGIN = "<span class='heading-h3'>";
     private static final String BOLD_END = "</span>";
 
     public static final String[] PROHIBITED_ORDER_IDS_FOR_SOLICITORS = {"noticeOfProceedings","noticeOfProceedingsParties",
-        "noticeOfProceedingsNonParties", "standardDirectionsOrder","directionOnIssue"};
+        "noticeOfProceedingsNonParties", "standardDirectionsOrder","directionOnIssue", "noticeOfHearingParties",
+        "noticeOfHearing"};
 
     public static List<String> getHearingScreenValidations(List<Element<HearingData>> ordersHearingDetails,
                                                            CreateSelectOrderOptionsEnum selectedOrderType,
@@ -611,12 +613,14 @@ public class ManageOrdersUtils {
                 && Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder()))) {
                 isOrderEdited = true;
             }
-        } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
-            .equalsIgnoreCase(eventId) && (caseData.getManageOrders() != null
-            && (OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe
-            .equals(caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin())
-            || OrderApprovalDecisionsForSolicitorOrderEnum.editTheOrderAndServe
-            .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor())))) {
+        } else if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+            && (caseData.getManageOrders() != null
+            && ((No.equals(caseData.getManageOrders().getIsOrderCreatedBySolicitor())
+                && OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe.equals(
+                    caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin()))
+            || (Yes.equals(caseData.getManageOrders().getIsOrderCreatedBySolicitor())
+                && OrderApprovalDecisionsForSolicitorOrderEnum.editTheOrderAndServe.equals(
+                    caseData.getManageOrders().getWhatToDoWithOrderSolicitor()))))) {
             isOrderEdited = true;
         } else if (Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(eventId)) {
             isOrderEdited = true;//default true for edit returned order

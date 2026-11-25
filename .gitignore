@@ -47,3 +47,4 @@ target/
 
 .aat-env*
 .devcontainer/
+/.run-coverage-on-commit

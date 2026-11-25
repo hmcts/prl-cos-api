@@ -101,6 +101,7 @@ To maintain our 80% coverage standard and reduce CI/CD feedback loops, this proj
 By default, local commits remain fast. You can "Opt-In" to the coverage gate so it runs automatically every time you hit commit.
 
 Note on Workflow: By default, the Quality Gate is DISABLED to keep your local development fast. We recommend enabling it `gate-on` when working on feature-complete code to catch coverage gaps early and avoid CI failures.
+
 ### 📊 Local Coverage Reports
 Run these commands to get instant, color-coded coverage feedback in your terminal:
 
@@ -109,6 +110,8 @@ Check Specific Class: `./gradlew testWithCoverage -Ptarget=MyClassName`
 Check Multiple Classes: `./gradlew testWithCoverage -Ptarget=ClassA,ClassB`
 
 > Note: The "Targeted" mode provides a line-by-line breakdown of missed instructions and branches.
+>
+> Note: The local coverage score is a JaCoCo/diff approximation intended to catch obvious gaps before CI. It reports covered units as executable lines plus conditions. Sonar remains the authoritative CI score, so very small percentage differences can occur.
 >
 🕹️ Control Aliases
 To make toggling the gate easy, add these to your shell profile (~/.zshrc or ~/.bash_profile):
@@ -137,15 +140,15 @@ The "Emergency" Skip: If the gate is ON but you need to bypass it for a single c
 UI Refresh: If you toggle the gate in the terminal and IntelliJ doesn't seem to notice, right-click the project root and select "Reload from Disk".
 
 ### ⚓ Git Pre-commit Hook (Opt-In)
-A Git Pre-commit Hook is included to prevent "Red" builds in SonarQube. By default, local commits remain fast and skip the coverage check.
+The shared coverage plugin provides a Git pre-commit hook installer to help prevent "Red" builds in SonarQube. By default, local commits remain fast and skip the coverage check.
 
-* **Installation:** Automatically installed/updated when you run `./gradlew build`.
+* **Installation:** Run `./gradlew installCoverageGateHook` to install or refresh the local hook.
+* **Enable the gate:** Run `gate-on`. Commits will then run `./gradlew testWithCoverage`.
+* **Disable the gate:** Run `gate-off`. Commits will skip the local coverage check.
 * The "Emergency" Skip: If the gate is ON but you need to bypass it for a single commit (e.g., a README typo), click the Gear Icon ⚙️ in the Commit window and uncheck "Run Git hooks".
 
 UI Refresh: If you toggle the gate and IntelliJ doesn't notice, right-click the project root and select "Reload from Disk".
-* **How to Run:** To verify your coverage during a commit, set the `VERIFY_COVERAGE` flag:
-  ```bash
-  VERIFY_COVERAGE=true git commit -m "My verified feature"
+
 There is no need to remove postgres and java or similar core images.
 
 ### Troubleshooting & Performance
@@ -155,7 +158,7 @@ JVM Crashes (Apple Silicon): If you encounter a SIGSEGV during the coverage task
 `./gradlew build -Dorg.gradle.jvmargs="-XX:-TieredCompilation"`
 
 Manual Refresh: If the hook isn't firing as expected, you can force a fresh installation of the logic with:
-`./gradlew installGitHooks`
+`./gradlew installCoverageGateHook`
 
 ### Managing Preview environment PODs
 Make sure you have added the label 'enable_keep_helm' while creating the PR. Otherwise, add the label and re-trigger the build.
@@ -168,6 +171,26 @@ No changes are needed in this repository, and everything will be set automatical
 ### If your ticket includes changes in the prl-ccd-definition
 Create a new label in lines of `"pr-defs:pr-2878` # Replace `2878` with the PR number of the prl-ccd-definition update you want to test against this repo
 
+## Running Functional Tests Locally
+It's possible to run functional tests locally against your local prl-cos-api instance. To do this you'll need to run the following
+
+Spin up a local instance of prl-cos-api with the following command:
+`./gradlew bootWithCCD`
+
+Afterwords in a different Terminal window or within IntelliJ you can run the functional tests with the following command:
+`./gradlew localFunctionalTests`
+
+You'll get a report of the functional tests in the `build/reports/tests/test/index.html` file.
+This method also allows for individual functional tests to be run as long as bootWithCCD is running in the background.
+
+## Running Functional Tests against AAT
+Just need to set the TEST_URL
+eg:
+export TEST_URL=http://prl-cos-aat.service.core-compute-aat.internal
+export test_environment=aat
+./gradlew localFunctionalTests --tests "*CitizenCaseUpdateControllerFunctionalTest*" --rerun-tasks
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+

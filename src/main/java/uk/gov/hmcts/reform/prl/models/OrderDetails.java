@@ -40,6 +40,7 @@ public class OrderDetails {
     private final YesOrNo isTheOrderAboutAllChildren;
     private final String childrenList;
     private final YesOrNo orderClosesCase;
+    private final YesOrNo checkIsThisUrgent;
     private final Document orderDocument;
     private final Document orderDocumentWelsh;
     private final OtherOrderDetails otherDetails;
@@ -81,6 +82,8 @@ public class OrderDetails {
 
     //PRL-6046 - persist FL404 order data fields
     private FL404 fl404CustomFields;
+
+    private final YesOrNo miamForOrder;
 
     @JsonIgnore
     public String getLabelForDynamicList() {

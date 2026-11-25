@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.HearingChannelsEnum;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.HearingTypeEnum;
 import uk.gov.hmcts.reform.prl.mapper.hearingrequest.HearingRequestDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.HearingDateTimeOption;
@@ -114,6 +115,22 @@ public class HearingDataService {
     public static final String APPLICANT = "(Applicant)";
     public static final String APPLICANT_1 = "(Applicant1)";
     public static final String RESPONDENT_1 = "(Respondent1)";
+    private static final String HOURS = "hours";
+    private static final String HOUR = "hour";
+    private static final String MINUTES = "minutes";
+    private static final String MINUTE = "minute";
+    private static final Map<String, String> WELSH_TRANSLATIONS = Map.of(
+        HOURS, " oriau",
+        HOUR, " awr",
+        MINUTES, " munudau",
+        MINUTE, " munud"
+    );
+    private static final Map<String, String> ENGLISH_TRANSLATIONS = Map.of(
+        HOURS, " hours",
+        HOUR, " hour",
+        MINUTES, " minutes",
+        MINUTE, " minute"
+    );
     private final RefDataUserService refDataUserService;
 
     private final HearingService hearingService;
@@ -126,7 +143,6 @@ public class HearingDataService {
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     DateTimeFormatter customDateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
-
 
     public HearingDataPrePopulatedDynamicLists populateHearingDynamicLists(String authorisation, String caseReferenceNumber,
                                                                            CaseData caseData, Hearings hearings) {
@@ -730,21 +746,35 @@ public class HearingDataService {
             LocalDateTime ldt = CaseUtils.convertUtcToBst(hearingDaySchedule
                                                               .getHearingStartDateTime());
             log.info("hearing start date time after converting to bst - {}", ldt);
-
             return element(HearingDataFromTabToDocmosis.builder()
                                .hearingEstimatedDuration(getHearingDuration(
                                    hearingDaySchedule.getHearingStartDateTime(),
                                    hearingDaySchedule.getHearingEndDateTime()
-                               )).hearingType(hearingType)
+                               ))
+                               .hearingEstimatedDurationInWelsh(getHearingDurationWelsh(
+                                   hearingDaySchedule.getHearingStartDateTime(),
+                                   hearingDaySchedule.getHearingEndDateTime()
+                               ))
+                               .hearingType(hearingType)
+                               .hearingTypeInWelsh(HearingTypeEnum.getDisplayedValueInWelshFromDisplayValueString(hearingType))
                                .hearingDate(hearingDaySchedule.getHearingStartDateTime().format(dateTimeFormatter))
                                .hearingLocation(hearingDaySchedule.getHearingVenueName() + ", " + hearingDaySchedule.getHearingVenueAddress())
                                .hearingTime(CaseUtils.convertLocalDateTimeToAmOrPmTime(ldt))
-                               .hearingArrangementsFromHmc(getHearingArrangementsData(hearingDaySchedules, caseData))
+                               .hearingArrangementsFromHmc(getHearingArrangementsData(hearingDaySchedules, caseData, false))
+                               .hearingArrangementsFromHmcInWelsh(getHearingArrangementsData(hearingDaySchedules, caseData, true))
                                .build());
         }).toList();
     }
 
     private String getHearingDuration(LocalDateTime start, LocalDateTime end) {
+        return generateHearingDurationText(start, end, ENGLISH_TRANSLATIONS);
+    }
+
+    private String getHearingDurationWelsh(LocalDateTime start, LocalDateTime end) {
+        return generateHearingDurationText(start, end, WELSH_TRANSLATIONS);
+    }
+
+    private String generateHearingDurationText(LocalDateTime start, LocalDateTime end, Map translations) {
         long minutes = Duration.between(start.toLocalTime(), end.toLocalTime()).toMinutes();
         long durationInHours = (minutes / 60);
         long durationInMinutes = (minutes % 60);
@@ -752,9 +782,9 @@ public class HearingDataService {
         if (durationInHours > 0) {
             durationInText = durationInText.append(durationInHours);
             if (durationInHours > 1) {
-                durationInText = durationInText.append(" hours");
+                durationInText = durationInText.append(translations.get(HOURS));
             } else {
-                durationInText = durationInText.append(" hour");
+                durationInText = durationInText.append(translations.get(HOUR));
             }
         }
         if (durationInMinutes > 0) {
@@ -763,9 +793,9 @@ public class HearingDataService {
             }
             durationInText = durationInText.append(durationInMinutes);
             if (durationInMinutes > 1) {
-                durationInText = durationInText.append(" minutes");
+                durationInText = durationInText.append(translations.get(MINUTES));
             } else {
-                durationInText = durationInText.append(" minute");
+                durationInText = durationInText.append(translations.get(MINUTE));
             }
         }
         return durationInText.toString();
@@ -776,15 +806,21 @@ public class HearingDataService {
             .findFirst();
     }
 
-    private DynamicList getHearingArrangementsData(List<HearingDaySchedule> hearingDaySchedules, CaseData caseData) {
+    private DynamicList getHearingArrangementsData(List<HearingDaySchedule> hearingDaySchedules, CaseData caseData, boolean isWelsh) {
         DynamicList dynamicList = DynamicList.builder().build();
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         for (Attendee attendee : hearingDaySchedules.get(0).getAttendees()) {
             String partyName = CaseUtils.getPartyFromPartyId(attendee.getPartyID(), caseData);
             if (!partyName.isBlank() && null != attendee.getHearingSubChannel()) {
-                dynamicListElements.add(DynamicListElement.builder().code(partyName)
-                                            .label(HearingChannelsEnum.getValue(attendee.getHearingSubChannel()).getDisplayedValue())
-                                            .build());
+                if (isWelsh) {
+                    dynamicListElements.add(DynamicListElement.builder().code(partyName)
+                                                .label(HearingChannelsEnum.getValue(attendee.getHearingSubChannel()).getDisplayedValueWelsh())
+                                                .build());
+                } else {
+                    dynamicListElements.add(DynamicListElement.builder().code(partyName)
+                                                .label(HearingChannelsEnum.getValue(attendee.getHearingSubChannel()).getDisplayedValue())
+                                                .build());
+                }
             }
         }
         dynamicList.setListItems(dynamicListElements);

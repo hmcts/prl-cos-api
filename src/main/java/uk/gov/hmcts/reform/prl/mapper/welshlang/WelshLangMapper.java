@@ -171,6 +171,11 @@ public class WelshLangMapper {
         welshMap.put(Gender.male.getDisplayedValue(), "Gwryw");
         welshMap.put(Gender.other.getDisplayedValue(), "Maent yn uniaethu mewn rhyw ffordd arall");
 
+        welshMap.put("liveInRefuge_Yes", "Ydy");
+        welshMap.put("liveInRefuge_No", "Nac ydy");
+        welshMap.put("liveInRefuge_IDontKnow", "Dw i ddim yn gwybod");
+
+        welshMap.put("watermark_DRAFT", "DRAFFT");
         /**
          *  Type of Application - What order(s) are you applying for?.
          */
@@ -1022,6 +1027,12 @@ public class WelshLangMapper {
         welshMap.put(Gender.female.getDisplayedValue(), "Benywaidd");
         welshMap.put(Gender.male.getDisplayedValue(), "Gwrywaidd");
         welshMap.put(Gender.other.getDisplayedValue(), "Hunaniaeth ryweddol arall");
+
+        welshMap.put("liveInRefuge_Yes", "Ydy");
+        welshMap.put("liveInRefuge_No", "Nac ydy");
+        welshMap.put("liveInRefuge_IDontKnow", "Dw i ddim yn gwybod");
+
+        welshMap.put("watermark_DRAFT", "DRAFFT");
 
         /**
          * FL401 Type of Application.

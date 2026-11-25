@@ -76,7 +76,6 @@ public class CustomOrderService {
     private static final String APPLICANT_NAME = "applicantName";
     private static final java.time.format.DateTimeFormatter DATE_FORMATTER =
         java.time.format.DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
-
     private final ObjectMapper objectMapper;
     private final AuthTokenGenerator authTokenGenerator;
     private final HearingDataService hearingDataService;
@@ -2134,8 +2133,10 @@ public class CustomOrderService {
                 updateFinalOrderCollection(caseData, caseDataUpdated, finalDoc, orderName);
             }
 
-            // Clean up previewOrderDoc now that we've used it
+            // Clean up previewOrderDoc and customOrderDoc now that we've used them
+            // This prevents stale data affecting subsequent order flows
             caseDataUpdated.put("previewOrderDoc", null);
+            caseDataUpdated.put(CUSTOM_ORDER_DOC, null);
 
         } catch (Exception e) {
             log.error("Failed to process custom order in submitted callback", e);

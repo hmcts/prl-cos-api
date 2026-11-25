@@ -27,15 +27,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_UPPER_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getWaMapper;
-
 
 @Slf4j
 public class CommonUtils {
@@ -228,6 +229,18 @@ public class CommonUtils {
         return null;
     }
 
+    public static Optional<LocalDate> parseDate(String dateStr) {
+        if (dateStr == null || dateStr.isBlank()) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(LocalDate.parse(dateStr));
+        } catch (Exception e) {
+            log.warn("Failed to parse date: {}", dateStr);
+            return Optional.empty();
+        }
+    }
+
     public static String formatDateTime(String pattern, LocalDateTime localDateTime) {
         try {
             if (null != localDateTime) {
@@ -270,5 +283,16 @@ public class CommonUtils {
                 .getTaskData()
                 .getAdditionalProperties()
                 .getMessageIdentifier()).orElse(null);
+    }
+
+    public static String getBundleDateTime(LocalDateTime bundleDateTime) {
+        StringBuilder newBundleDateTime = new StringBuilder();
+        LocalDateTime ldt = CaseUtils.convertUtcToBst(bundleDateTime);
+
+        return newBundleDateTime
+            .append(ldt.format(DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH)))
+            .append(EMPTY_SPACE_STRING)
+            .append(CaseUtils.convertLocalDateTimeToAmOrPmTime(ldt))
+            .toString();
     }
 }

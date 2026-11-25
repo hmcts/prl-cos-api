@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.BundleApiClient;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.mapper.bundle.BundleCreateRequestMapper;
+import uk.gov.hmcts.reform.prl.mapper.bundle.IBundleCreateRequestMapper;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -16,13 +16,14 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
+import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BundlingService {
     private final BundleApiClient bundleApiClient;
-    private final BundleCreateRequestMapper bundleCreateRequestMapper;
+    private final IBundleCreateRequestMapper bundleCreateRequestMapper;
     private final AuthTokenGenerator authTokenGenerator;
     private final HearingService hearingService;
 
@@ -35,8 +36,15 @@ public class BundlingService {
     public BundleCreateResponse createBundleServiceRequest(CaseData caseData,String eventId,
                                                            String authorization) {
         Hearings hearingDetails = null;
-        if (DECISION_OUTCOME.equals(caseData.getState())) {
+        if (DECISION_OUTCOME.equals(caseData.getState()) || PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())) {
             hearingDetails = hearingService.getHearings(authorization, String.valueOf(caseData.getId()));
+            log.info(
+                "Bundle creation fetched hearing details for case {}, hearingCount={}",
+                caseData.getId(),
+                hearingDetails != null && hearingDetails.getCaseHearings() != null
+                    ? hearingDetails.getCaseHearings().size()
+                    : 0
+            );
         }
         return createBundle(authorization,authTokenGenerator.generate(),
             bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(

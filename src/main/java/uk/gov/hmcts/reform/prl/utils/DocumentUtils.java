@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
@@ -41,7 +42,7 @@ public class DocumentUtils {
             .build();
     }
 
-    public static Document toCoverSheetDocument(GeneratedDocumentInfo generatedDocumentInfo, String fileName) {
+    public static Document toDocumentWithFilename(GeneratedDocumentInfo generatedDocumentInfo, String fileName) {
         if (null != generatedDocumentInfo) {
             return Document.builder().documentUrl(generatedDocumentInfo.getUrl())
                 .documentHash(generatedDocumentInfo.getHashToken())
@@ -81,12 +82,13 @@ public class DocumentUtils {
         if (wierdAttributeName == null) {
             String[] splittedCategory = StringUtils.splitByCharacterTypeCamelCase(categoryId);
             String finalCategory = "";
-
-            for (int i = 0; i < splittedCategory.length; i++) {
-                if (i == 0) {
-                    finalCategory = finalCategory.concat(splittedCategory[i].toLowerCase());
-                } else {
-                    finalCategory = finalCategory.concat(splittedCategory[i]);
+            if (nonNull(splittedCategory)) {
+                for (int i = 0; i < splittedCategory.length; i++) {
+                    if (i == 0) {
+                        finalCategory = finalCategory.concat(splittedCategory[i].toLowerCase());
+                    } else {
+                        finalCategory = finalCategory.concat(splittedCategory[i]);
+                    }
                 }
             }
             return finalCategory + "Document";

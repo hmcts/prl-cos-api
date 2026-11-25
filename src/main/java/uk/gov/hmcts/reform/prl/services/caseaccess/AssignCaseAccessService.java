@@ -1,14 +1,19 @@
 package uk.gov.hmcts.reform.prl.services.caseaccess;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CaseAssignmentApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRoleWithOrganisation;
+import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRolesRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.caseaccess.AssignCaseAccessRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -31,6 +36,8 @@ public class AssignCaseAccessService {
     private final LaunchDarklyClient launchDarklyClient;
 
     private final RoleAssignmentApi roleAssignmentApi;
+    private final SystemUserService systemUserService;
+    private final CaseAssignmentApi caseAssignmentApi;
 
 
     public void assignCaseAccess(String caseId, String authorisation) {
@@ -71,6 +78,36 @@ public class AssignCaseAccessService {
             .assigneeId(userId)
             .caseTypeId(caseTypeId)
             .build();
+    }
+
+    public void assignCaseAccessToUserWithRole(
+        String caseId,
+        String assigneeUserId,
+        String caseRole,
+        String organisationId
+    ) {
+        log.info("Assigning case {} to user {} with role {}", caseId, assigneeUserId, caseRole);
+
+        try {
+            CaseAssignmentUserRolesRequest request = CaseAssignmentUserRolesRequest.builder()
+                .caseAssignmentUserRolesWithOrganisation(List.of(
+                    CaseAssignmentUserRoleWithOrganisation.builder()
+                        .caseDataId(caseId)
+                        .userId(assigneeUserId)
+                        .caseRole(caseRole)
+                        .organisationId(organisationId)
+                        .build()
+                ))
+                .build();
+
+            caseAssignmentApi.addCaseUserRoles(
+                systemUserService.getSysUserToken(),
+                authTokenGenerator.generate(),
+                request
+            );
+        } catch (FeignException ex) {
+            log.error("Failed to assign role {} to user {} on case {}", caseRole, assigneeUserId, caseId, ex);
+        }
     }
 
 

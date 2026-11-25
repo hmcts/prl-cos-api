@@ -1,0 +1,19 @@
+{
+  "ra_typeOfHearing":[
+    "videoHearing",
+    "phoneHearing"
+  ],
+  "ra_languageNeeds":[
+    "speakInWelsh",
+    "readAndWriteInWelsh",
+    "needInterpreterInCertainLanguage"
+  ],
+  "ra_needInterpreterInCertainLanguage_subfield":"test",
+  "ra_specialArrangements":[
+    "noSafetyRequirements"
+  ],
+  "ra_intermediaryRequirements": "Yes",
+  "ra_intermediaryRequired_subfield": "test",
+  "ra_assistanceRequirements": "Yes",
+  "ra_assistanceRequirements_subfield": "test"
+}

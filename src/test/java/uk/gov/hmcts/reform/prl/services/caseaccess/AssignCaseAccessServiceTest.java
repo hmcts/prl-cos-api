@@ -8,11 +8,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CaseAssignmentApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRolesRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
 import java.util.ArrayList;
@@ -49,7 +52,11 @@ public class AssignCaseAccessServiceTest {
     @Mock
     private RoleAssignmentApi roleAssignmentApi;
 
+    @Mock
+    private SystemUserService systemUserService;
 
+    @Mock
+    private CaseAssignmentApi caseAssignmentApi;
 
     @Test
     public void testAssignCaseAccess() {
@@ -123,5 +130,18 @@ public class AssignCaseAccessServiceTest {
         roleAssignmentServiceResponse.setRoleAssignmentResponse(listOfRoleAssignmentResponses);
         return roleAssignmentServiceResponse;
     }
+
+    @Test
+    public void testAssignCaseAccessToUserWithRole() {
+        when(authTokenGenerator.generate()).thenReturn("service-token");
+        when(systemUserService.getSysUserToken()).thenReturn("sysToken");
+
+        assignCaseAccessService.assignCaseAccessToUserWithRole(
+            "42", "user-id", "[C100RESPONDENTSOLICITOR1]", "ORG123");
+
+        verify(caseAssignmentApi, times(1))
+            .addCaseUserRoles(Mockito.eq("sysToken"), Mockito.eq("service-token"), Mockito.any(CaseAssignmentUserRolesRequest.class));
+    }
+
 }
 

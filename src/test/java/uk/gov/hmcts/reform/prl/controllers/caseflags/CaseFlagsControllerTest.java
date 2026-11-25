@@ -27,14 +27,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ALL_SELECTED_FLAGS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_CASE_FLAG_TASK_CREATED;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -93,6 +94,20 @@ public class CaseFlagsControllerTest {
     }
 
     @Test
+    public void testHandleAboutToStartWhenReviewWrapperMissing() {
+        Map<String, Object> aboutToStartMap = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder().data(aboutToStartMap).id(12345L).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        CaseData caseData = CaseData.builder().id(12345L).build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        AboutToStartOrSubmitCallbackResponse response = caseFlagsController.handleAboutToStart(AUTH_TOKEN, callbackRequest);
+
+        assertTrue(((List<?>) response.getData().get(WA_ALL_SELECTED_FLAGS)).isEmpty());
+        verify(caseFlagsWaService).setSelectedFlags(any(CaseData.class));
+    }
+
+    @Test
     public void testHandleAboutToSubmitWhenCaseFlagsStatusIsRequested() {
         Map<String, Object> caseDataMap = new HashMap<>();
         FlagDetail caseLevelDetail = FlagDetail.builder().status(REQUESTED).build();
@@ -137,6 +152,23 @@ public class CaseFlagsControllerTest {
         verify(caseFlagsWaService).validateAllFlags(caseData);
         verify(caseFlagsWaService).searchAndUpdateCaseFlags(caseData, caseDataMap, mostRecentlyModified);
 
+    }
+
+    @Test
+    public void testHandleAboutToSubmitWhenNoSelectedFlagReturned() {
+        Map<String, Object> caseDataMap = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder().data(caseDataMap).id(12345L).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        CaseData caseData = CaseData.builder().id(12345L).build();
+
+        when(caseFlagsWaService.validateAllFlags(caseData)).thenReturn(null);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        AboutToStartOrSubmitCallbackResponse response = caseFlagsController.handleAboutToSubmit(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
+
+        assertEquals(1, response.getErrors().size());
+        assertEquals("No case flag selected to review", response.getErrors().getFirst());
+        verify(caseFlagsWaService, never()).searchAndUpdateCaseFlags(any(), any(), any());
     }
 
     @Test
@@ -199,55 +231,6 @@ public class CaseFlagsControllerTest {
                 .handleAboutToStartForReviewLangSm(AUTH_TOKEN, SERVICE_TOKEN, CLIENT_CONTEXT, callbackRequest);
         });
         verify(flagsService, never()).prepareSelectedReviewLangAndSmReq(Map.of(), CLIENT_CONTEXT);
-    }
-
-    @Test
-    public void testHandleAboutToSubmitForReviewLangSmEventWithErrors() {
-        List<String> errors = List.of("Please select");
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetailsBefore(
-                CaseDetails.builder()
-                    .data(Map.of())
-                    .build()
-            )
-            .caseDetails(
-                CaseDetails.builder()
-                    .data(Map.of())
-                    .build())
-            .build();
-
-        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
-        when(flagsService.validateNewFlagStatus(Map.of()))
-            .thenReturn(errors);
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = caseFlagsController
-            .handleAboutToSubmitForReviewLangSm(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
-        assertThat(aboutToStartOrSubmitCallbackResponse.getErrors()).containsAll(errors);
-        verify(flagsService, times(1)).validateNewFlagStatus(Map.of());
-    }
-
-    @Test
-    public void testHandleAboutToSubmitForReviewLangSmEventWithNoErrors() {
-        List<String> errors = new ArrayList<>();
-        Map<String, Object> caseDataMap = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().data(caseDataMap).id(12345L).build();
-        CaseData caseData = CaseData.builder()
-            .reviewRaRequestWrapper(ReviewRaRequestWrapper
-                                        .builder()
-                                        .isCaseFlagsTaskCreated(YesOrNo.No)
-                                        .build()).id(12345L).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetailsBefore(caseDetails)
-            .caseDetails(caseDetails)
-            .build();
-
-        when(authorisationService.isAuthorized(AUTH_TOKEN, SERVICE_TOKEN)).thenReturn(true);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(flagsService.validateNewFlagStatus(caseDataMap)).thenReturn(errors);
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = caseFlagsController
-            .handleAboutToSubmitForReviewLangSm(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
-        assertThat(aboutToStartOrSubmitCallbackResponse.getErrors()).containsAll(errors);
-        assertEquals(YesOrNo.No, aboutToStartOrSubmitCallbackResponse.getData().get(WA_IS_CASE_FLAG_TASK_CREATED));
-        verify(flagsService, times(1)).validateNewFlagStatus(caseDataMap);
     }
 }
 

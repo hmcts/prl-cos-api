@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.cafcass;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +22,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,6 +30,9 @@ class CafcassDateTimeServiceTest {
 
     @Mock
     private FeatureToggleService featureToggleService;
+
+    @Mock
+    private CafcassCaseDataHelper cafcassCaseDataHelper;
 
     @InjectMocks
     private CafcassDateTimeService cafcassDateTimeService;
@@ -53,9 +58,60 @@ class CafcassDateTimeServiceTest {
             .build();
 
         when(featureToggleService.isCafcassDateTimeFeatureEnabled()).thenReturn(true);
+        when(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
+            callbackRequest.getCaseDetails(),
+            callbackRequest.getCaseDetailsBefore(),
+            callbackRequest.getEventId()
+        )).thenReturn(true);
 
         Map<String, Object> actual = cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
         assertNotNull(actual.get(PrlAppsConstants.CAFCASS_DATE_TIME));
+    }
+
+    @Test
+    void shouldNotUpdateCafcassDateTimeWhenCafcassCaseDataHasNotChanged() {
+        CaseDetails caseDetails = CaseDetails.builder().data(new HashMap<>()).state("DECISION_OUTCOME").build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .eventId("manageDocumentsNew")
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
+
+        when(featureToggleService.isCafcassDateTimeFeatureEnabled()).thenReturn(true);
+        when(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
+            caseDetails,
+            caseDetails,
+            callbackRequest.getEventId()
+        )).thenReturn(false);
+
+        Map<String, Object> actual = cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
+        assertNull(actual.get(PrlAppsConstants.CAFCASS_DATE_TIME));
+    }
+
+    @Test
+    void shouldUseFallbackEventIdWhenCallbackEventIdIsBlank() {
+        CaseDetails caseDetails = CaseDetails.builder().data(new HashMap<>()).state("DECISION_OUTCOME").build();
+        CaseDetails caseDetailsBefore = CaseDetails.builder().data(new HashMap<>()).state("DECISION_OUTCOME").build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .eventId("")
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetailsBefore)
+            .build();
+
+        when(featureToggleService.isCafcassDateTimeFeatureEnabled()).thenReturn(true);
+        when(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
+            caseDetails,
+            caseDetailsBefore,
+            "childrenAndApplicants"
+        )).thenReturn(false);
+
+        Map<String, Object> actual = cafcassDateTimeService.updateCafcassDateTime(
+            callbackRequest,
+            "childrenAndApplicants"
+        );
+
+        assertNull(actual.get(PrlAppsConstants.CAFCASS_DATE_TIME));
+        verify(cafcassCaseDataHelper).hasCafcassCaseDataChanged(caseDetails, caseDetailsBefore, "childrenAndApplicants");
     }
 
     @Test
@@ -98,5 +154,46 @@ class CafcassDateTimeServiceTest {
 
         Map<String, Object> actual = cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
         assertNull(actual.get(PrlAppsConstants.CAFCASS_DATE_TIME));
+    }
+
+    @Test
+    void shouldReturnOnlyCafcassDateTimeWhenUpdated() {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .eventId("manageDocumentsNew")
+            .caseDetails(CaseDetails.builder().data(new HashMap<>()).state("DECISION_OUTCOME").build())
+            .caseDetailsBefore(CaseDetails.builder().data(new HashMap<>()).state("DECISION_OUTCOME").build())
+            .build();
+
+        when(featureToggleService.isCafcassDateTimeFeatureEnabled()).thenReturn(true);
+        when(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
+            callbackRequest.getCaseDetails(),
+            callbackRequest.getCaseDetailsBefore(),
+            callbackRequest.getEventId()
+        )).thenReturn(true);
+
+        Map<String, Object> actual = cafcassDateTimeService.updateAndGetCafcassDatetime(callbackRequest);
+
+        assertNotNull(actual.get(PrlAppsConstants.CAFCASS_DATE_TIME));
+        Assertions.assertEquals(1, actual.size());
+    }
+
+    @Test
+    void shouldReturnEmptyMapWhenCafcassDateTimeNotUpdated() {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .eventId("manageDocumentsNew")
+            .caseDetails(CaseDetails.builder().data(new HashMap<>()).state("DECISION_OUTCOME").build())
+            .caseDetailsBefore(CaseDetails.builder().data(new HashMap<>()).state("DECISION_OUTCOME").build())
+            .build();
+
+        when(featureToggleService.isCafcassDateTimeFeatureEnabled()).thenReturn(true);
+        when(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
+            callbackRequest.getCaseDetails(),
+            callbackRequest.getCaseDetailsBefore(),
+            callbackRequest.getEventId()
+        )).thenReturn(false);
+
+        Map<String, Object> actual = cafcassDateTimeService.updateAndGetCafcassDatetime(callbackRequest);
+
+        Assertions.assertTrue(actual.isEmpty());
     }
 }

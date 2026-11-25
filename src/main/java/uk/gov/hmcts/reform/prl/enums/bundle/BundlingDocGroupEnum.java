@@ -128,6 +128,12 @@ public enum BundlingDocGroupEnum {
     @JsonProperty("childImpactReport2")
     childImpactReport2("childImpactReport2", "childImpactReport2"),
 
+    @JsonProperty("enforcementOrderSuitabilityReport")
+    enforcementOrderSuitabilityReport("enforcementOrderSuitabilityReport", "enforcementOrderSuitabilityReport"),
+
+    @JsonProperty("parentalOrderReporterReport")
+    parentalOrderReporterReport("parentalOrderReporterReport", "parentalOrderReporterReport"),
+
     @JsonProperty("section7Report")
     section7Report("section7Report", "section7Report"),
 
@@ -189,7 +195,13 @@ public enum BundlingDocGroupEnum {
     fm5Statements("fm5Statements", "fm5Statements"),
 
     @JsonProperty("notRequiredGroup")
-    notRequiredGroup("notRequiredGroup", "notRequiredGroup");
+    notRequiredGroup("notRequiredGroup", "notRequiredGroup"),
+
+    @JsonProperty("applicantAWPDocuments")
+    applicantAWPDocuments("applicantAWPDocuments", "applicantAWPDocuments"),
+
+    @JsonProperty("respondentAWPDocuments")
+    respondentAWPDocuments("respondentAWPDocuments", "respondentAWPDocuments");
 
     private final String id;
     private final String displayedValue;

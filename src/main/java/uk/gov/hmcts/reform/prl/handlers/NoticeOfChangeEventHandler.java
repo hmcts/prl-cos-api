@@ -45,7 +45,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class NoticeOfChangeEventHandler {
-    public static final String PRL_LEGAL_REP_COVER_LETTER_TEMPLATE = "PRL-LEG-REP-REMOVED.docx";
+    public static final String PRL_LEGAL_REP_COVER_LETTER_TEMPLATE = "FL-PRL-LET-ENG-REP-REMOVED.docx";
     private final EmailService emailService;
     private final NoticeOfChangeContentProvider noticeOfChangeContentProvider;
     private final LaunchDarklyClient launchDarklyClient;
@@ -358,10 +358,11 @@ public class NoticeOfChangeEventHandler {
         if (isNotEmpty(party.getValue().getAddress())
             && isNotEmpty(party.getValue().getAddress().getAddressLine1())) {
             List<Document> documents = new ArrayList<>();
-            //generate cover sheets & add to documents
-            generateCoverSheets(caseData, party.getValue(), documents);
             //generate cover letter with access code & add to documents
             generateCoverLetter(caseData, party, documents, accessCode);
+
+            //generate cover sheets & add to documents
+            generateCoverSheets(caseData, party.getValue(), documents);
 
             UUID bulkPrintId = bulkPrintService.send(
                 String.valueOf(caseData.getId()),

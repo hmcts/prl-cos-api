@@ -6,15 +6,19 @@ import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
+import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
@@ -26,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamPolicyUpgradeDetails;
@@ -45,14 +50,27 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.config.DocumentGenerationExecutorVirtualConfig.DOCUMENT_EXECUTOR_SERVICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
@@ -119,6 +137,10 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     @Mock
     private C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
 
+    @Mock
+    @Qualifier(DOCUMENT_EXECUTOR_SERVICE)
+    private ExecutorService documentVirtualThreadExecutorService;
+
     @Value("${document.templates.c100.c100_draft_template}")
     protected String c100DraftTemplate;
 
@@ -133,6 +155,56 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
     public static final String AUTH_TOKEN = "Bearer TestAuthToken";
     public static final String S2S_TOKEN = "s2s AuthToken";
+
+    /**
+     * Helper method to avoid code repetition in the Docmosis parallel calls tests.
+     * Provides a successful journey of document submission.
+     * @throws Exception fetchFeeDetails and getNearestFamilyCourt can throw Exceptions.
+     */
+    private void stubSuccessfulJourney() throws Exception {
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN))
+            .thenReturn(true);
+
+        when(submitAndPayChecker.hasMandatoryCompleted(
+            any(CaseData.class)
+        )).thenReturn(true);
+
+        when(feesService.fetchFeeDetails(
+            FeeType.C100_SUBMISSION_FEE
+        )).thenReturn(feeResponse);
+
+        when(courtFinderService.getNearestFamilyCourt(
+            any(CaseData.class)
+        )).thenReturn(court);
+
+        when(userService.getUserDetails(AUTH_TOKEN))
+            .thenReturn(
+                UserDetails.builder()
+                    .forename("Test")
+                    .surname("Solicitor")
+                    .email("solicitor@test.com")
+                    .build()
+            );
+
+        when(organisationService.getApplicantOrganisationDetails(
+            any(CaseData.class)
+        )).thenReturn(caseData);
+
+        when(organisationService.getRespondentOrganisationDetails(
+            any(CaseData.class)
+        )).thenReturn(caseData);
+
+        when(documentLanguageService.docGenerateLang(
+            any(CaseData.class)
+        )).thenReturn(documentLanguage);
+
+        when(c100DocumentTemplateFinderService
+                 .findFinalDraftDocumentTemplate(
+                     any(CaseData.class),
+                     Mockito.anyBoolean()
+                 ))
+            .thenReturn("draft-template");
+    }
 
     @Before
     public void setUp() {
@@ -175,7 +247,11 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .caseDetails(caseDetails)
             .build();
 
-        generatedDocumentInfoShared = GeneratedDocumentInfo.builder().build();
+        generatedDocumentInfoShared = GeneratedDocumentInfo.builder()
+            .url("document-url")
+            .binaryUrl("document-binary-url")
+            .hashToken("document-hash")
+            .build();
 
         documentLanguage = DocumentLanguage.builder()
             .isGenEng(true)
@@ -184,6 +260,25 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
 
         when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(any(), any()))
             .thenAnswer(inv -> inv.getArgument(0));
+
+        when(documentVirtualThreadExecutorService.submit(
+            Mockito.<Callable<GeneratedDocumentInfo>>any()
+        )).thenAnswer(invocation -> {
+            Callable<GeneratedDocumentInfo> task = invocation.getArgument(0);
+            return CompletableFuture.completedFuture(task.call());
+        });
+
+        ReflectionTestUtils.setField(
+            prePopulateFeeAndSolicitorNameController,
+            "c100DraftFilename",
+            "Draft_c100_application.pdf"
+        );
+
+        ReflectionTestUtils.setField(
+            prePopulateFeeAndSolicitorNameController,
+            "c100DraftWelshFilename",
+            "Draft_c100_application_welsh.pdf"
+        );
     }
 
     @Test
@@ -222,6 +317,26 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         CaseData out = (CaseData) resp.getData();
         assertNotNull(out);
 
+        assertNotNull(out.getSubmitAndPayDownloadApplicationLink());
+        assertNotNull(out.getSubmitAndPayDownloadApplicationWelshLink());
+
+        assertEquals(
+            "Draft_c100_application.pdf",
+            out.getSubmitAndPayDownloadApplicationLink().getDocumentFileName()
+        );
+        assertEquals(
+            "Draft_c100_application_welsh.pdf",
+            out.getSubmitAndPayDownloadApplicationWelshLink().getDocumentFileName()
+        );
+        assertEquals(
+            Yes.toString(),
+            out.getIsEngDocGen()
+        );
+        assertEquals(
+            Yes.toString(),
+            out.getIsWelshDocGen()
+        );
+
         assertEquals("caseSolicitorName should match user full name",
                      concreteUser.getFullName(), out.getCaseSolicitorName());
 
@@ -232,7 +347,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     }
 
     @Test
-    public void testWhenControllerCalledOneInvokeToDgsService() throws Exception {
+    public void testWhenBothLanguagesRequestedSubmitsTwoDocumentGenerationTasks() throws Exception {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
@@ -250,8 +365,10 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(submitAndPayChecker.hasMandatoryCompleted(Mockito.any(CaseData.class))).thenReturn(true);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(AUTH_TOKEN, S2S_TOKEN,
-                                                                             callbackRequestShared
+        prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(
+            AUTH_TOKEN,
+            S2S_TOKEN,
+            callbackRequestShared
         );
         verify(dgsService, times(1)).generateDocument(
             Mockito.anyString(),
@@ -263,7 +380,8 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             Mockito.any(CaseDetails.class),
             Mockito.any()
         );
-
+        verify(documentVirtualThreadExecutorService, times(2))
+            .submit(Mockito.<Callable<GeneratedDocumentInfo>>any());
     }
 
     @Test
@@ -539,7 +657,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     }
 
     @Test
-    public void testExceptionCourtDetailsWithoutCourtName() throws Exception {
+    public void shouldReturnNoCourtFetchedWhenCourtDetailsUnavailable() throws Exception {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         CallbackRequest callbackRequest = getCallbackRequest();
@@ -585,14 +703,18 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .thenReturn(generatedDocumentInfo);
 
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class))
             .thenReturn(caseData1);
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
-        assertExpectedException(() -> {
-            prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(AUTH_TOKEN,
-                                                                                 S2S_TOKEN, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+
+        CallbackResponse response = prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(
+            AUTH_TOKEN,
+            S2S_TOKEN,
+            callbackRequest
+        );
+        CaseData result = (CaseData) response.getData();
+        assertNotNull(result);
+        assertEquals("No Court Fetched", result.getCourtName());
     }
 
     protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
@@ -644,6 +766,11 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         verify(dgsService).generateDocument(Mockito.anyString(), captor.capture(), any());
         CaseData sentToDgs = captor.getValue().getCaseData();
         assertEquals("New Solicitor", sentToDgs.getSolicitorName());
+
+        ArgumentCaptor<CaseDetails> welshCaptor = ArgumentCaptor.forClass(CaseDetails.class);
+        verify(dgsService).generateWelshDocument(Mockito.anyString(), welshCaptor.capture(), any());
+        CaseData sentToDgsWelsh = welshCaptor.getValue().getCaseData();
+        assertEquals("New Solicitor", sentToDgsWelsh.getSolicitorName());
     }
 
     @Test
@@ -733,4 +860,259 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         verify(organisationService, times(0)).getApplicantOrganisationDetails(any(CaseData.class));
         verify(organisationService, times(0)).getRespondentOrganisationDetails(any(CaseData.class));
     }
+
+    @Test
+    public void shouldSubmitBothDocumentTasksBeforeAwaitingResults() throws Exception {
+
+        stubSuccessfulJourney();
+
+        @SuppressWarnings("unchecked")
+        Future<GeneratedDocumentInfo> englishFuture =
+            Mockito.mock(Future.class);
+
+        @SuppressWarnings("unchecked")
+        Future<GeneratedDocumentInfo> welshFuture =
+            Mockito.mock(Future.class);
+
+        when(englishFuture.get())
+            .thenReturn(generatedDocumentInfoShared);
+        when(welshFuture.get())
+            .thenReturn(generatedDocumentInfoShared);
+
+        doReturn(englishFuture, welshFuture)
+            .when(documentVirtualThreadExecutorService)
+            .submit(Mockito.<Callable<GeneratedDocumentInfo>>any());
+
+        prePopulateFeeAndSolicitorNameController
+            .prePopulateSolicitorAndFees(
+                AUTH_TOKEN,
+                S2S_TOKEN,
+                callbackRequestShared
+        );
+
+        InOrder order = inOrder(
+            documentVirtualThreadExecutorService,
+            englishFuture,
+            welshFuture
+        );
+
+        order.verify(
+            documentVirtualThreadExecutorService,
+            times(2)
+        ).submit(Mockito.<Callable<GeneratedDocumentInfo>>any());
+
+        order.verify(englishFuture).get();
+        order.verify(welshFuture).get();
+    }
+
+
+    @Test
+    public void shouldGenerateOnlyEnglishDocument() throws Exception {
+        DocumentLanguage englishOnly = DocumentLanguage.builder()
+            .isGenEng(true)
+            .isGenWelsh(false)
+            .build();
+
+        stubSuccessfulJourney();
+        when(documentLanguageService.docGenerateLang(any(CaseData.class)))
+            .thenReturn(englishOnly);
+
+        when(dgsService.generateDocument(
+            Mockito.anyString(),
+            any(CaseDetails.class),
+            any()
+        )).thenReturn(generatedDocumentInfoShared);
+
+        CallbackResponse response =
+            prePopulateFeeAndSolicitorNameController
+                .prePopulateSolicitorAndFees(
+                    AUTH_TOKEN,
+                    S2S_TOKEN,
+                    callbackRequestShared
+                );
+
+        CaseData result = (CaseData) response.getData();
+
+        assertNotNull(result.getSubmitAndPayDownloadApplicationLink());
+        assertNull(result.getSubmitAndPayDownloadApplicationWelshLink());
+
+        verify(documentVirtualThreadExecutorService, times(1))
+            .submit(Mockito.<Callable<GeneratedDocumentInfo>>any());
+
+        verify(dgsService, times(1)).generateDocument(
+            Mockito.anyString(),
+            any(CaseDetails.class),
+            any()
+        );
+
+        verify(dgsService, never()).generateWelshDocument(
+            Mockito.anyString(),
+            any(CaseDetails.class),
+            any()
+        );
+    }
+
+    @Test
+    public void shouldGenerateOnlyWelshDocument() throws Exception {
+        DocumentLanguage welshOnly = DocumentLanguage.builder()
+            .isGenEng(false)
+            .isGenWelsh(true)
+            .build();
+
+        stubSuccessfulJourney();
+        when(documentLanguageService.docGenerateLang(any(CaseData.class)))
+            .thenReturn(welshOnly);
+
+        when(dgsService.generateWelshDocument(
+            Mockito.anyString(),
+            any(CaseDetails.class),
+            any()
+        )).thenReturn(generatedDocumentInfoShared);
+
+        CallbackResponse response =
+            prePopulateFeeAndSolicitorNameController
+                .prePopulateSolicitorAndFees(
+                    AUTH_TOKEN,
+                    S2S_TOKEN,
+                    callbackRequestShared
+                );
+
+        CaseData result = (CaseData) response.getData();
+
+        assertNull(result.getSubmitAndPayDownloadApplicationLink());
+        assertNotNull(
+            result.getSubmitAndPayDownloadApplicationWelshLink()
+        );
+
+        verify(documentVirtualThreadExecutorService, times(1))
+            .submit(Mockito.<Callable<GeneratedDocumentInfo>>any());
+
+        verify(dgsService, never()).generateDocument(
+            Mockito.anyString(),
+            any(CaseDetails.class),
+            any()
+        );
+
+        verify(dgsService, times(1)).generateWelshDocument(
+            Mockito.anyString(),
+            any(CaseDetails.class),
+            any()
+        );
+    }
+
+    @Test
+    public void shouldCancelWelshTaskWhenEnglishGenerationFails() throws Exception {
+
+        stubSuccessfulJourney();
+
+        RuntimeException docmosisFailure =
+            new RuntimeException("Docmosis failure");
+
+        CompletableFuture<GeneratedDocumentInfo> englishFuture =
+            new CompletableFuture<>();
+        englishFuture.completeExceptionally(docmosisFailure);
+
+        CompletableFuture<GeneratedDocumentInfo> welshFuture =
+            new CompletableFuture<>();
+
+        doReturn(englishFuture, welshFuture)
+            .when(documentVirtualThreadExecutorService)
+            .submit(Mockito.<Callable<GeneratedDocumentInfo>>any());
+
+        DocumentGenerationException exception = assertThrows(
+            DocumentGenerationException.class,
+            () -> prePopulateFeeAndSolicitorNameController
+                .prePopulateSolicitorAndFees(
+                    AUTH_TOKEN,
+                    S2S_TOKEN,
+                    callbackRequestShared
+                )
+        );
+
+        assertSame(docmosisFailure, exception.getCause());
+        assertTrue(welshFuture.isCancelled());
+
+        // It had already failed, so it cannot subsequently be cancelled.
+        assertFalse(englishFuture.isCancelled());
+    }
+
+    @Test
+    public void shouldCancelTasksAndRestoreInterruptWhenWaitingIsInterrupted() throws Exception {
+
+        stubSuccessfulJourney();
+
+        @SuppressWarnings("unchecked")
+        Future<GeneratedDocumentInfo> englishFuture =
+            Mockito.mock(Future.class);
+
+        @SuppressWarnings("unchecked")
+        Future<GeneratedDocumentInfo> welshFuture =
+            Mockito.mock(Future.class);
+
+        when(englishFuture.get())
+            .thenThrow(new InterruptedException("Test interruption"));
+
+        when(englishFuture.isDone()).thenReturn(false);
+        when(welshFuture.isDone()).thenReturn(false);
+
+        doReturn(englishFuture, welshFuture)
+            .when(documentVirtualThreadExecutorService)
+            .submit(Mockito.<Callable<GeneratedDocumentInfo>>any());
+
+        try {
+            DocumentGenerationException exception = assertThrows(
+                DocumentGenerationException.class,
+                () -> prePopulateFeeAndSolicitorNameController
+                    .prePopulateSolicitorAndFees(
+                        AUTH_TOKEN,
+                        S2S_TOKEN,
+                        callbackRequestShared
+                    )
+            );
+
+            assertTrue(
+                exception.getCause() instanceof InterruptedException
+            );
+            assertTrue(Thread.currentThread().isInterrupted());
+
+            verify(englishFuture).cancel(true);
+            verify(welshFuture).cancel(true);
+        } finally {
+            // Prevent the interrupted state leaking into later tests.
+            Thread.interrupted();
+        }
+    }
+
+    @Test
+    public void shouldNotSubmitTasksWhenNoLanguageIsSelected()
+        throws Exception {
+
+        DocumentLanguage noLanguage = DocumentLanguage.builder()
+            .isGenEng(false)
+            .isGenWelsh(false)
+            .build();
+
+        stubSuccessfulJourney();
+
+        when(documentLanguageService.docGenerateLang(any(CaseData.class)))
+            .thenReturn(noLanguage);
+
+        CallbackResponse response =
+            prePopulateFeeAndSolicitorNameController
+                .prePopulateSolicitorAndFees(
+                    AUTH_TOKEN,
+                    S2S_TOKEN,
+                    callbackRequestShared
+                );
+
+        CaseData result = (CaseData) response.getData();
+
+        assertNotNull(result);
+        assertNull(result.getSubmitAndPayDownloadApplicationLink());
+        assertNull(result.getSubmitAndPayDownloadApplicationWelshLink());
+
+        verifyNoInteractions(documentVirtualThreadExecutorService);
+        verifyNoInteractions(dgsService);
+    }
+
 }

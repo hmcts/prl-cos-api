@@ -57,6 +57,7 @@ public enum CaseEvent {
     MARK_CASE_AS_PUBLIC("publicCaseAccess"),
     CHANGE_CASE_ACCESS_AS_SYSUSER("changeCaseAccess"),
     CITIZEN_LANG_SUPPORT_NOTES("citizenLanguageSupportNotes"),
+    SOLICITOR_LANG_SUPPORT_NOTES("solicitorLanguageSupportNotes"),
     CAFCASS_DOCUMENT_UPLOAD("cafcass-document-upload"),
     CITIZEN_PCQ_UPDATE("pcqUpdateForCitizen"),
     CITIZEN_RESPONSE_TO_AOH("citizenResponseToAoH"),
@@ -81,6 +82,9 @@ public enum CaseEvent {
     PATH_FINDER_DECISION("pathfinderDecision"),
     REVIEW_ADDITIONAL_APPLICATION("reviewAdditionalApplication"),
     CLOSE_REVIEW_RA_REQUEST_TASK("closeReviewRARequestTask"),
+    REQUEST_FURTHER_INFORMATION("requestFurtherInformation"),
+    REQUEST_FURTHER_INFORMATION_HISTORY("requestFurtherInformationHistory"),
+    EXIT_AWAITING_INFORMATION("exitAwaitingInformation"),
     CANCEL_REQUEST_CIR_UPDATE_TASK("cancelRequestCirUpdateTask"),
     CREATE_REQUEST_CIR_UPDATE_TASK("createRequestCirUpdateTask");
 

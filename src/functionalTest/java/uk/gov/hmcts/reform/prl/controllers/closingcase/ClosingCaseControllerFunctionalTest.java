@@ -7,8 +7,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
@@ -18,10 +18,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 
-
 @Slf4j
-@SpringBootTest
-@ContextConfiguration
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
 public class ClosingCaseControllerFunctionalTest {
 
     private static final String VALID_REQUEST_BODY_ABOUT_TO_START = "requests/closingcase/about-to-start.json";
@@ -32,13 +30,11 @@ public class ClosingCaseControllerFunctionalTest {
 
     private static final String VALID_REQUEST_BODY_ABOUT_TO_SUBMIT = "requests/closingcase/about-to-submit.json";
 
-
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
 
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
-
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(

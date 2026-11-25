@@ -62,6 +62,7 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.AccessCode;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
+import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
@@ -73,6 +74,7 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
+import uk.gov.hmcts.reform.prl.utils.MaskEmail;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -89,6 +91,7 @@ import java.util.stream.Collectors;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C100_AP7;
@@ -106,7 +109,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_WELSH_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUMENT_WELSH_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_CAN_VIEW_ONLINE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
@@ -129,11 +132,13 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_APPLICATION
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C6A_OTHER_PARTIES_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C6A_OTHER_PARTIES_ORDER_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CAFCASS_CYMRU_SERVED_OPTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CONFIDENTIAL_DETAILS_PRESENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CYMRU_EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_DOCUMENT_PLACE_HOLDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_NOTICE_SAFETY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_ORDER_LIST_EMPTY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PARTIES;
@@ -216,6 +221,7 @@ public class ServiceOfApplicationService {
     public static final String CONFIRMATION_HEADER = "confirmationHeader";
     public static final String TEMPLATE = "template";
     public static final String PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE = "Please select at least one party to serve";
+    public static final String IS_CITIZEN = "isCitizen";
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -312,6 +318,10 @@ public class ServiceOfApplicationService {
     private final LaunchDarklyClient launchDarklyClient;
     private final ConfidentialityCheckService confidentialityCheckService;
     private final HearingService hearingService;
+    private final OrganisationService organisationService;
+    private final MaskEmail maskEmail;
+    private final AssignCaseAccessService assignCaseAccessService;
+    private final RespondentOrgPolicyService respondentOrgPolicyService;
 
     @Value("${citizen.url}")
     private String citizenUrl;
@@ -361,18 +371,18 @@ public class ServiceOfApplicationService {
 
                 if (null != other.getValue().getAddress()
                     && null != other.getValue().getAddress().getAddressLine1()) {
-                    List<Document> docs = new ArrayList<>(serviceOfApplicationPostService
-                                                              .getCoverSheets(caseData, authorization,
-                                                                              other.getValue().getAddress(),
-                                                                              other.getValue().getLabelForDynamicList(),
-                                                                              DOCUMENT_COVER_SHEET_HINT
-                                                              ));
-                    docs.addAll(packN);
+                    ArrayList<Document> packWithCoverSheets = new ArrayList<>(packN);
+                    packWithCoverSheets.addAll(serviceOfApplicationPostService
+                                     .getCoverSheets(caseData, authorization,
+                                                     other.getValue().getAddress(),
+                                                     other.getValue().getLabelForDynamicList(),
+                                                     DOCUMENT_COVER_SHEET_HINT
+                                     ));
                     bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
                         caseData,
                         authorization,
                         other,
-                        docs,
+                        packWithCoverSheets,
                         servedParty
                     )));
                 }
@@ -552,7 +562,7 @@ public class ServiceOfApplicationService {
 
         if ("No".equalsIgnoreCase(selection) && hasRecipients(soa)) {
             List<Document> filteredDocs = staticDocs.stream()
-                .filter(d -> !C9_DOCUMENT_FILENAME.equalsIgnoreCase(d.getDocumentFileName())).toList();
+                .filter(d -> !isC9Document(d)).toList();
             sendNotificationsSoaC100NonPersonal(caseData, auth, emails, bulk, filteredDocs);
             caseDataMap.put(UNSERVED_APPLICANT_LIP_RESPONDENT_PACK, null);
             return responsibleParty;
@@ -782,7 +792,7 @@ public class ServiceOfApplicationService {
                 SERVED_PARTY_APPLICANT
             );
         }
-        packFdocs = packFdocs.stream().filter(d -> !SOA_FL415_FILENAME.equalsIgnoreCase(d.getDocumentFileName()))
+        packFdocs = packFdocs.stream().filter(d -> !isFL415Document(d))
             .toList();
         caseDataMap.put(UNSERVED_APPLICANT_LIP_RESPONDENT_PACK, SoaPack.builder()
             .packDocument(wrapElements(packFdocs))
@@ -909,7 +919,7 @@ public class ServiceOfApplicationService {
     private void generateUnservedRespondentPackDaCbCa(CaseData caseData, String authorization, List<Document> staticDocs,
                                                       Map<String, Object> caseDataMap, String personalServiceBy) {
         List<Element<CoverLetterMap>> coverLetterMap = new ArrayList<>();
-        staticDocs = staticDocs.stream().filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME))
+        staticDocs = staticDocs.stream().filter(d -> !isFL415Document(d))
             .toList();
         List<Document> packdDocs = getRespondentPacksForDaPersonaServiceByCourtAdminAndBailiff(
             caseData,
@@ -1049,7 +1059,7 @@ public class ServiceOfApplicationService {
                                                         List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                         List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                         List<Document> staticDocs) {
-        staticDocs = staticDocs.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME)).toList();
+        staticDocs = staticDocs.stream().filter(d -> !isFL415Document(d)).toList();
         List<Element<PartyDetails>> applicantFl401 = Collections.singletonList(element(
             caseData.getApplicantsFL401().getPartyId(),
             caseData.getApplicantsFL401()
@@ -1581,7 +1591,7 @@ public class ServiceOfApplicationService {
                                                                       List<Document> packDocs) {
         //C9 to be excluded for personal service court admin/bailiff
         List<Document> packDocsWithoutC9 = packDocs.stream()
-            .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME)).toList();
+            .filter(d -> !isC9Document(d)).toList();
 
         //Notify applicants based on contact preference
         caseData.getApplicants().forEach(applicant -> {
@@ -1623,7 +1633,7 @@ public class ServiceOfApplicationService {
                                                                       List<Document> packDocs) {
         //C9 to be excluded for personal service court admin/bailiff
         List<Document> packDocsWithoutC9 = packDocs.stream()
-            .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME)).toList();
+            .filter(d -> !isC9Document(d)).toList();
         //Notify applicants based on contact preference
         caseData.getApplicants().forEach(applicant -> {
             if (!CaseUtils.hasLegalRepresentation(applicant.getValue())) {
@@ -2013,16 +2023,18 @@ public class ServiceOfApplicationService {
             //TEMP SOLUTION TO GET ACCESS CODES - GENERATE AND SEND ACCESS CODE TO APPLICANTS & RESPONDENTS OVER EMAIL
         }
 
+
         if (isRespondentDetailsConfidential(caseData) || CaseUtils.isC8Present(caseData)) {
             return processConfidentialDetailsSoa(authorisation, caseDataMap, caseData, startAllTabsUpdateDataContent);
+        } else {
+            return processNonConfidentialSoa(
+                authorisation,
+                caseData,
+                caseDataMap,
+                startAllTabsUpdateDataContent,
+                String.valueOf(callbackRequest.getCaseDetails().getId())
+            );
         }
-        return processNonConfidentialSoa(
-            authorisation,
-            caseData,
-            caseDataMap,
-            startAllTabsUpdateDataContent,
-            String.valueOf(callbackRequest.getCaseDetails().getId())
-        );
     }
 
     private ResponseEntity<SubmittedCallbackResponse> processNonConfidentialSoa(String authorisation, CaseData caseData,
@@ -2064,6 +2076,10 @@ public class ServiceOfApplicationService {
             updatedCaseDataContent.eventRequestData(),
             caseDataMap
         );
+        // Populate respondent org policies and grant respondent solicitor case access
+        // (no-op if respondents/details not present).
+        respondentOrgPolicyService.populateRespondentOrganisations(caseDataMap, caseData);
+
         return ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(confirmationBanner.get(CONFIRMATION_HEADER))
                       .confirmationBody(confirmationBody).build());
@@ -2148,6 +2164,10 @@ public class ServiceOfApplicationService {
                                                 manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId()
                                                     + SERVICE_OF_APPLICATION_ENDPOINT);
         log.info("Confidential details are present, case needs to be reviewed and served later");
+        // Respondent solicitor access is NOT granted here: confidential info is still present
+        // and the confidentiality check has not yet been completed. Access is granted in
+        // handleConfidentialCheckSuccessful once court admin approves the check.
+
         return ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(CONFIDENTIAL_CONFIRMATION_HEADER)
                       .confirmationBody(confirmationBody).build());
@@ -2497,17 +2517,18 @@ public class ServiceOfApplicationService {
                                                      List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                      Element<PartyDetails> party, List<Document> coverLetter,
                                                      String servedParty) {
-
         try {
-            List<Document> docs = new ArrayList<>(serviceOfApplicationPostService
+            List<Document> docs = new ArrayList<>();
+            if (coverLetter != null) {
+                docs.addAll(coverLetter);
+            }
+            docs.addAll(serviceOfApplicationPostService
                                                       .getCoverSheets(caseData, authorization,
                                                                       party.getValue().getAddress(),
                                                                       party.getValue().getLabelForDynamicList(),
                                                                       DOCUMENT_COVER_SHEET_HINT
                                                       ));
-            if (coverLetter != null) {
-                docs.addAll(coverLetter);
-            }
+
             docs.addAll(packDocs);
             log.info("*** Sending docs to party Lip post");
             bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
@@ -2569,6 +2590,7 @@ public class ServiceOfApplicationService {
                         .filter(d -> !(d.getDocumentFileName().equalsIgnoreCase(C1A_BLANK_DOCUMENT_FILENAME)
                             || d.getDocumentFileName().equalsIgnoreCase(C1A_BLANK_DOCUMENT_WELSH_FILENAME)
                             || d.getDocumentFileName().equalsIgnoreCase(C7_BLANK_DOCUMENT_FILENAME)
+                            || d.getDocumentFileName().equalsIgnoreCase(C7_BLANK_DOCUMENT_WELSH_FILENAME)
                             || d.getDocumentFileName().equalsIgnoreCase(SOA_NOTICE_SAFETY)
                         )).toList());
         docs.addAll(getSoaSelectedOrders(caseData));
@@ -2580,7 +2602,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(staticDocs.stream()
-                        .filter(d -> !(d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME)
+                        .filter(d -> !(isC9Document(d)
                             || d.getDocumentFileName().equalsIgnoreCase(SOA_NOTICE_SAFETY))
                         ).toList());
         docs.addAll(getSoaSelectedOrders(caseData));
@@ -2600,7 +2622,10 @@ public class ServiceOfApplicationService {
                         .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
                             C1A_BLANK_DOCUMENT_WELSH_FILENAME))
                         .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
-                            C7_BLANK_DOCUMENT_FILENAME)).toList());
+                            C7_BLANK_DOCUMENT_FILENAME))
+                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
+                            C7_BLANK_DOCUMENT_WELSH_FILENAME))
+                        .toList());
         return docs;
     }
 
@@ -2612,7 +2637,7 @@ public class ServiceOfApplicationService {
         // Annex Y to be excluded
         docs.addAll(staticDocs);
         docs = docs.stream()
-                .filter(d -> !(d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME)
+                .filter(d -> !(isC9Document(d)
                 || d.getDocumentFileName().equalsIgnoreCase(PrlAppsConstants.C1A_DOCUMENT_FILENAME)
             || d.getDocumentFileName().equalsIgnoreCase(PrlAppsConstants.C1A_DOCUMENT_WELSH_FILENAME)))
                 .toList();
@@ -2667,6 +2692,7 @@ public class ServiceOfApplicationService {
                         .filter(d -> !(SOA_NOTICE_SAFETY.equalsIgnoreCase(d.getDocumentFileName())
                             || C1A_BLANK_DOCUMENT_FILENAME.equalsIgnoreCase(d.getDocumentFileName())
                             || C1A_BLANK_DOCUMENT_WELSH_FILENAME.equalsIgnoreCase(d.getDocumentFileName())
+                            || C7_BLANK_DOCUMENT_WELSH_FILENAME.equalsIgnoreCase(d.getDocumentFileName())
                             || C7_BLANK_DOCUMENT_FILENAME.equalsIgnoreCase(d.getDocumentFileName())))
                         .toList());
         docs.addAll(getSoaSelectedOrders(caseData));
@@ -2679,7 +2705,7 @@ public class ServiceOfApplicationService {
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(staticDocs.stream()
                         .filter(d -> !(d.getDocumentFileName().equalsIgnoreCase(SOA_NOTICE_SAFETY)
-                        || d.getDocumentFileName().equalsIgnoreCase(C9_DOCUMENT_FILENAME)))
+                        || isC9Document(d)))
                         .toList());
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         docs.addAll(getSoaSelectedOrders(caseData));
@@ -2692,7 +2718,7 @@ public class ServiceOfApplicationService {
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         docs.addAll(staticDocs.stream()
-                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME)).toList());
+                        .filter(d -> !isC9Document(d)).toList());
         return docs;
     }
 
@@ -2706,9 +2732,12 @@ public class ServiceOfApplicationService {
                             C1A_BLANK_DOCUMENT_FILENAME) || d.getDocumentFileName().equalsIgnoreCase(SOA_NOTICE_SAFETY)))
                         .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
                             C1A_BLANK_DOCUMENT_WELSH_FILENAME))
-                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME))
+                        .filter(d -> !isC9Document(d))
                         .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
-                            C7_BLANK_DOCUMENT_FILENAME)).toList());
+                            C7_BLANK_DOCUMENT_FILENAME))
+                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
+                            C7_BLANK_DOCUMENT_WELSH_FILENAME))
+                        .toList());
         return docs;
     }
 
@@ -2766,7 +2795,7 @@ public class ServiceOfApplicationService {
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getWitnessStatement(caseData));
         docs.addAll(staticDocs.stream()
-                                    .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME)).toList());
+                                    .filter(d -> !isFL415Document(d)).toList());
         docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         return docs;
@@ -2777,7 +2806,7 @@ public class ServiceOfApplicationService {
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getWitnessStatement(caseData));
         docs.addAll(staticDocs.stream()
-                                    .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME)).toList());
+                                    .filter(d -> !isFL415Document(d)).toList());
         docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         return docs;
@@ -2807,7 +2836,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(staticDocs.stream()
-                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME)).toList());
+                        .filter(d -> !isFL415Document(d)).toList());
         docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         return docs;
@@ -3236,15 +3265,15 @@ public class ServiceOfApplicationService {
         if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
             dataMap.put("applicantName", caseData.getApplicants().get(0).getValue().getLabelForDynamicList());
         }
-        dataMap.put("isCitizen", false);
+        dataMap.put(IS_CITIZEN, false);
         if (launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)) {
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                dataMap.put("isCitizen", !CaseUtils.hasLegalRepresentation(party.getValue()));
+                dataMap.put(IS_CITIZEN, !CaseUtils.hasLegalRepresentation(party.getValue()));
             }
             // This check is added to disable or enable DA citizen journey as needed
             if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                 && launchDarklyClient.isFeatureEnabled(PrlAppsConstants.CITIZEN_ALLOW_DA_JOURNEY)) {
-                dataMap.put("isCitizen", !CaseUtils.hasLegalRepresentation(party.getValue()));
+                dataMap.put(IS_CITIZEN, !CaseUtils.hasLegalRepresentation(party.getValue()));
             }
         }
         return dataMap;
@@ -3534,8 +3563,7 @@ public class ServiceOfApplicationService {
                                                                       Map<String, Object> caseDataUpdated,
                                                                       CaseData caseData,
                                                                       List<Document> c100StaticDocs) {
-        c100StaticDocs = c100StaticDocs.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(
-            C9_DOCUMENT_FILENAME)).collect(
+        c100StaticDocs = c100StaticDocs.stream().filter(d -> !isC9Document(d)).collect(
             Collectors.toList());
         log.info("serving applicants or respondents");
         List<DynamicMultiselectListElement> selectedApplicants = getSelectedApplicantsOrRespondents(
@@ -3618,7 +3646,7 @@ public class ServiceOfApplicationService {
                                                                                                         .getSoaRecipientsOptions().getValue());
         respondentFl401 = getSelectedPartyElements(respondentFl401, caseData.getServiceOfApplication()
             .getSoaRecipientsOptions().getValue());
-        fl401StaticDocs = fl401StaticDocs.stream().filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME))
+        fl401StaticDocs = fl401StaticDocs.stream().filter(d -> !isFL415Document(d))
             .toList();
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
@@ -3681,7 +3709,7 @@ public class ServiceOfApplicationService {
         List<Document> packEDocs = new ArrayList<>();
         packEDocs.addAll(applicantCoverLetters);
         packEDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.E, fl401StaticDocs));
-        fl401StaticDocs = fl401StaticDocs.stream().filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME))
+        fl401StaticDocs = fl401StaticDocs.stream().filter(d -> !isFL415Document(d))
             .toList();
         List<Document> packFDocs = new ArrayList<>();
         Element<PartyDetails> respondent = element(caseData.getRespondentsFL401().getPartyId(), caseData.getRespondentsFL401());
@@ -3720,7 +3748,7 @@ public class ServiceOfApplicationService {
             fl401StaticDocs,
             coverLetterMap
         );
-        packdDocs = packdDocs.stream().filter(d -> !SOA_FL415_FILENAME.equalsIgnoreCase(d.getDocumentFileName()))
+        packdDocs = packdDocs.stream().filter(d -> !isFL415Document(d))
             .toList();
         final SoaPack unservedRespondentPack = SoaPack.builder().packDocument(wrapElements(packdDocs))
             .partyIds(wrapElements(caseData.getRespondentsFL401().getPartyId().toString()))
@@ -3767,7 +3795,7 @@ public class ServiceOfApplicationService {
             .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptions().toString())
             .build();
         caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
-        fl401StaticDocs = fl401StaticDocs.stream().filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME))
+        fl401StaticDocs = fl401StaticDocs.stream().filter(d -> !isFL415Document(d))
             .toList();
         List<Document> packBDocs = getNotificationPack(caseData, PrlAppsConstants.B, fl401StaticDocs);
         Element<PartyDetails> respondent = Element.<PartyDetails>builder()
@@ -4312,16 +4340,19 @@ public class ServiceOfApplicationService {
             log.info("Reject reason list not empty");
             // get existing reject reason
             confidentialCheckFailedList.addAll(caseData.getServiceOfApplication().getConfidentialCheckFailed());
-            //The confidentiality check reason text is mandatory on Manage Case, therefore we only add it to the
-            //case when it has a value to avoid null entries.
-            log.info("Adding reject reason list to the case");
-            caseDataMap.put(CONFIDENTIAL_CHECK_FAILED, confidentialCheckFailedList);
-        } else {
-            //No rejection reasons = not an actual rejection  since the user interface does not allow proceeding with
-            //a rejection without writing at least one reason.
-            log.info("Reject reason list empty, therefore not an actual rejection but"
-                         + " likely timeout on update all tabs");
         }
+        if (!isEmpty(caseData.getServiceOfApplication().getRejectionReason())
+            && No.equals(caseData.getServiceOfApplication().getApplicationServedYesNo())) {
+            final ConfidentialCheckFailed confidentialCheckFailed = ConfidentialCheckFailed.builder().confidentialityCheckRejectReason(
+                    caseData.getServiceOfApplication().getRejectionReason())
+                .dateRejected(CaseUtils.getCurrentDate())
+                .build();
+
+            confidentialCheckFailedList.add(ElementUtils.element(confidentialCheckFailed));
+
+        }
+        caseDataMap.put(CONFIDENTIAL_CHECK_FAILED, confidentialCheckFailedList);
+
 
         response = ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(RETURNED_TO_ADMIN_HEADER)
@@ -4369,6 +4400,9 @@ public class ServiceOfApplicationService {
         caseDataMap.put(UNSERVED_OTHERS_PACK, null);
         caseDataMap.put(UNSERVED_LA_PACK, null);
         caseDataMap.put(UNSERVED_CAFCASS_CYMRU_PACK, null);
+        // Deferred from SOA aboutToSubmit: populate respondent org policies and grant respondent
+        // solicitor case access now that the confidentiality check has passed.
+        respondentOrgPolicyService.populateRespondentOrganisations(caseDataMap, caseData);
         response = ok(SubmittedCallbackResponse.builder()
                           .confirmationHeader(confirmationHeader)
                           .confirmationBody(
@@ -4502,4 +4536,17 @@ public class ServiceOfApplicationService {
             && party.getValue().getEmail().equalsIgnoreCase(
             caseData.getUserInfo().get(0).getValue().getEmailAddress());
     }
+
+    private boolean isC9Document(Document document) {
+        return document != null
+            && (SOA_C9_PERSONAL_SERVICE_FILENAME.equalsIgnoreCase(document.getDocumentFileName())
+            || SOA_C9_PERSONAL_SERVICE_FILENAME_WELSH.equalsIgnoreCase(document.getDocumentFileName()));
+    }
+
+    private boolean isFL415Document(Document document) {
+        return document != null
+            && (SOA_FL415_FILENAME.equalsIgnoreCase(document.getDocumentFileName())
+            || SOA_FL415_FILENAME_WELSH.equalsIgnoreCase(document.getDocumentFileName()));
+    }
+
 }

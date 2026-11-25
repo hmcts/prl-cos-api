@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -21,6 +22,8 @@ import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.caseworkeremailnotification.CaseWorkerEmailNotificationEventEnum;
+import uk.gov.hmcts.reform.prl.events.CaseWorkerNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -40,7 +43,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
-import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
@@ -52,12 +54,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -96,10 +98,16 @@ public class C100IssueCaseServiceTest {
     private WorkflowResult workflowResult;
 
     @Mock
+    private UpdatePartyDetailsService updatePartyDetailsService;
+
+    @Mock
     private DgsService dgsService;
 
     @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
+
+    @Mock
+    private C8Service c8Service;
 
     @Mock
     private SolicitorEmailService solicitorEmailService;
@@ -115,12 +123,6 @@ public class C100IssueCaseServiceTest {
 
     @Mock
     AllTabServiceImpl allTabsService;
-
-    @Mock
-    SendgridService sendgridService;
-
-    @Mock
-    C100JsonMapper c100JsonMapper;
 
     @Mock
     private OrganisationService organisationService;
@@ -214,6 +216,7 @@ public class C100IssueCaseServiceTest {
             "dfjArea", "SWANSEA",
             "swanseaDFJCourt", "234946"
         ));
+        when(c8Service.generateOtherPartiesC8s(any(), any(), any())).thenReturn(Map.of());
     }
 
 
@@ -293,8 +296,12 @@ public class C100IssueCaseServiceTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                                                       .data(stringObjectMap).build()).build();
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L).data(stringObjectMap).build())
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L).data(stringObjectMap).build())
+            .build();
 
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
@@ -342,8 +349,12 @@ public class C100IssueCaseServiceTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                                                       .data(stringObjectMap).build()).build();
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L).data(stringObjectMap).build())
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L).data(stringObjectMap).build())
+            .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
@@ -415,6 +426,12 @@ public class C100IssueCaseServiceTest {
             .childrenKnownToLocalAuthorityTextArea("Test")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .applicants(applicantList)
+            .respondents(List.of(element(UUID.randomUUID(), PartyDetails.builder()
+                .phoneNumber("1234567890")
+                .isPhoneNumberConfidential(YesOrNo.Yes)
+                .firstName("John")
+                .lastName("Smith")
+                .build())))
             .allegationOfHarm(AllegationOfHarm.builder()
                                   .allegationsOfHarmYesNo(Yes)
                                   .allegationsOfHarmDomesticAbuseYesNo(Yes)
@@ -429,8 +446,16 @@ public class C100IssueCaseServiceTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                                                       .data(stringObjectMap).build()).build();
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
 
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
@@ -452,6 +477,8 @@ public class C100IssueCaseServiceTest {
             Mockito.any(CaseData.class),
             eq(true)
         );
+        verify(updatePartyDetailsService).generateC8DocumentsForRespondents(
+            any(), eq(callbackRequest), eq(authToken), any(), eq(caseData.getRespondents()), eq(true));
     }
 
     @Test
@@ -528,8 +555,14 @@ public class C100IssueCaseServiceTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                                                       .data(stringObjectMap).build()).build();
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L).data(stringObjectMap)
+                             .build())
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                   .id(123L).data(stringObjectMap)
+                                   .build())
+            .build();
 
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
@@ -560,7 +593,7 @@ public class C100IssueCaseServiceTest {
     }
 
     @Test
-    public void issueAndSendLocalCourtEventShouldNotifyRpaAndLocalCourt() {
+    public void issueAndSendLocalCourtEventShouldOnlyNotifyLocalCourtForNonConsentApplication() {
         CaseData caseData = CaseData.builder()
             .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("Test")
@@ -581,17 +614,25 @@ public class C100IssueCaseServiceTest {
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                                                       .data(stringObjectMap).build()).build();
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L).data(stringObjectMap).build())
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L).data(stringObjectMap).build())
+            .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         c100IssueCaseService.issueAndSendToLocalCourNotification(callbackRequest);
 
-        verify(eventPublisher,times(2)).publishEvent(Mockito.any());
+        ArgumentCaptor<CaseWorkerNotificationEmailEvent> notification = ArgumentCaptor.forClass(CaseWorkerNotificationEmailEvent.class);
+        verify(eventPublisher).publishEvent(notification.capture());
+        assertThat(notification.getValue().getTypeOfEvent())
+            .isEqualTo(CaseWorkerEmailNotificationEventEnum.sendEmailToCourtAdmin.getDisplayedValue());
+        verifyNoMoreInteractions(eventPublisher);
     }
 
     @Test
-    public void issueAndSendLocalCourtEventShouldOnlyNotifyLocalCourt() {
+    public void issueAndSendLocalCourtEventShouldOnlyNotifyLocalCourtForConsentApplication() {
         CaseData caseData = CaseData.builder()
             .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("Test")
@@ -612,13 +653,21 @@ public class C100IssueCaseServiceTest {
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                                                       .data(stringObjectMap).build()).build();
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L).data(stringObjectMap).build())
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L).data(stringObjectMap).build())
+            .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         c100IssueCaseService.issueAndSendToLocalCourNotification(callbackRequest);
 
-        verify(eventPublisher,times(1)).publishEvent(Mockito.any());
+        ArgumentCaptor<CaseWorkerNotificationEmailEvent> notification = ArgumentCaptor.forClass(CaseWorkerNotificationEmailEvent.class);
+        verify(eventPublisher).publishEvent(notification.capture());
+        assertThat(notification.getValue().getTypeOfEvent())
+            .isEqualTo(CaseWorkerEmailNotificationEventEnum.sendEmailToCourtAdmin.getDisplayedValue());
+        verifyNoMoreInteractions(eventPublisher);
     }
 
     @Test
@@ -645,8 +694,12 @@ public class C100IssueCaseServiceTest {
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                                                       .data(stringObjectMap).build()).build();
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L).data(stringObjectMap).build())
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L).data(stringObjectMap).build())
+            .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         c100IssueCaseService.issueAndSendToLocalCourt(authToken, callbackRequest);
@@ -681,8 +734,12 @@ public class C100IssueCaseServiceTest {
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                                                       .data(stringObjectMap).build()).build();
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L).data(stringObjectMap).build())
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                   .id(123L).data(stringObjectMap).build())
+            .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(pathFinderLookupService.getPathFinderMappingByCourtField("234946")).thenReturn(Optional.of(
             PathFinderMapping.builder().pathFinderEnabled(true).build()));

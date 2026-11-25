@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentC8;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -299,7 +299,7 @@ class ConfidentialityCheckServiceTest {
             .value(PartyDetails.builder()
                        .firstName("firstName")
                        .lastName("lastName")
-                       .liveInRefuge(YesOrNo.Yes)
+                       .liveInRefuge(YesNoIDontKnowV2.Yes)
                        .refugeConfidentialityC8Form(applicant1RefugeDocument)
                        .build())
             .build();
@@ -307,7 +307,7 @@ class ConfidentialityCheckServiceTest {
             .value(PartyDetails.builder()
                        .firstName("firstName1")
                        .lastName("lastName")
-                       .liveInRefuge(YesOrNo.Yes)
+                       .liveInRefuge(YesNoIDontKnowV2.Yes)
                        .refugeConfidentialityC8Form(applicant2RefugeDocument)
                        .build())
             .build();
@@ -315,7 +315,7 @@ class ConfidentialityCheckServiceTest {
             .value(PartyDetails.builder()
                        .firstName("firstName2")
                        .lastName("lastName")
-                       .liveInRefuge(YesOrNo.Yes)
+                       .liveInRefuge(YesNoIDontKnowV2.Yes)
                        .refugeConfidentialityC8Form(
                            applicant3RefugeDocument)
                        .build())
@@ -324,7 +324,7 @@ class ConfidentialityCheckServiceTest {
             .value(PartyDetails.builder()
                        .firstName("firstName3")
                        .lastName("lastName")
-                       .liveInRefuge(YesOrNo.Yes)
+                       .liveInRefuge(YesNoIDontKnowV2.Yes)
                        .refugeConfidentialityC8Form(applicant4RefugeDocument)
                        .build())
             .build();
@@ -332,7 +332,7 @@ class ConfidentialityCheckServiceTest {
             .value(PartyDetails.builder()
                        .firstName("firstName4")
                        .lastName("lastName")
-                       .liveInRefuge(YesOrNo.Yes)
+                       .liveInRefuge(YesNoIDontKnowV2.Yes)
                        .refugeConfidentialityC8Form(null)
                        .build())
             .build();
@@ -340,7 +340,7 @@ class ConfidentialityCheckServiceTest {
             .value(PartyDetails.builder()
                        .firstName("firstName5")
                        .lastName("lastName")
-                       .liveInRefuge(YesOrNo.Yes)
+                       .liveInRefuge(YesNoIDontKnowV2.Yes)
                        .refugeConfidentialityC8Form(null)
                        .build())
             .build();
@@ -373,7 +373,7 @@ class ConfidentialityCheckServiceTest {
     void processApplicantC8DocumentsForFL401() {
         Document applicant1RefugeDocument = Document.builder().documentFileName("applicant 1 C8 Refuge Form").build();
         PartyDetails partyDetails = PartyDetails.builder().firstName("firstName").lastName("lastName")
-            .liveInRefuge(YesOrNo.Yes).refugeConfidentialityC8Form(applicant1RefugeDocument).build();
+            .liveInRefuge(YesNoIDontKnowV2.Yes).refugeConfidentialityC8Form(applicant1RefugeDocument).build();
 
         CaseData caseData = CaseData.builder().id(12345L).applicantsFL401(partyDetails).caseTypeOfApplication(
             FL401_CASE_TYPE).build();
@@ -395,7 +395,7 @@ class ConfidentialityCheckServiceTest {
             .value(PartyDetails.builder()
                        .firstName("firstName")
                        .lastName("lastName")
-                       .liveInRefuge(YesOrNo.Yes)
+                       .liveInRefuge(YesNoIDontKnowV2.Yes)
                        .refugeConfidentialityC8Form(applicant1RefugeDocument)
                        .build())
             .build();
@@ -403,7 +403,7 @@ class ConfidentialityCheckServiceTest {
             .value(PartyDetails.builder()
                        .firstName("firstName1")
                        .lastName("lastName")
-                       .liveInRefuge(YesOrNo.Yes)
+                       .liveInRefuge(YesNoIDontKnowV2.Yes)
                        .refugeConfidentialityC8Form(applicant2RefugeDocument)
                        .build())
             .build();
@@ -411,7 +411,7 @@ class ConfidentialityCheckServiceTest {
             .value(PartyDetails.builder()
                        .firstName("firstName2")
                        .lastName("lastName")
-                       .liveInRefuge(YesOrNo.Yes)
+                       .liveInRefuge(YesNoIDontKnowV2.Yes)
                        .refugeConfidentialityC8Form(applicant3RefugeDocument)
                        .build())
             .build();
@@ -419,7 +419,7 @@ class ConfidentialityCheckServiceTest {
             .value(PartyDetails.builder()
                        .firstName("firstName3")
                        .lastName("lastName")
-                       .liveInRefuge(YesOrNo.Yes)
+                       .liveInRefuge(YesNoIDontKnowV2.Yes)
                        .refugeConfidentialityC8Form(applicant4RefugeDocument)
                        .build())
             .build();
@@ -427,7 +427,7 @@ class ConfidentialityCheckServiceTest {
             .value(PartyDetails.builder()
                        .firstName("firstName4")
                        .lastName("lastName")
-                       .liveInRefuge(YesOrNo.Yes)
+                       .liveInRefuge(YesNoIDontKnowV2.Yes)
                        .refugeConfidentialityC8Form(null)
                        .build())
             .build();
@@ -435,7 +435,7 @@ class ConfidentialityCheckServiceTest {
             .value(PartyDetails.builder()
                        .firstName("firstName5")
                        .lastName("lastName")
-                       .liveInRefuge(YesOrNo.Yes)
+                       .liveInRefuge(YesNoIDontKnowV2.Yes)
                        .refugeConfidentialityC8Form(null)
                        .build())
             .build();
@@ -472,7 +472,7 @@ class ConfidentialityCheckServiceTest {
             .value(PartyDetails.builder()
                 .firstName("firstName")
                 .lastName("lastName")
-                .liveInRefuge(YesOrNo.Yes)
+                .liveInRefuge(YesNoIDontKnowV2.Yes)
                 .refugeConfidentialityC8Form(applicant1RefugeDocument)
                 .build())
             .build();
@@ -502,7 +502,7 @@ class ConfidentialityCheckServiceTest {
             .value(PartyDetails.builder()
                        .firstName("firstName")
                        .lastName("lastName")
-                       .liveInRefuge(YesOrNo.Yes)
+                       .liveInRefuge(YesNoIDontKnowV2.Yes)
                        .refugeConfidentialityC8Form(applicant1RefugeDocument)
                        .build())
             .build();
@@ -510,7 +510,7 @@ class ConfidentialityCheckServiceTest {
             .value(PartyDetails.builder()
                        .firstName("firstName1")
                        .lastName("lastName")
-                       .liveInRefuge(YesOrNo.Yes)
+                       .liveInRefuge(YesNoIDontKnowV2.Yes)
                        .refugeConfidentialityC8Form(applicant2RefugeDocument)
                        .build())
             .build();

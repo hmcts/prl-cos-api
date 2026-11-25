@@ -50,26 +50,21 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 public class CitizenAwpMapper {
     private static final String CAT_AWP_APPLICANT   = "applicationsWithinProceedings";
     private static final String CAT_AWP_RESPONDENT = "applicationsWithinProceedingsRes";
-    private static final String CAT_AWP_UNDEFINED = "undefined";
+    private static final String CAT_AWP_OTHER = "applicationsFromOtherProceedings";
 
     private String categoryForParty(String raw) {
         return switch (raw.toLowerCase(Locale.ENGLISH)) {
             case "applicant" -> CAT_AWP_APPLICANT;
             case "respondent" -> CAT_AWP_RESPONDENT;
-            default -> CAT_AWP_UNDEFINED;
+            default -> CAT_AWP_OTHER;
         };
     }
 
     private static Document withCategory(Document doc, String categoryId) {
-        if (categoryId.equals(CAT_AWP_UNDEFINED)) {
-            return doc; // if no category play safe and don't add a default
-        }
         if (doc == null) {
-            throw new IllegalArgumentException(
-                "Document cannot be null");
-        } else {
-            return doc.toBuilder().categoryId(categoryId).build();
+            return null;
         }
+        return doc.toBuilder().categoryId(categoryId).build();
     }
 
     private static List<Element<Document>> toDocElementsWithCategory(List<Document> docs, String categoryId) {
@@ -201,7 +196,7 @@ public class CitizenAwpMapper {
                     .documentRelatedToCase(YesOrNo.Yes)
                     .finalDocument(toDocElementsWithCategory(citizenAwpRequest.getUploadedApplicationForms(), cat))
                     .supportingEvidenceBundle(YesOrNo.Yes.equals(citizenAwpRequest.getHasSupportingDocuments())
-                                                  ? getSupportingBundles(citizenAwpRequest) : null)
+                                                  ? getSupportingBundles(citizenAwpRequest, cat) : null)
                     .combinedReasonsForC2Application(Arrays.asList(CombinedC2AdditionalOrdersRequested
                                                                        .getValue(getApplicationKey(citizenAwpRequest)))) //REVISIT
                     //.otherReasonsFoC2Application(null) //REVISIT - NOT NEEDED FOR CITIZEN AS THERE IS OTHER OPTION
@@ -231,15 +226,16 @@ public class CitizenAwpMapper {
     private OtherApplicationsBundle getOtherApplicationBundle(CitizenAwpRequest citizenAwpRequest) {
         if (!"C2".equals(citizenAwpRequest.getAwpType())) {
             log.info("Inside mapping citizen awp other applications");
+            String cat = categoryForParty(citizenAwpRequest.getPartyType());
             return OtherApplicationsBundle.builder()
                 .applicantName(citizenAwpRequest.getPartyName())
                 .author(citizenAwpRequest.getPartyName())
                 .uploadedDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE))
                                       .format(DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS_AM_PM))
                 .documentRelatedToCase(YesOrNo.Yes)
-                .finalDocument(getDocuments(citizenAwpRequest.getUploadedApplicationForms()))
+                .finalDocument(toDocElementsWithCategory(citizenAwpRequest.getUploadedApplicationForms(), cat))
                 .supportingEvidenceBundle(YesOrNo.Yes.equals(citizenAwpRequest.getHasSupportingDocuments())
-                                              ? getSupportingBundles(citizenAwpRequest) : null)
+                                              ? getSupportingBundles(citizenAwpRequest, cat) : null)
                 .urgency(YesOrNo.Yes.equals(citizenAwpRequest.getUrgencyInFiveDays())
                              ? getUrgency(citizenAwpRequest) : null)
                 .applicationType(OtherApplicationType.getValue(getApplicationKey(citizenAwpRequest))) //REVISIT
@@ -264,14 +260,14 @@ public class CitizenAwpMapper {
             .toList();
     }
 
-    private List<Element<SupportingEvidenceBundle>> getSupportingBundles(CitizenAwpRequest citizenAwpRequest) {
+    private List<Element<SupportingEvidenceBundle>> getSupportingBundles(CitizenAwpRequest citizenAwpRequest, String cat) {
         return nullSafeCollection(citizenAwpRequest.getSupportingDocuments()).stream()
             .map(document -> element(
                 SupportingEvidenceBundle.builder()
                     .uploadedBy(citizenAwpRequest.getPartyName())
                     .dateTimeUploaded(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
                     .documentRelatedToCase(YesOrNo.Yes)
-                    .document(document)
+                    .document(withCategory(document, cat))
                     .build()
             )).toList();
     }

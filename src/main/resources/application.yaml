@@ -21,12 +21,53 @@ prl:
   system-update:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxx}
-  document:
-    generate:
-      uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
   refdata:
     username: ${PRL_IDAM_REFDATA_USERNAME:xxxxxx}
     password: ${PRL_IDAM_REFDATA_PASSWORD:xxxxxx}
+
+testing-support-data:
+  demo:
+    org:
+      org1:
+        id: 6RUBIJM
+        name: Private law NOC Applicant organisation
+      org2:
+        id: 9SCQJOI
+        name: Private law Applicant organisation
+      org3:
+        id: 52IWCVT
+        name: PRL Barrister Org2
+      org4:
+        id: UYLJCAI
+        name: PRL Barrister Org3
+  aat:
+    org:
+      org1:
+        id: LM6OZX0
+        name: Private law NOC solution
+      org2:
+        id: QO4A1Q8
+        name: FPRL-test-organisation
+      org3:
+        id: F9I5I7G
+        name: Private law test organisation
+      org4:
+        id: 5S5EJUH
+        name: KapilYAIEIiGGpEN7XAjg9Tdy JainsAspDFHin7J9kTF3TV3Q
+  preview:
+    org:
+      org1:
+        id: LM6OZX0
+        name: Private law NOC solution
+      org2:
+        id: QO4A1Q8
+        name: FPRL-test-organisation
+      org3:
+        id: F9I5I7G
+        name: Private law test organisation
+      org4:
+        id: 5S5EJUH
+        name: KapilYAIEIiGGpEN7XAjg9Tdy JainsAspDFHin7J9kTF3TV3Q
 
 management:
   endpoint:
@@ -41,7 +82,7 @@ management:
   #If you use a database then uncomment below lines and update db properties accordingly
 spring:
   config:
-    import: "optional:configtree:/mnt/secrets/prl/"
+    import: optional:configtree:/mnt/secrets/prl/,optional:classpath:docmosis-templates.yml
   application:
     name: Prl cos api
   servlet:
@@ -67,6 +108,7 @@ logging:
     org.springframework.integration: DEBUG
     org.springframework.integration.sftp: DEBUG
     com.jcraft.jsch: DEBUG
+    io.github.resilience4j.retry: DEBUG
   pattern:
     console: "%d{yyyy-MMM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{15} - %msg%n"
 
@@ -81,6 +123,9 @@ feature:
     barristerFeatureEnabled: ${BARRISTER_FEATURE_ENABLED:false}
     cafcassDateTimeFeatureEnabled: ${CAFCASS_DATE_TIME_FEATURE_ENABLED:false}
     osCourtLookupEnabled: ${OS_COURT_LOOKUP_ENABLED:false}
+    bundleByCategoryEnabled: ${BUNDLE_BY_CATEGORY_ENABLED:false}
+    awaitingInformationEnabled: ${AWAITING_INFORMATION_ENABLED:false}
+    exitAwaitingInformationEnabled: ${EXIT_AWAITING_INFORMATION_ENABLED:false}
     createRequestCirUpdateTaskEnabled: ${CREATE_REQUEST_CIR_UPDATE_TASK_ENABLED:false}
 
 xui:
@@ -250,17 +295,17 @@ send-grid:
           SERVE_ORDER_NON_PERSONAL_SOLLICITOR: ${SEND_GRID_SERVE_ORDER_NON_PERSONAL_SOLLICITOR:d-a897504a9e2645978ffc59d8cc488d89}
           SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP: ${SEND_GRID_SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP:d-54982840ce414c43acdc6ac166fbb07f}
           SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB: ${SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB:d-e2ca5bfc715049f9a6030087110d5aac}
-          SOA_SERVE_APPLICANT_PER_CA_CB: ${SOA_SERVE_APPLICANT_PER_CA_CB:d-b2cf161dd4dd482794057ea5b919b082}
+          SOA_SERVE_APPLICANT_PER_CA_CB: ${SOA_SERVE_APPLICANT_PER_CA_CB:d-d038cf4733294c8abc75ceb7b7f1f986}
           SOA_CA_LOCAL_AUTHORITY: ${SEND_GRID_SOA_CA_LOCAL_AUTHORITY:d-0d33615a698a49a4bbbb58b73c43ba1f}
           SERVE_ORDER_CAFCASS_CYMRU: ${SEND_GRID_CAFCASS_CYMRU_ORDER:d-f117f63372a3466aae1eb08120ed1fd0}
-          SOA_CA_APPLICANT_LIP_PERSONAL: ${SOA_CA_APPLICANT_LIP_PERSONAL:d-1f2ea9ee8ac54a8db3af21a2c46c2d4a}
+          SOA_CA_APPLICANT_LIP_PERSONAL: ${SOA_CA_APPLICANT_LIP_PERSONAL:d-8daffd9d6ab3407eb13313f420612d3e}
           SOA_DA_APPLICANT_LIP_PERSONAL: ${SOA_DA_APPLICANT_LIP_PERSONAL:d-4a8751998e024bb1b69ec3b6ba0cbd88}
-          SERVE_ORDER_APPLICANT_RESPONDENT: ${SEND_GRID_SERVE_ORDER_APPLICANT_RESPONDENT:d-19ea91b1dfd8471bb509825b188e4377}
-          SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP:d-7c5f0b34c01c4fafaf1aa97466d58909}
+          SERVE_ORDER_APPLICANT_RESPONDENT: ${SEND_GRID_SERVE_ORDER_APPLICANT_RESPONDENT:d-1235949bb4844bfbb7d6d84185a458ad}
+          SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP:d-9a9e37e2fb98419cb810a15ab757599e}
           SOA_DA_NON_PERSONAL_SERVICE_APPLICANT_LIP: ${SOA_DA_NON_PERSONAL_SERVICE_APPLICANT_LIP:d-e99d580ca3a34f59ab660e0fc37b58b1}
           SOA_DA_NON_PERSONAL_SERVICE_RESPONDENT_LIP: ${SOA_DA_NON_PERSONAL_SERVICE_RESPONDENT_LIP:d-ce6ddab2e9c74dc8a7e50aa2526daaba}
-          SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP:d-00bc2fa3911b4b2aa95d175cfed0eec8}
-          SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP: ${SEND_GRID_SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP:d-8502be2765ac487fa2c3a68997e8b06b}
+          SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP:d-7a9fcf6c18094cc686b64c87fe37f6ba}
+          SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP: ${SEND_GRID_SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP:d-7a5eb527c4d4487d9ce7fc09e00d83df}
           SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP: ${SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP:d-985fad2d0eb7452e9372dce27ddefbd7}
           FM5_REMINDER_APPLICANT_RESPONDENT_SOLICITOR: ${FM5_REMINDER_APPLICANT_RESPONDENT_SOLICITOR:d-06b96acab2484b60b91962b58608adba}
           FM5_REMINDER_APPLICANT_RESPONDENT: ${FM5_REMINDER_APPLICANT_RESPONDENT:d-27c887d8102d43c1992e7f16d81c3b51}
@@ -271,8 +316,8 @@ send-grid:
           C1A_NOTIFICATION_APPLICANT_SOLICITOR: ${C1A_NOTIFICATION_APPLICANT_SOLICITOR:d-ec36aa7e392841f68f3ba291c2765451}
           C1A_RESPONSE_NOTIFICATION_APPLICANT: ${C1A_RESPONSE_NOTIFICATION_APPLICANT:d-821083909cdf4655a923e16bff735ae9}
           C1A_RESPONSE_NOTIFICATION_APPLICANT_SOLICITOR: ${C1A_RESPONSE_NOTIFICATION_APPLICANT_SOLICITOR:d-b43e61866fbe44a8841fbbcf687073c1}
-          SOD_PERSONAL_SERVICE_APPLICANT_LIP: ${SOD_PERSONAL_SERVICE_APPLICANT_LIP:d-0508a0848da147af8fc291b93c71ea04}
-          SOD_NON_PERSONAL_SERVICE_APPLICANT_RESPONDENT_LIP: ${SOD_NON_PERSONAL_SERVICE_APPLICANT_RESPONDENT_LIP:d-e23ef2960e1043b4b2bcb978b84b0cc4}
+          SOD_PERSONAL_SERVICE_APPLICANT_LIP: ${SOD_PERSONAL_SERVICE_APPLICANT_LIP:d-d9880afb8d634990a220d822cb41722c}
+          SOD_NON_PERSONAL_SERVICE_APPLICANT_RESPONDENT_LIP: ${SOD_NON_PERSONAL_SERVICE_APPLICANT_RESPONDENT_LIP:d-92ab78f998174685836010665d96d981}
           SOD_APPLICANT_RESPONDENT_SOLICITOR: ${SOD_APPLICANT_RESPONDENT_SOLICITOR:d-d546049909a74966a5f9d75428fbeb56}
           SOD_ADDITIONAL_RECIPIENTS: ${SOD_ADDITIONAL_RECIPIENTS:d-ada46351d4e44796bb0badcc2a46eed4}
         welsh:
@@ -280,24 +325,37 @@ send-grid:
           SERVE_ORDER_CAFCASS_CYMRU: ${SEND_GRID_CAFCASS_CYMRU_ORDER:d-f117f63372a3466aae1eb08120ed1fd0}
           SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR: ${SEND_GRID_SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR:d-f6f24e4d816c4813a36555e2a2ee0401}
           SERVE_ORDER_NON_PERSONAL_SOLLICITOR: ${SEND_GRID_SERVE_ORDER_NON_PERSONAL_SOLLICITOR:d-a897504a9e2645978ffc59d8cc488d89}
-          SERVE_ORDER_APPLICANT_RESPONDENT: ${SEND_GRID_SERVE_ORDER_APPLICANT_RESPONDENT:d-19ea91b1dfd8471bb509825b188e4377}
+          SERVE_ORDER_APPLICANT_RESPONDENT: ${SEND_GRID_SERVE_ORDER_APPLICANT_RESPONDENT:d-1235949bb4844bfbb7d6d84185a458ad}
           SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP: ${SEND_GRID_SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP:d-54982840ce414c43acdc6ac166fbb07f}
           SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB: ${SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB:d-e2ca5bfc715049f9a6030087110d5aac}
-          SOA_SERVE_APPLICANT_PER_CA_CB: ${SOA_SERVE_APPLICANT_PER_CA_CB:d-b2cf161dd4dd482794057ea5b919b082}
+          SOA_SERVE_APPLICANT_PER_CA_CB: ${SOA_SERVE_APPLICANT_PER_CA_CB:d-d038cf4733294c8abc75ceb7b7f1f986}
           SOA_CA_LOCAL_AUTHORITY: ${SEND_GRID_SOA_CA_LOCAL_AUTHORITY:d-0d33615a698a49a4bbbb58b73c43ba1f}
-          SOA_CA_APPLICANT_LIP_PERSONAL: ${SOA_CA_APPLICANT_LIP_PERSONAL:d-1f2ea9ee8ac54a8db3af21a2c46c2d4a}
+          SOA_CA_APPLICANT_LIP_PERSONAL: ${SOA_CA_APPLICANT_LIP_PERSONAL:d-8daffd9d6ab3407eb13313f420612d3e}
           SOA_DA_APPLICANT_LIP_PERSONAL: ${SOA_DA_APPLICANT_LIP_PERSONAL:d-4a8751998e024bb1b69ec3b6ba0cbd88}
-          SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP:d-7c5f0b34c01c4fafaf1aa97466d58909}
+          SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP:d-9a9e37e2fb98419cb810a15ab757599e}
           SOA_DA_NON_PERSONAL_SERVICE_APPLICANT_LIP: ${SOA_DA_NON_PERSONAL_SERVICE_APPLICANT_LIP:d-e99d580ca3a34f59ab660e0fc37b58b1}
           SOA_DA_NON_PERSONAL_SERVICE_RESPONDENT_LIP: ${SOA_DA_NON_PERSONAL_SERVICE_RESPONDENT_LIP:d-ce6ddab2e9c74dc8a7e50aa2526daaba}
-          SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP:d-00bc2fa3911b4b2aa95d175cfed0eec8}
-          SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP: ${SEND_GRID_SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP:d-8502be2765ac487fa2c3a68997e8b06b}
+          SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP:d-7a9fcf6c18094cc686b64c87fe37f6ba}
+          SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP: ${SEND_GRID_SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP:d-7a5eb527c4d4487d9ce7fc09e00d83df}
           SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP: ${SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP:d-985fad2d0eb7452e9372dce27ddefbd7}
           SEND_EMAIL_TO_EXTERNAL_PARTY: ${SEND_GRID_EMAIL_TO_EXTERNAL_PARTY:d-d6f807d095b046458517924e6c48e5ea}
-  rpa:
-    email:
-      to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
-      from: ${RPA_NOTIFY_FROM_EMAIL:xxxxxxxx}
+  email:
+    from: ${SEND_GRID_FROM_EMAIL:xxxxxxxx}
+
+bankHolidays:
+  api:
+    url: ${BANK_HOLIDAYS_API_URL:https://www.gov.uk}
+
+request-order-task:
+  concurrent-request: ${CONCURRENT_REQUEST:5}
+  release-date: ${REQUEST_ORDER_TASK_RELEASE_DATE:2026-09-15}
+  cadence-working-days:
+    c100: ${REQUEST_ORDER_TASK_C100_CADENCE:1}
+    fl401: ${REQUEST_ORDER_TASK_FL401_CADENCE:1}
+    searchMulitplier: ${REQUEST_ORDER_TASK_CADENCE_MULTIPLIER:1}
+
+update-hearing-actuals:
+  concurrent-request: ${CONCURRENT_REQUEST:5}
 
 fees-register:
   api:
@@ -464,9 +522,6 @@ send-letter:
 case_document_am:
   url: ${CCD_CASE_DOCS_AM_API:http://ccd-case-document-am-api-aat.service.core-compute-aat.internal}
 
-prl-dgs-api:
-  url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
-
 courtfinder:
   api:
     url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
@@ -486,12 +541,21 @@ rd_professional:
 staffDetails:
   api:
     url: ${STAFF_DETAILS_API:http://rd-caseworker-ref-api-aat.service.core-compute-aat.internal}
+  cache:
+    refreshDelayMillis: 1800000
+    emptyRefreshDelayMillis: 30000
 
 judicialUsers:
   api:
     url: ${JUDICIAL_USERS_API:http://rd-judicial-api-aat.service.core-compute-aat.internal}
+  cache:
+    refreshDelayMillis: 1800000
 
 commonData:
+  cache:
+    refreshDelayMillis: 1800000
+    emptyRefreshDelayMillis: 30000
+    failureRetryDelayMillis: 5000
   api:
     url: ${COMMON_DATA_API:http://rd-commondata-api-aat.service.core-compute-aat.internal}
 
@@ -548,6 +612,8 @@ document:
       c100_c1a_welsh_filename: C1A_Document_Welsh.pdf
       c100_resp_c8_welsh_template: FL-PRL-GOR-WEL-RES-C8-FINAL.docx
       c100_resp_c8_welsh_filename: C8Document_Welsh.pdf
+      c100_resp_c8_welsh_draft_template: FL-PRL-GOR-WEL-RES-C8-DRAFT.docx
+      c100_resp_c8_welsh_draft_filename: C8Document_Welsh_Draft.pdf
     fl401:
       fl401_final_template: FL-PRL-APP-ENG-Fl401-Final.docx
       fl401_final_filename: FL401FinalDocument.pdf
@@ -572,7 +638,11 @@ document:
       fl401_resp_c8_template: FL-PRL-GOR-ENG-RES-C8-FL401-FINAL.docx
       fl401_resp_c8_filename: C8Document.pdf
       fl401_resp_c8_template_welsh: FL-PRL-GOR-WEL-RES-C8-FL401-FINAL.docx
-      fl401_resp_c8_filename_welsh: C8Document.pdf
+      fl401_resp_c8_filename_welsh: C8Document_Welsh.pdf
+      fl401_resp_c8_draft_template: FL-PRL-GOR-ENG-RES-C8-FL401-DRAFT.docx
+      fl401_resp_c8_draft_filename: C8Document_Draft.pdf
+      fl401_resp_c8_draft_template_welsh: FL-PRL-GOR-WEL-RES-C8-FL401-DRAFT.docx
+      fl401_resp_c8_draft_filename_welsh: C8Document_Welsh_Draft.pdf
     common:
       doc_cover_sheet_template: FL-PRL-APP-ENG-COVER-SHEET.docx
       doc_cover_sheet_welsh_template: FL-PRL-APP-WEL-COVER-SHEET.docx
@@ -681,6 +751,14 @@ document:
       prl_fl402_welsh_draft_filename: Welsh_NoticeOfProceedings(FL402)Draft.pdf
       prl_fl402_welsh_final_template: PRL-HNO-WEL-FL402-Notice-Of-Proceedings-Final.docx
       prl_fl402_welsh_final_filename: Welsh_NoticeOfProceedings(FL402).pdf
+      prl_notice_of_hearing_fl402_draft_template: FL-PRL-HNO-ENG-FL402-Notice-Of-Hearing-Draft.docx
+      prl_notice_of_hearing_fl402_draft_filename: NoticeOfHearing(DA)Draft.pdf
+      prl_notice_of_hearing_fl402_final_template: FL-PRL-HNO-ENG-FL402-Notice-Of-Hearing-Final.docx
+      prl_notice_of_hearing_fl402_final_filename: NoticeOfHearing(DA).pdf
+      prl_notice_of_hearing_fl402_welsh_draft_template: FL-PRL-HNO-WEL-FL402-Notice-Of-Hearing-Draft.docx
+      prl_notice_of_hearing_fl402_welsh_draft_filename: Welsh_NoticeOfHearing(DA)Draft.pdf
+      prl_notice_of_hearing_fl402_welsh_final_template: FL-PRL-HNO-WEL-FL402-Notice-Of-Hearing-Final.docx
+      prl_notice_of_hearing_fl402_welsh_final_filename: Welsh_NoticeOfHearing(DA).pdf
       prl_n117_welsh_draft_template: FL-PRL-GOR-WEL-N117-General-Undertaking-Form-Draft.docx
       prl_n117_welsh_draft_filename: Welsh_N117CreateOrderDraft.pdf
       prl_n117_welsh_template: FL-PRL-GOR-WEL-N117-General-Undertaking-Form-Final.docx
@@ -709,6 +787,14 @@ document:
       prl_c6_welsh_filename: Welsh_Notice_Of_Proceeding_Order_C6.pdf
       prl_c6_welsh_draft_template: FL-PRL-GOR-WEL-C6-Notice-of-parties-Order-Draft.docx
       prl_c6_welsh_draft_filename: Welsh_Notice_Of_Proceeding_Order_C6_draft.pdf
+      prl_notice_of_hearing_c100_template: FL-PRL-GOR-ENG-C100-Notice-of-hearing-Final.docx
+      prl_notice_of_hearing_c100_filename: NoticeOfHearing(CA).pdf
+      prl_notice_of_hearing_c100_draft_template: FL-PRL-GOR-ENG-C100-Notice-of-hearing-Draft.docx
+      prl_notice_of_hearing_c100_draft_filename: NoticeOfHearing(CA)Draft.pdf
+      prl_notice_of_hearing_c100_welsh_template: FL-PRL-GOR-WEL-C100-Notice-of-hearing-Final.docx
+      prl_notice_of_hearing_c100_welsh_filename: Welsh_NoticeOfHearing(CA).pdf
+      prl_notice_of_hearing_c100_welsh_draft_template: FL-PRL-GOR-WEL-C100-Notice-of-hearing-Draft.docx
+      prl_notice_of_hearing_c100_welsh_draft_filename: Welsh_NoticeOfHearing(CA)Draft.pdf
       prl_c6a_template: FL-PRL-GOR-ENG-C6a-Notice-of-nonparties-Order-Final.docx
       prl_c6a_filename: Notice_Of_Proceeding_Order_C6a.pdf
       prl_c6a_draft_template: FL-PRL-GOR-ENG-C6a-Notice-of-nonparties-Order-Draft.docx
@@ -727,10 +813,18 @@ document:
       prl_sdo_welsh_filename: Welsh_Standard_Directions_Order_Final.pdf
       doc_cover_sheet_serve_order_template: FL-PRL-APP-ENG-COVER-SERVE-ORDER-SHEET.docx
       doc_cover_sheet_welsh_serve_order_template: FL-PRL-APP-WEL-COVER-SERVE-ORDER-SHEET.docx
+      prl_blank_cover_letter_template: FL-PRL-APP-ENG-BLANK-COVER-LETTER.docx
+      prl_blank_cover_letter_welsh_template: FL-PRL-APP-WEL-BLANK-COVER-LETTER.docx
       prl_citizen_c1a_final_response_template: FL-PRL-GOR-ENG-CITIZEN-C1A-RESPONSE-FINAL.docx
       prl_citizen_c1a_final_response_welsh_template: FL-PRL-GOR-WEL-CITIZEN-C1A-RESPONSE-FINAL.docx
       doc_send_reply_message_template: FL-PRL-LET-ENG-SEND-REPLY-MESSAGE.docx
       doc_send_reply_message_welsh_template: FL-PRL-LET-WEL-SEND-REPLY-MESSAGE.docx
+      other_c8_template: FL-PRL-GOR-ENG-OTHER-C8.docx
+      other_c8_filename: C8Document.pdf
+      other_c8_draft_filename: C8Document_Draft.pdf
+      other_c8_template_welsh: FL-PRL-GOR-WEL-OTHER-C8.docx
+      other_c8_filename_welsh: C8Document_Welsh.pdf
+      other_c8_draft_filename_welsh: C8Document_Welsh_Draft.pdf
     citizen:
       prl_citizen_witness_statement_welsh_template: FL-PRL-GOR-WEL-Citizen-Witness-Statement.docx
       prl_citizen_witness_statement_template: FL-PRL-GOR-ENG-Citizen-Witness-Statement.docx
@@ -849,3 +943,35 @@ hwf-update-case-state-task:
 prepare-hearing-bundle:
   calendar-days-before-hearing: ${PREPARE_HEARING_BUNDLE_CALENDAR_DAYS_BEFORE_HEARING:7}
 
+resilience4j:
+  retry:
+    instances:
+      searchCasesRetryConfig:
+        maxAttempts: 3
+        waitDuration: 1s
+        retryExceptions:
+          - feign.FeignException
+        ignoreExceptions:
+          - org.springframework.web.server.ResponseStatusException
+          - feign.FeignException$Unauthorized
+          - feign.FeignException$BadRequest
+      generateAndStorePdfRetryConfig:
+        maxAttempts: 3
+        waitDuration: 1s
+        retryExceptions:
+          - uk.gov.hmcts.reform.prl.exception.PdfConversionException
+
+docmosis:
+  url: ${DOCMOSIS_SERVICE_BASE_URL:https://docmosis.aat.platform.hmcts.net}
+  access-key: ${DOCMOSIS_ACCESS_KEY:}
+  pdf:
+    familyCourtImgKey: "familycourt"
+    familyCourtImgVal: "[userImage:familycourt.png]"
+    hmctsImgKey: "hmcts"
+    hmctsImgVal: "[userImage:hmcts.png]"
+    displayTemplateKey: "displayTemplateOnly"
+    displayTemplateVal: "1"
+
+http:
+  connect-timeout: 60s
+  read-timeout: 60s

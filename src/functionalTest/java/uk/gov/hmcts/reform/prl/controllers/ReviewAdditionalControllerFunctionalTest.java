@@ -4,22 +4,19 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import java.util.Base64;
 
+
 @Slf4j
-@SpringBootTest
-@RunWith(SpringRunner.class)
-@ContextConfiguration
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
 public class ReviewAdditionalControllerFunctionalTest {
 
     @Autowired
@@ -74,7 +71,7 @@ public class ReviewAdditionalControllerFunctionalTest {
 
     @Test
     public void givenBodyWithNoMessages_whenAboutToSubmitForSendOrReply() throws Exception {
-        String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST_FOR_REPLY);
+        String requestBody = ResourceLoader.loadJson(REVIEW_ADDITIONAL_APPLICATION_REQUEST_FOR_SEND);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .body(requestBody)
@@ -88,7 +85,7 @@ public class ReviewAdditionalControllerFunctionalTest {
 
     @Test
     public void givenBodyWithNoMessages_whenSubmittedForSendOrReply() throws Exception {
-        String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST_FOR_REPLY);
+        String requestBody = ResourceLoader.loadJson(REVIEW_ADDITIONAL_APPLICATION_REQUEST_FOR_SEND);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .body(requestBody)

@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentC8;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
@@ -102,7 +102,7 @@ public class ConfidentialityCheckService {
     }
 
     private static void findAndShowC8RefugeDocs(Map<String, Object> caseDataMap, PartyDetails eachApp, String ccdCaseFieldId) {
-        if (YesOrNo.Yes.equals(eachApp.getLiveInRefuge())
+        if (YesNoIDontKnowV2.Yes.equals(eachApp.getLiveInRefuge())
                 && null != eachApp.getRefugeConfidentialityC8Form()) {
             caseDataMap.put(ccdCaseFieldId, eachApp.getRefugeConfidentialityC8Form());
         } else {

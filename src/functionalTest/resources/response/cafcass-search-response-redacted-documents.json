@@ -1,0 +1,32 @@
+{
+  "total": 1,
+  "cases": [
+    {
+      "id": 1661164783455399,
+      "jurisdiction": "PRIVATELAW",
+      "state": "DECISION_OUTCOME",
+      "caseTypeOfApplication": "C100",
+      "case_type_id": "PRLAPPS",
+      "created_date": "2022-08-22T10:39:43.49",
+      "last_modified": "2022-08-22T10:44:54.055",
+      "case_data": {
+        "dateSubmitted": "2022-08-22",
+        "caseTypeOfApplication": "C100",
+        "caseManagementLocation": {
+          "regionId": "2",
+          "baseLocationId": "123456"
+        },
+        "otherDocumentsUploaded": [
+          {
+            "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/00000000-0000-0000-0000-000000000000",
+            "document_filename": "*Redacted*.pdf"
+          },
+          {
+            "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/11111111-1111-1111-1111-111111111111",
+            "document_filename": "valid-document.pdf"
+          }
+        ]
+      }
+    }
+  ]
+}

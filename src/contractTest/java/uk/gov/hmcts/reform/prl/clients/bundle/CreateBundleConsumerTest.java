@@ -45,7 +45,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
         "fis_hearing.api.url=localhost:5000",
         "refdata.api.url=",
         "courtfinder.api.url=",
-        "prl-dgs-api.url=",
         "fees-register.api.url=",
         "fis_hearing.api.url=",
         "judicialUsers.api.url=",
@@ -56,7 +55,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
         "staffDetails.api.url=",
         "amRoleAssignment.api.url=",
         "core_case_data.api.url=",
-        "postcodelookup.api.url="
+        "postcodelookup.api.url=",
+        "bankHolidays.api.url="
     }
 )
 @PactFolder("pacts")

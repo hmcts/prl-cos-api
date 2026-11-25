@@ -24,10 +24,8 @@ java:
           alias: LAUNCH_DARKLY_SDK_KEY
         - name: send-grid-api-key
           alias: SEND_GRID_API_KEY
-        - name: rpa-notify-to-email
-          alias: RPA_NOTIFY_TO_EMAIL
         - name: rpa-notify-from-email
-          alias: RPA_NOTIFY_FROM_EMAIL
+          alias: SEND_GRID_FROM_EMAIL
         - name: AppInsightsInstrumentationKey
           alias: APP_INSIGHTS_INSTRUMENTATION_KEY
         - name: southampton-court-email-address
@@ -68,6 +66,8 @@ java:
           alias: ACRO_SFTP_USER
         - name: acro-sftp-user-password
           alias: ACRO_SFTP_USER_PASSWORD
+        - name: docmosis-api-key
+          alias: DOCMOSIS_ACCESS_KEY
   environment:
     PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PAY_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
@@ -82,6 +82,7 @@ java:
     CCD_CASE_DOCS_AM_API: ${CCD_CASE_DOCS_AM_API}
     ACA_SERVICE_API_BASEURL: ${ACA_SERVICE_API_BASEURL}
     BUNDLE_URL: http://em-ccd-orchestrator-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    # AM_ROLE_ASSIGNMENT_API_URL: https://am-role-assignment-service-prl-ccd-definitions-pr-3761.preview.platform.hmcts.net
     AM_ROLE_ASSIGNMENT_API_URL: http://am-role-assignment-service-aat.service.core-compute-aat.internal
     AUTH_IDAM_CLIENT_BASEURL: https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net
     AUTH_PROVIDER_SERVICE_CLIENT_BASEURL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
@@ -91,7 +92,6 @@ java:
     AUTH_PROVIDER_SERVICE_CLIENT_MICROSERVICE: prl_cos_api
     AUTH_PROVIDER_SERVICE_CLIENT_TOKENTIMETOLIVEINSECONDS: 900
     IDAM_S2S_AUTH_MICROSERVICE: prl_cos_api
-    PRL_DGS_API_URL: http://prl-dgs-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     FEE_REGISTER_API_URL: http://fees-register-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PRL_S2S_AUTHORISED_SERVICES: api_gw,prl_citizen_frontend,fis_hmc_api,ccd_data,prl_cos_api
     FACT_API: http://fact-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
@@ -105,6 +105,9 @@ java:
     COMMON_DATA_API: http://rd-commondata-api-aat.service.core-compute-aat.internal
     SEND_LETTER_URL: http://rpe-send-letter-service-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     BARRISTER_FEATURE_ENABLED: true
+    AWAITING_INFORMATION_ENABLED: true
+    EXIT_AWAITING_INFORMATION_ENABLED: true
     CAFCASS_DATE_TIME_FEATURE_ENABLED: true
+    BUNDLE_BY_CATEGORY_ENABLED: true
     CREATE_REQUEST_CIR_UPDATE_TASK_ENABLED: true
     APP_ENV: "preview"

@@ -61,7 +61,7 @@ public class ServiceOfApplication {
     private final YesOrNo applicationServedYesNo;
     private final String rejectionReason;
 
-    private List<Element<ConfidentialCheckFailed>> confidentialCheckFailed;
+    private List<Element<ConfidentialCheckFailed>> confidentialCheckFailed; //audit of all failed confidential checks
 
     private final YesOrNo soaServeLocalAuthorityYesOrNo;
     private final String soaLaEmailAddress;

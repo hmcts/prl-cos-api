@@ -43,7 +43,11 @@ public class AutomatedHearingUtils {
         // For custom orders, process AHR using caseDataMap's collections to preserve
         // custom order updates (combined doc, orderTypeId) that would be lost if we
         // overwrote with caseData's collections
-        if (caseDataMap.get("customOrderDoc") != null && objectMapper != null) {
+        // Check manageOrdersOptions (not customOrderNameOption which persists from previous orders)
+        Object manageOrdersOption = caseDataMap.get("manageOrdersOptions");
+        boolean isCustomOrder = "createCustomOrder".equals(manageOrdersOption)
+            || (manageOrdersOption != null && manageOrdersOption.toString().contains("createCustomOrder"));
+        if (isCustomOrder && objectMapper != null) {
             processAhrForCustomOrder(authorisation, caseData, caseDataMap, manageOrderService, objectMapper);
             log.info("AutomatedHearingUtils::automatedHearingManagementRequest: End (custom order)");
             return;

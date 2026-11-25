@@ -6,13 +6,13 @@ import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
@@ -20,8 +20,8 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 import static uk.gov.hmcts.reform.prl.controllers.listwithoutnotice.ListWithoutNoticeController.CONFIRMATION_BODY_PREFIX_CA;
 
 @Slf4j
-@SpringBootTest
-@ContextConfiguration
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
+
 public class ListWithoutNoticeControllerFT {
 
     @Autowired
@@ -35,7 +35,6 @@ public class ListWithoutNoticeControllerFT {
 
     private static final String LIST_WITHOUT_NOTICE_CA_VALID_REQUEST_BODY = "requests/listwithoutnotice/ListWithoutNoticeCa.json";
 
-
     private final String c100ListWithoutNoticeEndpoint = "/listWithoutNotice";
 
     private final String c100ListWithoutNoticeConfirmationEndpoint = "/listWithoutNotice-confirmation";
@@ -47,7 +46,6 @@ public class ListWithoutNoticeControllerFT {
         );
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
-
 
     @Test
     public void testListWithoutNotice_200ResponseAndNoErrors_CA() throws Exception {
@@ -63,8 +61,8 @@ public class ListWithoutNoticeControllerFT {
             .post(c100ListWithoutNoticeEndpoint);
         response.then().assertThat().statusCode(200);
         AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
-        Assert.assertNotNull(res.getData());
-        Assert.assertTrue(res.getData().containsKey("caseNotes"));
+        Assertions.assertNotNull(res.getData());
+        Assertions.assertTrue(res.getData().containsKey("caseNotes"));
     }
 
     @Test
@@ -84,6 +82,6 @@ public class ListWithoutNoticeControllerFT {
             response.getBody().asString(),
             SubmittedCallbackResponse.class
         );
-        Assert.assertEquals(res.getConfirmationBody(),CONFIRMATION_BODY_PREFIX_CA);
+        Assertions.assertEquals(res.getConfirmationBody(),CONFIRMATION_BODY_PREFIX_CA);
     }
 }

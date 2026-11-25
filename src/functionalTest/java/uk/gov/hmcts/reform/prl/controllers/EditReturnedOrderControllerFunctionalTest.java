@@ -6,31 +6,27 @@ import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
-
 @Slf4j
-@SpringBootTest
-@RunWith(SpringRunner.class)
-@ContextConfiguration
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class EditReturnedOrderControllerFunctionalTest {
 
     @Autowired
@@ -60,7 +56,9 @@ public class EditReturnedOrderControllerFunctionalTest {
     private static final String VALID_INPUT_JSON_FOR_RETURNED_ORDER = "requests/editreturnedorder/CallBackRequestEditReturnedOrder.json";
 
     @Test
-    public void createCcdTestCase() throws Exception {
+    @Order(1)
+
+    void createCcdTestCase() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
         caseDetails =  request
@@ -75,11 +73,12 @@ public class EditReturnedOrderControllerFunctionalTest {
             .extract()
             .as(CaseDetails.class);
 
-        Assert.assertNotNull(caseDetails);
-        Assert.assertNotNull(caseDetails.getId());
+        Assertions.assertNotNull(caseDetails);
+        Assertions.assertNotNull(caseDetails.getId());
     }
 
     @Test
+    @Order(2)
     public void givenRequestBody_whenAboutToStart_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_RETURNED_ORDER);
         Response response = request
@@ -94,15 +93,16 @@ public class EditReturnedOrderControllerFunctionalTest {
             response.getBody().asString(),
             AboutToStartOrSubmitCallbackResponse.class
         );
-        Assert.assertTrue(res.getData().containsKey("rejectedOrdersDynamicList"));
+        Assertions.assertTrue(res.getData().containsKey("rejectedOrdersDynamicList"));
         DynamicList rejectedOrdersDynamicList = objectMapper.convertValue(
             res.getData().get("rejectedOrdersDynamicList"),
             DynamicList.class
         );
-        Assert.assertNotNull(rejectedOrdersDynamicList);
+        Assertions.assertNotNull(rejectedOrdersDynamicList);
     }
 
     @Test
+    @Order(3)
     public void givenBody_whenMidEventToPopulateInstructions() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_RETURNED_ORDER);
         Response response = request
@@ -117,22 +117,24 @@ public class EditReturnedOrderControllerFunctionalTest {
             response.getBody().asString(),
             AboutToStartOrSubmitCallbackResponse.class
         );
-        Assert.assertTrue(res.getData().containsKey("editOrderTextInstructions"));
+        Assertions.assertTrue(res.getData().containsKey("editOrderTextInstructions"));
         String editOrderTextInstructions = objectMapper.convertValue(
             res.getData().get("editOrderTextInstructions"),
             String.class
         );
-        Assert.assertNotNull(editOrderTextInstructions);
+        Assertions.assertNotNull(editOrderTextInstructions);
 
     }
 
     @Test
+    @Order(4)
     public void givenBody_whenSubmittedToResubmit() throws Exception {
+
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_RETURNED_ORDER);
         String requestBodyRevised = requestBody
-            .replace("1706607610239516", caseDetails.getId().toString());
+            .replaceAll("1706607610239516", caseDetails.getId().toString());
         Response response = request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBodyRevised)
             .when()
@@ -143,7 +145,7 @@ public class EditReturnedOrderControllerFunctionalTest {
             response.getBody().asString(),
             SubmittedCallbackResponse.class
         );
-        Assert.assertEquals(res.getConfirmationHeader(), "# Gorchymyn drafft wedi’i ailgyflwyno<br/>Draft order resubmitted");
+        Assertions.assertEquals(res.getConfirmationHeader(), "# Gorchymyn drafft wedi’i ailgyflwyno<br/>Draft order resubmitted");
 
     }
 }

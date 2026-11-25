@@ -4,12 +4,12 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
@@ -18,10 +18,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 
-
 @Slf4j
-@SpringBootTest
-@ContextConfiguration
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
 public class AddCafcassOfficerControllerFunctionalTest {
 
     private static final String VALID_REQUEST_BODY = "requests/add-cafcass-officer.json";
@@ -33,7 +31,6 @@ public class AddCafcassOfficerControllerFunctionalTest {
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
     private static final String C100_SEND_TO_GATEKEEPERJUDGE = "requests/call-back-controller-send-to-gatekeeperForJudge.json";
-
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -66,7 +63,7 @@ public class AddCafcassOfficerControllerFunctionalTest {
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
-        Assert.assertNotNull(response.getData().get("newChildDetails"));
+        Assertions.assertNotNull(response.getData().get("newChildDetails"));
 
     }
 }

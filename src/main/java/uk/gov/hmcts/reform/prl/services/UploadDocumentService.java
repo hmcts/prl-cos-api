@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
@@ -36,22 +34,15 @@ public class UploadDocumentService {
 
     private final AuthTokenGenerator authTokenGenerator;
     private final CaseDocumentClient caseDocumentClient;
-    private final CoreCaseDataApi coreCaseDataApi;
-    private final ObjectMapper objectMapper;
 
     public Document uploadDocument(byte[] pdf, String fileName, String contentType, String authorisation) {
         MultipartFile file = new InMemoryMultipartFile("files", fileName, contentType, pdf);
 
-
         UploadResponse response = caseDocumentClient.uploadDocuments(authorisation, authTokenGenerator.generate(),
-                                                                     CASE_TYPE, JURISDICTION, newArrayList(file)
-        );
-
+                                                                     CASE_TYPE, JURISDICTION, newArrayList(file));
         return response.getDocuments().stream()
             .findFirst()
-            .orElseThrow(() ->
-                             new RuntimeException("Document upload failed due to empty result"));
-
+            .orElseThrow(() -> new RuntimeException("Document upload failed due to empty result"));
     }
 
     public UploadedDocuments uploadCitizenDocument(String authorisation, UploadedDocumentRequest uploadedDocumentRequest) {

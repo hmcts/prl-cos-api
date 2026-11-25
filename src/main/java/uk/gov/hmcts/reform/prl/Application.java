@@ -8,6 +8,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
@@ -35,6 +36,7 @@ import uk.gov.hmcts.reform.prl.tasks.ScheduledTaskRunner;
 @EnableAutoConfiguration
 @EnableCaching
 @EnableScheduling
+@ConfigurationPropertiesScan
 @ComponentScan(basePackages = {  "uk.gov.hmcts.reform.prl", "uk.gov.hmcts.reform.prl.services",
     "uk.gov.hmcts.reform.prl.config","uk.gov.hmcts.reform.ccd.document","uk.gov.hmcts.reform.prl.repositories",
     "uk.gov.hmcts.reform.prl.mapper","uk.gov.hmcts.reform.idam.client",

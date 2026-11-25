@@ -51,6 +51,7 @@ public class RelationshipsController {
     private final CafcassDateTimeService cafcassDateTimeService;
 
     private static final String CHILD_AND_APPLICANT_RELATIONS = "buffChildAndApplicantRelations";
+    private static final String CHILDREN_AND_APPLICANTS_EVENT = "childrenAndApplicants";
 
     @PostMapping(path = "/pre-populate-applicant-to-child-relation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "pre populates applicant and child relations")
@@ -153,7 +154,7 @@ public class RelationshipsController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put(CHILD_AND_APPLICANT_RELATIONS, null);
         caseDataUpdated.put("childAndApplicantRelations", updatedChildAndApplicantRelations);
-        cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
+        cafcassDateTimeService.updateCafcassDateTime(callbackRequest, CHILDREN_AND_APPLICANTS_EVENT);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -397,4 +398,3 @@ public class RelationshipsController {
     }
 
 }
-

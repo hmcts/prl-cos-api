@@ -1675,6 +1675,57 @@
               "isWithdrawnRequestApproved": "",
               "typeOfChildArrangementsOrder": ""
             }
+          },
+          {
+            "id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+            "value": {
+              "orderType": "nonMolestation",
+              "sosStatus": "NOT_REQUIRED",
+              "dateCreated": "2025-08-07T12:25:09.341864",
+              "typeOfOrder": "Final",
+              "orderDocument": {
+                "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/9388c68f-8297-412c-b072-b5e655ed0744",
+                "upload_timestamp": "2025-08-06T13:25:09.539914397",
+                "document_filename": "non_molestation_order_fl404a_final.pdf",
+                "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/9388c68f-8297-412c-b072-b5e655ed0744/binary"
+              },
+              "isOrderUploaded": "No",
+              "orderClosesCase": "No",
+              "serveOrderDetails": {
+                "servedParties": [
+                  {
+                    "id": "309f08fa-6a3e-492b-8133-7f02607798f1",
+                    "value": {
+                      "partyId": "f2847b15-dbb8-4df0-868a-420d9de11d29",
+                      "partyName": "John Smith(Applicant)",
+                      "servedDateTime": "2025-08-06T13:25:09.343316"
+                    }
+                  },
+                  {
+                    "id": "a7708ff5-f3a7-4339-ad46-b4c66d044f2f",
+                    "value": {
+                      "partyId": "f2847b15-dbb8-4df0-868a-420d9de11d29",
+                      "partyName": "John Smith",
+                      "servedDateTime": "2025-08-06T14:25:09.343491"
+                    }
+                  }
+                ],
+                "recipientsOptions": "John Smith",
+                "serveOnRespondent": "No",
+                "otherPartiesServed": "No",
+                "multipleOrdersServed": "No"
+              },
+              "orderDocumentWelsh": {
+                "document_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/37a097eb-2c68-4d81-a34a-d1cf0bc3f530",
+                "upload_timestamp": "2025-08-06T13:25:09.539914397",
+                "document_filename": "welsh_non_molestation_order_fl404a_final.pdf",
+                "document_binary_url": "http://dm-store-demo.service.core-compute-demo.internal/documents/37a097eb-2c68-4d81-a34a-d1cf0bc3f530/binary"
+              },
+              "isAutoHearingReqPending": "No",
+              "isTheOrderAboutChildren": "No",
+              "isWithdrawnRequestApproved": "",
+              "typeOfChildArrangementsOrder": ""
+            }
           }
         ]
       }

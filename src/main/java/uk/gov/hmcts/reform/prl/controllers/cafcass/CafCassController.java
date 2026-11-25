@@ -65,7 +65,6 @@ public class CafCassController extends AbstractCallbackController {
             serviceAuthorisation = serviceAuthorisation.startsWith(BEARER)
                 ? serviceAuthorisation : BEARER.concat(serviceAuthorisation);
             Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
-
             if (userInfo.isPresent() && Boolean.TRUE.equals(
                 authorisationService.authoriseService(serviceAuthorisation))) {
                 if (userInfo.get().getRoles().contains(CAFCASS_USER_ROLE)) {

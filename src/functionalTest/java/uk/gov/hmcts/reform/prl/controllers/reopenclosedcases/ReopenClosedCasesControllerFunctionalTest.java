@@ -7,8 +7,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
@@ -16,21 +16,17 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 
-
 @Slf4j
-@SpringBootTest
-@ContextConfiguration
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
 public class ReopenClosedCasesControllerFunctionalTest {
 
     private static final String VALID_REQUEST_BODY_ABOUT_TO_SUBMIT = "requests/reopenclosedcases/about-to-submit.json";
-
 
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
 
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
-
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -39,7 +35,6 @@ public class ReopenClosedCasesControllerFunctionalTest {
         );
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
-
 
     @Test
     public void givenRequestBody_aboutToSubmit_then200Response() throws Exception {

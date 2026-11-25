@@ -4,20 +4,21 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.TestPropertySource;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 @Slf4j
-@SpringBootTest
-@RunWith(SpringRunner.class)
-@ContextConfiguration
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
+
+@TestPropertySource(properties = {"feature.toggle.bundleByCategoryEnabled=false"})
 public class BundlingControllerFunctionalTest {
 
     @Autowired
@@ -25,7 +26,11 @@ public class BundlingControllerFunctionalTest {
 
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
+
+    private static CaseDetails caseDetails;
+
     private static final String VALID_REQUEST_BODY = "requests/bundle/C100-case-data.json";
+    private static final String VALID_CAFCASS_REQUEST_JSON = "requests/cafcass-cymru-send-email-request.json";
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -36,12 +41,35 @@ public class BundlingControllerFunctionalTest {
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
     @Test
-    public void createBundle_then200Response() throws Exception {
+    public void createCcdTestCase() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
+        caseDetails = request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/testing-support/create-ccd-case-data")
+            .then()
+            .assertThat().statusCode(200)
+            .extract()
+            .as(CaseDetails.class);
+
+        Assertions.assertNotNull(caseDetails);
+        Assertions.assertNotNull(caseDetails.getId());
+    }
+
+    @Test
+    public void givenCreateBundle_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        String requestBodyRevised = requestBody
+            .replace("1648728532100635", caseDetails.getId().toString());
+
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
+            .body(requestBodyRevised)
             .when()
             .contentType("application/json")
             .post("/bundle/createBundle")

@@ -39,6 +39,7 @@ public class CftLibConfig implements CFTLibConfigurer {
             "caseworker-privatelaw-bulkscansystemupdate",
             "caseworker-privatelaw-bulkscan",
             "pui-case-manager",
+            "pui-organisation-manager",
             "caseworker-approver",
             "caseworker-privatelaw-cafcass",
             "caseworker-privatelaw-externaluser-viewonly",

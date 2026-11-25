@@ -38,7 +38,10 @@ import java.util.Optional;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
@@ -126,21 +129,51 @@ public class CourtNavCaseControllerTest {
     }
 
     @Test
-    public void shouldUploadDocumentWhenCalledWithValidS2sAndAuthToken() {
+    public void shouldUploadDocumentWhenDocumentIdIsNullForCourtNavUser() {
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(userInfo.getRoles()).thenReturn(List.of(COURTNAV_USER));
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
-        doNothing().when(courtNavCaseService).uploadDocument(any(), any(), any(), any());
+        doNothing().when(courtNavCaseService).uploadDocument(any(), any(), any(), any(), any());
 
         ResponseEntity<Object> response = courtNavCaseController.uploadDocument(
             AUTH,
             "s2s token",
             "1234567891234567",
             file,
-            "fl401Doc1"
+            "fl401Doc1",
+            null
         );
         assertEquals(OK, response.getStatusCode());
+        verify(courtNavCaseService).uploadDocument(eq(AUTH), eq(file), eq("fl401Doc1"), eq("1234567891234567"), isNull());
+
+    }
+
+    @Test
+    public void shouldUploadDocumentWhenDocumentIdIsNonNullAndUniqueForCourtNavUser() {
+
+        String uniqueDocumentId = "courtnav-doc-id-123";
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(userInfo.getRoles()).thenReturn(List.of(COURTNAV_USER));
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
+        doNothing().when(courtNavCaseService).uploadDocument(any(), any(), any(), any(), any());
+
+        ResponseEntity<Object> response = courtNavCaseController.uploadDocument(
+            AUTH,
+            "s2s token",
+            "1234567891234567",
+            file,
+            "fl401Doc1",
+            uniqueDocumentId
+        );
+        assertEquals(OK, response.getStatusCode());
+        verify(courtNavCaseService).uploadDocument(
+            eq(AUTH),
+            eq(file),
+            eq("fl401Doc1"),
+            eq("1234567891234567"),
+            eq(uniqueDocumentId)
+        );
 
     }
 
@@ -157,7 +190,8 @@ public class CourtNavCaseControllerTest {
             "s2s token",
             "1234567891234567",
             file,
-            "fl401Doc1"
+            "fl401Doc1",
+            null
         );
         assertEquals(OK, response.getStatusCode());
 
@@ -238,11 +272,11 @@ public class CourtNavCaseControllerTest {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(userInfo.getRoles()).thenReturn(List.of(COURTNAV_USER));
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
-        doNothing().when(courtNavCaseService).uploadDocument(any(), any(), any(), any());
+        doNothing().when(courtNavCaseService).uploadDocument(any(), any(), any(), any(), any());
 
         ResponseEntity<Object> response = courtNavCaseController
             .uploadDocument("Bearer:test", "s2s token",
-                            "", file, "fl401Doc1"
+                            "", file, "fl401Doc1", null
             );
         assertEquals(OK, response.getStatusCode());
     }
@@ -251,13 +285,13 @@ public class CourtNavCaseControllerTest {
     public void shouldNotUploadDocWhenCalledWithInvalidAuthToken() {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         assertThrows(FORBIDDEN.toString(), ResponseStatusException.class, () -> courtNavCaseController.uploadDocument(
-            "Bearer:invalid", "s2s token", "", file, "fl401Doc1"));
+            "Bearer:invalid", "s2s token", "", file, "fl401Doc1", null));
     }
 
     @Test
     public void shouldNotUploadDocWhenCalledWithInvalidS2SToken() {
         assertThrows(FORBIDDEN.toString(), ResponseStatusException.class, () -> courtNavCaseController.uploadDocument(
-            "Bearer:test", "invalid", "", file, "fl401Doc1"));
+            "Bearer:test", "invalid", "", file, "fl401Doc1", null));
     }
 
     @Test
@@ -266,7 +300,7 @@ public class CourtNavCaseControllerTest {
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         when(userInfo.getRoles()).thenReturn(List.of("invalidRole"));
         assertThrows(FORBIDDEN.toString(), ResponseStatusException.class, () -> courtNavCaseController.uploadDocument(
-            "Bearer:test", "s2s token", "", file, "fl401Doc1"));
+            "Bearer:test", "s2s token", "", file, "fl401Doc1", null));
     }
 
     @Test

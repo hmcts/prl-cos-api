@@ -4,8 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.wa.AdditionalProperties;
+import uk.gov.hmcts.reform.prl.models.wa.ClientContext;
+import uk.gov.hmcts.reform.prl.models.wa.TaskData;
+import uk.gov.hmcts.reform.prl.models.wa.UserTask;
 import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import static java.util.Objects.nonNull;
@@ -39,5 +44,16 @@ public class TaskUtils {
                                  objectMapper)
             )
             .orElse(null);
+    }
+
+    public Optional<AdditionalProperties> getTaskAdditionalProperties(
+        String clientContext) {
+
+        return ofNullable(clientContext)
+            .map(value -> CaseUtils.getWaMapper(clientContext))
+            .map(WaMapper::getClientContext)
+            .map(ClientContext::getUserTask)
+            .map(UserTask::getTaskData)
+            .map(TaskData::getAdditionalProperties);
     }
 }

@@ -16,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FeeAndPayServiceRequestService {
     public static final String HWF_SUPPRESSION_ERROR_MESSAGE
-        = "Help with Fees is not yet available in Family Private Law digital service. Select 'No' to continue with your application";
+        = "Help with Fees is not yet available in the Private Law digital service. Select 'No' to continue with your application.";
 
     public static final String HWF_SUPPRESSION_ERROR_MESSAGE_WELSH
         = "Nid yw Help i Dalu Ffioedd ar gael eto yng ngwasanaeth digidol Cyfraith Deulu Breifat. Dewiswch ‘Na’ i barhau â’ch cais";
