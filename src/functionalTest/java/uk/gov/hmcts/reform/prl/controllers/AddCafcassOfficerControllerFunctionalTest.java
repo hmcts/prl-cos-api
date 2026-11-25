@@ -20,6 +20,9 @@ import static org.hamcrest.Matchers.notNullValue;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
+@org.springframework.test.context.TestPropertySource(properties = {
+    "hearing_component.api.feign-url=http://localhost:4044"
+})
 public class AddCafcassOfficerControllerFunctionalTest {
 
     private static final String VALID_REQUEST_BODY = "requests/add-cafcass-officer.json";

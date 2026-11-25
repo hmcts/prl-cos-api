@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import static uk.gov.hmcts.reform.prl.services.HearingRefDataService.HEARING_REF_DATA_CACHE;
 import static uk.gov.hmcts.reform.prl.services.RefDataUserService.JUDICIAL_USER_CACHE;
 import static uk.gov.hmcts.reform.prl.services.RefDataUserService.STAFF_REF_DATA_CACHE;
+import static uk.gov.hmcts.reform.prl.services.SystemUserService.HMC_USER_CACHE;
 import static uk.gov.hmcts.reform.prl.services.SystemUserService.SYS_USER_CACHE;
 
 @Configuration
@@ -16,6 +17,6 @@ public class CacheConfig {
     @Bean
     public CacheManager cacheManager() {
         return new ConcurrentMapCacheManager(SYS_USER_CACHE, JUDICIAL_USER_CACHE, STAFF_REF_DATA_CACHE,
-                                             HEARING_REF_DATA_CACHE);
+                                             HEARING_REF_DATA_CACHE, HMC_USER_CACHE);
     }
 }
