@@ -41,11 +41,9 @@ import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +62,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_ARCHIVED_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
@@ -104,7 +103,6 @@ public class UpdatePartyDetailsService {
     private static final List<State> SEALED_STATES = List.of(CASE_ISSUED, JUDICIAL_REVIEW, PREPARE_FOR_HEARING_CONDUCT_HEARING, DECISION_OUTCOME);
     protected static final String[] HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS = {CaseEvent.AMEND_APPLICANTS_DETAILS.getValue(),
         CaseEvent.AMEND_RESPONDENTS_DETAILS.getValue(), CaseEvent.AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED.getValue()};
-    public static final String C_8_OF = "C8 of ";
     private final ObjectMapper objectMapper;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
@@ -118,8 +116,6 @@ public class UpdatePartyDetailsService {
     private final C8ArchiveService c8ArchiveService;
     private final CaseNameService caseNameService;
     private final C8Service c8Service;
-
-    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
     @Qualifier("caseSummaryTab")
     private final  CaseSummaryTabService caseSummaryTabService;
@@ -653,6 +649,7 @@ public class UpdatePartyDetailsService {
                     && (CaseUtils.isEmailAddressChanged(respondent.getValue(), resp1.getValue())
                     || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), resp1.getValue())
                     || CaseUtils.isPhoneNumberChanged(respondent.getValue(), resp1.getValue())
+                    || !Objects.equals(respondent.getValue().getLiveInRefuge(), resp1.getValue().getLiveInRefuge())
                     || !(resp1.getValue().getLabelForDynamicList().equals(respondent.getValue()
                     .getLabelForDynamicList())))).toList();
         } else {
@@ -835,22 +832,6 @@ public class UpdatePartyDetailsService {
                 : C8_RESP_FL401_DRAFT_HINT;
         }
 
-    }
-
-    private List<Element<ResponseDocuments>> getC8DocumentReverseOrderList(List<Element<ResponseDocuments>> c8Documents,
-                                                                           Element<ResponseDocuments> newC8Document) {
-        List<Element<ResponseDocuments>> newC8Documents = new ArrayList<>();
-        if (null != c8Documents) {
-            c8Documents.add(newC8Document);
-            c8Documents.sort(Comparator.comparing(
-                m -> m.getValue().getDateTimeCreated(),
-                Comparator.reverseOrder()
-            ));
-            return c8Documents;
-        } else {
-            newC8Documents.add(newC8Document);
-            return newC8Documents;
-        }
     }
 
     public Map<String, Object> setDefaultEmptyApplicantForC100(CaseData caseData) {
