@@ -7,7 +7,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -33,7 +32,6 @@ class CallbackControllerChildIdentityTest {
     private static final String FIRST_ID = "2d148b3a-7f45-4346-bc3d-d4e12306940f";
     private static final String SECOND_ID = "11111111-2222-4333-8444-555555555555";
 
-    @Spy
     private ObjectMapper mapper = Jackson2ObjectMapperBuilder.json().build();
     @InjectMocks
     private UpdatePartyDetailsService childService;
@@ -44,6 +42,8 @@ class CallbackControllerChildIdentityTest {
 
     @BeforeEach
     void setUp() {
+        ReflectionTestUtils.setField(controller, "objectMapper", mapper);
+        ReflectionTestUtils.setField(childService, "objectMapper", mapper);
         // Explicitly wire the REAL service: nested @InjectMocks fields are not automatically injected.
         ReflectionTestUtils.setField(controller, "updatePartyDetailsService", childService);
         mvc = MockMvcBuilders.standaloneSetup(controller)
