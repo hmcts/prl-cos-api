@@ -118,7 +118,7 @@ public class FL401SubmitApplicationServiceTest {
     CourtSealFinderService courtSealFinderService;
 
     @Mock
-    DfjLookupService dfjLookupService;
+    PrlCourtConfigService prlCourtConfigService;
 
     @Mock
     UserDetails userDetails;

@@ -83,7 +83,6 @@ import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
-import uk.gov.hmcts.reform.prl.services.DfjLookupService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.EventService;
@@ -91,6 +90,7 @@ import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.PrlCourtConfigService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
@@ -298,7 +298,7 @@ public class CallbackControllerTest {
     private C100IssueCaseService c100IssueCaseService;
 
     @Mock
-    private DfjLookupService dfjLookupService;
+    private PrlCourtConfigService prlCourtConfigService;
 
     @Mock
     private  EventService eventPublisher;
@@ -356,7 +356,7 @@ public class CallbackControllerTest {
         fl401DocsMap.put(DOCUMENT_FIELD_FINAL_WELSH, "test");
         when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(),Mockito.anyString()))
             .thenReturn(Optional.of(courtVenue));
-        when(dfjLookupService.getDfjAreaFieldsByCourtName("Swansea Civil Justice Centre")).thenReturn(
+        when(prlCourtConfigService.getDfjAreaFieldsByCourtName("Swansea Civil Justice Centre")).thenReturn(
             Map.of("dfjArea", "SWANSEA", "swanseaDFJCourt", "123")
         );
         when(c8Service.generateOtherPartiesC8s(any(CaseData.class), any(CaseData.class), anyString()))
