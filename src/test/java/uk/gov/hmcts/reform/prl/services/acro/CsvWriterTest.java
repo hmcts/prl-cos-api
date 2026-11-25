@@ -44,7 +44,7 @@ class CsvWriterTest {
     private static final String TEST_ORDER_FILENAME = "test-order.pdf";
 
     private static final String[] EXPECTED_CSV_HEADERS = {
-        "Case No. FamilyMan", "Case No. Manage Cases", "Court Name/Location", "Court Code", "Order Name", "Court Date",
+        "Case No. FamilyMan", "Case Name", "Case No. Manage Cases", "Court Name/Location", "Court Code", "Order Name", "Court Date",
         "Order Expiry Date", "Respondent Surname", "Respondent Forename(s)", "Respondent DOB",
         "Respondent 1st Line of Address", "Respondent 2nd Line of Address", "Respondent Postcode", "Respondent Phone",
         "Respondent Email", "Is Respondent Address Confidential", "Is Respondent Phone Confidential",
