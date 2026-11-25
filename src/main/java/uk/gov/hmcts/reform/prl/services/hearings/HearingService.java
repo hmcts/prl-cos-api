@@ -287,7 +287,7 @@ public class HearingService {
         if (cases == null || cases.isEmpty()) {
             return List.of();
         }
-        int batchSize = 25;
+        int batchSize = 10;
 
         for (int i = 0; i < cases.size(); i += batchSize) {
             List<String> batch = cases.subList(i, Math.min(i + batchSize, cases.size()))
