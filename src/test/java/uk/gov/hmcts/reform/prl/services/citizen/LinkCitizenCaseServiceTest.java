@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
@@ -98,8 +99,9 @@ public class LinkCitizenCaseServiceTest {
         applicantList.add(wrappedApplicant);
         applicantList.add(wrappedApplicant2);
 
-        caseDetails = CaseDetails.builder().build();
+        caseDetails = CaseDetails.builder().state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue()).build();
         caseData = CaseData.builder()
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             .caseTypeOfApplication("C100")
             .applicants(applicantList)
             .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.Yes)
@@ -226,8 +228,9 @@ public class LinkCitizenCaseServiceTest {
                       .idamId("123")
                       .solicitorRepresented(YesOrNo.Yes)
                       .build()).build();
-        CaseDetails caseDetails1 = CaseDetails.builder().build();
+        CaseDetails caseDetails1 = CaseDetails.builder().state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue()).build();
         CaseData caseData1 = CaseData.builder()
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             .applicantsFL401(applicant)
             .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.Yes)
                                                                          .partyId(null)
@@ -259,8 +262,9 @@ public class LinkCitizenCaseServiceTest {
                       .idamId("123")
                       .solicitorRepresented(YesOrNo.No)
                       .build()).build();
-        CaseDetails caseDetails1 = CaseDetails.builder().build();
+        CaseDetails caseDetails1 = CaseDetails.builder().state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue()).build();
         CaseData caseData1 = CaseData.builder()
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             .respondentsFL401(applicant)
             .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.No)
                                                                          .partyId(null)
@@ -292,8 +296,9 @@ public class LinkCitizenCaseServiceTest {
                       .idamId("123")
                       .solicitorRepresented(YesOrNo.No)
                       .build()).build();
-        CaseDetails caseDetails1 = CaseDetails.builder().build();
+        CaseDetails caseDetails1 = CaseDetails.builder().state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue()).build();
         CaseData caseData1 = CaseData.builder()
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             .respondents(Arrays.asList(element(applicant)))
             .caseTypeOfApplication("C100")
             .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.No)

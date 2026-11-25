@@ -11,9 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.caseworkeremailnotification.CaseWorkerEmailNotificationEventEnum;
-import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNotificationEventEnum;
 import uk.gov.hmcts.reform.prl.events.CaseWorkerNotificationEmailEvent;
-import uk.gov.hmcts.reform.prl.events.SolicitorNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -160,13 +158,6 @@ public class C100IssueCaseService {
 
     public void issueAndSendToLocalCourNotification(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        if (No.equals(caseData.getConsentOrder())) {
-            SolicitorNotificationEmailEvent rpaEmailNotificationEvent = SolicitorNotificationEmailEvent.builder()
-                .typeOfEvent(SolicitorEmailNotificationEventEnum.notifyRpa.getDisplayedValue())
-                .caseDetailsModel(callbackRequest.getCaseDetails())
-                .build();
-            eventPublisher.publishEvent(rpaEmailNotificationEvent);
-        }
         CaseWorkerNotificationEmailEvent notifyLocalCourtEvent = CaseWorkerNotificationEmailEvent.builder()
             .typeOfEvent(CaseWorkerEmailNotificationEventEnum.sendEmailToCourtAdmin.getDisplayedValue())
             .caseDetailsModel(callbackRequest.getCaseDetails())

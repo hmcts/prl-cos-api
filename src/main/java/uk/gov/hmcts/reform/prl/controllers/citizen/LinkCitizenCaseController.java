@@ -10,13 +10,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.exception.CaseActivationNotAllowedException;
 import uk.gov.hmcts.reform.prl.models.citizen.AccessCodeRequest;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -42,6 +46,12 @@ public class LinkCitizenCaseController {
     private final CaseService caseService;
     private static final String INVALID_CLIENT = "Invalid Client";
     private static final String CASE_LINKING_FAILED = "Case Linking has failed";
+
+    @ExceptionHandler(CaseActivationNotAllowedException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String handleCaseActivationNotAllowed() {
+        return LinkCitizenCaseService.NOT_READY;
+    }
 
     @PostMapping(value = "/link-case-to-account")
     @Operation(description = "Linking case to citizen account with access code")
@@ -104,7 +114,7 @@ public class LinkCitizenCaseController {
     }
 
     @PostMapping(value = "/validate-access-code")
-    @Operation(description = "Frontend to fetch the data")
+    @Operation(description = "Validate a citizen access code and check whether the case is ready for activation")
     public String validateAccessCode(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
                                       @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
                                       @RequestBody @NotNull @Valid AccessCodeRequest accessCodeRequest) {
