@@ -17,7 +17,7 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ManageOrderRuntimeException.class)
     public ResponseEntity<ErrorResponse> handleManageOrderRuntimeException(ManageOrderRuntimeException ex) {
-        log.error("Exception occurred while Manage Orders due to: {}", ex.getMessage());
+        log.error("Exception occurred while Manage Orders due to: {}", ex.getMessage(), ex);
         ErrorResponse error = ErrorResponse.builder(ex, ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500),
                                                                                          ex.getMessage())).build();
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -41,7 +41,7 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ReviewDocumentException.class)
     public ResponseEntity<ErrorResponse> handleDocumentGenerationException(ReviewDocumentException ex) {
-        log.error("Exception occurred while reviewing document {}", ex.getMessage());
+        log.error("Exception occurred while reviewing document {}", ex.getMessage(), ex);
         ErrorResponse error = ErrorResponse.builder(ex, ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500),
                                                                                          ex.getMessage())).build();
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -49,7 +49,7 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(InvalidClientException.class)
     public ResponseEntity<ErrorResponse> handleInvalidClientException(InvalidClientException ex) {
-        log.error("Exception occurred while validating the client: {}", ex.getMessage());
+        log.error("Exception occurred while validating the client: {}", ex.getMessage(), ex);
         ErrorResponse error = ErrorResponse.builder(ex, ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500),
                                                                                          ex.getMessage())).build();
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -57,7 +57,7 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ManageOrdersUnsupportedOperationException.class)
     public ResponseEntity<ErrorResponse> handleManageOrdersUnsupportedOperationException(ManageOrdersUnsupportedOperationException ex) {
-        log.error("Unsupported operation during manage orders due to: {}", ex.getMessage());
+        log.error("Unsupported operation during manage orders due to: {}", ex.getMessage(), ex);
         ErrorResponse error = ErrorResponse.builder(ex, ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500),
                                                                                          ex.getMessage())).build();
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -65,7 +65,7 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(NoCaseDataFoundException.class)
     public ResponseEntity<ErrorResponse> handleNoCaseDataFoundException(NoCaseDataFoundException ex) {
-        log.error("No Case Data found due to: {}", ex.getMessage());
+        log.error("No Case Data found due to: {}", ex.getMessage(), ex);
         ErrorResponse error = ErrorResponse.builder(ex, ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500),
                                                                                          ex.getMessage())).build();
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -73,7 +73,7 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(GovUkNotificationException.class)
     public ResponseEntity<ErrorResponse> handleGovUkNotificationException(GovUkNotificationException ex) {
-        log.error("Exception occurred while sending email notification due to: {}", ex.getMessage());
+        log.error("Exception occurred while sending email notification due to: {}", ex.getMessage(), ex);
         ErrorResponse error = ErrorResponse.builder(ex, ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500),
             ex.getMessage())).build();
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -81,20 +81,17 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(BulkPrintException.class)
     public ResponseEntity<ErrorResponse> handleBulkPrintException(BulkPrintException ex) {
-        log.error("Exception occurred during bulk print due to: {}", ex.getMessage());
+        log.error("Exception occurred during bulk print due to: {}", ex.getMessage(), ex);
         ErrorResponse error = ErrorResponse.builder(ex, ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500),
                 ex.getMessage())).build();
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-
-
     @ExceptionHandler(PdfConversionException.class)
     public ResponseEntity<ErrorResponse> handlePdfConversionException(PdfConversionException ex) {
-        log.error("Exception occurred during PDF conversion due to: {}", ex.getMessage());
+        log.error("Exception occurred during PDF conversion due to: {}", ex.getMessage(), ex);
         ErrorResponse error = ErrorResponse.builder(ex, ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500),
                                                                                          ex.getMessage())).build();
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
 }
