@@ -7,6 +7,7 @@ import lombok.Value;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @Value
@@ -31,8 +32,11 @@ public class LocalAuthorityCourt {
             .familyCourtName(row.getOrDefault("Designated Family Ct", ""))
             .refDataCourtName(row.getOrDefault("RefData Court Name", ""))
             .localCustodianCode(row.getOrDefault("Local Custodian code", ""))
-            .specificPostCodes(Arrays.stream((row.getOrDefault("Specific PostCodes", "")
-                .split(";"))).filter(code -> !code.isEmpty()).toList())
+            .specificPostCodes(Arrays.stream(row.getOrDefault("Specific PostCodes", "").split(";"))
+                .map(String::strip)
+                .filter(code -> !code.isEmpty())
+                .map(code -> code.toUpperCase(Locale.ROOT))
+                .toList())
             .excludes(row.getOrDefault("Excludes", ""))
             .epimmsId(row.getOrDefault("epimms", ""))
             .address(row.getOrDefault("Address", ""))

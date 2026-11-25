@@ -769,7 +769,6 @@
       "respondentConfidentialDetails": [
 
       ],
-      "courtCodeFromFact": "344",
       "soaServeLocalAuthorityYesOrNo": "No",
       "reasonsForApplicationWithoutNotice": null,
       "confidentialDetails": {
@@ -928,8 +927,8 @@
                         "label": "Llanelli Law Courts - Town Hall Square, Llanelli - SA15 3AW"
                       },
                       {
-                        "code": "487294:KentPRL@justice.gov.uk",
-                        "label": "Medway County Court and Family Court - 47-67 High Street Chatham Kent - ME4 4DW"
+                        "code": "369145:",
+                        "label": "Medway County Court and Family Court - HMCTS Main Entrance, Gun Wharf, Dock Road, Chatham - ME4 4AR"
                       },
                       {
                         "code": "366796:newcastle.c100applications@justice.gov.uk",
@@ -1620,8 +1619,8 @@
                         "label": "Llanelli Law Courts - Town Hall Square, Llanelli - SA15 3AW"
                       },
                       {
-                        "code": "487294:KentPRL@justice.gov.uk",
-                        "label": "Medway County Court and Family Court - 47-67 High Street Chatham Kent - ME4 4DW"
+                        "code": "369145:",
+                        "label": "Medway County Court and Family Court - HMCTS Main Entrance, Gun Wharf, Dock Road, Chatham - ME4 4AR"
                       },
                       {
                         "code": "366796:newcastle.c100applications@justice.gov.uk",
@@ -2232,8 +2231,8 @@
                         "label": "Llanelli Law Courts - Town Hall Square, Llanelli - SA15 3AW"
                       },
                       {
-                        "code": "487294:KentPRL@justice.gov.uk",
-                        "label": "Medway County Court and Family Court - 47-67 High Street Chatham Kent - ME4 4DW"
+                        "code": "369145:",
+                        "label": "Medway County Court and Family Court - HMCTS Main Entrance, Gun Wharf, Dock Road, Chatham - ME4 4AR"
                       },
                       {
                         "code": "366796:newcastle.c100applications@justice.gov.uk",
@@ -2941,8 +2940,8 @@
                         "label": "Llanelli Law Courts - Town Hall Square, Llanelli - SA15 3AW"
                       },
                       {
-                        "code": "487294:KentPRL@justice.gov.uk",
-                        "label": "Medway County Court and Family Court - 47-67 High Street Chatham Kent - ME4 4DW"
+                        "code": "369145:",
+                        "label": "Medway County Court and Family Court - HMCTS Main Entrance, Gun Wharf, Dock Road, Chatham - ME4 4AR"
                       },
                       {
                         "code": "366796:newcastle.c100applications@justice.gov.uk",

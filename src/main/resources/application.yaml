@@ -122,7 +122,6 @@ feature:
   toggle:
     barristerFeatureEnabled: ${BARRISTER_FEATURE_ENABLED:false}
     cafcassDateTimeFeatureEnabled: ${CAFCASS_DATE_TIME_FEATURE_ENABLED:false}
-    osCourtLookupEnabled: ${OS_COURT_LOOKUP_ENABLED:false}
     bundleByCategoryEnabled: ${BUNDLE_BY_CATEGORY_ENABLED:false}
     awaitingInformationEnabled: ${AWAITING_INFORMATION_ENABLED:false}
     exitAwaitingInformationEnabled: ${EXIT_AWAITING_INFORMATION_ENABLED:false}
@@ -521,10 +520,6 @@ send-letter:
 
 case_document_am:
   url: ${CCD_CASE_DOCS_AM_API:http://ccd-case-document-am-api-aat.service.core-compute-aat.internal}
-
-courtfinder:
-  api:
-    url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
 
 locationfinder:
   api:

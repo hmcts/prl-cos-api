@@ -32,7 +32,6 @@ import static org.assertj.core.api.Assertions.assertThat;
     properties = {"bundle.api.url=","idam.api.url=","commonData.api.url=",
         "fis_hearing.api.url=",
         "refdata.api.url=",
-        "courtfinder.api.url=",
         "fees-register.api.url=",
         "judicialUsers.api.url=",
         "locationfinder.api.url=",

@@ -34,7 +34,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
-import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.court.PathFinderMapping;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -203,7 +202,6 @@ public class C100IssueCaseServiceTest {
                                         .courtName("test")
                                         .regionId("1")
                                         .siteName("test")
-                                        .factUrl("test/test/test/test/test")
                                         .region("test")
                                         .build()));
 
@@ -289,8 +287,6 @@ public class C100IssueCaseServiceTest {
             .thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
-        when(courtFinderService.getCourtDetails(anyString())).thenReturn(Court.builder().countyLocationCode(123L)
-                                                                                     .build());
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
 
@@ -360,8 +356,6 @@ public class C100IssueCaseServiceTest {
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
 
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        when(courtFinderService.getCourtDetails(anyString())).thenReturn(Court.builder().countyLocationCode(123L)
-                                                                                     .build());
         Map<String, Object> objectMap = c100IssueCaseService.issueAndSendToLocalCourt(
             authToken,
             callbackRequest
@@ -464,7 +458,6 @@ public class C100IssueCaseServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(documentGenService.createUpdatedCaseDataWithDocuments(anyString(), Mockito.any(CaseData.class), eq(true)))
             .thenReturn(c100DocsMap);
-        when(courtFinderService.getCourtDetails(anyString())).thenReturn(null);
         Map<String, Object> objectMap = c100IssueCaseService.issueAndSendToLocalCourt(
             authToken,
             callbackRequest
@@ -582,7 +575,6 @@ public class C100IssueCaseServiceTest {
                    "c1AWelshDocument", "document",
                    "finalWelshDocument", "document")
         );
-        when(courtFinderService.getCourtDetails(anyString())).thenReturn(null);
         Map<String, Object> objectMap = c100IssueCaseService.issueAndSendToLocalCourt(
             authToken,
             callbackRequest
@@ -672,6 +664,8 @@ public class C100IssueCaseServiceTest {
 
     @Test
     public void checkStateIsOfflineWhenUserSelectsNonWorkAllocatedCourt() throws Exception {
+        dynamicList = DynamicList.builder().value(DynamicListElement.builder()
+            .code("366796:configured@example.com").label("Newcastle").build()).build();
         CaseData caseData = CaseData.builder()
             .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("Test")
@@ -704,6 +698,11 @@ public class C100IssueCaseServiceTest {
 
         c100IssueCaseService.issueAndSendToLocalCourt(authToken, callbackRequest);
 
+        List<Element<uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail>> recipients =
+            (List<Element<uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail>>) stringObjectMap.get("localCourtAdmin");
+        Assertions.assertEquals("configured@example.com", recipients.getFirst().getValue().getEmail());
+        Assertions.assertEquals("366796", stringObjectMap.get("courtId"));
+        Assertions.assertEquals("test", stringObjectMap.get("courtName"));
         Assertions.assertEquals("Yes", stringObjectMap.get("isNonWorkAllocationEnabledCourtSelected"));
     }
 

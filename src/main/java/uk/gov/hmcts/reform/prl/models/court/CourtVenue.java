@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.court;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
@@ -39,6 +40,9 @@ public class CourtVenue {
     private String mrdBuildingLocationId;
     @JsonProperty("mrd_venue_id")
     private String mrdVenueId;
-    @JsonProperty("fact_url")
-    private String factUrl;
+
+    @JsonIgnore
+    public String getCourtDisplayName() {
+        return siteName;
+    }
 }

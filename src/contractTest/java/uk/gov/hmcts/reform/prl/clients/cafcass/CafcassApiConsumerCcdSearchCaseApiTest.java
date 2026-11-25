@@ -56,7 +56,6 @@ import static uk.gov.hmcts.reform.prl.clients.util.TestConstants.CCD_STORE_SEARC
     properties = {"bundle.api.url=http://localhost:8899","idam.api.url=localhost:5000","commonData.api.url=localhost:5000",
         "fis_hearing.api.url=localhost:5000",
         "refdata.api.url=",
-        "courtfinder.api.url=",
         "fees-register.api.url=",
         "fis_hearing.api.url=",
         "judicialUsers.api.url=",

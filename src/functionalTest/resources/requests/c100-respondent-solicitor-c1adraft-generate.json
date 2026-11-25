@@ -111,7 +111,6 @@
       "miamChildProtectionConcernList": [
         "MIAMChildProtectionConcernChecklistEnum_value_1"
       ],
-      "courtCodeFromFact": "344",
       "reasonsForApplicationWithoutNotice": null,
       "confidentialDetails": {
         "isConfidentialDetailsAvailable": "Yes"

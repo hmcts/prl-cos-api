@@ -26,7 +26,7 @@ import uk.gov.hmcts.reform.prl.enums.caseworkeremailnotification.CaseWorkerEmail
 import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNotificationEventEnum;
 import uk.gov.hmcts.reform.prl.events.CaseWorkerNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.events.SolicitorNotificationEmailEvent;
-import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
@@ -57,7 +57,6 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
@@ -119,7 +118,7 @@ public class ResubmitApplicationController {
 
             //SNI-5695 fix-- if court name is already present then do not update
             if (StringUtils.isBlank(caseData.getCourtName())) {
-                Court closestChildArrangementsCourt = courtFinderService
+                CourtVenue closestChildArrangementsCourt = courtFinderService
                     .getNearestFamilyCourt(caseData);
                 caseData = assignCourtDetailsBasedOnClosestChildArrangementCourt(closestChildArrangementsCourt, caseData, caseDataUpdated);
             }
@@ -202,21 +201,19 @@ public class ResubmitApplicationController {
         }
     }
 
-    private static CaseData assignCourtDetailsBasedOnClosestChildArrangementCourt(Court closestChildArrangementsCourt,
+    private static CaseData assignCourtDetailsBasedOnClosestChildArrangementCourt(CourtVenue closestChildArrangementsCourt,
                                                                                   CaseData caseData, Map<String, Object> caseDataUpdated) {
-        if (closestChildArrangementsCourt != null && null != caseData.getCourtId()) {
+        if (closestChildArrangementsCourt != null
+            && !StringUtils.isBlank(closestChildArrangementsCourt.getCourtDisplayName())
+            && null != caseData.getCourtId()) {
             caseData = caseData.toBuilder()
-                .courtName(closestChildArrangementsCourt.getCourtName())
-                .courtId(String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()))
+                .courtName(closestChildArrangementsCourt.getCourtDisplayName())
+                .courtId(closestChildArrangementsCourt.getCourtEpimmsId())
                 .build();
-            caseDataUpdated.put(COURT_NAME_FIELD, closestChildArrangementsCourt.getCourtName());
+            caseDataUpdated.put(COURT_NAME_FIELD, closestChildArrangementsCourt.getCourtDisplayName());
             caseDataUpdated.put(
                 COURT_ID_FIELD,
-                String.valueOf(closestChildArrangementsCourt.getCountyLocationCode())
-            );
-            caseDataUpdated.put(
-                COURT_CODE_FROM_FACT,
-                String.valueOf(closestChildArrangementsCourt.getCountyLocationCode())
+                closestChildArrangementsCourt.getCourtEpimmsId()
             );
         }
         return caseData;

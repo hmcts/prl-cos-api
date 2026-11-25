@@ -9,8 +9,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
@@ -61,6 +63,41 @@ class CaseUtilsTest {
         assertThat(caseData.getState()).isEqualTo(State.SUBMITTED_PAID);
         assertThat(caseData.getCreatedDate()).isNotNull();
         assertThat(caseData.getLastModifiedDate()).isNotNull();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {C100_CASE_TYPE, FL401_CASE_TYPE})
+    void preservesHistoricalCourtCodeWhenCaseDataIsReadUpdatedAndWritten(String caseType) {
+        ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper().copy().findAndRegisterModules();
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345L)
+            .state("AWAITING_SUBMISSION_TO_HMCTS")
+            .data(Map.of("caseTypeOfApplication", caseType, "courtCodeFromFact", "344"))
+            .build();
+
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        Map<String, Object> updatedData = caseData.toBuilder()
+            .courtName("Updated court name")
+            .build()
+            .toMap(objectMapper);
+
+        assertThat(updatedData).containsEntry("courtCodeFromFact", "344")
+            .containsEntry("courtName", "Updated court name");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {C100_CASE_TYPE, FL401_CASE_TYPE})
+    void doesNotAddLegacyCourtCodeToCasesWithoutOne(String caseType) {
+        ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper().copy().findAndRegisterModules();
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345L)
+            .state("AWAITING_SUBMISSION_TO_HMCTS")
+            .data(Map.of("caseTypeOfApplication", caseType))
+            .build();
+
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+
+        assertThat(caseData.toMap(objectMapper)).doesNotContainKey("courtCodeFromFact");
     }
 
     @ParameterizedTest
