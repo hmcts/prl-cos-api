@@ -26,9 +26,12 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.services.CaseNameService;
+import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,13 +71,20 @@ class BundleCreateRequestByCategoryMapperTest {
 
     private LocalDateTime futureHearingDateTime;
 
+    private CaseNameService caseNameService;
+
+    @Mock
+    private FeatureToggleService featureToggleService;
+
     @BeforeEach
     void setUp() {
         hearingDetailsMapperUtil = new HearingDetailsMapperUtil();
+        caseNameService = new CaseNameService(featureToggleService);
         bundleCreateRequestByCategoryMapper = new BundleCreateRequestByCategoryMapper(categoriesAndDocumentsHelper,
                                                                                       systemUserService,
                                                                                       bundleCategoryConfig,
-                                                                                      hearingDetailsMapperUtil);
+                                                                                      hearingDetailsMapperUtil,
+                                                                                      caseNameService);
         futureHearingDateTime = LocalDateTime.now().plusDays(7);
     }
 
@@ -600,20 +610,44 @@ class BundleCreateRequestByCategoryMapperTest {
     }
 
     @Test
-    void testCaseNameHmctsInternalAddedByMapper() {
+    void testCaseNameHmctsInternalAddedByMapperForCaseIssuedBeforeReleaseDate() {
         CaseData c100CaseData = CaseData.builder()
             .id(123456789123L)
             .caseNameHmctsInternal("Prefix - ApplicantFirstNameAndLastName")
+            .issueDate(LocalDate.of(2023, 1, 1))
             .build();
 
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(categoriesAndDocumentsHelper.getCategoriesAndDocuments(AUTH_TOKEN, c100CaseData))
             .thenReturn(new ArrayList<>());
         when(bundleCategoryConfig.getFolders()).thenReturn(new ArrayList<>());
+        when(featureToggleService.isCaseIssuedAfterReleaseDate(c100CaseData.getIssueDate())).thenReturn(false);
 
         BundleCreateRequest bundleCreateRequest = bundleCreateRequestByCategoryMapper
             .mapCaseDataToBundleCreateRequest(c100CaseData, "eventId",
                 Hearings.hearingsWith().caseHearings(new ArrayList<>()).build(), "sample.yaml");
+
+        assertNotNull(bundleCreateRequest);
+        assertNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getCaseNameHmctsInternal());
+    }
+
+    @Test
+    void testCaseNameHmctsInternalAddedByMapperForCaseIssuedAfterReleaseDate() {
+        CaseData c100CaseData = CaseData.builder()
+            .id(123456789123L)
+            .caseNameHmctsInternal("Prefix - ApplicantFirstNameAndLastName")
+            .issueDate(LocalDate.of(2026, 11, 1))
+            .build();
+
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        when(categoriesAndDocumentsHelper.getCategoriesAndDocuments(AUTH_TOKEN, c100CaseData))
+            .thenReturn(new ArrayList<>());
+        when(bundleCategoryConfig.getFolders()).thenReturn(new ArrayList<>());
+        when(featureToggleService.isCaseIssuedAfterReleaseDate(c100CaseData.getIssueDate())).thenReturn(true);
+
+        BundleCreateRequest bundleCreateRequest = bundleCreateRequestByCategoryMapper
+            .mapCaseDataToBundleCreateRequest(c100CaseData, "eventId",
+                                              Hearings.hearingsWith().caseHearings(new ArrayList<>()).build(), "sample.yaml");
 
         assertNotNull(bundleCreateRequest);
         assertEquals("Prefix - ApplicantFirstNameAndLastName",
