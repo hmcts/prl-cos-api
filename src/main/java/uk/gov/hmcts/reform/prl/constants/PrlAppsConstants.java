@@ -86,9 +86,6 @@ public class PrlAppsConstants {
     public static final String DOCUMENT_FIELD_C8_DRAFT_WELSH = "c8WelshDraftDocument";
     public static final String DOCUMENT_FIELD_FINAL_WELSH = "finalWelshDocument";
 
-    public static final String CHILD_ARRANGEMENT_CASE = "CHILD ARRANGEMENT CASE";
-    public static final String ISSUE_EVENT_CODE = "001";
-    public static final String ISSUE_EVENT_SEQUENCE = "1";
     public static final String BLANK_STRING = "";
     public static final String WITHOUT_NOTICE = "Without notice";
 
@@ -191,6 +188,7 @@ public class PrlAppsConstants {
     public static final String DOCUMENT_REQUEST = "documentRequestedByCourt";
 
     public static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
+    public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String CITIZEN_ROLE = "citizen";
 
     public static final String OTHER = "Other";
@@ -1123,4 +1121,15 @@ public class PrlAppsConstants {
 
     public static final String TASK_ASSIGNEE_IDAM_ID = "taskAssigneeIdamId";
     public static final String NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS = "newTaskRequiredForUploadedDocs";
+
+    public static final String NOT_TO_CONTACT = "[The respondent must not] contact or try to contact or communicate with the applicant"
+        + " in any way or by any means except that (i) you can contact the applicant through solicitors and/or through an agreed third party"
+        + " to make child contact arrangements (ii) you can contact the applicant directly by [means of communication] to make arrangements"
+        + " about the child/ren. (delete whichever of (i) and (ii) do not apply)";
+    public static final String NOT_TO_STREET_ADDRESS = "Go to or travel on [road name] but (i) you can enter [road name] to facilitate"
+        + " contact arrangements for the child/ren which must be agreed in writing or ordered by the court (ii) but otherwise you cannot"
+        + " park your vehicle or leave your bicycle/motorbike or scooter in [road name]. (delete as appropriate)";
+    public static final String NOT_TO_SEND_DOCUMENTS = "If the applicant does not have solicitors, this order does not prevent you"
+        + " from sending documents in respect of these or any other proceedings directly to them. If the applicant has solicitors,"
+        + " you should send any documents to the solicitors.";
 }

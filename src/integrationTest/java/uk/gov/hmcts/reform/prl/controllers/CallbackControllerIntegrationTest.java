@@ -17,7 +17,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
@@ -29,7 +28,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConf
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
-import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.AmendCourtService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
@@ -62,11 +60,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-import static uk.gov.hmcts.reform.prl.enums.State.JUDICIAL_REVIEW;
-import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
 import static uk.gov.hmcts.reform.prl.util.TestConstants.AUTHORISATION_HEADER;
 import static uk.gov.hmcts.reform.prl.util.TestConstants.TEST_AUTH_TOKEN;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -112,8 +107,6 @@ public class CallbackControllerIntegrationTest {
     @MockBean
     SendgridService sendgridService;
 
-    @MockBean
-    C100JsonMapper c100JsonMapper;
 
     @MockBean
     CourtFinderService courtLocatorService;
@@ -460,24 +453,6 @@ public class CallbackControllerIntegrationTest {
     }
 
     @Test
-    public void testResendRpa() throws Exception {
-        String url = "/resend-rpa";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-
-        Mockito.when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-
-        mockMvc.perform(
-                post(url)
-                    .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
-                    .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
-                    .accept(APPLICATION_JSON)
-                    .contentType(APPLICATION_JSON)
-                    .content(jsonRequest))
-            .andExpect(status().isOk())
-            .andReturn();
-    }
-
-    @Test
     public void testPrePopulatePartyInformation() throws Exception {
         String url = "/pre-populate-party-information";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
@@ -566,50 +541,6 @@ public class CallbackControllerIntegrationTest {
                     .contentType(APPLICATION_JSON)
                     .content(jsonRequest))
             .andExpect(status().isOk())
-            .andReturn();
-    }
-
-    @Test
-    public void testFl401AddCaseNumberWhenStateIsSubmitted() throws Exception {
-        String url = "/fl401-add-case-number";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-
-        Mockito.when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        Mockito.when(caseEventService.findEventsForCase(any())).thenReturn(List.of(CaseEventDetail.builder()
-                                                                                       .stateId(SUBMITTED_PAID.getValue())
-                                                                                       .build()));
-
-        mockMvc.perform(
-                post(url)
-                    .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
-                    .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
-                    .accept(APPLICATION_JSON)
-                    .contentType(APPLICATION_JSON)
-                    .content(jsonRequest))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.isAddCaseNumberAdded").value("Yes"))
-            .andReturn();
-    }
-
-    @Test
-    public void testFl401AddCaseNumberWhenStateIsNotInSubmitted() throws Exception {
-        String url = "/fl401-add-case-number";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-
-        Mockito.when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        Mockito.when(caseEventService.findEventsForCase(any())).thenReturn(List.of(CaseEventDetail.builder()
-                                                                                       .stateId(JUDICIAL_REVIEW.getValue())
-                                                                                       .build()));
-
-        mockMvc.perform(
-                post(url)
-                    .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
-                    .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
-                    .accept(APPLICATION_JSON)
-                    .contentType(APPLICATION_JSON)
-                    .content(jsonRequest))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.isAddCaseNumberAdded").doesNotExist())
             .andReturn();
     }
 

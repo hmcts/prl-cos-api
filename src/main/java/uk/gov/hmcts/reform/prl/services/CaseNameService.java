@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NAME_HMCTS_INTERNAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 @Service
@@ -20,8 +22,12 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 public class CaseNameService {
     public static final String CA_CASE_NAME_FORMAT = "%s V %s";
     public static final String DA_CASE_NAME_FORMAT = "%s %s & %s %s";
+    public static final String PREFIX_CASE_TYPE_CA = "P";
+    public static final String PREFIX_CASE_TYPE_DA = "F";
 
     private final FeatureToggleService featureToggleService;
+    private final CourtPrefixDataLoader courtPrefixDataLoader;
+    private final ObjectMapper objectMapper;
 
     public String getCaseNameForCA(String applicantLastName, String respondentLastName) {
         return String.format(CA_CASE_NAME_FORMAT, applicantLastName, respondentLastName);
@@ -62,16 +68,17 @@ public class CaseNameService {
 
     private void updateCaseName(LocalDate issueDate, boolean isCAorDA, Map<String, Object> updatedCaseData, String caseName) {
         updatedCaseData.put(APPLICANT_CASE_NAME, caseName);
-        String internalCaseName = getInternalCaseNameForIssueDate(caseName, issueDate, isCAorDA);
+        String epimmsId = objectMapper.convertValue(updatedCaseData.get(COURT_ID_FIELD), String.class);
+        String internalCaseName = getInternalCaseNameForIssueDate(epimmsId, caseName, issueDate, isCAorDA);
         updatedCaseData.put(CASE_NAME_HMCTS_INTERNAL, internalCaseName);
     }
 
-    public String getInternalCaseNameForIssueDate(String caseName, LocalDate issueDate, boolean isCAorDA) {
+    public String getInternalCaseNameForIssueDate(String epimmsId, String caseName, LocalDate issueDate, boolean isCAorDA) {
         String internalCaseName = caseName;
         if (featureToggleService.isCaseIssuedAfterReleaseDate(issueDate)) {
-            String courtLocation = "WV";
-            String yearIssued = String.valueOf(issueDate.getYear());
-            String caseType = isCAorDA ? "P" : "D";
+            String courtLocation = courtPrefixDataLoader.getPrefixForGivenEpimmsId(epimmsId);
+            String yearIssued = String.valueOf(issueDate.getYear()).substring(2);
+            String caseType = isCAorDA ? PREFIX_CASE_TYPE_CA : PREFIX_CASE_TYPE_DA;
             String monthIssued = StringUtils.leftPad(String.valueOf(issueDate.getMonthValue()), 2).replaceAll(" ", "0");
             String prefix =  courtLocation + yearIssued + caseType + monthIssued;
 
