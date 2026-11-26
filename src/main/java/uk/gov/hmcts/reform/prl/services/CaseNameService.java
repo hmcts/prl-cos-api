@@ -22,6 +22,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 public class CaseNameService {
     public static final String CA_CASE_NAME_FORMAT = "%s V %s";
     public static final String DA_CASE_NAME_FORMAT = "%s %s & %s %s";
+    public static final String PREFIX_CASE_TYPE_CA = "P";
+    public static final String PREFIX_CASE_TYPE_DA = "F";
 
     private final FeatureToggleService featureToggleService;
     private final CourtPrefixDataLoader courtPrefixDataLoader;
@@ -76,7 +78,7 @@ public class CaseNameService {
         if (featureToggleService.isCaseIssuedAfterReleaseDate(issueDate)) {
             String courtLocation = courtPrefixDataLoader.getPrefixForGivenEpimmsId(epimmsId);
             String yearIssued = String.valueOf(issueDate.getYear()).substring(2);
-            String caseType = isCAorDA ? "P" : "D";
+            String caseType = isCAorDA ? PREFIX_CASE_TYPE_CA : PREFIX_CASE_TYPE_DA;
             String monthIssued = StringUtils.leftPad(String.valueOf(issueDate.getMonthValue()), 2).replaceAll(" ", "0");
             String prefix =  courtLocation + yearIssued + caseType + monthIssued;
 

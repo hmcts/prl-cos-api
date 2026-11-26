@@ -192,7 +192,7 @@ class CaseNameServiceTest {
         caseNameService.setFinalCaseName(updatedCaseData, caseData);
 
         assertEquals("AppFN AppLN & RespFN RespLN", updatedCaseData.get("applicantCaseName"));
-        assertEquals("WV26D12 - AppFN AppLN & RespFN RespLN", updatedCaseData.get("caseNameHmctsInternal"));
+        assertEquals("WV26F12 - AppFN AppLN & RespFN RespLN", updatedCaseData.get("caseNameHmctsInternal"));
     }
 
     @Test
