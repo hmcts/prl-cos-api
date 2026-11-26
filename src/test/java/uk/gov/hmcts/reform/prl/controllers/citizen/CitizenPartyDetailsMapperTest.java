@@ -105,7 +105,7 @@ class CitizenPartyDetailsMapperTest {
     DocumentGenService documentGenService;
     @Mock
     C8ArchiveService c8ArchiveService;
-    @Spy
+    @Mock
     CaseNameService caseNameService;
     @Spy
     ObjectMapper objectMapper = new ObjectMapper();

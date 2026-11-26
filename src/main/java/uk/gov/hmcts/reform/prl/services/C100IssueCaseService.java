@@ -32,11 +32,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.lang.String.valueOf;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NAME_HMCTS_INTERNAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_STATUS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_ISSUED_AFTER_CASENAME_RELEASE;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.PATH_FINDER_DECISION;
 import static uk.gov.hmcts.reform.prl.enums.State.PROCEEDS_IN_HERITAGE_SYSTEM;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -62,6 +65,8 @@ public class C100IssueCaseService {
     private final CcdCoreCaseDataService ccdCoreCaseDataService;
     private final SystemUserService systemUserService;
     private final UpdatePartyDetailsService updatePartyDetailsService;
+    private final FeatureToggleService featureToggleService;
+    private final CaseNameService caseNameService;
 
     public Map<String, Object> issueAndSendToLocalCourt(String authorisation, CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -139,6 +144,13 @@ public class C100IssueCaseService {
                 .build());
         }
         caseDataUpdated.put("issueDate", caseData.getIssueDate());
+        String epimmsId = objectMapper.convertValue(caseDataUpdated.get(COURT_ID_FIELD), String.class);
+        caseDataUpdated.put(CASE_NAME_HMCTS_INTERNAL, caseNameService.getInternalCaseNameForIssueDate(epimmsId,
+            caseData.getApplicantCaseName(), caseData.getIssueDate(), true));
+
+        caseDataUpdated.put(IS_ISSUED_AFTER_CASENAME_RELEASE,
+            featureToggleService.isFullCaseNameEnabled() ? Yes.getDisplayedValue() : No.getDisplayedValue());
+
         return caseDataUpdated;
     }
 
