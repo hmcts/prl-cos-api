@@ -93,9 +93,27 @@ public class BundlingController extends AbstractCallbackController {
                     "*** Bundle created successfully.. Updating bundle Information in case data for the case id: {}",
                     caseData.getId()
                 );
-                cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
             }
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(path = "/asyncStitchingComplete", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Stitching bundle complete callback.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Stitching Bundle Complete."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")
+    })
+    public AboutToStartOrSubmitCallbackResponse asyncStitchingComplete(@RequestHeader("Authorization") @Parameter(hidden = true) String authorization,
+                                                                       @RequestHeader("ServiceAuthorization") @Parameter(hidden = true)
+                                                                           String serviceAuthorization,
+                                                                       @RequestBody CallbackRequest callbackRequest) {
+        if (authorisationService.isAuthorized(authorization, serviceAuthorization)) {
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(cafcassDateTimeService.updateCafcassDateTime(callbackRequest))
+                .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
