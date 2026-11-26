@@ -41,11 +41,9 @@ import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -118,8 +116,6 @@ public class UpdatePartyDetailsService {
     private final C8ArchiveService c8ArchiveService;
     private final CaseNameService caseNameService;
     private final C8Service c8Service;
-
-    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
     @Qualifier("caseSummaryTab")
     private final  CaseSummaryTabService caseSummaryTabService;
@@ -253,7 +249,7 @@ public class UpdatePartyDetailsService {
             }
             Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
             applicantList.ifPresent(elements -> setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData,
-                    ElementUtils.unwrapElements(elements).get(0)));
+                    ElementUtils.unwrapElements(elements).getFirst()));
             CaseData latest = objectMapper.convertValue(updatedCaseData, CaseData.class);
             List<Element<PartyDetails>> respondentsForC8 = latest.getRespondents();
 
@@ -371,7 +367,7 @@ public class UpdatePartyDetailsService {
                 .stream()
                 .map(Element::getValue)
                 .toList();
-            PartyDetails applicant1 = applicants.get(0);
+            PartyDetails applicant1 = applicants.getFirst();
             if (Objects.nonNull(applicant1)) {
                 updatedCaseData.put("applicantName", applicant1.getFirstName() + " " + applicant1.getLastName());
             }
@@ -609,7 +605,7 @@ public class UpdatePartyDetailsService {
         caseDataUpdated.putAll(documentGenService.createUpdatedCaseDataWithDocuments(authorisation, caseData));
         CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
 
-        caseData = caseData.toBuilder()
+        caseData.toBuilder()
             .c8Document(updatedCaseData.getC8Document())
             .c8WelshDocument(updatedCaseData.getC8WelshDocument())
             .build();
@@ -654,8 +650,8 @@ public class UpdatePartyDetailsService {
                     || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), resp1.getValue())
                     || CaseUtils.isPhoneNumberChanged(respondent.getValue(), resp1.getValue())
                     || !Objects.equals(respondent.getValue().getLiveInRefuge(), resp1.getValue().getLiveInRefuge())
-                    || !StringUtils.equals(resp1.getValue().getLabelForDynamicList(), respondent.getValue()
-                    .getLabelForDynamicList()))).toList();
+                    || !(resp1.getValue().getLabelForDynamicList().equals(respondent.getValue()
+                    .getLabelForDynamicList())))).toList();
         } else {
             PartyDetails respondentDetailsFL401 = caseDataBefore.getRespondentsFL401();
             // if we did not have a respondent in the before case, the respondent is NEW so isChanged = true
@@ -666,15 +662,12 @@ public class UpdatePartyDetailsService {
                 || !Objects.equals(respondent.getValue().getLiveInRefuge(), respondentDetailsFL401.getLiveInRefuge())
                 || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), respondentDetailsFL401)
                 || (CaseUtils.isPhoneNumberChanged(respondent.getValue(), respondentDetailsFL401))
-                || !StringUtils.equals(respondent.getValue().getLabelForDynamicList(), respondentDetailsFL401
-                .getLabelForDynamicList())) {
+                || !(respondent.getValue().getLabelForDynamicList().equals(respondentDetailsFL401
+                .getLabelForDynamicList()))) {
                 return true;
             }
         }
-        if (respondentList != null && !respondentList.isEmpty()) {
-            return true;
-        }
-        return false;
+        return respondentList != null && !respondentList.isEmpty();
     }
 
     private List<Element<Document>> archiveRespondentC8Documents(List<Element<ResponseDocuments>> existingDocuments, CaseData caseData) {
@@ -841,22 +834,6 @@ public class UpdatePartyDetailsService {
 
     }
 
-    private List<Element<ResponseDocuments>> getC8DocumentReverseOrderList(List<Element<ResponseDocuments>> c8Documents,
-                                                                           Element<ResponseDocuments> newC8Document) {
-        List<Element<ResponseDocuments>> newC8Documents = new ArrayList<>();
-        if (null != c8Documents) {
-            c8Documents.add(newC8Document);
-            c8Documents.sort(Comparator.comparing(
-                m -> m.getValue().getDateTimeCreated(),
-                Comparator.reverseOrder()
-            ));
-            return c8Documents;
-        } else {
-            newC8Documents.add(newC8Document);
-            return newC8Documents;
-        }
-    }
-
     public Map<String, Object> setDefaultEmptyApplicantForC100(CaseData caseData) {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
@@ -904,6 +881,7 @@ public class UpdatePartyDetailsService {
                 List<Element<ChildDetailsRevised>> listOfChildren = caseData.getNewChildDetails();
                 List<Element<ChildDetailsRevised>> listOfChildrenRevised = new ArrayList<>();
                 listOfChildren.forEach(child -> listOfChildrenRevised.add(element(
+                    child.getId(),
                     child.getValue().toBuilder()
                         .whoDoesTheChildLiveWith(
                             populateWhoDoesTheChildLiveWith(caseData)
@@ -1058,9 +1036,11 @@ public class UpdatePartyDetailsService {
             if (!removeParty.isEmpty()) {
                 StringBuilder validationMsg = new StringBuilder("Barrister is associated with the party ");
                 AtomicBoolean isBarristerExists = new AtomicBoolean(false);
-                removeParty.stream().forEach(party -> {
+                removeParty.forEach(party -> {
                     if (party.getValue().getBarrister() != null && party.getValue().getBarrister().getBarristerEmail() != null) {
-                        validationMsg.append(party.getValue().getFirstName() + " " + party.getValue().getLastName() + "\n");
+                        validationMsg.append(party.getValue().getFirstName())
+                            .append(" ").append(party.getValue().getLastName())
+                            .append("\n");
                         isBarristerExists.set(true);
                     }
                 });
