@@ -54,6 +54,8 @@ import java.util.Map;
 //import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_STATEMENTS;
@@ -324,5 +326,40 @@ public class BundlingControllerTest {
         Assert.assertNotNull(response);
         Assert.assertEquals(0, response.getData().size());
         Assert.assertNull(response.getData().get("bundleInformation"));
+    }
+
+    @Test
+    public void testAsyncStitchingCompleteWhenAuthorised() {
+        Map<String, Object> cafcassUpdatedData = new HashMap<>();
+        cafcassUpdatedData.put("testKey", "testValue");
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .eventId("asyncStitchingComplete")
+            .build();
+
+        when(cafcassDateTimeService.updateCafcassDateTime(callbackRequest)).thenReturn(cafcassUpdatedData);
+
+        AboutToStartOrSubmitCallbackResponse response =
+            bundlingController.asyncStitchingComplete(authToken, "serviceAuth", callbackRequest);
+
+        Assert.assertNotNull(response);
+        Assert.assertEquals(cafcassUpdatedData, response.getData());
+        verify(cafcassDateTimeService).updateCafcassDateTime(callbackRequest);
+    }
+
+    @Test
+    public void testAsyncStitchingCompleteWhenAuthorisationIsFalse() {
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(false);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .eventId("asyncStitchingComplete")
+            .build();
+
+        Assert.assertThrows(RuntimeException.class, () ->
+            bundlingController.asyncStitchingComplete(authToken, "serviceAuth", callbackRequest));
+
+        verify(cafcassDateTimeService, never()).updateCafcassDateTime(any(CallbackRequest.class));
     }
 }
