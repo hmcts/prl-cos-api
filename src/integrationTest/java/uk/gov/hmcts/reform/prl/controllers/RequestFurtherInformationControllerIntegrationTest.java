@@ -70,7 +70,6 @@ public class RequestFurtherInformationControllerIntegrationTest {
     @Before
     public void setUp() {
         mockMvc = webAppContextSetup(webApplicationContext).build();
-        when(featureToggleService.isAwaitingInformationEnabled()).thenReturn(true);
     }
 
     @Test
@@ -158,20 +157,6 @@ public class RequestFurtherInformationControllerIntegrationTest {
                     .content(validCallbackRequestJson()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors[0]").value("Please enter a future date"));
-    }
-
-    @Test
-    public void shouldReturnEmptyValidationErrorsWhenFeatureToggleDisabled() throws Exception {
-        when(featureToggleService.isAwaitingInformationEnabled()).thenReturn(false);
-
-        mockMvc.perform(
-                post(VALIDATE_URL)
-                    .accept(APPLICATION_JSON)
-                    .contentType(APPLICATION_JSON)
-                    .content(validCallbackRequestJson()))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.errors").isArray())
-            .andExpect(jsonPath("$.errors").isEmpty());
     }
 
     @Test

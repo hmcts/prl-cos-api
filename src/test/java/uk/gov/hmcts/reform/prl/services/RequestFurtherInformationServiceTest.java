@@ -59,7 +59,6 @@ public class RequestFurtherInformationServiceTest {
             .caseDetails(caseDetails)
             .build();
 
-        when(featureToggleService.isAwaitingInformationEnabled()).thenReturn(true);
     }
 
     @Test

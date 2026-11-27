@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 import static java.lang.String.valueOf;
-import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
 import static org.apache.commons.lang3.StringUtils.SPACE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_STATUS;
@@ -42,9 +41,6 @@ public class RequestFurtherInformationService {
     private final SystemUserService systemUserService;
 
     public List<String> validate(CallbackRequest callbackRequest) {
-        if (!featureToggleService.isAwaitingInformationEnabled()) {
-            return emptyList();
-        }
         var caseDataUpdated = addToCase(callbackRequest);
         var requestFurtherInformation = getRequestFurtherInformation(caseDataUpdated);
         var errorList = new ArrayList<String>();

@@ -77,7 +77,6 @@ public class RequestFurtherInformationControllerTest {
         updatedCaseData = new HashMap<>(caseDataMap);
         updatedCaseData.put(CASE_STATUS, CaseStatus.builder().state("Awaiting information").build());
 
-        when(featureToggleService.isAwaitingInformationEnabled()).thenReturn(true);
     }
 
     // Tests for submitAwaitingInformation endpoint
@@ -106,18 +105,6 @@ public class RequestFurtherInformationControllerTest {
 
         assertEquals("Invalid Client", exception.getMessage());
         verify(authorisationService, times(1)).isAuthorized(AUTH_TOKEN, S2S_TOKEN);
-        verify(requestFurtherInformationService, times(0)).addToCase(any());
-    }
-
-    @Test
-    public void shouldThrowExceptionWhenFeatureToggleDisabled() {
-        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
-        when(featureToggleService.isAwaitingInformationEnabled()).thenReturn(false);
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () ->
-            requestFurtherInformationController.submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest));
-
-        assertEquals("Invalid Client", exception.getMessage());
         verify(requestFurtherInformationService, times(0)).addToCase(any());
     }
 
@@ -182,16 +169,6 @@ public class RequestFurtherInformationControllerTest {
     }
 
     @Test
-    public void shouldReturnEmptyErrorsWhenFeatureToggleDisabled() {
-        when(featureToggleService.isAwaitingInformationEnabled()).thenReturn(false);
-
-        CallbackResponse response = requestFurtherInformationController.validateReviewDate(callbackRequest);
-
-        assertNotNull(response);
-        assertTrue(response.getErrors().isEmpty());
-    }
-
-    @Test
     public void shouldReturnMultipleValidationErrors() {
         List<String> errorList = new ArrayList<>();
         errorList.add("Please enter a future date");
@@ -204,17 +181,6 @@ public class RequestFurtherInformationControllerTest {
         assertNotNull(response);
         assertEquals(2, response.getErrors().size());
         verify(requestFurtherInformationService, times(1)).validate(callbackRequest);
-    }
-
-    @Test
-    public void shouldCallFeatureToggleServiceBeforeValidation() {
-        when(featureToggleService.isAwaitingInformationEnabled()).thenReturn(true);
-        when(requestFurtherInformationService.validate(callbackRequest)).thenReturn(new ArrayList<>());
-
-        CallbackResponse response = requestFurtherInformationController.validateReviewDate(callbackRequest);
-
-        assertNotNull(response);
-        verify(featureToggleService, times(1)).isAwaitingInformationEnabled();
     }
 
     @Test
@@ -268,17 +234,6 @@ public class RequestFurtherInformationControllerTest {
     }
 
     @Test
-    public void historyUpdated_ThrowsExceptionWhenFeatureToggleDisabled() {
-        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
-        when(featureToggleService.isAwaitingInformationEnabled()).thenReturn(false);
-
-        assertThrows(RuntimeException.class, () ->
-            requestFurtherInformationController.historyUpdated(AUTH_TOKEN, S2S_TOKEN, callbackRequest));
-
-        verify(requestFurtherInformationService, times(0)).updateHistoryTab(any());
-    }
-
-    @Test
     public void submitAwaitingInformation_WithValidTokens_Success() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         when(requestFurtherInformationService.addToCase(callbackRequest)).thenReturn(updatedCaseData);
@@ -291,32 +246,8 @@ public class RequestFurtherInformationControllerTest {
     }
 
     @Test
-    public void validateReviewDate_FeatureToggleEnabled_CallsService() {
-        List<String> emptyErrors = new ArrayList<>();
-        when(featureToggleService.isAwaitingInformationEnabled()).thenReturn(true);
-        when(requestFurtherInformationService.validate(callbackRequest)).thenReturn(emptyErrors);
-
-        CallbackResponse response = requestFurtherInformationController.validateReviewDate(callbackRequest);
-
-        assertNotNull(response);
-        verify(requestFurtherInformationService, times(1)).validate(callbackRequest);
-        verify(featureToggleService, times(1)).isAwaitingInformationEnabled();
-    }
-
-    @Test
     public void submitAwaitingInformation_AuthorizationFails_ThrowsException() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
-
-        assertThrows(RuntimeException.class, () ->
-            requestFurtherInformationController.submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest));
-
-        verify(requestFurtherInformationService, times(0)).addToCase(callbackRequest);
-    }
-
-    @Test
-    public void submitAwaitingInformation_FeatureToggleDisabled_ThrowsException() {
-        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
-        when(featureToggleService.isAwaitingInformationEnabled()).thenReturn(false);
 
         assertThrows(RuntimeException.class, () ->
             requestFurtherInformationController.submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest));
@@ -358,17 +289,6 @@ public class RequestFurtherInformationControllerTest {
         var response = requestFurtherInformationController.historyUpdated(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
         assertEquals(200, response.getStatusCode().value());
-    }
-
-    @Test
-    public void validateReviewDate_FeatureDisabledAndErrorsExist_ReturnsEmptyErrors() {
-        when(featureToggleService.isAwaitingInformationEnabled()).thenReturn(false);
-
-        CallbackResponse response = requestFurtherInformationController.validateReviewDate(callbackRequest);
-
-        assertTrue(response.getErrors().isEmpty());
-        // Service should not be called when feature is disabled
-        verify(requestFurtherInformationService, times(0)).validate(any());
     }
 
 
