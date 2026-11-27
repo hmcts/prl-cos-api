@@ -68,7 +68,6 @@ public class ExitAwaitingInformationControllerIntegrationTest {
     @Before
     public void setUp() {
         mockMvc = webAppContextSetup(webApplicationContext).build();
-        when(featureToggleService.isExitAwaitingInformationEnabled()).thenReturn(true);
     }
 
     @Test

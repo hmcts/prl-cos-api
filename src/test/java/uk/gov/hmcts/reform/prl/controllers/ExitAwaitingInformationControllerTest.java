@@ -72,7 +72,6 @@ public class ExitAwaitingInformationControllerTest {
         updatedCaseData.put(CASE_STATUS, CaseStatus.builder().state(State.CASE_ISSUED.getLabel()).build());
 
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
-        when(featureToggleService.isExitAwaitingInformationEnabled()).thenReturn(true);
         when(exitAwaitingInformationService.updateCase(callbackRequest)).thenReturn(updatedCaseData);
 
         AboutToStartOrSubmitCallbackResponse response = exitAwaitingInformationController
@@ -81,7 +80,6 @@ public class ExitAwaitingInformationControllerTest {
         assertNotNull(response);
         assertEquals(State.CASE_ISSUED.getValue(), response.getData().get(STATE_FIELD));
         verify(authorisationService, times(1)).isAuthorized(AUTH_TOKEN, S2S_TOKEN);
-        verify(featureToggleService, times(1)).isExitAwaitingInformationEnabled();
         verify(exitAwaitingInformationService, times(1)).updateCase(callbackRequest);
     }
 
@@ -93,7 +91,6 @@ public class ExitAwaitingInformationControllerTest {
         updatedCaseData.put(CASE_STATUS, CaseStatus.builder().state(State.SUBMITTED_PAID.getLabel()).build());
 
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
-        when(featureToggleService.isExitAwaitingInformationEnabled()).thenReturn(true);
         when(exitAwaitingInformationService.updateCase(callbackRequest)).thenReturn(updatedCaseData);
 
         AboutToStartOrSubmitCallbackResponse response = exitAwaitingInformationController
@@ -118,27 +115,7 @@ public class ExitAwaitingInformationControllerTest {
 
         assertEquals(INVALID_CLIENT, exception.getMessage());
         verify(authorisationService, times(1)).isAuthorized(AUTH_TOKEN, S2S_TOKEN);
-        verify(featureToggleService, never()).isExitAwaitingInformationEnabled();
         verify(exitAwaitingInformationService, never()).updateCase(any());
     }
 
-    @Test
-    public void shouldThrowExceptionForSubmitWhenFeatureDisabled() {
-        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
-        when(featureToggleService.isExitAwaitingInformationEnabled()).thenReturn(false);
-
-        RuntimeException exception = assertThrows(
-            RuntimeException.class,
-            () -> exitAwaitingInformationController.submitExitAwaitingInformation(
-                AUTH_TOKEN,
-                S2S_TOKEN,
-                callbackRequest
-            )
-        );
-
-        assertEquals(INVALID_CLIENT, exception.getMessage());
-        verify(authorisationService, times(1)).isAuthorized(AUTH_TOKEN, S2S_TOKEN);
-        verify(featureToggleService, times(1)).isExitAwaitingInformationEnabled();
-        verify(exitAwaitingInformationService, never()).updateCase(any());
-    }
 }

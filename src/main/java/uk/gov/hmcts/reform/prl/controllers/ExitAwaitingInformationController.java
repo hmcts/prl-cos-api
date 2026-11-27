@@ -49,8 +49,7 @@ public class ExitAwaitingInformationController {
         log.info("Submitting exit awaiting information for case: {}",
             callbackRequest.getCaseDetails().getId());
 
-        if (authorisationService.isAuthorized(authorisation, s2sToken)
-            && featureToggleService.isExitAwaitingInformationEnabled()) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             var caseDataUpdated = exitAwaitingInformationService.updateCase(callbackRequest);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         }

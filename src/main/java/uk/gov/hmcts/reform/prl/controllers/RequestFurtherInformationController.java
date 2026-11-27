@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.services.RequestFurtherInformationService;
 
-import static java.util.Collections.emptyList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -51,8 +50,7 @@ public class RequestFurtherInformationController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)
-            && featureToggleService.isAwaitingInformationEnabled()) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             var caseDataUpdated = requestFurtherInformationService.addToCase(callbackRequest);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         }
@@ -66,11 +64,6 @@ public class RequestFurtherInformationController {
         @ApiResponse(responseCode = "200", description = "Child details are fetched"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public CallbackResponse validateReviewDate(@RequestBody CallbackRequest callbackRequest) {
-        if (!featureToggleService.isAwaitingInformationEnabled()) {
-            return CallbackResponse.builder()
-                .errors(emptyList())
-                .build();
-        }
         CallbackResponse build = CallbackResponse.builder()
             .errors(requestFurtherInformationService.validate(callbackRequest))
             .build();
@@ -89,8 +82,7 @@ public class RequestFurtherInformationController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)
-            && featureToggleService.isAwaitingInformationEnabled()) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             requestFurtherInformationService.updateHistoryTab(callbackRequest);
             return ok(SubmittedCallbackResponse.builder().build());
         }
